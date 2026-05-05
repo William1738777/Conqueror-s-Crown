@@ -24,7 +24,6 @@
         .subtitle { color: #888; margin-bottom: 40px; letter-spacing: 2px; text-align: center; }
         .upload-area { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 12px; border: 1px dashed var(--gold); margin-bottom: 20px; text-align: center; position: relative; cursor: pointer; transition: 0.3s;}
         .upload-area:hover { background: rgba(212, 175, 55, 0.1); transform: scale(1.02); }
-        .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
         #absorbing-text { display: none; color: var(--gold); font-size: 1.5rem; margin-top: 20px; animation: pulse 1s infinite alternate;}
         @keyframes pulse { from { opacity: 0.6; transform: scale(0.98); } to { opacity: 1; transform: scale(1.02); } }
 
@@ -161,10 +160,9 @@
     <div id="start-screen">
         <h1>CONQUEROR'S CROWN</h1>
         <div class="subtitle">Tactical Deployment</div>
-        <div class="upload-area" id="upload-box">
-            <h2>INSERT YOUR DECK & ASSETS HERE</h2>
-            <p style="font-size: 0.8rem; color: #aaa;">Click or Drag images/audio (Hold Ctrl/Cmd).<br><i>Include "Back_Card", "Slash", "Arrow_FX", "ShurikenKin_FX"<br>Include "KinSanSound" and "BloodSound" as MP3/WAV.</i></p>
-            <input type="file" id="image-upload" accept="image/*, audio/*" multiple>
+        <div class="upload-area" id="upload-box" onclick="initializeGame()">
+            <h2>INITIALIZE BATTLEFIELD</h2>
+            <p style="font-size: 0.8rem; color: #aaa;">Click to download assets directly from GitHub repository.</p>
         </div>
         <div id="absorbing-text">Absorbing Assets...</div>
     </div>
@@ -238,6 +236,26 @@
     </div>
 
     <script>
+        // ============================================================================
+        // ⚙️ GITHUB ASSET CONFIGURATION ⚙️
+        // The URLs below now use relative paths. Ensure your images are inside an
+        // "assets" folder that is in the same directory as this index.html file!
+        // ============================================================================
+        const ASSET_LINKS = {
+            "KIN-RYU": "./assets/Kin-Ryu.png",
+            "Shadow Stalker": "./assets/Shadow_Stalker.png",
+            "Lionel Guard Tower": "./assets/Lionel_Guard_Tower.png",
+            "Rolyn": "./assets/Rolyn.png",
+            "Mana Core": "./assets/Mana_Core.png",
+            "Back_Card": "./assets/Back_Card.png",
+            "Slash": "./assets/Slash.gif",
+            "Arrow_FX": "./assets/Arrow_FX.png",
+            "ShurikenKin_FX": "./assets/ShurikenKin_FX.png",
+            "KinSanSound": "./assets/KinSanSound.mp3",
+            "BloodSound": "./assets/BloodSound.mp3"
+        };
+        // ============================================================================
+
         let cardLibrary = [];
         let eHandData = [];
         let currentTurn = 'PLAYER', turnCount = 1;
@@ -317,45 +335,51 @@
             }
         }
 
-        // --- Upload ---
-        document.getElementById('image-upload').addEventListener('change', async (e) => {
-            const files = e.target.files;
-            if(files.length === 0) return;
+        // --- GITHUB ASSET INITIALIZER ---
+        async function initializeGame() {
             document.getElementById('upload-box').style.display = 'none';
             document.getElementById('absorbing-text').style.display = 'block';
 
-            for(let i=0; i<files.length; i++) {
-                document.getElementById('absorbing-text').innerText = `Absorbing File ${i + 1} of ${files.length}...`;
-                await new Promise(resolve => {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const cardData = getCardTemplate(files[i].name, event.target.result);
-                        if (cardData.isCardBack) {
-                            deckBackImg = cardData.img;
-                            document.getElementById('player-deck-stack').style.backgroundImage = `url('${deckBackImg}')`;
-                            document.getElementById('enemy-deck-stack').style.backgroundImage = `url('${deckBackImg}')`;
-                        } else if (cardData.isSlash) {
-                            document.documentElement.style.setProperty('--slash-url', `url('${cardData.img}')`);
-                        } else if (cardData.isArrow) {
-                            arrowImgUrl = cardData.img;
-                            document.documentElement.style.setProperty('--arrow-url', `url('${cardData.img}')`);
-                        } else if (cardData.isShuriken) {
-                            shurikenImgUrl = cardData.img;
-                            document.documentElement.style.setProperty('--shuriken-url', `url('${cardData.img}')`);
-                        } else if (cardData.isPlayable) {
-                            cardLibrary.push({...cardData}); 
-                        }
-                        setTimeout(resolve, 100); 
-                    };
-                    reader.readAsDataURL(files[i]); 
-                });
+            let keys = Object.keys(ASSET_LINKS);
+            for(let i=0; i<keys.length; i++) {
+                let key = keys[i];
+                let fileUrl = ASSET_LINKS[key];
+                
+                document.getElementById('absorbing-text').innerText = `Loading Asset ${i + 1} of ${keys.length}...`;
+                
+                const cardData = getCardTemplate(key, fileUrl);
+                
+                if (cardData.isCardBack) {
+                    deckBackImg = cardData.img;
+                    document.getElementById('player-deck-stack').style.backgroundImage = `url('${deckBackImg}')`;
+                    document.getElementById('enemy-deck-stack').style.backgroundImage = `url('${deckBackImg}')`;
+                } else if (cardData.isSlash) {
+                    document.documentElement.style.setProperty('--slash-url', `url('${cardData.img}')`);
+                } else if (cardData.isArrow) {
+                    arrowImgUrl = cardData.img;
+                    document.documentElement.style.setProperty('--arrow-url', `url('${cardData.img}')`);
+                } else if (cardData.isShuriken) {
+                    shurikenImgUrl = cardData.img;
+                    document.documentElement.style.setProperty('--shuriken-url', `url('${cardData.img}')`);
+                } else if (cardData.isAudio) {
+                    // Handled inside getCardTemplate side-effects
+                } else if (cardData.isPlayable) {
+                    cardLibrary.push({...cardData}); 
+                }
+                
+                // Slight visual delay to show loading process
+                await new Promise(r => setTimeout(r, 80)); 
             }
+            
             if (cardLibrary.length === 0) {
-                alert("No playable cards found! Please refresh and upload units/abilities.");
+                alert("No playable cards found! Please verify your GITHUB links inside ASSET_LINKS.");
+                document.getElementById('upload-box').style.display = 'block';
+                document.getElementById('absorbing-text').style.display = 'none';
                 return;
             }
+            
             setTimeout(startGame, 500); 
-        });
+        }
 
         function updateUI() {
             document.getElementById('mana-display').innerText = `MANA: ${pMana}`;
@@ -780,18 +804,34 @@
             let nDOM = document.getElementById(nextTarget.id); let aDOM = document.getElementById(actor.id);
             
             if (kinSanAudioUrl) playSound(kinSanAudioUrl);
-            const hitDelay = 150; // Sync duration to hit target
+            const hitDelay = 150; 
             
+            // Randomize the 800 damage into 3 distinct hits
+            let dmg1 = Math.floor(Math.random() * 201) + 200; // 200 to 400
+            let dmg2 = Math.floor(Math.random() * 201) + 200; // 200 to 400
+            let dmg3 = 800 - dmg1 - dmg2;
+            let sanDmgs = [dmg1, dmg2, dmg3];
+
             if (shurikenImgUrl !== '') {
                 for(let i=0; i<3; i++) { 
                     setTimeout(() => {
                         shootShuriken(aDOM, nDOM, hitDelay);
-                        setTimeout(() => { if (bloodAudioUrl) playSound(bloodAudioUrl); }, hitDelay);
+                        setTimeout(() => { 
+                            if (bloodAudioUrl) playSound(bloodAudioUrl); 
+                            
+                            // Visual Popup Sync
+                            if (nDOM) {
+                                nDOM.classList.remove("shake-anim"); void nDOM.offsetWidth;
+                                nDOM.classList.add("shake-anim"); 
+                                showFloatingText(nDOM, `-${sanDmgs[i]}`, "#ff4d4d", "2.5rem");
+                            }
+                        }, hitDelay);
                     }, i * 200); 
                 }
                 await new Promise(r => setTimeout(r, 400 + hitDelay)); 
             } else { await new Promise(r => setTimeout(r, 600)); }
 
+            // Math is finalized on the backend natively
             let targetDied = await applyDamage(actor, nextTarget.id, 800, "SAN");
             
             if (targetDied) { addLog(`<b>System</b> [SAN]: Chain reaction continues!`, "var(--gold)"); await triggerSanChain(actor, defSide); }
@@ -821,10 +861,15 @@
             }
 
             if(targetDOM) {
-                // Remove Slash animation if the skill is SAN
+                // Blocks the slash if the skill is SAN
                 if(isSlash && skillName !== "SAN") triggerSlash(targetDOM); 
                 targetDOM.classList.remove("shake-anim"); void targetDOM.offsetWidth;
-                targetDOM.classList.add("shake-anim"); showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
+                targetDOM.classList.add("shake-anim"); 
+                
+                // Blocks the main -800 damage popup so it doesn't overlap the 3 shuriken damages
+                if (skillName !== "SAN") {
+                    showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
+                }
             }
             
             let died = false;
