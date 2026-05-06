@@ -1,4 +1,4 @@
-Test 1.4
+Test 1.5
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -204,7 +204,6 @@ Test 1.4
     </div>
 
     <div id="game-area">
-        <!-- LEFT PANEL -->
         <div class="side-panel">
             <div id="card-inspector"><div id="inspect-content"><div class="empty-inspector">Select a card to inspect.</div></div></div>
             <div id="hand-container">
@@ -214,7 +213,6 @@ Test 1.4
             </div>
         </div>
 
-        <!-- CENTER PANEL -->
         <div class="center-panel">
             <div id="turn-banner">PLAYER TURN 1</div>
             <div class="battlefield">
@@ -257,7 +255,6 @@ Test 1.4
             </div>
         </div>
 
-        <!-- RIGHT PANEL -->
         <div class="side-panel">
             <button id="cancel-btn" class="btn-main">CANCEL PENDING</button>
             <button id="exec-btn" class="btn-main">EXECUTE PENDING (0)</button>
@@ -366,7 +363,7 @@ Test 1.4
 
             if(cleanName.includes('kin-ryu') || cleanName.includes('kin ryu')) {
                 return { isPlayable: true, type: 'unit', name: "KIN-RYU", title: "YAMI NO SHINOBI (Level 7)", powerLevel: 7, summonCost: 5, faction: "Arashi", race: "Human", hp: 1200, maxHp: 1200, atk: 400, img: dataUrl, marks: 0, queued: false, extraAction: false,
-                    skills: [{ name: "ICHI", manaCost: 1, desc: "Cuts target. 300-1100 DMG. If <500, rerolls." }, { name: "NI", manaCost: 2, desc: "Hits 2 targets for 200 damage each." }], passives: [{ name: "SHADOW STANCE", desc: "Shinobi Marks make targets take +12% DMG." }, { name: "SAN", desc: "Auto-chains shurikens upon kill." }] };
+                    skills: [{ name: "ICHI", manaCost: 1, desc: "Cuts target. 300-1100 DMG. If <500, rerolls." }, { name: "NI", manaCost: 2, desc: "Hits 2 targets for 300-400 damage each." }], passives: [{ name: "SHADOW STANCE", desc: "Shinobi Marks make targets take +18% DMG." }, { name: "SAN", desc: "Auto-chains shurikens upon kill." }] };
             }
             else if(cleanName.includes('shadow stalker')) {
                 return { isPlayable: true, type: 'unit', name: "Shadow Stalker", title: "Level 3", powerLevel: 3, summonCost: 1, faction: "Arashi", race: "Human", hp: 800, maxHp: 800, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false,
@@ -765,7 +762,7 @@ Test 1.4
             if (trigger === "DAMAGE_CALC") {
                 let dmg = payload.baseDmg;
                 if (payload.actor.name === "KIN-RYU" && payload.targetInst && payload.targetInst.marks > 0) {
-                    dmg = Math.floor(dmg * (1 + 0.12 * payload.targetInst.marks));
+                    dmg = Math.floor(dmg * (1 + 0.18 * payload.targetInst.marks));
                 }
                 return dmg;
             }
@@ -966,10 +963,11 @@ Test 1.4
             if (kinSanAudioUrl) playSound(kinSanAudioUrl);
             const hitDelay = 150; 
             
-            let dmg1 = Math.floor(Math.random() * 201) + 200; 
-            let dmg2 = Math.floor(Math.random() * 201) + 200; 
-            let dmg3 = 800 - dmg1 - dmg2;
+            let dmg1 = Math.floor(Math.random() * 201) + 300; 
+            let dmg2 = Math.floor(Math.random() * 201) + 300; 
+            let dmg3 = Math.floor(Math.random() * 201) + 300;
             let sanDmgs = [dmg1, dmg2, dmg3];
+            let totalSanDmg = dmg1 + dmg2 + dmg3;
 
             if (shurikenImgUrl !== '') {
                 for(let i=0; i<3; i++) { 
@@ -988,7 +986,7 @@ Test 1.4
                 await new Promise(r => setTimeout(r, 400 + hitDelay)); 
             } else { await new Promise(r => setTimeout(r, 600)); }
 
-            let targetDied = await applyDamage(actor, nextTarget.id, 800, "SAN");
+            let targetDied = await applyDamage(actor, nextTarget.id, totalSanDmg, "SAN");
             if (targetDied) { addLog(`<b>System</b> [SAN]: Chain reaction continues!`, "var(--gold)"); await triggerSanChain(actor, defSide); }
         }
 
@@ -1182,7 +1180,7 @@ Test 1.4
                         if (action.skillName === "ICHI") { dmg = Math.floor(Math.random() * (1100 - 300 + 1)) + 300; if (dmg < 500) { secondDmg = Math.floor(Math.random() * (1100 - 500 + 1)) + 500; marksToApply = 1; } } 
                         else if (action.skillName === "NI") { 
                             if(kinSfx1Url) playSound(kinSfx1Url);
-                            dmg = 200; marksToApply = 1; 
+                            dmg = Math.floor(Math.random() * 101) + 300; marksToApply = 1; 
                         } else dmg = actor.atk;
                     } else if (actor.name === "Rolyn") {
                         if (action.skillName === "Lion's Challenge") dmg = 250; else if (action.skillName === "Royal Command") dmg = 200;
@@ -1308,3 +1306,4 @@ Test 1.4
     </script>
 </body>
 </html>
+```
