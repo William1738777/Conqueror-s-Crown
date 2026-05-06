@@ -1,25 +1,3 @@
-### Why The Game Froze (And How It Was Fixed)
-
-**The Cause of the Freeze:**
-The bug with Althea's heal happened because the targeting logic allowed you to select *any* allied card, including **Ability Cards** (like Mana Core). Ability cards do not possess an HP badge UI element (`.badge-hp`). When the code executed the heal and attempted to update the numbers on the screen, it tried to change the text of a non-existent element. This threw a hidden "Cannot set properties of null" Javascript error, which violently halted the execution loop midway. Because the queue crashed, the `isExecuting` flag was permanently stuck on `true`, freezing the entire game board.
-
-**Steps Taken to Fix It:**
-1.  **Target Restriction:** I updated the targeting logic in `createCardDOM` and `queueAction` so that support skills like "Blessing of the Light" and the new "One More Time" card can *only* highlight and target actual **unit** cards.
-2.  **Safety Net:** Added a failsafe inside the heal calculation (`if(targetDOM.querySelector('.badge-hp'))`) so that even if a UI element is somehow missing, the game skips the text update instead of crashing.
-3.  **Visual Clarity:** Created brand new green (`target-heal-glow`) and purple (`target-buff-glow`) targeting crosshairs so it is visually obvious when you are selecting allies for support/buffs versus selecting enemies for attacks. 
-
-***
-
-### ⚠️ Asset Checklist Before Testing
-Ensure these new files are uploaded exactly as named to your `assets` folder:
-1.  `One More Time.png`
-2.  `KinSFX1.mp3`
-3.  `KinSFX2.mp3`
-
-### Updated Complete Code
-Copy this block and replace your `index.html`. Once saved, perform a **Hard Refresh (Ctrl + F5 or Cmd + Shift + R)** on your live site!
-
-```html
 <!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
