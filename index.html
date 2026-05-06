@@ -1,4 +1,4 @@
-Test 1.8
+Test 1.9
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -525,7 +525,7 @@ Test 1.8
                 setTimeout(() => {
                     const data = JSON.parse(JSON.stringify(cardLibrary[Math.floor(Math.random() * cardLibrary.length)]));
                     const cardId = 'card_' + Math.random().toString(36).substr(2, 9);
-                    // ADDED actionsLeft tracker
+                    // ADDED actionsLeft tracker initialized to 1
                     cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: sideTarget, turnPlaced: 0, tauntedBy: null, actionsLeft: 1 };
 
                     const flyingCard = document.createElement('div');
@@ -631,11 +631,24 @@ Test 1.8
 
                 if(slot.dataset.side === 'PLAYER' && !slot.querySelector('.card')) {
                     if(data.type !== slot.dataset.allowed) return addLog(`Needs ${slot.dataset.allowed.toUpperCase()} slot.`, "red");
+                    
+                    // PRE-DROP VALIDATION: One More Time Empty Board Check
+                    if (data.name === "One More Time") {
+                        let validAllies = Array.from(document.querySelectorAll('.slot[data-side="PLAYER"] .card')).filter(c => {
+                            let inst = cardInstances[c.id];
+                            return inst && inst.type === 'unit' && inst.name !== "Lionel Guard Tower";
+                        });
+                        if (validAllies.length === 0) {
+                            addLog(`Cannot place: No valid attacking units fielded for One More Time.`, "red");
+                            return; // Drop rejected, card returns to hand
+                        }
+                    }
+
                     if(pMana >= data.summonCost) {
                         pMana -= data.summonCost; data.turnPlaced = turnCount;
                         slot.appendChild(cardEl);
                         
-                        // ONE MORE TIME: Instant Activation Injection
+                        // INSTANT AUTO-ACTIVATION for One More Time
                         if(data.name === "One More Time") {
                             addLog(`Played <b>One More Time</b>. Auto-activating...`, "#9b59b6");
                             window.queueAction(cardId, 'Double Action', 0, false);
@@ -718,11 +731,11 @@ Test 1.8
             inspect.innerHTML = html;
         }
 
-        // --- Helper Function: Pushes action and dynamically handles multi-queue states ---
+        // --- ACTION COMMITTING ENGINE ---
         function commitAction(action) {
             pQueue.push(action);
             let actorInst = cardInstances[action.actorId];
-            if (actorInst) {
+            if (actorInst && action.skillName !== "Double Action") {
                 actorInst.actionsLeft--;
                 if (actorInst.actionsLeft <= 0) {
                     actorInst.queued = true;
@@ -742,7 +755,7 @@ Test 1.8
             pQueue.forEach(a => { 
                 if(cardInstances[a.actorId]) {
                     cardInstances[a.actorId].queued = false;
-                    // Restores dual actions if they still hold the purple buff
+                    // Restore dual actions if they still hold the purple buff
                     let dOM = document.getElementById(a.actorId);
                     cardInstances[a.actorId].actionsLeft = (dOM && dOM.classList.contains('buff-double-action')) ? 2 : 1;
                 }
@@ -846,9 +859,13 @@ Test 1.8
         window.queueAction = function(actorId, skillName, cost, isCore) {
             if(currentTurn !== 'PLAYER' || isExecuting) return;
             const actor = cardInstances[actorId];
-            if(actor.turnPlaced === turnCount) return addLog("Card has Summoning Sickness!", "red");
+            
+            // BYPASS SUMMONING SICKNESS ONLY FOR "ONE MORE TIME"
+            if(actor.turnPlaced === turnCount && actor.name !== "One More Time") return addLog("Card has Summoning Sickness!", "red");
             if(turnCount === 1) return addLog("No combat allowed on Turn 1!", "red");
-            if(actor.exhausted || actor.queued) return addLog("Card has already acted this turn!", "red");
+            
+            // USE ACTIONS_LEFT INSTEAD OF STRICT FLAGS
+            if(actor.actionsLeft <= 0 || actor.exhausted) return addLog("Card has already acted this turn!", "red");
             
             if (actor.tauntedBy) {
                 let taunterDOM = document.getElementById(actor.tauntedBy);
@@ -863,7 +880,7 @@ Test 1.8
             if(isCore) {
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'CORE' };
                 addLog(`Queued [${skillName}] on Enemy Core.`, "#aaa"); commitAction(action);
-            } else if (skillName === "Mana Initiation" || actor.type === 'ability') {
+            } else if (skillName === "Mana Initiation" || (actor.type === 'ability' && skillName !== "Double Action")) {
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
                 addLog(`Queued [${skillName}].`, "#aaa"); commitAction(action);
             } else if (skillName === "Shield of Hope") {
@@ -879,7 +896,8 @@ Test 1.8
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
                 targetCountReq = 1; addLog("Select an Allied unit for One More Time...", "#9b59b6");
                 document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => {
-                    if(cardInstances[c.id].type === 'unit') c.classList.add('target-buff-glow');
+                    let inst = cardInstances[c.id];
+                    if(inst && inst.type === 'unit' && inst.name !== "Lionel Guard Tower") c.classList.add('target-buff-glow');
                 });
             } else if (skillName === "Punishment of the Blessed") {
                 if(actor.blessings < 7) return addLog("Needs 7 Blessings!", "red");
@@ -901,7 +919,7 @@ Test 1.8
         };
 
         function handleTargetSelection(targetId) {
-            // --- INSTANT ONE MORE TIME ACTIVATION BYPASS ---
+            // --- INSTANT ONE MORE TIME RESOLUTION ---
             if (pendingSkill && pendingSkill.skillName === "Double Action") {
                 isTargeting = false;
                 document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'target-buff-glow'));
@@ -920,6 +938,7 @@ Test 1.8
                     showInspector(tId, targetDOM);
                 }
                 
+                // Cinematic Zoom & Graveyard removal
                 if (actorDOM) {
                     actorDOM.style.transition = "all 0.5s ease";
                     actorDOM.style.transform = "scale(2.5)";
@@ -928,7 +947,10 @@ Test 1.8
                         actorDOM.style.opacity = "0";
                         setTimeout(() => {
                             actorDOM.remove();
-                            if (cardInstances[pendingSkill.actorId]) cardInstances[pendingSkill.actorId].hp = 0;
+                            if (cardInstances[pendingSkill.actorId]) {
+                                cardInstances[pendingSkill.actorId].hp = 0;
+                                cardInstances[pendingSkill.actorId].queued = false;
+                            }
                         }, 300);
                     }, 800);
                 }
@@ -1247,7 +1269,7 @@ Test 1.8
                         await systemDetector("ATTACK_END", { actor, targetInst, action, targetDied });
                     }
                 }
-                if(actor.type === 'ability' && action.skillName !== "Double Action") { actor.hp = 0; if(actorDOM) actorDOM.remove(); }
+                if(actor.type === 'ability') { actor.hp = 0; if(actorDOM) actorDOM.remove(); }
                 updateUI(); await new Promise(r => setTimeout(r, 400)); 
             }
             isExecuting = false; updateUI();
@@ -1274,7 +1296,10 @@ Test 1.8
                 
                 // ENEMY: One More Time Instant Bypass
                 if(data.name === "One More Time") {
-                    let activeAllies = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card'));
+                    let activeAllies = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card')).filter(c => {
+                        let inst = cardInstances[c.id];
+                        return inst && inst.type === 'unit' && inst.name !== "Lionel Guard Tower";
+                    });
                     if(activeAllies.length > 0 && eMana >= data.summonCost) {
                         eMana -= data.summonCost; eHandData.splice(eHandData.indexOf(id), 1);
                         let targetDOM = activeAllies[Math.floor(Math.random() * activeAllies.length)];
@@ -1305,7 +1330,7 @@ Test 1.8
             if(turnCount > 1) {
                 let activeEnemyUnits = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card')).map(c => cardInstances[c.id]).filter(d => d.turnPlaced < turnCount && !d.exhausted && d.name !== "Lionel Guard Tower");
                 for(let data of activeEnemyUnits) {
-                    // Loop to allow AI to utilize double actions naturally
+                    // Loop to allow AI to utilize double actions natively
                     while (data.actionsLeft > 0) {
                         if(data.skills.length > 0 || data.type === 'unit') {
                             let cost = data.skills.length > 0 ? data.skills[0].manaCost : 0;
@@ -1338,10 +1363,10 @@ Test 1.8
                                     data.actionsLeft--;
                                     if(data.actionsLeft <= 0) data.queued = true;
                                 } else {
-                                    break; // Prevent infinite loop if no valid action found
+                                    break; // Prevent loop lock if no target
                                 }
                             } else {
-                                break; // Out of mana
+                                break; // OOM
                             }
                         } else {
                             break; 
