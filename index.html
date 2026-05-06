@@ -86,7 +86,6 @@
 
         .card { width: 100px; height: 140px; border-radius: 6px; padding: 5px; box-sizing: border-box; cursor: grab; background: var(--card-unit); border: 1px solid #444; display: flex; flex-direction: column; justify-content: space-between; font-family: sans-serif; position: relative; flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s;}
         
-        /* Covers the dashed slot border entirely */
         .slot .card { position: absolute; top: -1px; left: -1px; width: calc(100% + 2px); height: calc(100% + 2px); margin: 0; z-index: 10; border-radius: 6px; border: 1px solid #444; box-sizing: border-box; }
         
         .card:hover { transform: translateY(-5px); border-color: var(--gold); z-index: 20;}
@@ -96,6 +95,8 @@
         .card.target-glow { outline: 3px solid #ff4d4d; box-shadow: 0 0 20px #ff4d4d; cursor: crosshair; animation: pulse-target 1s infinite alternate;}
         @keyframes pulse-target { from { box-shadow: 0 0 10px #ff4d4d; } to { box-shadow: 0 0 25px #ff4d4d; } }
 
+        .target-line-glow { outline: 3px dashed #ff9f43; box-shadow: 0 0 20px #ff9f43; }
+
         .card-title { font-size: 0.65rem; font-weight: bold; text-align: center; color: var(--gold); line-height: 1; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .card-level { text-align: center; font-size: 0.55rem; color: #aaa; margin-bottom: 2px;}
         .card-img-container { flex-grow: 1; margin: 3px 0; background-color: #111; border-radius: 3px; border: 1px solid #333; background-size: cover; background-position: center; pointer-events: none;}
@@ -104,6 +105,8 @@
         .badge-hp { position: absolute; bottom: -5px; right: -5px; background: var(--hp-color); color: #111; border-radius: 4px; padding: 1px 5px; font-size: 0.65rem; font-weight: bold; border: 1px solid #111; z-index: 15;}
         
         .placed-badge { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(231, 76, 60, 0.9); color: white; padding: 2px 6px; font-size: 0.65rem; font-weight: bold; border-radius: 3px; z-index: 25; pointer-events: none; text-shadow: 1px 1px 0 #000; border: 1px solid #fff;}
+        .badge-blessing { position: absolute; top: -8px; left: 20px; background: #f1c40f; color: #111; border-radius: 50%; width: 22px; height: 22px; display: flex; justify-content: center; align-items: center; font-size: 0.7rem; font-weight: bold; border: 1px solid #111; z-index: 26; box-shadow: 0 0 10px #f1c40f;}
+        .badge-shield { position: absolute; bottom: 22px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 1px 5px; font-size: 0.65rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
 
         /* --- DECKS --- */
         .deck-container { position: absolute; right: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 50; }
@@ -126,6 +129,13 @@
             100% { transform: translate(2px, -2px) rotate(-1deg); }
         }
         .shake-anim { animation: shake 0.4s; }
+
+        @keyframes shimmer {
+            0% { filter: brightness(1) drop-shadow(0 0 0px var(--gold)); }
+            50% { filter: brightness(1.8) drop-shadow(0 0 25px var(--gold)); }
+            100% { filter: brightness(1) drop-shadow(0 0 0px var(--gold)); }
+        }
+        .shimmer-fx { animation: shimmer 1s ease-in-out; }
 
         .floating-text { position: absolute; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; pointer-events: none; z-index: 1000; animation: floatUp 1.2s forwards ease-out; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.4); opacity: 0; } }
@@ -249,6 +259,7 @@
             "Shadow Stalker": "./assets/Shadow%20Stalker.png",
             "Lionel Guard Tower": "./assets/Lionel%20Guard%20Tower.png",
             "Rolyn": "./assets/King%20Rolyn.png",
+            "Althea": "./assets/Althea.png",
             "Mana Core": "./assets/Mana%20Core.png",
             "Back_Card": "./assets/Conqueror%27s%20Crown%20Back_Card.png",
             "Slash": "./assets/Slash.gif",
@@ -259,7 +270,8 @@
             "MainMenuBG": "./assets/MainMenuBG.jpg",
             "MenuMusic": "./assets/MenuMusic.mp3",
             "BodyShot": "./assets/BodyShot.mp3",
-            "ArrowHit": "./assets/ArrowHit.mp3"
+            "ArrowHit": "./assets/ArrowHit.mp3",
+            "HealSound": "./assets/Heal.mp3"
         };
         // ============================================================================
 
@@ -278,6 +290,7 @@
         let bloodAudioUrl = '';
         let bodyShotAudioUrl = '';
         let arrowHitAudioUrl = '';
+        let healAudioUrl = '';
         let menuMusicUrl = '';
         let menuAudioEl = null;
         
@@ -312,6 +325,7 @@
             if(cleanName.includes('bloodsound') || cleanName.includes('blood sound')) { bloodAudioUrl = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('bodyshot')) { bodyShotAudioUrl = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('arrowhit')) { arrowHitAudioUrl = dataUrl; return { isAudio: true }; }
+            if(cleanName.includes('healsound') || cleanName.includes('heal.mp3')) { healAudioUrl = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('menumusic')) { menuMusicUrl = dataUrl; return { isAudio: true }; }
 
             // FX Checks
@@ -325,27 +339,36 @@
             if (cleanName.includes('ability') || cleanName.includes('skill') || cleanName.includes('spell') || cleanName.includes('magic') || cleanName.includes('mana core')) type = 'ability';
 
             if(cleanName.includes('kin-ryu') || cleanName.includes('kin ryu')) {
-                return { isPlayable: true, type: 'unit', name: "KIN-RYU", title: "YAMI NO SHINOBI (Level 7)", powerLevel: 7, summonCost: 5, faction: "Arashi", race: "Human", hp: 1200, atk: 400, img: dataUrl, marks: 0, queued: false,
+                return { isPlayable: true, type: 'unit', name: "KIN-RYU", title: "YAMI NO SHINOBI (Level 7)", powerLevel: 7, summonCost: 5, faction: "Arashi", race: "Human", hp: 1200, maxHp: 1200, atk: 400, img: dataUrl, marks: 0, queued: false,
                     skills: [{ name: "ICHI", manaCost: 1, desc: "Cuts target. 300-1100 DMG. If <500, rerolls." }, { name: "NI", manaCost: 2, desc: "Hits 2 targets for 200 damage each." }], passives: [{ name: "SHADOW STANCE", desc: "Shinobi Marks make targets take +12% DMG." }, { name: "SAN", desc: "Auto-chains shurikens upon kill." }] };
             }
             else if(cleanName.includes('shadow stalker')) {
-                return { isPlayable: true, type: 'unit', name: "Shadow Stalker", title: "Level 3", powerLevel: 3, summonCost: 1, faction: "Arashi", race: "Human", hp: 800, atk: 200, img: dataUrl, marks: 0, queued: false,
+                return { isPlayable: true, type: 'unit', name: "Shadow Stalker", title: "Level 3", powerLevel: 3, summonCost: 1, faction: "Arashi", race: "Human", hp: 800, maxHp: 800, atk: 200, img: dataUrl, marks: 0, queued: false,
                     skills: [{ name: "SHADOW STAR", manaCost: 0, desc: "Throws a Shuriken inflicting 150 damage." }, { name: "BLADE STRIKE", manaCost: 1, desc: "Lunges forward to inflict 225 damage." }], passives: [{ name: "SHADOW SYNC", desc: "Mimics other stalkers." }] };
             }
             else if(cleanName.includes('lionel guard') || cleanName.includes('guard tower')) {
-                return { isPlayable: true, type: 'unit', name: "Lionel Guard Tower", title: "Structure", powerLevel: 5, summonCost: 4, faction: "Leonia", race: "Structure", hp: 2000, atk: 0, img: dataUrl, marks: 0, queued: false,
+                return { isPlayable: true, type: 'unit', name: "Lionel Guard Tower", title: "Structure", powerLevel: 5, summonCost: 4, faction: "Leonia", race: "Structure", hp: 2000, maxHp: 2000, atk: 0, img: dataUrl, marks: 0, queued: false,
                     skills: [], passives: [{ name: "Guard Tower", desc: "Retaliates on allied attack (200 DMG)." }, { name: "Attack Tower", desc: "Assists allied attacks (100 DMG)." }, { name: "Structure Info", desc: "Passive rely." }] };
             }
             else if(cleanName.includes('rolyn')) {
-                return { isPlayable: true, type: 'unit', name: "Rolyn", title: "King of Leonia", powerLevel: 8, summonCost: 6, faction: "Leonia", race: "Human", hp: 2500, atk: 300, img: dataUrl, marks: 0, queued: false,
+                return { isPlayable: true, type: 'unit', name: "Rolyn", title: "King of Leonia", powerLevel: 8, summonCost: 6, faction: "Leonia", race: "Human", hp: 2500, maxHp: 2500, atk: 300, img: dataUrl, marks: 0, queued: false,
                     skills: [{ name: "Lion's Challenge", manaCost: 2, desc: "Taunts target for 1 turn. 250 DMG." }, { name: "Royal Command", manaCost: 4, desc: "Commands 1-2 allies to team up on target." }], passives: [{ name: "Dauntless", desc: "Auto counter-attacks taunted units (300 DMG)." }] };
             }
+            else if(cleanName.includes('althea')) {
+                return { isPlayable: true, type: 'unit', name: "Althea", title: "Guardian Deity (Level 7)", powerLevel: 7, summonCost: 4, faction: "Neutral", race: "Deity", hp: 1000, maxHp: 1000, atk: 200, img: dataUrl, marks: 0, queued: false, blessings: 0,
+                    skills: [
+                        { name: "Blessing of the Light", manaCost: 1, desc: "Heal target ally for 150-300. Gains +1 Blessing." },
+                        { name: "Shield of Hope", manaCost: 3, desc: "Shields frontline allies for 500 DMG (2 turns). +1 Blessing per ally." },
+                        { name: "Punishment of the Blessed", manaCost: 0, desc: "Fires a beam in a line. 800-1800 DMG front, 500-1000 DMG back. Needs 7 Blessings.", requiresBlessings: 7 }
+                    ], passives: [] };
+            }
             else if(cleanName.includes('mana core')) {
-                return { isPlayable: true, type: 'ability', name: "Mana Core", title: "Ability Card", powerLevel: 0, summonCost: 0, faction: "NA", race: "N/A", hp: 0, atk: 0, img: dataUrl, marks: 0, queued: false,
+                return { isPlayable: true, type: 'ability', name: "Mana Core", title: "Ability Card", powerLevel: 0, summonCost: 0, faction: "NA", race: "N/A", hp: 0, maxHp: 0, atk: 0, img: dataUrl, marks: 0, queued: false,
                     skills: [ { name: "Mana Initiation", manaCost: 0, desc: "Grants user +3 Mana when activated." } ], passives: [ { name: "Auto-Discard", desc: "Discards after use." } ] };
             }
             else {
-                return { isPlayable: true, type: type, name: name, title: type === 'ability' ? "Spell Card" : "Basic Unit", powerLevel: type==='ability'? 0 : 1, summonCost: 1, faction: "Unknown", race: "Unknown", hp: type==='ability'? 0 : 500, atk: type==='ability'? 0 : 150, img: dataUrl, marks: 0, queued: false,
+                let defaultHp = type==='ability'? 0 : 500;
+                return { isPlayable: true, type: type, name: name, title: type === 'ability' ? "Spell Card" : "Basic Unit", powerLevel: type==='ability'? 0 : 1, summonCost: 1, faction: "Unknown", race: "Unknown", hp: defaultHp, maxHp: defaultHp, atk: type==='ability'? 0 : 150, img: dataUrl, marks: 0, queued: false,
                     skills: type === 'ability' ? [{ name: "CAST SPELL", manaCost: 1, desc: "Activate ability effect." }] : [{ name: "ATTACK", manaCost: 1, desc: "Basic attack for 100 damage." }], passives: [] };
             }
         }
@@ -374,24 +397,23 @@
                 
                 if (cardData.isCardBack) {
                     deckBackImg = cardData.img;
-                    document.getElementById('player-deck-stack').style.backgroundImage = `url("${deckBackImg}")`;
-                    document.getElementById('enemy-deck-stack').style.backgroundImage = `url("${deckBackImg}")`;
+                    document.getElementById('player-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
+                    document.getElementById('enemy-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
                 } else if (cardData.isSlash) {
-                    document.documentElement.style.setProperty('--slash-url', `url("${cardData.img}")`);
+                    document.documentElement.style.setProperty('--slash-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
                 } else if (cardData.isArrow) {
                     arrowImgUrl = cardData.img;
-                    document.documentElement.style.setProperty('--arrow-url', `url("${cardData.img}")`);
+                    document.documentElement.style.setProperty('--arrow-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
                 } else if (cardData.isShuriken) {
                     shurikenImgUrl = cardData.img;
-                    document.documentElement.style.setProperty('--shuriken-url', `url("${cardData.img}")`);
+                    document.documentElement.style.setProperty('--shuriken-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
                 } else if (cardData.isAudio || cardData.isMenuBG) {
                     // Handled inside getCardTemplate side-effects or CSS directly
                 } else if (cardData.isPlayable) {
                     cardLibrary.push({...cardData}); 
                 }
                 
-                // Slight visual delay to show loading process
-                await new Promise(r => setTimeout(r, 80)); 
+                await new Promise(r => setTimeout(r, 60)); 
             }
             
             if (cardLibrary.length === 0) {
@@ -420,19 +442,24 @@
                 const data = cardInstances[c.id];
                 if (!data) return;
                 
-                const badge = c.querySelector('.placed-badge');
+                // Clear dynamic badges
+                c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield').forEach(el => el.remove());
+
                 if(data.turnPlaced === turnCount) {
-                    if(!badge) { const b = document.createElement('div'); b.className = 'placed-badge'; b.innerText = '{PLACED}'; c.appendChild(b); }
-                } else if(badge) badge.remove();
+                    const b = document.createElement('div'); b.className = 'placed-badge'; b.innerText = '{PLACED}'; c.appendChild(b);
+                }
+                if(data.blessings > 0) {
+                    const bl = document.createElement('div'); bl.className = 'badge-blessing'; bl.innerText = '+' + data.blessings; c.appendChild(bl);
+                }
+                if(data.shield && data.shield > 0 && data.shieldTurns >= turnCount) {
+                    const sh = document.createElement('div'); sh.className = 'badge-shield'; sh.innerText = '🛡 ' + data.shield; c.appendChild(sh);
+                } else {
+                    data.shield = 0; // Shield expired
+                }
 
-                if(data.queued) c.classList.add('queued-status');
-                else c.classList.remove('queued-status');
-
-                if(data.exhausted) c.classList.add('exhausted');
-                else c.classList.remove('exhausted');
-
-                if(data.tauntedBy) c.classList.add('taunted-status');
-                else c.classList.remove('taunted-status');
+                if(data.queued) c.classList.add('queued-status'); else c.classList.remove('queued-status');
+                if(data.exhausted) c.classList.add('exhausted'); else c.classList.remove('exhausted');
+                if(data.tauntedBy) c.classList.add('taunted-status'); else c.classList.remove('taunted-status');
             });
         }
 
@@ -470,7 +497,7 @@
 
                     const flyingCard = document.createElement('div');
                     flyingCard.className = 'flying-card';
-                    flyingCard.style.backgroundImage = `url("${deckBackImg}")`;
+                    flyingCard.style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
                     
                     const deckRect = stack.getBoundingClientRect();
                     flyingCard.style.left = deckRect.left + 'px'; flyingCard.style.top = deckRect.top + 'px';
@@ -505,7 +532,6 @@
             const c = document.createElement('div');
             c.className = `card`; c.id = id; c.draggable = true;
             
-            // Clean quotes to prevent HTML breaking
             let safeImgUrl = data.img.replace(/"/g, '&quot;').replace(/'/g, '%27');
             let safeBackImgUrl = deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27');
 
@@ -514,7 +540,6 @@
 
             let html = `<div class="badge-mana">${data.summonCost}</div>`;
             if(data.side === 'PLAYER' || data.type !== 'ability') html += `<div class="card-title">${data.name}</div>`;
-            // Use double quotes for the style attribute
             html += `<div class="card-img-container" style="${bgImg}"></div>`;
             if(data.type === 'unit') html += `<div class="card-level">${"★".repeat(data.powerLevel)}</div><div class="badge-hp">${data.hp}</div>`;
 
@@ -527,8 +552,15 @@
             });
             c.addEventListener('click', () => {
                 if(isExecuting) return;
-                if(isTargeting && data.side === 'ENEMY') handleTargetSelection(id);
-                else showInspector(id, c);
+                if(isTargeting) {
+                    if(pendingSkill.skillName === "Blessing of the Light") {
+                        if(data.side === currentTurn) handleTargetSelection(id);
+                    } else if(pendingSkill.skillName === "Punishment of the Blessed") {
+                        if(data.side !== currentTurn && c.parentElement.classList.contains('frontline')) handleTargetSelection(id);
+                    } else {
+                        if(data.side !== currentTurn) handleTargetSelection(id);
+                    }
+                } else showInspector(id, c);
             });
             return c;
         }
@@ -549,7 +581,6 @@
                 const cardEl = document.getElementById(cardId);
                 const data = cardInstances[cardId];
 
-                // Check for existing card overlaying the slot
                 if(slot.dataset.side === 'PLAYER' && !slot.querySelector('.card')) {
                     if(data.type !== slot.dataset.allowed) return addLog(`Needs ${slot.dataset.allowed.toUpperCase()} slot.`, "red");
                     if(pMana >= data.summonCost) {
@@ -602,7 +633,11 @@
                     if(data.name !== "Lionel Guard Tower") {
                         data.skills.forEach(skill => {
                             const safeSkillName = skill.name.replace(/'/g, "\\'");
-                            html += `<button class="skill-btn" ${canAct && pMana >= skill.manaCost ? '' : 'disabled'} onclick="queueAction('${id}', '${safeSkillName}', ${skill.manaCost}, false)">
+                            let costMet = pMana >= skill.manaCost;
+                            let meetsCondition = true;
+                            if(skill.requiresBlessings) meetsCondition = (data.blessings >= skill.requiresBlessings);
+
+                            html += `<button class="skill-btn" ${canAct && costMet && meetsCondition ? '' : 'disabled'} onclick="queueAction('${id}', '${safeSkillName}', ${skill.manaCost}, false)">
                                 <span class="skill-name">[${skill.name}]</span><span class="skill-cost">${skill.manaCost} MP</span><span class="skill-desc">${skill.desc}</span>
                             </button>`;
                         });
@@ -628,9 +663,27 @@
             if(isExecuting) return;
             pQueue.forEach(a => { if(cardInstances[a.actorId]) cardInstances[a.actorId].queued = false; });
             pQueue = []; isTargeting = false; pendingSkill = null; selectedTargets = [];
-            document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow'));
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow'));
             addLog("All pending actions cancelled.", "#e74c3c");
             updateUI(); showInspector('none', null); 
+        });
+
+        // --- Target Line Glow for Althea Beam ---
+        document.addEventListener('mouseover', (e) => {
+            if(!isTargeting || pendingSkill?.skillName !== "Punishment of the Blessed") return;
+            const cardEl = e.target.closest('.card');
+            if(cardEl && cardEl.parentElement.classList.contains('frontline') && cardInstances[cardEl.id].side !== currentTurn) {
+                let slots = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${cardInstances[cardEl.id].side}"]`));
+                let idx = slots.indexOf(cardEl.parentElement);
+                if(idx > -1) {
+                    let backSlot = document.querySelectorAll(`.slot.backline[data-side="${cardInstances[cardEl.id].side}"]`)[idx];
+                    let backCard = backSlot.querySelector('.card');
+                    if(backCard) backCard.classList.add('target-line-glow');
+                }
+            }
+        });
+        document.addEventListener('mouseout', (e) => {
+            document.querySelectorAll('.target-line-glow').forEach(el => el.classList.remove('target-line-glow'));
         });
 
         // --- BACKEND SYSTEM DETECTOR ---
@@ -665,7 +718,6 @@
                 let defSide = payload.actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
                 let atkSide = payload.actor.side;
                 
-                // Dauntless Counter Attack
                 if (payload.actor.tauntedBy) {
                     let taunter = cardInstances[payload.actor.tauntedBy];
                     let tDOM = document.getElementById(payload.actor.tauntedBy);
@@ -675,7 +727,6 @@
                     }
                 }
 
-                // Guard Tower Check
                 let guardTowers = activeCardsOnBoard.filter(c => c.side === defSide && c.name === "Lionel Guard Tower");
                 for (let tower of guardTowers) {
                     addLog(`<b>System</b> [Guard Tower]: Retaliates for 200 DMG!`, "var(--gold)");
@@ -683,7 +734,6 @@
                     await applyDamage(tower, payload.actor.id, 200, "Passive");
                 }
 
-                // Attack Tower Check
                 let atkTowers = activeCardsOnBoard.filter(c => c.side === atkSide && c.name === "Lionel Guard Tower" && c.id !== payload.actor.id);
                 for (let tower of atkTowers) {
                     if (payload.action.targetId !== 'SELF') {
@@ -695,7 +745,6 @@
                     }
                 }
 
-                // Marks for KIN-RYU
                 if (payload.actor.name === "KIN-RYU" && payload.targetInst && payload.action.skillName !== "SAN" && !payload.targetDied) {
                      payload.targetInst.marks += 2;
                      let tDOM = document.getElementById(payload.action.targetId);
@@ -711,7 +760,6 @@
             if(turnCount === 1) return addLog("No combat allowed on Turn 1!", "red");
             if(actor.exhausted || actor.queued) return addLog("Card has already acted this turn!", "red");
             
-            // Taunt Enforcement
             if (actor.tauntedBy) {
                 let taunterDOM = document.getElementById(actor.tauntedBy);
                 if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) {
@@ -731,6 +779,18 @@
             } else if (skillName === "Mana Initiation" || actor.type === 'ability') {
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
                 pQueue.push(action); addLog(`Queued [${skillName}].`, "#aaa"); systemDetector("QUEUE", { action });
+            } else if (skillName === "Shield of Hope") {
+                let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'ALLIES_FRONT' };
+                pQueue.push(action); addLog(`Queued [${skillName}] on Frontline.`, "#3498db"); systemDetector("QUEUE", { action });
+            } else if (skillName === "Blessing of the Light") {
+                isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
+                targetCountReq = 1; addLog("Select an Allied target to heal...", "var(--hp-color)");
+                document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => c.classList.add('target-glow'));
+            } else if (skillName === "Punishment of the Blessed") {
+                if(actor.blessings < 7) return addLog("Needs 7 Blessings!", "red");
+                isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
+                targetCountReq = 1; addLog("Select an Enemy Frontline target...", "var(--gold)");
+                document.querySelectorAll('.slot.frontline[data-side="ENEMY"] .card').forEach(c => c.classList.add('target-glow'));
             } else {
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
                 if (skillName === "NI") {
@@ -753,12 +813,12 @@
                 
                 if (selectedTargets.length < targetCountReq) { addLog(`Select Target ${selectedTargets.length + 1}...`, "var(--gold)"); return; }
                 
-                isTargeting = false; document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow'));
+                isTargeting = false; document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow'));
                 let action = { ...pendingSkill, targetId: selectedTargets }; pQueue.push(action);
                 addLog(`Queued [${pendingSkill.skillName}] on ${selectedTargets.length} targets.`, "#aaa");
                 systemDetector("QUEUE", { action }); pendingSkill = null; selectedTargets = []; updateUI();
             } else {
-                isTargeting = false; document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow'));
+                isTargeting = false; document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow'));
                 let action = { ...pendingSkill, targetId }; pQueue.push(action);
                 addLog(`Queued [${pendingSkill.skillName}] on ${cardInstances[targetId].name}.`, "#aaa");
                 systemDetector("QUEUE", { action }); pendingSkill = null; updateUI();
@@ -796,7 +856,6 @@
             await new Promise(r => setTimeout(r, 300)); arrow.remove();
         }
 
-        // Projectile that goes THROUGH target (Targeting parent elements to avoid coordinate desync from active CSS transitions)
         function shootShuriken(sourceDOM, targetDOM, hitDelayMs) {
             if(!sourceDOM || !targetDOM || shurikenImgUrl === '') return;
             
@@ -810,12 +869,12 @@
             const targetX = tRect.left + tRect.width/2; const targetY = tRect.top + tRect.height/2;
             
             const dx = targetX - startX; const dy = targetY - startY;
-            const endX = startX + dx * 10; const endY = startY + dy * 10; // Project 10x distance
+            const endX = startX + dx * 10; const endY = startY + dy * 10; 
 
             s.style.setProperty('--startX', startX + 'px'); s.style.setProperty('--startY', startY + 'px');
             s.style.setProperty('--endX', endX + 'px'); s.style.setProperty('--endY', endY + 'px');
             
-            const totalAnimTime = hitDelayMs * 10; // Guarantees hit on target at exact hitDelayMs
+            const totalAnimTime = hitDelayMs * 10; 
             s.style.animation = `spinFly ${totalAnimTime}ms linear forwards`;
             
             document.body.appendChild(s); setTimeout(() => s.remove(), totalAnimTime);
@@ -837,9 +896,8 @@
             if (kinSanAudioUrl) playSound(kinSanAudioUrl);
             const hitDelay = 150; 
             
-            // Randomize the 800 damage into 3 distinct hits
-            let dmg1 = Math.floor(Math.random() * 201) + 200; // 200 to 400
-            let dmg2 = Math.floor(Math.random() * 201) + 200; // 200 to 400
+            let dmg1 = Math.floor(Math.random() * 201) + 200; 
+            let dmg2 = Math.floor(Math.random() * 201) + 200; 
             let dmg3 = 800 - dmg1 - dmg2;
             let sanDmgs = [dmg1, dmg2, dmg3];
 
@@ -849,8 +907,6 @@
                         shootShuriken(aDOM, nDOM, hitDelay);
                         setTimeout(() => { 
                             if (bloodAudioUrl) playSound(bloodAudioUrl); 
-                            
-                            // Visual Popup Sync
                             if (nDOM) {
                                 nDOM.classList.remove("shake-anim"); void nDOM.offsetWidth;
                                 nDOM.classList.add("shake-anim"); 
@@ -862,9 +918,7 @@
                 await new Promise(r => setTimeout(r, 400 + hitDelay)); 
             } else { await new Promise(r => setTimeout(r, 600)); }
 
-            // Math is finalized on the backend natively
             let targetDied = await applyDamage(actor, nextTarget.id, 800, "SAN");
-            
             if (targetDied) { addLog(`<b>System</b> [SAN]: Chain reaction continues!`, "var(--gold)"); await triggerSanChain(actor, defSide); }
         }
 
@@ -873,10 +927,12 @@
             let targetDOM = targetId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(targetId);
             let targetInst = cardInstances[targetId]; let actorDOM = document.getElementById(actor.id);
             
-            let isKinRyu = actor.name === "KIN-RYU"; let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn";
+            let isKinRyu = actor.name === "KIN-RYU"; 
+            // Disable slash for Guard Tower, and disable for special skills except basic ATTACK
+            let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK");
             let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
-            if(actorDOM && skillName !== "Passive" && skillName !== "SAN") {
+            if(actorDOM && skillName !== "Passive" && skillName !== "SAN" && !skillName.includes("Punishment")) {
                 const aRect = actorDOM.getBoundingClientRect(); const cx = window.innerWidth / 2; const cy = window.innerHeight / 2;
                 const tX = cx - (aRect.left + aRect.width/2); const tY = cy - (aRect.top + aRect.height/2);
                 actorDOM.style.zIndex = "9999"; actorDOM.style.transition = "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
@@ -884,33 +940,49 @@
                 actorDOM.style.transition = "transform 0.2s ease-in"; actorDOM.style.transform = "translate(0px, 0px) scale(1)"; await new Promise(r => setTimeout(r, 250));
             }
 
-            if(actorDOM && actor.type === 'unit' && targetDOM && actor.name !== "Lionel Guard Tower" && skillName !== "SAN") {
+            if(actorDOM && actor.type === 'unit' && targetDOM && actor.name !== "Lionel Guard Tower" && skillName !== "SAN" && !skillName.includes("Punishment")) {
                 const aRect2 = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
                 const dX = (tRect.left + tRect.width/2) - (aRect2.left + aRect2.width/2); const dY = (tRect.top + tRect.height/2) - (aRect2.top + aRect2.height/2);
                 actorDOM.style.transition = "transform 0.15s cubic-bezier(0.4, 0, 1, 1)"; actorDOM.style.transform = `translate(${dX * 0.5}px, ${dY * 0.5}px) scale(1.3)`;
                 await new Promise(r => setTimeout(r, 150));
             }
 
-            if(targetDOM) {
-                // Blocks the slash if the skill is SAN
-                if(isSlash && skillName !== "SAN") triggerSlash(targetDOM); 
+            if(targetDOM && skillName !== "SAN") {
+                if(isSlash) triggerSlash(targetDOM); 
                 targetDOM.classList.remove("shake-anim"); void targetDOM.offsetWidth;
                 targetDOM.classList.add("shake-anim"); 
-                
-                // Blocks the main -800 damage popup so it doesn't overlap the 3 shuriken damages
-                if (skillName !== "SAN") {
-                    showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
-                }
             }
             
             let died = false;
             if(targetId === 'CORE') {
+                showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
                 if(actor.side === 'PLAYER') { eCoreHP = Math.max(0, eCoreHP - dmg); addLog(`<b>${actor.name}</b> strikes ENEMY CORE for ${dmg}!`, '#ff4d4d'); if(eCoreHP<=0) died=true; } 
                 else { pCoreHP = Math.max(0, pCoreHP - dmg); addLog(`ENEMY <b>${actor.name}</b> strikes YOUR CORE for ${dmg}!`, '#ff4d4d'); if(pCoreHP<=0) died=true; }
             } else if (targetInst) {
-                targetInst.hp -= dmg; addLog(`<b>${actor.name}</b> hits ${targetInst.name} for ${dmg} DMG!`, '#ff4d4d');
-                if(targetInst.hp <= 0) { died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); if(targetDOM) targetDOM.remove(); } 
-                else { if(targetDOM) targetDOM.querySelector('.badge-hp').innerText = targetInst.hp; }
+                // Shield Absorption Logic
+                if(targetInst.shield && targetInst.shield > 0 && targetInst.shieldTurns >= turnCount) {
+                     if(dmg <= targetInst.shield) {
+                          targetInst.shield -= dmg;
+                          showFloatingText(targetDOM, `ABSORBED`, "#3498db", "1.5rem");
+                          addLog(`${targetInst.name}'s shield absorbed ${dmg} damage!`, '#3498db');
+                          dmg = 0;
+                     } else {
+                          let absorbed = targetInst.shield;
+                          dmg -= targetInst.shield;
+                          targetInst.shield = 0;
+                          showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
+                          addLog(`${targetInst.name}'s shield absorbed ${absorbed} damage and broke!`, '#3498db');
+                     }
+                } else if(skillName !== "SAN") {
+                     showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
+                }
+
+                if(dmg > 0) {
+                     targetInst.hp -= dmg; 
+                     addLog(`<b>${actor.name}</b> hits ${targetInst.name} for ${dmg} DMG!`, '#ff4d4d');
+                     if(targetInst.hp <= 0) { died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); if(targetDOM) targetDOM.remove(); } 
+                     else { if(targetDOM) targetDOM.querySelector('.badge-hp').innerText = targetInst.hp; }
+                }
             }
 
             await new Promise(r => setTimeout(r, 300)); 
@@ -939,6 +1011,68 @@
                     }
                     if(sideProcessing === 'PLAYER') { pMana += 3; addLog(`<b>${actor.name}</b> grants +3 Mana!`, "var(--mana-color)"); } 
                     else { eMana += 3; addLog(`Enemy <b>${actor.name}</b> grants +3 Mana!`, "var(--mana-color)"); }
+                } else if (action.skillName === "Shield of Hope") {
+                    let slots = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${sideProcessing}"]`));
+                    let shieldedCount = 0;
+                    slots.forEach(slot => {
+                         let cEl = slot.querySelector('.card');
+                         if(cEl && cardInstances[cEl.id]) {
+                              cardInstances[cEl.id].shield = 500;
+                              cardInstances[cEl.id].shieldTurns = turnCount + 1; // Lasts 2 turns
+                              showFloatingText(cEl, "SHIELDED", "#3498db", "1.5rem");
+                              shieldedCount++;
+                         }
+                    });
+                    actor.blessings = (actor.blessings || 0) + shieldedCount;
+                    addLog(`<b>${actor.name}</b> shielded ${shieldedCount} allies!`, "#3498db");
+                    await new Promise(r => setTimeout(r, 600));
+                } else if (action.skillName === "Blessing of the Light") {
+                    let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
+                    let targetInst = cardInstances[tId];
+                    let targetDOM = document.getElementById(tId);
+                    if(targetInst && targetDOM) {
+                         let heal = Math.floor(Math.random() * 151) + 150;
+                         targetInst.hp = Math.min(targetInst.maxHp || targetInst.hp + heal, targetInst.hp + heal);
+                         showFloatingText(targetDOM, `+${heal}`, "#2ecc71", "2.5rem");
+                         targetDOM.classList.add('shimmer-fx');
+                         if(healAudioUrl) playSound(healAudioUrl);
+                         actor.blessings = (actor.blessings || 0) + 1;
+                         targetDOM.querySelector('.badge-hp').innerText = targetInst.hp;
+                         addLog(`<b>${actor.name}</b> heals ${targetInst.name} for ${heal}!`, "#2ecc71");
+                    }
+                    await new Promise(r => setTimeout(r, 1000));
+                    if(targetDOM) targetDOM.classList.remove('shimmer-fx');
+                } else if(action.skillName === "Punishment of the Blessed") {
+                    actor.blessings = Math.max(0, actor.blessings - 7);
+                    let frontTargetId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
+                    let frontDOM = document.getElementById(frontTargetId);
+                    
+                    let targetsToHit = [frontTargetId];
+                    let defSide = sideProcessing === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+                    
+                    if(frontDOM && frontDOM.parentElement.classList.contains('frontline')) {
+                         let slots = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${defSide}"]`));
+                         let idx = slots.indexOf(frontDOM.parentElement);
+                         if(idx > -1) {
+                              let backSlot = document.querySelectorAll(`.slot.backline[data-side="${defSide}"]`)[idx];
+                              let backCard = backSlot.querySelector('.card');
+                              if(backCard) targetsToHit.push(backCard.id);
+                         }
+                    }
+
+                    if(actorDOM) {
+                        actorDOM.style.transition = "transform 0.4s ease"; actorDOM.style.transform = "translateY(-20px) scale(1.1)";
+                        await new Promise(r => setTimeout(r, 400)); 
+                    }
+
+                    for(let i=0; i<targetsToHit.length; i++) {
+                         let tId = targetsToHit[i];
+                         if (!cardInstances[tId] || cardInstances[tId].hp <= 0) continue;
+                         // 800-1800 for front, 500-1000 for back
+                         let dmg = i === 0 ? Math.floor(Math.random() * 1001) + 800 : Math.floor(Math.random() * 501) + 500;
+                         await applyDamage(actor, tId, dmg, action.skillName);
+                    }
+                    if(actorDOM) { actorDOM.style.transform = "scale(1) translateY(0)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
                 } else {
                     let dmg = actor.atk || 150; let secondDmg = 0; let marksToApply = 0;
                     if (actor.name === "KIN-RYU") {
@@ -1026,6 +1160,16 @@
                             }
                             if (!action) {
                                 if(data.type === 'ability') { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: data.skills[0].name, cost: cost, targetId: 'SELF' }; } 
+                                else if (data.name === "Althea") {
+                                    if (data.blessings >= 7 && pTargets.length > 0) { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "Punishment of the Blessed", cost: 0, targetId: pTargets[Math.floor(Math.random()*pTargets.length)].id }; } 
+                                    if (!action && eMana >= 3) { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "Shield of Hope", cost: 3, targetId: 'ALLIES_FRONT' }; } 
+                                    if (!action && eMana >= 1) {
+                                        let eTargets = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card'));
+                                        if(eTargets.length > 0) action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "Blessing of the Light", cost: 1, targetId: eTargets[Math.floor(Math.random()*eTargets.length)].id };
+                                    }
+                                    if (!action && isFrontClear && Math.random() > 0.3) { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "ATTACK", cost: cost, targetId: 'CORE' }; }
+                                    else if (!action && pTargets.length > 0) { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "ATTACK", cost: cost, targetId: pTargets[Math.floor(Math.random()*pTargets.length)].id }; }
+                                }
                                 else if(isFrontClear && Math.random() > 0.3) { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "ATTACK", cost: cost, targetId: 'CORE' }; } 
                                 else if(pTargets.length > 0) { let target = pTargets[Math.floor(Math.random()*pTargets.length)]; action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "ATTACK", cost: cost, targetId: target.id }; }
                             }
