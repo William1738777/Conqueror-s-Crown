@@ -1,4 +1,4 @@
-Test 1.6
+Test 1.7
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,7 +54,7 @@ Test 1.6
         #inspect-content { height: 100%; padding-right: 5px; }
         #inspect-content::-webkit-scrollbar { width: 5px; } #inspect-content::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 5px;}
         
-        #hand-container { height: 160px; background: rgba(0,0,0,0.85); padding: 10px; border: 2px solid #333; border-radius: 12px; display: flex; align-items: center; gap: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); flex-shrink: 0; }
+        #hand-container { height: 230px; background: rgba(0,0,0,0.85); padding: 10px; border: 2px solid #333; border-radius: 12px; display: flex; align-items: center; gap: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); flex-shrink: 0; }
         #hand { display: flex; gap: 8px; flex-grow: 1; overflow-x: hidden; scroll-behavior: smooth; padding: 5px; }
         .scroll-btn { background: #222; color: var(--gold); border: 1px solid #444; border-radius: 5px; font-size: 1.2rem; cursor: pointer; padding: 5px; height: 100%; display: flex; align-items: center; transition: 0.2s; }
         .scroll-btn:hover { background: #444; border-color: var(--gold); }
@@ -82,13 +82,13 @@ Test 1.6
         .board { display: flex; flex-direction: column; gap: 8px; padding: 8px; background: rgba(255,255,255,0.02); border-radius: 10px; }
         .row { display: flex; gap: 12px; justify-content: center;}
         
-        /* Slot & Card Alignment OVERHAUL */
-        .slot { width: 100px; height: 140px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 6px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #555; position: relative; box-sizing: border-box; padding: 0;}
+        /* Slot & Card Alignment OVERHAUL - Enlarged Dimensions */
+        .slot { width: 140px; height: 196px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 6px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #555; position: relative; box-sizing: border-box; padding: 0;}
         .slot.drag-over { border-color: var(--gold); background: rgba(212, 175, 55, 0.1); }
         .ability-slot { border-color: #9b59b6; color: #9b59b6; }
         .slot-text { pointer-events: none; z-index: 1; }
 
-        .card { width: 100px; height: 140px; border-radius: 6px; padding: 5px; box-sizing: border-box; cursor: grab; background: var(--card-unit); border: 1px solid #444; display: flex; flex-direction: column; justify-content: space-between; font-family: sans-serif; position: relative; flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s;}
+        .card { width: 140px; height: 196px; border-radius: 6px; padding: 5px; box-sizing: border-box; cursor: grab; background: var(--card-unit); border: 1px solid #444; display: flex; flex-direction: column; justify-content: space-between; font-family: sans-serif; position: relative; flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s;}
         
         .slot .card { position: absolute; top: -1px; left: -1px; width: calc(100% + 2px); height: calc(100% + 2px); margin: 0; z-index: 10; border-radius: 6px; border: 1px solid #444; box-sizing: border-box; }
         
@@ -111,22 +111,22 @@ Test 1.6
         .buff-double-action { outline: 3px solid #9b59b6; box-shadow: 0 0 15px #9b59b6; animation: purple-burn 0.8s infinite alternate; }
         @keyframes purple-burn { from { box-shadow: 0 0 10px #9b59b6; } to { box-shadow: 0 0 25px #9b59b6; } }
 
-        .card-title { font-size: 0.65rem; font-weight: bold; text-align: center; color: var(--gold); line-height: 1; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .card-level { text-align: center; font-size: 0.55rem; color: #aaa; margin-bottom: 2px;}
+        .card-title { font-size: 0.8rem; font-weight: bold; text-align: center; color: var(--gold); line-height: 1; margin-top: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .card-level { text-align: center; font-size: 0.7rem; color: #aaa; margin-bottom: 4px;}
         .card-img-container { flex-grow: 1; margin: 3px 0; background-color: #111; border-radius: 3px; border: 1px solid #333; background-size: cover; background-position: center; pointer-events: none;}
 
-        .badge-mana { position: absolute; top: -5px; left: -5px; background: var(--mana-color); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; font-size: 0.65rem; font-weight: bold; border: 1px solid #111; z-index: 15;}
-        .badge-hp { position: absolute; bottom: -5px; right: -5px; background: var(--hp-color); color: #111; border-radius: 4px; padding: 1px 5px; font-size: 0.65rem; font-weight: bold; border: 1px solid #111; z-index: 15;}
+        .badge-mana { position: absolute; top: -5px; left: -5px; background: var(--mana-color); color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15;}
+        .badge-hp { position: absolute; bottom: -5px; right: -5px; background: var(--hp-color); color: #111; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15;}
         
-        .placed-badge { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(231, 76, 60, 0.9); color: white; padding: 2px 6px; font-size: 0.65rem; font-weight: bold; border-radius: 3px; z-index: 25; pointer-events: none; text-shadow: 1px 1px 0 #000; border: 1px solid #fff;}
-        .badge-blessing { position: absolute; top: -8px; left: 20px; background: #f1c40f; color: #111; border-radius: 50%; width: 22px; height: 22px; display: flex; justify-content: center; align-items: center; font-size: 0.7rem; font-weight: bold; border: 1px solid #111; z-index: 26; box-shadow: 0 0 10px #f1c40f;}
-        .badge-shield { position: absolute; bottom: 22px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 1px 5px; font-size: 0.65rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
+        .placed-badge { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(231, 76, 60, 0.9); color: white; padding: 3px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 3px; z-index: 25; pointer-events: none; text-shadow: 1px 1px 0 #000; border: 1px solid #fff;}
+        .badge-blessing { position: absolute; top: -8px; left: 20px; background: #f1c40f; color: #111; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 26; box-shadow: 0 0 10px #f1c40f;}
+        .badge-shield { position: absolute; bottom: 28px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
 
         /* --- DECKS --- */
         .deck-container { position: absolute; right: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 50; }
         #enemy-deck-area { top: 20px; }
         #player-deck-area { bottom: 20px; }
-        .deck-stack { width: 85px; height: 125px; border-radius: 6px; border: 1px solid #555; background-color: #1a1a24; background-size: cover; background-position: center; box-shadow: -2px 2px 0 #222, -4px 4px 0 #111, -6px 6px 0 #333, -8px 8px 10px rgba(0,0,0,0.8); transition: opacity 0.3s; }
+        .deck-stack { width: 100px; height: 140px; border-radius: 6px; border: 1px solid #555; background-color: #1a1a24; background-size: cover; background-position: center; box-shadow: -2px 2px 0 #222, -4px 4px 0 #111, -6px 6px 0 #333, -8px 8px 10px rgba(0,0,0,0.8); transition: opacity 0.3s; }
         #enemy-deck-area .deck-stack { transform: rotate(180deg); box-shadow: 2px -2px 0 #222, 4px -4px 0 #111, 6px -6px 0 #333, 8px -8px 10px rgba(0,0,0,0.8); }
         .deck-count { width: 100%; text-align: center; font-weight: bold; color: var(--gold); font-size: 0.8rem; text-shadow: 0 2px 4px rgba(0,0,0,1); }
         
@@ -169,7 +169,7 @@ Test 1.6
         .shuriken-fx { position: fixed; top: 0; left: 0; margin-top: -25px; margin-left: -25px; width: 50px; height: 50px; z-index: 9999; pointer-events: none; background-image: var(--shuriken-url); background-size: contain; background-repeat: no-repeat; }
         @keyframes spinFly { 0% { transform: translate(var(--startX), var(--startY)) rotate(0deg); opacity: 1; } 100% { transform: translate(var(--endX), var(--endY)) rotate(1440deg); opacity: 0; } }
 
-        .flying-card { position: fixed; width: 100px; height: 140px; border-radius: 6px; border: 1px solid #555; background-color: #1a1a24; background-size: cover; background-position: center; z-index: 1000; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
+        .flying-card { position: fixed; width: 140px; height: 196px; border-radius: 6px; border: 1px solid #555; background-color: #1a1a24; background-size: cover; background-position: center; z-index: 1000; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
         .flip-reveal { animation: flipIn 0.6s ease-out forwards; }
         @keyframes flipIn { 0% { transform: perspective(400px) rotateY(90deg); opacity: 0; } 100% { transform: perspective(400px) rotateY(0deg); opacity: 1; } }
 
@@ -269,7 +269,7 @@ Test 1.6
         // URL encoded %20 handles spaces, %27 handles the apostrophe seamlessly.
         // ============================================================================
         const ASSET_LINKS = {
-            "KIN-RYU": "./assets/Kin-Ryu.png",
+            "KIN-RYU": "./assets/Kin-Ryu.jpg",
             "Shadow Stalker": "./assets/Shadow%20Stalker.png",
             "Lionel Guard Tower": "./assets/Lionel%20Guard%20Tower.png",
             "Rolyn": "./assets/King%20Rolyn.png",
