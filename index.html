@@ -289,6 +289,8 @@
         // ============================================================================
 
         let cardLibrary = [];
+        let pDrawBag = [];
+        let eDrawBag = [];
         let eHandData = [];
         let currentTurn = 'PLAYER', turnCount = 1;
         let pMana = 8, eMana = 8;
@@ -447,6 +449,23 @@
             setTimeout(startGame, 500); 
         }
 
+        // --- "Bag" Draw System to prevent rare RNG ---
+        function getNextCardFromBag(side) {
+            let bag = side === 'PLAYER' ? pDrawBag : eDrawBag;
+            if (bag.length === 0) {
+                // Refill the bag with exactly 1 copy of every playable card in the library
+                bag = cardLibrary.map(c => JSON.parse(JSON.stringify(c)));
+                // Shuffle the bag
+                for (let i = bag.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [bag[i], bag[j]] = [bag[j], bag[i]];
+                }
+                if (side === 'PLAYER') pDrawBag = bag;
+                else eDrawBag = bag;
+            }
+            return bag.pop();
+        }
+
         function updateUI() {
             document.getElementById('mana-display').innerText = `MANA: ${pMana}`;
             document.getElementById('enemy-core-hp').innerText = `ENEMY CORE: ${eCoreHP} | MANA: ${eMana}`;
@@ -513,7 +532,7 @@
             
             for(let i=0; i<n; i++) {
                 setTimeout(() => {
-                    const data = JSON.parse(JSON.stringify(cardLibrary[Math.floor(Math.random() * cardLibrary.length)]));
+                    const data = getNextCardFromBag(sideTarget);
                     const cardId = 'card_' + Math.random().toString(36).substr(2, 9);
                     cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: sideTarget, turnPlaced: 0, tauntedBy: null };
 
@@ -574,8 +593,15 @@
             });
             c.addEventListener('click', () => {
                 if(isExecuting) return;
+                
+                // One More Time Instant Activation Logic
+                if(pendingSkill && pendingSkill.skillName === "Double Action" && data.side === currentTurn && data.type === 'unit') {
+                    activateOneMoreTime(pendingSkill.actorId, id);
+                    return;
+                }
+
                 if(isTargeting) {
-                    if(pendingSkill.skillName === "Blessing of the Light" || pendingSkill.skillName === "Double Action") {
+                    if(pendingSkill.skillName === "Blessing of the Light") {
                         if(data.side === currentTurn && data.type === 'unit') handleTargetSelection(id);
                     } else if(pendingSkill.skillName === "Punishment of the Blessed") {
                         if(data.side !== currentTurn && c.parentElement.classList.contains('frontline')) handleTargetSelection(id);
@@ -716,7 +742,8 @@
             });
             
             if (trigger === "QUEUE") {
-                if (payload.action.actorName === "Shadow Stalker") {
+                // Ensure only Stalkers on the CURRENT turn's side mimic the action
+                if (payload.action.actorName === "Shadow Stalker" && payload.action.side === currentTurn) {
                     let allies = activeCardsOnBoard.filter(c => c.side === payload.action.side && c.name === "Shadow Stalker" && c.id !== payload.action.actorId);
                     for (let ally of allies) {
                         if (!ally.exhausted && !ally.queued && ally.turnPlaced < turnCount) {
@@ -775,6 +802,40 @@
             }
         }
 
+        // --- Instant Activation Logic for One More Time ---
+        async function activateOneMoreTime(actorId, targetId) {
+            isTargeting = false; 
+            pendingSkill = null; 
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'target-buff-glow'));
+            
+            let actor = cardInstances[actorId];
+            let targetInst = cardInstances[targetId];
+            let actorDOM = document.getElementById(actorId);
+            let targetDOM = document.getElementById(targetId);
+
+            if(actorDOM) {
+                actorDOM.style.transition = "transform 0.5s ease";
+                actorDOM.style.transform = "scale(2.5)";
+                actorDOM.style.zIndex = "9999";
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            
+            if(targetInst && targetDOM) {
+                targetInst.extraAction = true;
+                targetInst.exhausted = false; // Refresh the unit
+                targetDOM.classList.add('buff-double-action');
+                addLog(`<b>${targetInst.name}</b> is granted One More Time!`, "#9b59b6");
+            }
+            
+            if(actorDOM) {
+                actorDOM.style.opacity = "0";
+                await new Promise(r => setTimeout(r, 300));
+                actorDOM.remove();
+            }
+            actor.hp = 0; // Destroy the ability card
+            updateUI();
+        }
+
         window.queueAction = function(actorId, skillName, cost, isCore) {
             if(currentTurn !== 'PLAYER' || isExecuting) return;
             const actor = cardInstances[actorId];
@@ -799,8 +860,16 @@
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'CORE' };
                 pQueue.push(action); addLog(`Queued [${skillName}] on Enemy Core.`, "#aaa"); systemDetector("QUEUE", { action });
             } else if (skillName === "Mana Initiation" || actor.type === 'ability') {
-                let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
-                pQueue.push(action); addLog(`Queued [${skillName}].`, "#aaa"); systemDetector("QUEUE", { action });
+                if (skillName === "Double Action") {
+                    isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
+                    targetCountReq = 1; addLog("Select an Allied unit for One More Time...", "#9b59b6");
+                    document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => {
+                        if(cardInstances[c.id].type === 'unit') c.classList.add('target-buff-glow');
+                    });
+                } else {
+                    let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
+                    pQueue.push(action); addLog(`Queued [${skillName}].`, "#aaa"); systemDetector("QUEUE", { action });
+                }
             } else if (skillName === "Shield of Hope") {
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'ALLIES_FRONT' };
                 pQueue.push(action); addLog(`Queued [${skillName}] on Frontline.`, "#3498db"); systemDetector("QUEUE", { action });
@@ -810,14 +879,8 @@
                 document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => {
                     if(cardInstances[c.id].type === 'unit') c.classList.add('target-heal-glow');
                 });
-            } else if (skillName === "Double Action") {
-                isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
-                targetCountReq = 1; addLog("Select an Allied unit for One More Time...", "#9b59b6");
-                document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => {
-                    if(cardInstances[c.id].type === 'unit') c.classList.add('target-buff-glow');
-                });
             } else if (skillName === "Punishment of the Blessed") {
-                if(actor.blessings < 7) return addLog("Needs 7 Blessings!", "red");
+                if(actor.blessings < 7) { actor.queued = false; return addLog("Needs 7 Blessings!", "red"); }
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
                 targetCountReq = 1; addLog("Select an Enemy Frontline target...", "var(--gold)");
                 document.querySelectorAll('.slot.frontline[data-side="ENEMY"] .card').forEach(c => c.classList.add('target-glow'));
@@ -888,7 +951,6 @@
 
         function shootShuriken(sourceDOM, targetDOM, hitDelayMs) {
             if(!sourceDOM || !targetDOM || shurikenImgUrl === '') return;
-            if(kinSfx2Url) playSound(kinSfx2Url);
             
             const sEl = sourceDOM.parentElement.classList.contains('slot') ? sourceDOM.parentElement : sourceDOM;
             const tEl = targetDOM.parentElement.classList.contains('slot') ? targetDOM.parentElement : targetDOM;
@@ -924,7 +986,9 @@
             let nextTarget = enemies[Math.floor(Math.random() * enemies.length)];
             let nDOM = document.getElementById(nextTarget.id); let aDOM = document.getElementById(actor.id);
             
+            // Audio Triggered IMMEDIATELY before visual loop
             if (kinSanAudioUrl) playSound(kinSanAudioUrl);
+            if (kinSfx2Url) playSound(kinSfx2Url);
             const hitDelay = 150; 
             
             let dmg1 = Math.floor(Math.random() * 201) + 200; 
@@ -1032,7 +1096,7 @@
                 actor.queued = false; 
                 
                 // Allow One More Time logic to bypass exhaustion
-                if (actor.extraAction && action.skillName !== "Double Action") {
+                if (actor.extraAction) {
                     actor.extraAction = false;
                     actor.exhausted = false;
                     if(actorDOM) actorDOM.classList.remove('buff-double-action');
@@ -1065,43 +1129,21 @@
                     actor.blessings = (actor.blessings || 0) + shieldedCount;
                     addLog(`<b>${actor.name}</b> shielded ${shieldedCount} allies!`, "#3498db");
                     await new Promise(r => setTimeout(r, 600));
-                } else if (action.skillName === "Double Action") {
-                    let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
-                    let targetInst = cardInstances[tId];
-                    let targetDOM = document.getElementById(tId);
-                    
-                    if(actorDOM) {
-                        actorDOM.style.transition = "transform 0.5s ease";
-                        actorDOM.style.transform = "scale(2.5)";
-                        actorDOM.style.zIndex = "9999";
-                        await new Promise(r => setTimeout(r, 1000));
-                    }
-                    
-                    if(targetInst && targetDOM) {
-                        targetInst.extraAction = true;
-                        targetInst.exhausted = false;
-                        targetDOM.classList.add('buff-double-action');
-                        addLog(`<b>${targetInst.name}</b> is granted One More Time!`, "#9b59b6");
-                    }
-                    
-                    if(actorDOM) {
-                        actorDOM.style.opacity = "0";
-                        await new Promise(r => setTimeout(r, 300));
-                        actorDOM.remove();
-                    }
-                    actor.hp = 0;
                 } else if (action.skillName === "Blessing of the Light") {
                     let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
                     let targetInst = cardInstances[tId];
                     let targetDOM = document.getElementById(tId);
-                    if(targetInst && targetDOM && targetDOM.querySelector('.badge-hp')) {
+                    
+                    // Fixed extracting ID as string to prevent crashing
+                    if(targetInst && targetDOM) {
                          let heal = Math.floor(Math.random() * 151) + 150;
                          targetInst.hp = Math.min(targetInst.maxHp || targetInst.hp + heal, targetInst.hp + heal);
                          showFloatingText(targetDOM, `+${heal}`, "#2ecc71", "2.5rem");
                          targetDOM.classList.add('shimmer-fx');
                          if(healAudioUrl) playSound(healAudioUrl);
                          actor.blessings = (actor.blessings || 0) + 1;
-                         targetDOM.querySelector('.badge-hp').innerText = targetInst.hp;
+                         // Safe UI Update
+                         if(targetDOM.querySelector('.badge-hp')) targetDOM.querySelector('.badge-hp').innerText = targetInst.hp;
                          addLog(`<b>${actor.name}</b> heals ${targetInst.name} for ${heal}!`, "#2ecc71");
                     }
                     await new Promise(r => setTimeout(r, 1000));
@@ -1139,11 +1181,10 @@
                 } else {
                     let dmg = actor.atk || 150; let secondDmg = 0; let marksToApply = 0;
                     if (actor.name === "KIN-RYU") {
+                        if(kinSfx1Url) playSound(kinSfx1Url); // Guaranteed play on Kin Ryu attack start
                         if (action.skillName === "ICHI") { dmg = Math.floor(Math.random() * (1100 - 300 + 1)) + 300; if (dmg < 500) { secondDmg = Math.floor(Math.random() * (1100 - 500 + 1)) + 500; marksToApply = 1; } } 
-                        else if (action.skillName === "NI") { 
-                            if(kinSfx1Url) playSound(kinSfx1Url);
-                            dmg = 200; marksToApply = 1; 
-                        } else dmg = actor.atk;
+                        else if (action.skillName === "NI") { dmg = 200; marksToApply = 1; } 
+                        else dmg = actor.atk;
                     } else if (actor.name === "Rolyn") {
                         if (action.skillName === "Lion's Challenge") dmg = 250; else if (action.skillName === "Royal Command") dmg = 200;
                     }
@@ -1173,7 +1214,6 @@
                         await systemDetector("ATTACK_END", { actor, targetInst, action, targetDied });
                     }
                 }
-                if(actor.type === 'ability' && action.skillName !== "Double Action") { actor.hp = 0; if(actorDOM) actorDOM.remove(); }
                 updateUI(); await new Promise(r => setTimeout(r, 400)); 
             }
             isExecuting = false; updateUI();
@@ -1227,8 +1267,12 @@
                             if (!action) {
                                 if(data.type === 'ability') { 
                                     if(data.name === "One More Time") {
-                                        let allies = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card'));
-                                        if(allies.length > 0) action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "Double Action", cost: 0, targetId: allies[Math.floor(Math.random()*allies.length)].id };
+                                        // Auto-activate and skip the execution queue for One More Time
+                                        let allies = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card')).map(c => c.id);
+                                        if(allies.length > 0) {
+                                            activateOneMoreTime(data.id, allies[Math.floor(Math.random()*allies.length)]);
+                                            continue; // Skip putting it in eQueue
+                                        }
                                     } else {
                                         action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: data.skills[0].name, cost: cost, targetId: 'SELF' }; 
                                     }
