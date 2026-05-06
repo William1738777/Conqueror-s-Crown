@@ -242,15 +242,15 @@
     <script>
         // ============================================================================
         // ⚙️ GITHUB ASSET CONFIGURATION ⚙️
-        // Adjusted to perfectly match the file names in your /assets repository folder.
+        // URL encoded %20 handles spaces, %27 handles the apostrophe seamlessly.
         // ============================================================================
         const ASSET_LINKS = {
             "KIN-RYU": "./assets/Kin-Ryu.jpg",
-            "Shadow Stalker": "./assets/Shadow Stalker.png",
-            "Lionel Guard Tower": "./assets/Lionel Guard Tower.png",
-            "Rolyn": "./assets/King Rolyn.png",
-            "Mana Core": "./assets/Mana Core.png",
-            "Back_Card": "./assets/Conqueror's Crown Back_Card.png",
+            "Shadow Stalker": "./assets/Shadow%20Stalker.png",
+            "Lionel Guard Tower": "./assets/Lionel%20Guard%20Tower.png",
+            "Rolyn": "./assets/King%20Rolyn.png",
+            "Mana Core": "./assets/Mana%20Core.png",
+            "Back_Card": "./assets/Conqueror%27s%20Crown%20Back_Card.png",
             "Slash": "./assets/Slash.gif",
             "Arrow_FX": "./assets/Arrow_FX.png",
             "ShurikenKin_FX": "./assets/ShurikenKin_FX.png",
@@ -355,6 +355,14 @@
             document.getElementById('upload-box').style.display = 'none';
             document.getElementById('absorbing-text').style.display = 'block';
 
+            // Start music immediately after user interaction grants audio permissions
+            if(menuMusicUrl && !menuAudioEl) {
+                menuAudioEl = new Audio(menuMusicUrl);
+                menuAudioEl.loop = true;
+                menuAudioEl.volume = 0.4;
+                menuAudioEl.play().catch(e=>console.log("Audio play failed:", e));
+            }
+
             let keys = Object.keys(ASSET_LINKS);
             for(let i=0; i<keys.length; i++) {
                 let key = keys[i];
@@ -391,14 +399,6 @@
                 document.getElementById('upload-box').style.display = 'block';
                 document.getElementById('absorbing-text').style.display = 'none';
                 return;
-            }
-
-            // Start music immediately after user interaction grants audio permissions
-            if(menuMusicUrl && !menuAudioEl) {
-                menuAudioEl = new Audio(menuMusicUrl);
-                menuAudioEl.loop = true;
-                menuAudioEl.volume = 0.4;
-                menuAudioEl.play().catch(e=>console.log("Audio play failed:", e));
             }
             
             setTimeout(startGame, 500); 
@@ -505,12 +505,17 @@
             const c = document.createElement('div');
             c.className = `card`; c.id = id; c.draggable = true;
             
-            let bgImg = `background-image: url("${data.img}");`;
-            if(data.side === 'ENEMY' && data.type === 'ability' && data.turnPlaced > 0) bgImg = `background-image: url("${deckBackImg}");`;
+            // Clean quotes to prevent HTML breaking
+            let safeImgUrl = data.img.replace(/"/g, '&quot;').replace(/'/g, '%27');
+            let safeBackImgUrl = deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27');
+
+            let bgImg = `background-image: url('${safeImgUrl}');`;
+            if(data.side === 'ENEMY' && data.type === 'ability' && data.turnPlaced > 0) bgImg = `background-image: url('${safeBackImgUrl}');`;
 
             let html = `<div class="badge-mana">${data.summonCost}</div>`;
             if(data.side === 'PLAYER' || data.type !== 'ability') html += `<div class="card-title">${data.name}</div>`;
-            html += `<div class="card-img-container" style='${bgImg}'></div>`;
+            // Use double quotes for the style attribute
+            html += `<div class="card-img-container" style="${bgImg}"></div>`;
             if(data.type === 'unit') html += `<div class="card-level">${"★".repeat(data.powerLevel)}</div><div class="badge-hp">${data.hp}</div>`;
 
             c.innerHTML = html;
