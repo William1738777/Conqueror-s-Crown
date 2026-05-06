@@ -19,12 +19,16 @@
         }
 
         /* --- Start Screen --- */
-        #start-screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, #1e1e2e 0%, #0d0d12 100%); z-index: 500; }
+        #start-screen { 
+            position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            background: linear-gradient(rgba(13, 13, 18, 0.6), rgba(13, 13, 18, 0.95)), url('./assets/MainMenuBG.jpg');
+            background-size: cover; background-position: center; z-index: 500; 
+        }
         #start-screen h1 { font-size: 4rem; color: var(--gold); letter-spacing: 8px; margin-bottom: 10px; text-shadow: 0 0 20px rgba(212, 175, 55, 0.5); text-align: center; }
         .subtitle { color: #888; margin-bottom: 40px; letter-spacing: 2px; text-align: center; }
-        .upload-area { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 12px; border: 1px dashed var(--gold); margin-bottom: 20px; text-align: center; position: relative; cursor: pointer; transition: 0.3s;}
-        .upload-area:hover { background: rgba(212, 175, 55, 0.1); transform: scale(1.02); }
-        #absorbing-text { display: none; color: var(--gold); font-size: 1.5rem; margin-top: 20px; animation: pulse 1s infinite alternate;}
+        .upload-area { background: rgba(0,0,0,0.6); padding: 30px; border-radius: 12px; border: 1px dashed var(--gold); margin-bottom: 20px; text-align: center; position: relative; cursor: pointer; transition: 0.3s;}
+        .upload-area:hover { background: rgba(212, 175, 55, 0.2); transform: scale(1.02); box-shadow: 0 0 20px rgba(212, 175, 55, 0.3); }
+        #absorbing-text { display: none; color: var(--gold); font-size: 1.5rem; margin-top: 20px; animation: pulse 1s infinite alternate; text-shadow: 0 0 10px #000;}
         @keyframes pulse { from { opacity: 0.6; transform: scale(0.98); } to { opacity: 1; transform: scale(1.02); } }
 
         /* --- Game Header --- */
@@ -251,7 +255,11 @@
             "Arrow_FX": "./assets/Arrow_FX.png",
             "ShurikenKin_FX": "./assets/ShurikenKin_FX.png",
             "KinSanSound": "./assets/KinSanSound.mp3",
-            "BloodSound": "./assets/BloodSound.mp3"
+            "BloodSound": "./assets/BloodSound.mp3",
+            "MainMenuBG": "./assets/MainMenuBG.jpg",
+            "MenuMusic": "./assets/MenuMusic.mp3",
+            "BodyShot": "./assets/BodyShot.mp3",
+            "ArrowHit": "./assets/ArrowHit.mp3"
         };
         // ============================================================================
 
@@ -268,6 +276,10 @@
         let shurikenImgUrl = '';
         let kinSanAudioUrl = '';
         let bloodAudioUrl = '';
+        let bodyShotAudioUrl = '';
+        let arrowHitAudioUrl = '';
+        let menuMusicUrl = '';
+        let menuAudioEl = null;
         
         // System Flags
         let pQueue = []; 
@@ -298,12 +310,16 @@
             // Audio checks
             if(cleanName.includes('kinsansound') || cleanName.includes('kin san sound')) { kinSanAudioUrl = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('bloodsound') || cleanName.includes('blood sound')) { bloodAudioUrl = dataUrl; return { isAudio: true }; }
+            if(cleanName.includes('bodyshot')) { bodyShotAudioUrl = dataUrl; return { isAudio: true }; }
+            if(cleanName.includes('arrowhit')) { arrowHitAudioUrl = dataUrl; return { isAudio: true }; }
+            if(cleanName.includes('menumusic')) { menuMusicUrl = dataUrl; return { isAudio: true }; }
 
             // FX Checks
             if(cleanName.includes('back_card') || cleanName.includes('back card') || cleanName.includes('crown back')) { return { isCardBack: true, img: dataUrl }; }
             if(cleanName.includes('slash')) { return { isSlash: true, img: dataUrl }; }
             if(cleanName.includes('arrow_fx') || cleanName.includes('arrow fx')) { return { isArrow: true, img: dataUrl }; }
             if(cleanName.includes('shurikenkin_fx') || cleanName.includes('shuriken')) { return { isShuriken: true, img: dataUrl }; }
+            if(cleanName.includes('mainmenubg')) { return { isMenuBG: true, img: dataUrl }; }
 
             let type = 'unit';
             if (cleanName.includes('ability') || cleanName.includes('skill') || cleanName.includes('spell') || cleanName.includes('magic') || cleanName.includes('mana core')) type = 'ability';
@@ -350,18 +366,18 @@
                 
                 if (cardData.isCardBack) {
                     deckBackImg = cardData.img;
-                    document.getElementById('player-deck-stack').style.backgroundImage = `url('${deckBackImg}')`;
-                    document.getElementById('enemy-deck-stack').style.backgroundImage = `url('${deckBackImg}')`;
+                    document.getElementById('player-deck-stack').style.backgroundImage = `url("${deckBackImg}")`;
+                    document.getElementById('enemy-deck-stack').style.backgroundImage = `url("${deckBackImg}")`;
                 } else if (cardData.isSlash) {
-                    document.documentElement.style.setProperty('--slash-url', `url('${cardData.img}')`);
+                    document.documentElement.style.setProperty('--slash-url', `url("${cardData.img}")`);
                 } else if (cardData.isArrow) {
                     arrowImgUrl = cardData.img;
-                    document.documentElement.style.setProperty('--arrow-url', `url('${cardData.img}')`);
+                    document.documentElement.style.setProperty('--arrow-url', `url("${cardData.img}")`);
                 } else if (cardData.isShuriken) {
                     shurikenImgUrl = cardData.img;
-                    document.documentElement.style.setProperty('--shuriken-url', `url('${cardData.img}')`);
-                } else if (cardData.isAudio) {
-                    // Handled inside getCardTemplate side-effects
+                    document.documentElement.style.setProperty('--shuriken-url', `url("${cardData.img}")`);
+                } else if (cardData.isAudio || cardData.isMenuBG) {
+                    // Handled inside getCardTemplate side-effects or CSS directly
                 } else if (cardData.isPlayable) {
                     cardLibrary.push({...cardData}); 
                 }
@@ -375,6 +391,14 @@
                 document.getElementById('upload-box').style.display = 'block';
                 document.getElementById('absorbing-text').style.display = 'none';
                 return;
+            }
+
+            // Start music immediately after user interaction grants audio permissions
+            if(menuMusicUrl && !menuAudioEl) {
+                menuAudioEl = new Audio(menuMusicUrl);
+                menuAudioEl.loop = true;
+                menuAudioEl.volume = 0.4;
+                menuAudioEl.play().catch(e=>console.log("Audio play failed:", e));
             }
             
             setTimeout(startGame, 500); 
@@ -446,7 +470,7 @@
 
                     const flyingCard = document.createElement('div');
                     flyingCard.className = 'flying-card';
-                    flyingCard.style.backgroundImage = `url('${deckBackImg}')`;
+                    flyingCard.style.backgroundImage = `url("${deckBackImg}")`;
                     
                     const deckRect = stack.getBoundingClientRect();
                     flyingCard.style.left = deckRect.left + 'px'; flyingCard.style.top = deckRect.top + 'px';
@@ -481,12 +505,12 @@
             const c = document.createElement('div');
             c.className = `card`; c.id = id; c.draggable = true;
             
-            let bgImg = `background-image: url('${data.img}');`;
-            if(data.side === 'ENEMY' && data.type === 'ability' && data.turnPlaced > 0) bgImg = `background-image: url('${deckBackImg}');`;
+            let bgImg = `background-image: url("${data.img}");`;
+            if(data.side === 'ENEMY' && data.type === 'ability' && data.turnPlaced > 0) bgImg = `background-image: url("${deckBackImg}");`;
 
             let html = `<div class="badge-mana">${data.summonCost}</div>`;
             if(data.side === 'PLAYER' || data.type !== 'ability') html += `<div class="card-title">${data.name}</div>`;
-            html += `<div class="card-img-container" style="${bgImg}"></div>`;
+            html += `<div class="card-img-container" style='${bgImg}'></div>`;
             if(data.type === 'unit') html += `<div class="card-level">${"★".repeat(data.powerLevel)}</div><div class="badge-hp">${data.hp}</div>`;
 
             c.innerHTML = html;
@@ -747,12 +771,15 @@
         }
 
         function triggerSlash(targetDOM) {
-            if(!targetDOM || arrowImgUrl === '') return;
+            if(!targetDOM) return;
+            if(bodyShotAudioUrl) playSound(bodyShotAudioUrl);
             const slash = document.createElement('div'); slash.className = 'slash-fx'; targetDOM.appendChild(slash); setTimeout(() => slash.remove(), 600);
         }
 
         async function shootArrow(sourceDOM, targetDOM) {
             if(!sourceDOM || !targetDOM || arrowImgUrl === '') return;
+            if(arrowHitAudioUrl) playSound(arrowHitAudioUrl);
+            
             const sRect = sourceDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
             const arrow = document.createElement('div'); arrow.className = 'arrow-fx';
             const startX = sRect.left + sRect.width/2; const startY = sRect.top + sRect.height/2;
