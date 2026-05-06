@@ -1,4 +1,4 @@
-Test 1.9
+Test 2.0
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,27 +39,39 @@ Test 1.9
         #game-header { width: 100%; height: 50px; padding: 0 20px; background: rgba(0,0,0,0.9); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; color: var(--gold); font-weight: bold; flex-shrink: 0; z-index: 50;}
         #mana-display { color: var(--mana-color); font-size: 1.2rem; }
         
-        /* --- Master Layout Grid --- */
+        /* --- Master Layout Grid (Arena Stone Texture) --- */
         #game-area { 
             display: none; flex-direction: row; justify-content: space-between; align-items: stretch;
             width: 100vw; height: calc(100vh - 50px); padding: 10px 15px; box-sizing: border-box; 
-            background: #16161d; overflow: hidden; gap: 15px;
+            overflow: hidden; gap: 15px;
+            /* New Basalt Arena Style */
+            background: radial-gradient(circle at center, #1a1a24 0%, #0d0d12 100%);
+            border-top: 2px solid #333;
         }
 
         .side-panel { width: 320px; display: flex; flex-direction: column; gap: 10px; height: 100%; flex-shrink: 0; }
         .center-panel { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; overflow: hidden; position: relative;}
 
-        /* --- LEFT PANEL --- */
-        #card-inspector { flex-grow: 1; background: rgba(17, 17, 17, 0.95); border: 1px solid var(--gold); border-radius: 8px; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        /* --- LEFT PANEL & RIGHT PANEL Backgrounds (Forged Iron / Dark Slab) --- */
+        #card-inspector, #event-log {
+            flex-grow: 1; border-radius: 8px; padding: 15px; box-sizing: border-box; 
+            display: flex; flex-direction: column; overflow-y: auto;
+            /* New Forged Iron Slab Style */
+            background: linear-gradient(135deg, #1a1a24 0%, #111117 100%);
+            border: 2px solid var(--gold);
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.9), 0 10px 20px rgba(0,0,0,0.5);
+        }
+        
         #inspect-content { height: 100%; padding-right: 5px; }
-        #inspect-content::-webkit-scrollbar { width: 5px; } #inspect-content::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 5px;}
+        #inspect-content::-webkit-scrollbar, #event-log::-webkit-scrollbar { width: 5px; } 
+        #inspect-content::-webkit-scrollbar-thumb, #event-log::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 5px;}
         
         #hand-container { height: 230px; background: rgba(0,0,0,0.85); padding: 10px; border: 2px solid #333; border-radius: 12px; display: flex; align-items: center; gap: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); flex-shrink: 0; }
         #hand { display: flex; gap: 8px; flex-grow: 1; overflow-x: hidden; scroll-behavior: smooth; padding: 5px; }
         .scroll-btn { background: #222; color: var(--gold); border: 1px solid #444; border-radius: 5px; font-size: 1.2rem; cursor: pointer; padding: 5px; height: 100%; display: flex; align-items: center; transition: 0.2s; }
         .scroll-btn:hover { background: #444; border-color: var(--gold); }
 
-        /* --- RIGHT PANEL --- */
+        /* --- RIGHT PANEL BUTTONS --- */
         .btn-main { width: 100%; padding: 12px; border: none; font-weight: bold; font-size: 1rem; cursor: pointer; border-radius: 4px; flex-shrink: 0; font-family: 'Cinzel'; transition: 0.2s;}
         .btn-main:hover { transform: scale(1.02); }
         .btn-main:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); transform: none; }
@@ -67,8 +79,7 @@ Test 1.9
         #exec-btn { background: #2ecc71; color: #111; }
         #end-turn-btn { background: var(--gold); color: #111; }
         
-        #event-log { flex-grow: 1; background: rgba(10, 10, 15, 0.95); border: 1px solid #333; border-radius: 6px; padding: 10px; overflow-y: auto; font-family: monospace; font-size: 0.75rem; box-sizing: border-box; }
-        #event-log::-webkit-scrollbar { width: 5px; } #event-log::-webkit-scrollbar-thumb { background: #444; border-radius: 5px;}
+        #event-log { font-family: 'Courier New', monospace; font-size: 0.75rem; }
 
         /* --- CENTER PANEL --- */
         #turn-banner { background: rgba(0,0,0,0.8); border: 2px solid var(--gold); padding: 4px 30px; font-size: 0.9rem; border-radius: 20px; margin-bottom: 5px; flex-shrink: 0;}
@@ -173,18 +184,37 @@ Test 1.9
         .flip-reveal { animation: flipIn 0.6s ease-out forwards; }
         @keyframes flipIn { 0% { transform: perspective(400px) rotateY(90deg); opacity: 0; } 100% { transform: perspective(400px) rotateY(0deg); opacity: 1; } }
 
-        /* --- Inspector Info --- */
+        /* --- Inspector Info (Bronze Filigree/Stone Updates) --- */
         .inspect-h { color: var(--gold); margin: 0 0 5px 0; font-family: 'Cinzel'; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px;}
         .inspect-sub { font-size: 0.65rem; color: #888; margin-bottom: 10px; text-transform: uppercase;}
-        .inspect-art { width: 100%; aspect-ratio: 2.5 / 3.5; max-height: 380px; object-fit: contain; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 10px; background: transparent; display: block;}
+        
+        .inspect-art { 
+            width: 100%; aspect-ratio: 2.5 / 3.5; max-height: 380px; object-fit: contain; 
+            border-radius: 6px; margin-bottom: 10px; display: block;
+            /* New Bronze Frame Style */
+            border: 2px solid rgba(212, 175, 55, 0.5); 
+            background: #000; 
+        }
+        
         .inspect-stat { font-size: 0.75rem; margin: 2px 0; }
         .inspect-section { margin-top: 10px; border-top: 1px solid #333; padding-top: 8px; }
-        .skill-btn { width: 100%; background: #222; color: white; border: 1px solid #444; padding: 6px; margin-top: 5px; cursor: pointer; text-align: left; transition: 0.2s; border-radius: 4px;}
-        .skill-btn:hover { border-color: var(--gold); background: #333; }
-        .skill-btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: #444 !important; }
+        
+        /* New Engraved Stone Plaque Buttons */
+        .skill-btn { 
+            width: 100%; color: white; padding: 6px; margin-top: 5px; cursor: pointer; text-align: left; transition: 0.2s; border-radius: 4px; font-family: 'Cinzel';
+            background: linear-gradient(to bottom, #2a2a35, #1a1a24);
+            border: 1px solid #444; border-bottom: 3px solid #111; 
+        }
+        .skill-btn:hover { 
+            border-color: var(--gold); 
+            background: linear-gradient(to bottom, #2c343f, #1e222a);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+        .skill-btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: #444 !important; box-shadow: none;}
+        
         .skill-name { color: var(--gold); font-weight: bold; font-size: 0.75rem;}
         .skill-cost { color: var(--mana-color); font-size: 0.65rem; float: right;}
-        .skill-desc { font-size: 0.65rem; color: #ccc; margin-top: 3px; display: block;}
+        .skill-desc { font-size: 0.65rem; color: #ccc; margin-top: 3px; display: block; font-family: sans-serif;}
         .empty-inspector { text-align: center; color: #666; margin-top: 50%; font-style: italic; font-size: 0.9rem;}
     </style></head><body>
 
@@ -269,7 +299,7 @@ Test 1.9
         // URL encoded %20 handles spaces, %27 handles the apostrophe seamlessly.
         // ============================================================================
         const ASSET_LINKS = {
-            "KIN-RYU": "./assets/Kin-Ryu.png",
+            "KIN-RYU": "./assets/Kin-Ryu.png", // Updated to .png per instructions
             "Shadow Stalker": "./assets/Shadow%20Stalker.png",
             "Lionel Guard Tower": "./assets/Lionel%20Guard%20Tower.png",
             "Rolyn": "./assets/King%20Rolyn.png",
@@ -405,7 +435,6 @@ Test 1.9
             document.getElementById('upload-box').style.display = 'none';
             document.getElementById('absorbing-text').style.display = 'block';
 
-            // Start music immediately after user interaction grants audio permissions
             if(menuMusicUrl && !menuAudioEl) {
                 menuAudioEl = new Audio(menuMusicUrl);
                 menuAudioEl.loop = true;
@@ -437,7 +466,7 @@ Test 1.9
                     shurikenImgUrl = cardData.img;
                     document.documentElement.style.setProperty('--shuriken-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
                 } else if (cardData.isAudio || cardData.isMenuBG) {
-                    // Handled inside getCardTemplate side-effects or CSS directly
+                    // Handled inside getCardTemplate
                 } else if (cardData.isPlayable) {
                     cardLibrary.push({...cardData}); 
                 }
@@ -463,7 +492,6 @@ Test 1.9
             document.getElementById('exec-btn').innerText = `EXECUTE PENDING (${pQueue.length})`;
             document.getElementById('exec-btn').disabled = isExecuting || pQueue.length === 0;
             
-            // --- FIX A: Cancel button is visible during targeting ---
             document.getElementById('cancel-btn').style.display = (pQueue.length > 0 || isTargeting) ? "block" : "none";
             document.getElementById('cancel-btn').disabled = isExecuting || (pQueue.length === 0 && !isTargeting);
             
@@ -474,7 +502,6 @@ Test 1.9
                 const data = cardInstances[c.id];
                 if (!data) return;
                 
-                // Clear dynamic badges
                 c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield').forEach(el => el.remove());
 
                 if(data.turnPlaced === turnCount) {
@@ -486,7 +513,7 @@ Test 1.9
                 if(data.shield && data.shield > 0 && data.shieldTurns >= turnCount) {
                     const sh = document.createElement('div'); sh.className = 'badge-shield'; sh.innerText = '🛡 ' + data.shield; c.appendChild(sh);
                 } else {
-                    data.shield = 0; // Shield expired
+                    data.shield = 0; 
                 }
 
                 if(data.queued) c.classList.add('queued-status'); else c.classList.remove('queued-status');
@@ -525,6 +552,7 @@ Test 1.9
                 setTimeout(() => {
                     const data = JSON.parse(JSON.stringify(cardLibrary[Math.floor(Math.random() * cardLibrary.length)]));
                     const cardId = 'card_' + Math.random().toString(36).substr(2, 9);
+                    
                     // ADDED actionsLeft tracker initialized to 1
                     cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: sideTarget, turnPlaced: 0, tauntedBy: null, actionsLeft: 1 };
 
@@ -579,7 +607,6 @@ Test 1.9
             c.innerHTML = html;
 
             c.addEventListener('dragstart', (e) => {
-                // UI Drag Lock when Targeting
                 if(currentTurn !== 'PLAYER' || isExecuting || isTargeting) return e.preventDefault();
                 if(data.exhausted || data.queued) return e.preventDefault();
                 e.dataTransfer.setData('text', id);
@@ -1363,10 +1390,10 @@ Test 1.9
                                     data.actionsLeft--;
                                     if(data.actionsLeft <= 0) data.queued = true;
                                 } else {
-                                    break; // Prevent loop lock if no target
+                                    break; 
                                 }
                             } else {
-                                break; // OOM
+                                break; 
                             }
                         } else {
                             break; 
