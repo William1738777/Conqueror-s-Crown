@@ -1,4 +1,4 @@
-Test 1.2
+Test 1.3
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,6 +12,7 @@ Test 1.2
             --slash-url: none;
             --arrow-url: none;
             --shuriken-url: none;
+            --healfx-url: none;
         }
 
         body {
@@ -150,19 +151,14 @@ Test 1.2
         }
         .shimmer-fx { animation: shimmer 1s ease-in-out; }
 
-        /* NEW: Green Sparkle Effect for Heals */
-        @keyframes healSparkle {
-            0% { filter: brightness(1) drop-shadow(0 0 0px #2ecc71); }
-            50% { filter: brightness(1.5) drop-shadow(0 0 30px #2ecc71); }
-            100% { filter: brightness(1) drop-shadow(0 0 0px #2ecc71); }
-        }
-        .heal-sparkle-fx { animation: healSparkle 1s ease-in-out forwards; }
-
         .floating-text { position: absolute; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; pointer-events: none; z-index: 1000; animation: floatUp 1.2s forwards ease-out; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.4); opacity: 0; } }
 
         .slash-fx { position: absolute; top: 50%; left: 50%; width: 250%; height: 250%; transform: translate(-50%, -50%); background-image: var(--slash-url); background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 9999; opacity: 0; animation: slashFade 0.6s ease-out forwards; }
         @keyframes slashFade { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.6); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); } }
+
+        .heal-fx { position: absolute; top: 50%; left: 50%; width: 250%; height: 250%; transform: translate(-50%, -50%); background-image: var(--healfx-url); background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 9999; opacity: 0; animation: healFade 0.8s ease-out forwards; }
+        @keyframes healFade { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); } }
         
         .arrow-fx { position: fixed; width: 40px; height: 10px; background-image: var(--arrow-url); background-size: contain; background-repeat: no-repeat; z-index: 9999; pointer-events: none; transition: all 0.3s linear; }
 
@@ -287,6 +283,7 @@ Test 1.2
             "Slash": "./assets/Slash.gif",
             "Arrow_FX": "./assets/Arrow_FX.png",
             "ShurikenKin_FX": "./assets/ShurikenKin_FX.png",
+            "HealFX": "./assets/HealFX.gif",
             "KinSanSound": "./assets/KinSanSound.mp3",
             "BloodSound": "./assets/BloodSound.mp3",
             "MainMenuBG": "./assets/MainMenuBG.jpg",
@@ -359,6 +356,7 @@ Test 1.2
             // FX Checks
             if(cleanName.includes('back_card') || cleanName.includes('back card') || cleanName.includes('crown back')) { return { isCardBack: true, img: dataUrl }; }
             if(cleanName.includes('slash')) { return { isSlash: true, img: dataUrl }; }
+            if(cleanName.includes('healfx')) { return { isHealFx: true, img: dataUrl }; }
             if(cleanName.includes('arrow_fx') || cleanName.includes('arrow fx')) { return { isArrow: true, img: dataUrl }; }
             if(cleanName.includes('shurikenkin_fx') || cleanName.includes('shuriken')) { return { isShuriken: true, img: dataUrl }; }
             if(cleanName.includes('mainmenubg')) { return { isMenuBG: true, img: dataUrl }; }
@@ -433,6 +431,8 @@ Test 1.2
                     document.getElementById('enemy-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
                 } else if (cardData.isSlash) {
                     document.documentElement.style.setProperty('--slash-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
+                } else if (cardData.isHealFx) {
+                    document.documentElement.style.setProperty('--healfx-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
                 } else if (cardData.isArrow) {
                     arrowImgUrl = cardData.img;
                     document.documentElement.style.setProperty('--arrow-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
@@ -590,7 +590,6 @@ Test 1.2
             c.addEventListener('click', () => {
                 if(isExecuting) return;
                 
-                // --- FIX B: Logic Scoping fixed. Validating against 'cardInstances[id]' instead of 'data' ---
                 if(isTargeting) {
                     let validTarget = false;
                     let targetInst = cardInstances[id]; 
@@ -607,7 +606,6 @@ Test 1.2
                         handleTargetSelection(id);
                     } else {
                         addLog("Invalid target. Selection cancelled.", "#e74c3c");
-                        // Simulating a click on the cancel button cleanly clears all targets and states
                         document.getElementById('cancel-btn').click(); 
                     }
                 } else {
@@ -714,6 +712,12 @@ Test 1.2
         document.getElementById('cancel-btn').addEventListener('click', () => {
             if(isExecuting) return;
             pQueue.forEach(a => { if(cardInstances[a.actorId]) cardInstances[a.actorId].queued = false; });
+            
+            // --- CANCEL FIX: Removes the "queued" status from an actor stuck in the pending/targeting state ---
+            if(pendingSkill && cardInstances[pendingSkill.actorId]) {
+                cardInstances[pendingSkill.actorId].queued = false;
+            }
+            
             pQueue = []; isTargeting = false; pendingSkill = null; selectedTargets = [];
             document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'target-buff-glow'));
             addLog("All pending actions cancelled.", "#e74c3c");
@@ -899,6 +903,11 @@ Test 1.2
             if(!targetDOM) return;
             if(bodyShotAudioUrl) playSound(bodyShotAudioUrl);
             const slash = document.createElement('div'); slash.className = 'slash-fx'; targetDOM.appendChild(slash); setTimeout(() => slash.remove(), 600);
+        }
+
+        function triggerHeal(targetDOM) {
+            if(!targetDOM) return;
+            const heal = document.createElement('div'); heal.className = 'heal-fx'; targetDOM.appendChild(heal); setTimeout(() => heal.remove(), 800);
         }
 
         async function shootArrow(sourceDOM, targetDOM) {
@@ -1128,17 +1137,15 @@ Test 1.2
                          let heal = Math.floor(Math.random() * 151) + 150;
                          targetInst.hp = Math.min(targetInst.maxHp || targetInst.hp + heal, targetInst.hp + heal);
                          showFloatingText(targetDOM, `+${heal}`, "#2ecc71", "2.5rem");
-                         
-                         // --- FIX C: Swapped shimmer-fx to the new green heal-sparkle-fx ---
-                         targetDOM.classList.add('heal-sparkle-fx');
-                         
+                         targetDOM.classList.add('shimmer-fx');
+                         triggerHeal(targetDOM); // Added HealFX execution
                          if(healAudioUrl) playSound(healAudioUrl);
                          actor.blessings = (actor.blessings || 0) + 1;
                          targetDOM.querySelector('.badge-hp').innerText = targetInst.hp;
                          addLog(`<b>${actor.name}</b> heals ${targetInst.name} for ${heal}!`, "#2ecc71");
                     }
                     await new Promise(r => setTimeout(r, 1000));
-                    if(targetDOM) targetDOM.classList.remove('heal-sparkle-fx');
+                    if(targetDOM) targetDOM.classList.remove('shimmer-fx');
                 } else if(action.skillName === "Punishment of the Blessed") {
                     actor.blessings = Math.max(0, actor.blessings - 7);
                     let frontTargetId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
