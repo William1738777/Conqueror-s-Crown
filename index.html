@@ -1,4 +1,4 @@
-Test 1.1
+Test 1.2
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -149,6 +149,14 @@ Test 1.1
             100% { filter: brightness(1) drop-shadow(0 0 0px var(--gold)); }
         }
         .shimmer-fx { animation: shimmer 1s ease-in-out; }
+
+        /* NEW: Green Sparkle Effect for Heals */
+        @keyframes healSparkle {
+            0% { filter: brightness(1) drop-shadow(0 0 0px #2ecc71); }
+            50% { filter: brightness(1.5) drop-shadow(0 0 30px #2ecc71); }
+            100% { filter: brightness(1) drop-shadow(0 0 0px #2ecc71); }
+        }
+        .heal-sparkle-fx { animation: healSparkle 1s ease-in-out forwards; }
 
         .floating-text { position: absolute; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; pointer-events: none; z-index: 1000; animation: floatUp 1.2s forwards ease-out; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.4); opacity: 0; } }
@@ -1120,14 +1128,17 @@ Test 1.1
                          let heal = Math.floor(Math.random() * 151) + 150;
                          targetInst.hp = Math.min(targetInst.maxHp || targetInst.hp + heal, targetInst.hp + heal);
                          showFloatingText(targetDOM, `+${heal}`, "#2ecc71", "2.5rem");
-                         targetDOM.classList.add('shimmer-fx');
+                         
+                         // --- FIX C: Swapped shimmer-fx to the new green heal-sparkle-fx ---
+                         targetDOM.classList.add('heal-sparkle-fx');
+                         
                          if(healAudioUrl) playSound(healAudioUrl);
                          actor.blessings = (actor.blessings || 0) + 1;
                          targetDOM.querySelector('.badge-hp').innerText = targetInst.hp;
                          addLog(`<b>${actor.name}</b> heals ${targetInst.name} for ${heal}!`, "#2ecc71");
                     }
                     await new Promise(r => setTimeout(r, 1000));
-                    if(targetDOM) targetDOM.classList.remove('shimmer-fx');
+                    if(targetDOM) targetDOM.classList.remove('heal-sparkle-fx');
                 } else if(action.skillName === "Punishment of the Blessed") {
                     actor.blessings = Math.max(0, actor.blessings - 7);
                     let frontTargetId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
