@@ -457,10 +457,9 @@
             document.getElementById('exec-btn').innerText = `EXECUTE PENDING (${pQueue.length})`;
             document.getElementById('exec-btn').disabled = isExecuting || pQueue.length === 0;
             
-            // --- FIX A: Cancel button is visible during targeting ---
             document.getElementById('cancel-btn').style.display = (pQueue.length > 0 || isTargeting) ? "block" : "none";
-            
             document.getElementById('cancel-btn').disabled = isExecuting || (pQueue.length === 0 && !isTargeting);
+            
             document.getElementById('end-turn-btn').disabled = isExecuting;
             document.getElementById('draw-cards-btn').disabled = isExecuting;
             
@@ -580,7 +579,6 @@
             c.addEventListener('click', () => {
                 if(isExecuting) return;
                 
-                // --- FIX B: Added logic to reset targeting state if an invalid target is clicked ---
                 if(isTargeting) {
                     let validTarget = false;
                     
@@ -596,7 +594,6 @@
                         handleTargetSelection(id);
                     } else {
                         addLog("Invalid target. Selection cancelled.", "#e74c3c");
-                        // Simulating a click on the cancel button cleanly clears all targets and states
                         document.getElementById('cancel-btn').click(); 
                     }
                 } else {
