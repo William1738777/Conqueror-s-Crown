@@ -457,6 +457,7 @@
             document.getElementById('exec-btn').innerText = `EXECUTE PENDING (${pQueue.length})`;
             document.getElementById('exec-btn').disabled = isExecuting || pQueue.length === 0;
             
+            // --- FIX A: Cancel button is visible during targeting ---
             document.getElementById('cancel-btn').style.display = (pQueue.length > 0 || isTargeting) ? "block" : "none";
             document.getElementById('cancel-btn').disabled = isExecuting || (pQueue.length === 0 && !isTargeting);
             
@@ -576,24 +577,28 @@
                 if(data.exhausted || data.queued) return e.preventDefault();
                 e.dataTransfer.setData('text', id);
             });
+            
             c.addEventListener('click', () => {
                 if(isExecuting) return;
                 
+                // --- FIX B: Logic Scoping fixed. Validating against 'cardInstances[id]' instead of 'data' ---
                 if(isTargeting) {
                     let validTarget = false;
+                    let targetInst = cardInstances[id]; 
                     
                     if(pendingSkill.skillName === "Blessing of the Light" || pendingSkill.skillName === "Double Action") {
-                        if(data.side === currentTurn && data.type === 'unit') validTarget = true;
+                        if(targetInst.side === currentTurn && targetInst.type === 'unit') validTarget = true;
                     } else if(pendingSkill.skillName === "Punishment of the Blessed") {
-                        if(data.side !== currentTurn && c.parentElement.classList.contains('frontline')) validTarget = true;
+                        if(targetInst.side !== currentTurn && c.parentElement.classList.contains('frontline')) validTarget = true;
                     } else {
-                        if(data.side !== currentTurn) validTarget = true;
+                        if(targetInst.side !== currentTurn) validTarget = true;
                     }
                     
                     if (validTarget) {
                         handleTargetSelection(id);
                     } else {
                         addLog("Invalid target. Selection cancelled.", "#e74c3c");
+                        // Simulating a click on the cancel button cleanly clears all targets and states
                         document.getElementById('cancel-btn').click(); 
                     }
                 } else {
