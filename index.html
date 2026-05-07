@@ -1,4 +1,4 @@
-Test 2.9
+Test 3.0
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -520,8 +520,8 @@ Test 2.9
                 }
                 if(data.chamberedRounds > 0) {
                     const cr = document.createElement('div'); cr.className = 'badge-chambered';
-                    cr.style.cssText = "position:absolute; top:20px; right:-5px; background:#e67e22; color:#111; border-radius:50%; width:24px; height:24px; display:flex; justify-content:center; align-items:center; font-size:0.75rem; font-weight:bold; border:1px solid #111; z-index:26; box-shadow:0 0 10px #e67e22;";
-                    cr.innerText = '🔫' + data.chamberedRounds; c.appendChild(cr);
+                    cr.style.cssText = "position:absolute; top:20px; right:-5px; background:#e74c3c; color:white; border-radius:50%; width:24px; height:24px; display:flex; justify-content:center; align-items:center; font-size:0.8rem; font-weight:bold; border:1px solid #111; z-index:26; box-shadow:0 0 10px #e74c3c;";
+                    cr.innerText = data.chamberedRounds; c.appendChild(cr);
                 }
                 if(data.shield && data.shield > 0 && data.shieldTurns >= turnCount) {
                     const sh = document.createElement('div'); sh.className = 'badge-shield'; sh.innerText = '🛡 ' + data.shield; c.appendChild(sh);
@@ -638,6 +638,7 @@ Test 2.9
                     } else if(pendingSkill.skillName === "Punishment of the Blessed") {
                         if(targetInst.side !== currentTurn && c.parentElement.classList.contains('frontline')) validTarget = true;
                     } else if(pendingSkill.skillName === "Sniping Shot") {
+                        // Sniping Shot bypasses frontline, any enemy is valid
                         if(targetInst.side !== currentTurn) validTarget = true;
                     } else {
                         if(targetInst.side !== currentTurn) {
@@ -732,7 +733,9 @@ Test 2.9
                             let costMet = pMana >= skill.manaCost;
                             let meetsCondition = true;
                             if(skill.requiresBlessings) meetsCondition = (data.blessings >= skill.requiresBlessings);
-                            if(skillName === "Trigger Unbound" && (!data.chamberedRounds || data.chamberedRounds === 0)) meetsCondition = false;
+                            
+                            // FIX APPLIED HERE (skillName -> skill.name)
+                            if(skill.name === "Trigger Unbound" && (!data.chamberedRounds || data.chamberedRounds === 0)) meetsCondition = false;
 
                             html += `<button class="skill-btn" ${canAct && costMet && meetsCondition ? '' : 'disabled'} onclick="queueAction('${id}', '${safeSkillName}', ${skill.manaCost}, false)">
                                 <span class="skill-name">[${skill.name}]</span><span class="skill-cost">${skill.manaCost} MP</span><span class="skill-desc">${skill.desc}</span>
@@ -946,7 +949,6 @@ Test 2.9
             else if (skillName === "Sniping Shot") {
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
                 targetCountReq = 1;
-                actor.queued = true; 
                 let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
                 addLog("Select ANY Enemy target...", "var(--gold)");
                 // Bypasses protection
