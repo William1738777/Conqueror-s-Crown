@@ -1,4 +1,4 @@
-Test 3.5
+Test 3.6
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +7,7 @@ Test 3.5
     <title>Conqueror's Crown - TCG</title>
     <style>
         :root {
-            --bg-color: #0d0d12; --board-color: #1a1a24; --gold: #d4af37;
+            --bg-color: #0d0d12; --gold: #d4af37;
             --mana-color: #3498db; --hp-color: #2ecc71; --card-unit: #232931;
             --slash-url: none;
             --arrow-url: none;
@@ -123,6 +123,7 @@ Test 3.5
         .badge-shield { position: absolute; bottom: 28px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
         .badge-taunted { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #e74c3c); }
         .badge-barrier { position: absolute; top: -8px; right: 15px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #3498db); }
+        .badge-block { background: #888 !important; box-shadow: 0 0 10px #888; }
 
         /* JADEN MECHANICS CSS */
         @keyframes pulse-lock {
@@ -282,6 +283,7 @@ Test 3.5
             "Rolyn": "./assets/King%20Rolyn.png",
             "Althea": "./assets/Althea.png",
             "Jaden": "./assets/Jaden.png",
+            "Skeleton Warrior": "./assets/Skeleton%20Warrior.png",
             "JadenLock": "./assets/JadenLock.png",
             "JadenBullet": "./assets/JadenBullet.gif",
             "JadenSFX1": "./assets/JadenSFX1.mp3",
@@ -303,6 +305,7 @@ Test 3.5
             "HealSound": "./assets/Heal.mp3",
             "KinSFX1": "./assets/KinSFX1.mp3",
             "KinSFX2": "./assets/KinSFX2.mp3",
+            "ShieldBlockSkel": "./assets/ShieldBlockSkel.mp3",
             "Taunted": "./assets/Taunted.png",
             "Barrier": "./assets/Barrier.png",
             "RolynSFX1": "./assets/RolynSFX1.mp3",
@@ -337,6 +340,7 @@ Test 3.5
         let jadenSfx3 = '';
         let rolynSfx1Url = '';
         let rolynSfx2Url = '';
+        let shieldBlockAudioUrl = '';
         let tauntedImgUrl = '';
         let barrierImgUrl = '';
         
@@ -392,6 +396,7 @@ Test 3.5
             if(cleanName.includes('jadensfx3')) { jadenSfx3 = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('rolynsfx1')) { rolynSfx1Url = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('rolynsfx2')) { rolynSfx2Url = dataUrl; return { isAudio: true }; }
+            if(cleanName.includes('shieldblockskel')) { shieldBlockAudioUrl = dataUrl; return { isAudio: true }; }
 
             if(cleanName.includes('back_card') || cleanName.includes('back card') || cleanName.includes('crown back')) { return { isCardBack: true, img: dataUrl }; }
             if(cleanName.includes('slash')) { return { isSlash: true, img: dataUrl }; }
@@ -406,23 +411,27 @@ Test 3.5
             if (cleanName.includes('ability') || cleanName.includes('skill') || cleanName.includes('spell') || cleanName.includes('magic') || cleanName.includes('mana core') || cleanName.includes('one more time')) type = 'ability';
 
             if(cleanName.includes('kin-ryu') || cleanName.includes('kin ryu')) {
-                return { isPlayable: true, type: 'unit', name: "KIN-RYU", title: "YAMI NO SHINOBI (Level 7)", powerLevel: 7, summonCost: 5, faction: "Arashi", race: "Human", hp: 1200, maxHp: 1200, atk: 400, img: dataUrl, marks: 0, queued: false, extraAction: false,
+                return { isPlayable: true, type: 'unit', name: "KIN-RYU", title: "YAMI NO SHINOBI (Level 7)", powerLevel: 7, summonCost: 5, faction: "Arashi", race: "Human", hp: 1200, maxHp: 1200, atk: 400, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
                     skills: [{ name: "ICHI", manaCost: 1, desc: "Cuts target. 300-1100 DMG. If <500, rerolls." }, { name: "NI", manaCost: 2, desc: "Hits 2 targets for 300-400 damage each." }], passives: [{ name: "SHADOW STANCE", desc: "Shinobi Marks make targets take +18% DMG." }, { name: "SAN", desc: "Auto-chains shurikens upon kill." }] };
             }
             else if(cleanName.includes('shadow stalker')) {
-                return { isPlayable: true, type: 'unit', name: "Shadow Stalker", title: "Level 3", powerLevel: 3, summonCost: 1, faction: "Arashi", race: "Human", hp: 800, maxHp: 800, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false,
+                return { isPlayable: true, type: 'unit', name: "Shadow Stalker", title: "Level 3", powerLevel: 3, summonCost: 1, faction: "Arashi", race: "Human", hp: 800, maxHp: 800, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
                     skills: [{ name: "SHADOW STAR", manaCost: 0, desc: "Throws a Shuriken inflicting 150 damage." }, { name: "BLADE STRIKE", manaCost: 1, desc: "Lunges forward to inflict 225 damage." }], passives: [{ name: "SHADOW SYNC", desc: "Mimics other stalkers." }] };
             }
+            else if(cleanName.includes('skeleton warrior')) {
+                return { isPlayable: true, type: 'unit', name: "Skeleton Warrior", title: "Wandering Swordsman", powerLevel: 1, summonCost: 0, faction: "Council of Darkness", race: "Undead", hp: 500, maxHp: 500, atk: 100, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
+                    skills: [{ name: "SLASH", manaCost: 0, desc: "Inflicts damage rolling from 50-150." }, { name: "BLOCK", manaCost: 0, desc: "Blocks the first attack cast on this unit during the enemy turn." }], passives: [{ name: "UNDEAD PRESENCE", desc: "Every time this unit is alive on the field, it generates 1 energy for the user." }] };
+            }
             else if(cleanName.includes('lionel guard') || cleanName.includes('guard tower')) {
-                return { isPlayable: true, type: 'unit', name: "Lionel Guard Tower", title: "Structure", powerLevel: 5, summonCost: 4, faction: "Leonia", race: "Structure", hp: 2000, maxHp: 2000, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false,
+                return { isPlayable: true, type: 'unit', name: "Lionel Guard Tower", title: "Structure", powerLevel: 5, summonCost: 4, faction: "Leonia", race: "Structure", hp: 2000, maxHp: 2000, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
                     skills: [], passives: [{ name: "Guard Tower", desc: "Retaliates on allied attack (200 DMG)." }, { name: "Attack Tower", desc: "Assists allied attacks (100 DMG)." }, { name: "Structure Info", desc: "Passive rely." }] };
             }
             else if(cleanName.includes('rolyn')) {
-                return { isPlayable: true, type: 'unit', name: "Rolyn", title: "King of Leonia", powerLevel: 7, summonCost: 6, faction: "Leonia", race: "Human", hp: 3000, maxHp: 3000, atk: 300, img: dataUrl, marks: 0, queued: false, extraAction: false,
+                return { isPlayable: true, type: 'unit', name: "Rolyn", title: "King of Leonia", powerLevel: 7, summonCost: 6, faction: "Leonia", race: "Human", hp: 3000, maxHp: 3000, atk: 300, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
                     skills: [{ name: "Lion's Challenge", manaCost: 2, desc: "Slash the target enemy card to taunt them for 1 turn. Deals 250 damage." }, { name: "Lion's Roar", manaCost: 4, desc: "Target up to 3 enemy units and taunt them for 2 turns." }], passives: [{ name: "Dauntless", desc: "Counterattack taunted units (300-500 DMG). Heals for 50% of damage dealt." }] };
             }
             else if(cleanName.includes('althea')) {
-                return { isPlayable: true, type: 'unit', name: "Althea", title: "Guardian Deity (Level 7)", powerLevel: 7, summonCost: 4, faction: "Neutral", race: "Deity", hp: 1000, maxHp: 1000, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blessings: 0,
+                return { isPlayable: true, type: 'unit', name: "Althea", title: "Guardian Deity (Level 7)", powerLevel: 7, summonCost: 4, faction: "Neutral", race: "Deity", hp: 1000, maxHp: 1000, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, blessings: 0,
                     skills: [
                         { name: "Blessing of the Light", manaCost: 1, desc: "Heal target ally for 150-300. Gains +1 Blessing." },
                         { name: "Shield of Hope", manaCost: 3, desc: "Shields frontline allies for 500 DMG (2 turns). +1 Blessing per ally." },
@@ -430,7 +439,7 @@ Test 3.5
                     ], passives: [] };
             }
             else if(cleanName.includes('jaden')) {
-                return { isPlayable: true, type: 'unit', name: "Jaden", title: "The Crown’s Enforcer", powerLevel: 6, summonCost: 4, faction: "Leonia", race: "Human", hp: 1000, maxHp: 1000, atk: 250, img: dataUrl, marks: 0, queued: false, extraAction: false, chamberedRounds: 0,
+                return { isPlayable: true, type: 'unit', name: "Jaden", title: "The Crown’s Enforcer", powerLevel: 6, summonCost: 4, faction: "Leonia", race: "Human", hp: 1000, maxHp: 1000, atk: 250, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, chamberedRounds: 0,
                     skills: [
                         { name: "Sniping Shot", manaCost: 2, desc: "Deals 500-800 DMG. Bypasses frontlines. (+1 Chambered Round)" },
                         { name: "Double-Shot", manaCost: 2, desc: "Shoots twice (300-500 DMG per shot). (+2 Chambered Rounds)" },
@@ -447,7 +456,7 @@ Test 3.5
             }
             else {
                 let defaultHp = type==='ability'? 0 : 500;
-                return { isPlayable: true, type: type, name: name, title: type === 'ability' ? "Spell Card" : "Basic Unit", powerLevel: type==='ability'? 0 : 1, summonCost: 1, faction: "Unknown", race: "Unknown", hp: defaultHp, maxHp: defaultHp, atk: type==='ability'? 0 : 150, img: dataUrl, marks: 0, queued: false, extraAction: false,
+                return { isPlayable: true, type: type, name: name, title: type === 'ability' ? "Spell Card" : "Basic Unit", powerLevel: type==='ability'? 0 : 1, summonCost: 1, faction: "Unknown", race: "Unknown", hp: defaultHp, maxHp: defaultHp, atk: type==='ability'? 0 : 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
                     skills: type === 'ability' ? [{ name: "CAST SPELL", manaCost: 1, desc: "Activate ability effect." }] : [{ name: "ATTACK", manaCost: 1, desc: "Basic attack for 100 damage." }], passives: [] };
             }
         }
@@ -527,7 +536,7 @@ Test 3.5
                 const data = cardInstances[c.id];
                 if (!data) return;
                 
-                c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier').forEach(el => el.remove());
+                c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier, .badge-block').forEach(el => el.remove());
 
                 if(data.turnPlaced === turnCount) {
                     const b = document.createElement('div'); b.className = 'placed-badge'; b.innerText = '{PLACED}'; c.appendChild(b);
@@ -561,6 +570,10 @@ Test 3.5
                     }
                 } else {
                     data.shield = 0; 
+                }
+
+                if(data.blockActive) {
+                    const blk = document.createElement('div'); blk.className = 'placed-badge badge-block'; blk.innerText = '{BLOCK}'; blk.style.background = '#888'; c.appendChild(blk);
                 }
 
                 if(data.queued) c.classList.add('queued-status'); else c.classList.remove('queued-status');
@@ -1007,7 +1020,7 @@ Test 3.5
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'ALLIES_FRONT' };
                 pQueue.push(action); addLog(`Queued [${skillName}] on Frontline.`, "#3498db"); systemDetector("QUEUE", { action });
             }
-            else if (skillName === "Mana Initiation" || actor.type === 'ability') {
+            else if (skillName === "Mana Initiation" || skillName === "BLOCK" || actor.type === 'ability') {
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
                 pQueue.push(action); addLog(`Queued [${skillName}].`, "#aaa"); systemDetector("QUEUE", { action });
             } 
@@ -1225,10 +1238,21 @@ Test 3.5
             let targetInst = cardInstances[targetId]; let actorDOM = document.getElementById(actor.id);
             
             let isKinRyu = actor.name === "KIN-RYU"; 
-            let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK");
+            let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK") || (actor.name === "Skeleton Warrior" && skillName === "SLASH");
             let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
-            if(actorDOM && skillName !== "Passive" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && skillName !== "Lion's Roar" && skillName !== "Dauntless") {
+            // BLOCK INTERCEPTION logic
+            if (targetInst && targetInst.blockActive && targetId !== 'CORE') {
+                targetInst.blockActive = false;
+                dmg = 0;
+                if (targetDOM) {
+                    showFloatingText(targetDOM, `BLOCKED`, "#ccc", "2.5rem");
+                    if (shieldBlockAudioUrl) playSound(shieldBlockAudioUrl);
+                }
+                addLog(`<b>${targetInst.name}</b> BLOCKED the attack!`, '#ccc');
+            }
+
+            if(actorDOM && skillName !== "Passive" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && skillName !== "Lion's Roar" && skillName !== "Dauntless" && skillName !== "BLOCK") {
                 if (actor.name === "Rolyn" && (skillName === "Lion's Challenge" || skillName === "ATTACK")) {
                     if(rolynSfx1Url) playSound(rolynSfx1Url);
                 }
@@ -1240,21 +1264,23 @@ Test 3.5
                 actorDOM.style.transition = "transform 0.2s ease-in"; actorDOM.style.transform = "translate(0px, 0px) scale(1)"; await new Promise(r => setTimeout(r, 250));
             }
 
-            if(actorDOM && actor.type === 'unit' && targetDOM && actor.name !== "Lionel Guard Tower" && actor.name !== "Jaden" && skillName !== "SAN" && !skillName.includes("Punishment") && skillName !== "Lion's Roar") {
+            if(actorDOM && actor.type === 'unit' && targetDOM && actor.name !== "Lionel Guard Tower" && actor.name !== "Jaden" && skillName !== "SAN" && !skillName.includes("Punishment") && skillName !== "Lion's Roar" && skillName !== "BLOCK") {
                 const aRect2 = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
                 const dX = (tRect.left + tRect.width/2) - (aRect2.left + aRect2.width/2); const dY = (tRect.top + tRect.height/2) - (aRect2.top + aRect2.height/2);
                 actorDOM.style.transition = "transform 0.15s cubic-bezier(0.4, 0, 1, 1)"; actorDOM.style.transform = `translate(${dX * 0.5}px, ${dY * 0.5}px) scale(1.3)`;
                 await new Promise(r => setTimeout(r, 150));
             }
 
-            if(targetDOM && skillName !== "SAN" && skillName !== "Lion's Roar") {
-                if(isSlash) {
+            if(targetDOM && skillName !== "SAN" && skillName !== "Lion's Roar" && skillName !== "BLOCK") {
+                if(isSlash && dmg > 0) {
                     let muteBS = false;
                     if (actor.name === "Rolyn" && (skillName === "Lion's Challenge" || skillName === "Dauntless" || skillName === "ATTACK")) muteBS = true;
                     triggerSlash(targetDOM, muteBS); 
                 }
-                targetDOM.classList.remove("shake-anim"); void targetDOM.offsetWidth;
-                targetDOM.classList.add("shake-anim"); 
+                if (dmg > 0) {
+                    targetDOM.classList.remove("shake-anim"); void targetDOM.offsetWidth;
+                    targetDOM.classList.add("shake-anim"); 
+                }
             }
             
             let died = false;
@@ -1263,7 +1289,7 @@ Test 3.5
                 if(actor.side === 'PLAYER') { eCoreHP = Math.max(0, eCoreHP - dmg); addLog(`<b>${actor.name}</b> strikes ENEMY CORE for ${dmg}!`, '#ff4d4d'); if(eCoreHP<=0) died=true; } 
                 else { pCoreHP = Math.max(0, pCoreHP - dmg); addLog(`ENEMY <b>${actor.name}</b> strikes YOUR CORE for ${dmg}!`, '#ff4d4d'); if(pCoreHP<=0) died=true; }
             } else if (targetInst) {
-                if(targetInst.shield && targetInst.shield > 0 && targetInst.shieldTurns >= turnCount) {
+                if(targetInst.shield && targetInst.shield > 0 && targetInst.shieldTurns >= turnCount && dmg > 0) {
                      if(dmg <= targetInst.shield) {
                           targetInst.shield -= dmg;
                           showFloatingText(targetDOM, `ABSORBED`, "#3498db", "1.5rem");
@@ -1276,7 +1302,7 @@ Test 3.5
                           showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
                           addLog(`${targetInst.name}'s shield absorbed ${absorbed} damage and broke!`, '#3498db');
                      }
-                } else if(skillName !== "SAN" && skillName !== "Lion's Roar") {
+                } else if(skillName !== "SAN" && skillName !== "Lion's Roar" && skillName !== "BLOCK" && dmg > 0) {
                      showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
                 }
 
@@ -1289,7 +1315,7 @@ Test 3.5
             }
 
             await new Promise(r => setTimeout(r, 300)); 
-            if(actorDOM && skillName !== "SAN" && actor.name !== "Jaden" && skillName !== "Lion's Roar") {
+            if(actorDOM && skillName !== "SAN" && actor.name !== "Jaden" && skillName !== "Lion's Roar" && skillName !== "BLOCK") {
                 actorDOM.style.transition = "transform 0.3s ease-out"; actorDOM.style.transform = "scale(1) translate(0, 0)";
                 await new Promise(r => setTimeout(r, 300)); actorDOM.style.zIndex = ""; actorDOM.style.transition = ""; 
             }
@@ -1308,7 +1334,8 @@ Test 3.5
                     if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) {
                         u.queued = true;
                         if (!queueArr.some(a => a.actorId === u.id)) {
-                            queueArr.push({ actorId: u.id, actorName: u.name, side: u.side, skillName: "ATTACK", cost: 0, targetId: u.tauntedBy });
+                            let forcedSkill = (u.skills && u.skills.length > 0) ? u.skills[0].name : "ATTACK";
+                            queueArr.push({ actorId: u.id, actorName: u.name, side: u.side, skillName: forcedSkill, cost: 0, targetId: u.tauntedBy });
                             addLog(`[TAUNTED] ${u.name} is forced to attack!`, "#e74c3c");
                         }
                     } else {
@@ -1318,8 +1345,8 @@ Test 3.5
             }
             
             let q = [...queueArr].sort((a, b) => {
-                let aPrio = (a.skillName === "Double Action" || a.skillName === "Mana Initiation") ? 0 : 1;
-                let bPrio = (b.skillName === "Double Action" || b.skillName === "Mana Initiation") ? 0 : 1;
+                let aPrio = (a.skillName === "Double Action" || a.skillName === "Mana Initiation" || a.skillName === "BLOCK") ? 0 : 1;
+                let bPrio = (b.skillName === "Double Action" || b.skillName === "Mana Initiation" || b.skillName === "BLOCK") ? 0 : 1;
                 return aPrio - bPrio;
             });
             
@@ -1356,6 +1383,15 @@ Test 3.5
                     }
                     if(sideProcessing === 'PLAYER') { pMana += 3; addLog(`<b>${actor.name}</b> grants +3 Mana!`, "var(--mana-color)"); } 
                     else { eMana += 3; addLog(`Enemy <b>${actor.name}</b> grants +3 Mana!`, "var(--mana-color)"); }
+                } else if (action.skillName === "BLOCK") {
+                    actor.blockActive = true;
+                    if(actorDOM) {
+                        actorDOM.style.transition = "transform 0.3s ease"; actorDOM.style.transform = "scale(1.2)";
+                        await new Promise(r => setTimeout(r, 400));
+                        showFloatingText(actorDOM, "BLOCK STANCE", "#ccc", "1.5rem");
+                        actorDOM.style.transform = "scale(1)"; actorDOM.style.transition = "";
+                    }
+                    addLog(`<b>${actor.name}</b> enters Block Stance!`, "#ccc");
                 } else if (action.skillName === "Shield of Hope") {
                     let slots = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${sideProcessing}"]`));
                     let shieldedCount = 0;
@@ -1562,6 +1598,8 @@ Test 3.5
                         } else dmg = actor.atk;
                     } else if (actor.name === "Rolyn") {
                         if (action.skillName === "Lion's Challenge") dmg = 250;
+                    } else if (actor.name === "Skeleton Warrior") {
+                        if (action.skillName === "SLASH") dmg = Math.floor(Math.random() * (150 - 50 + 1)) + 50;
                     }
 
                     let targetsToHit = Array.isArray(action.targetId) ? action.targetId : [action.targetId]; 
@@ -1627,7 +1665,8 @@ Test 3.5
                 let taunterDOM = document.getElementById(u.tauntedBy);
                 if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) {
                     if (!pQueue.some(a => a.actorId === u.id)) {
-                        pQueue.push({ actorId: u.id, actorName: u.name, side: u.side, skillName: "ATTACK", cost: 0, targetId: u.tauntedBy });
+                        let forcedSkill = (u.skills && u.skills.length > 0) ? u.skills[0].name : "ATTACK";
+                        pQueue.push({ actorId: u.id, actorName: u.name, side: u.side, skillName: forcedSkill, cost: 0, targetId: u.tauntedBy });
                         addLog(`[TAUNTED] ${u.name} is forced to attack!`, "#e74c3c");
                     }
                 } else {
@@ -1696,30 +1735,35 @@ Test 3.5
                 let activeEnemyUnits = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card')).map(c => cardInstances[c.id]).filter(d => d.turnPlaced < turnCount && !d.exhausted && d.name !== "Lionel Guard Tower");
                 for(let data of activeEnemyUnits) {
                     if (data.queued) continue; 
-                    if(data.skills.length > 0 || data.type === 'unit') {
-                        let validSkills = data.skills.filter(s => {
-                            if (s.name === "Trigger Unbound" && (data.chamberedRounds || 0) === 0) return false;
-                            if (s.requiresBlessings && (data.blessings || 0) < s.requiresBlessings) return false;
-                            return eMana >= s.manaCost;
-                        });
-                        
-                        let cost = validSkills.length > 0 ? validSkills[0].manaCost : 0;
-                        let canAttack = (validSkills.length > 0 || data.type === 'ability');
+                    
+                    let action = null;
 
-                        if(canAttack && eMana >= cost) {
-                            let pTargetIds = getValidEnemyTargetIds('PLAYER');
-                            let pTargets = pTargetIds.map(id => document.getElementById(id)).filter(el => el);
-                            let isFrontClear = pTargets.length === 0; 
-                            let action = null;
+                    // Taunt Override (Bypasses mana check entirely)
+                    if (data.tauntedBy) {
+                        let taunterDOM = document.getElementById(data.tauntedBy);
+                        if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) { 
+                            let forcedSkill = (data.skills && data.skills.length > 0) ? data.skills[0].name : "ATTACK";
+                            action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: forcedSkill, cost: 0, targetId: data.tauntedBy }; 
+                        } else { data.tauntedBy = null; }
+                    }
 
-                            if (data.tauntedBy) {
-                                let taunterDOM = document.getElementById(data.tauntedBy);
-                                if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) { 
-                                    let forcedSkill = data.skills.length > 0 ? data.skills[0].name : "ATTACK";
-                                    action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: forcedSkill, cost: 0, targetId: data.tauntedBy }; 
-                                } else { data.tauntedBy = null; }
-                            }
-                            if (!action) {
+                    // Standard AI Logic
+                    if (!action) {
+                        if(data.skills.length > 0 || data.type === 'ability') {
+                            let validSkills = data.skills.filter(s => {
+                                if (s.name === "Trigger Unbound" && (data.chamberedRounds || 0) === 0) return false;
+                                if (s.requiresBlessings && (data.blessings || 0) < s.requiresBlessings) return false;
+                                return eMana >= s.manaCost;
+                            });
+                            
+                            let cost = validSkills.length > 0 ? validSkills[0].manaCost : 0;
+                            let canAttack = (validSkills.length > 0 || data.type === 'ability');
+
+                            if(canAttack && eMana >= cost) {
+                                let pTargetIds = getValidEnemyTargetIds('PLAYER');
+                                let pTargets = pTargetIds.map(id => document.getElementById(id)).filter(el => el);
+                                let isFrontClear = pTargets.length === 0; 
+                                
                                 if(data.type === 'ability') { 
                                     action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: data.skills[0].name, cost: cost, targetId: 'SELF' }; 
                                 } 
@@ -1745,17 +1789,18 @@ Test 3.5
                                 else if(isFrontClear && Math.random() > 0.3) { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "ATTACK", cost: 0, targetId: 'CORE' }; } 
                                 else if(pTargets.length > 0 && validSkills.length > 0) { 
                                     let chosenSkill = validSkills[Math.floor(Math.random() * validSkills.length)];
-                                    let target = pTargets[Math.floor(Math.random()*pTargets.length)]; 
-                                    action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: chosenSkill.name, cost: chosenSkill.manaCost, targetId: target.id }; 
+                                    let tId = chosenSkill.name === "BLOCK" ? 'SELF' : pTargets[Math.floor(Math.random()*pTargets.length)].id;
+                                    action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: chosenSkill.name, cost: chosenSkill.manaCost, targetId: tId }; 
                                 }
                             }
-                            if (action) { 
-                                eMana -= action.cost; 
-                                data.queued = true; 
-                                eQueue.push(action); 
-                                systemDetector("QUEUE", { action }); 
-                            }
                         }
+                    }
+
+                    if (action) { 
+                        eMana -= action.cost; 
+                        data.queued = true; 
+                        eQueue.push(action); 
+                        systemDetector("QUEUE", { action }); 
                     }
                 }
                 if(eQueue.length > 0) await processQueue('ENEMY', eQueue);
@@ -1763,13 +1808,30 @@ Test 3.5
 
             turnCount++; currentTurn = 'PLAYER'; isExecuting = false; 
             document.getElementById('turn-banner').innerText = `PLAYER TURN ${turnCount}`; document.getElementById('turn-banner').style.borderColor = "var(--gold)";
-            let manaGain = (turnCount <= 10 ? 2 : turnCount <= 20 ? 3 : turnCount <= 30 ? 4 : 5); pMana += manaGain; eMana += manaGain;
+            
+            // Undead Presence Passive & Block Reset Loop
+            let pSkeletonMana = 0, eSkeletonMana = 0;
             Object.values(cardInstances).forEach(c => { 
-                c.exhausted = false; c.queued = false; c.extraAction = false; 
+                c.exhausted = false; c.queued = false; c.extraAction = false; c.blockActive = false;
                 if(c.tauntedTurn && c.tauntedTurn < turnCount) { c.tauntedBy = null; } 
                 let dDOM = document.getElementById(c.id);
                 if(dDOM) dDOM.classList.remove('buff-double-action');
+
+                if (c.name === "Skeleton Warrior" && c.hp > 0) {
+                    if (dDOM && dDOM.parentElement && dDOM.parentElement.classList.contains('slot')) {
+                        if (c.side === 'PLAYER') pSkeletonMana++;
+                        if (c.side === 'ENEMY') eSkeletonMana++;
+                        showFloatingText(dDOM, "+1 MANA", "var(--mana-color)", "1.5rem");
+                    }
+                }
             }); 
+            
+            let manaGain = (turnCount <= 10 ? 2 : turnCount <= 20 ? 3 : turnCount <= 30 ? 4 : 5); 
+            pMana += manaGain + pSkeletonMana; eMana += manaGain + eSkeletonMana;
+            
+            if (pSkeletonMana > 0) addLog(`<b>Skeleton Warrior</b> generated ${pSkeletonMana} Mana!`, "var(--mana-color)");
+            if (eSkeletonMana > 0) addLog(`Enemy <b>Skeleton Warrior</b> generated ${eSkeletonMana} Mana!`, "var(--mana-color)");
+
             addLog(`--- TURN ${turnCount} START ---`, "var(--gold)"); updateUI(); 
             const drawBtn = document.getElementById('draw-cards-btn'); drawBtn.style.display = "block"; drawBtn.innerText = "DRAW TO 6";
         }
