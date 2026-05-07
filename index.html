@@ -1,4 +1,4 @@
-Test 3.3
+Test 3.4
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -653,7 +653,7 @@ Test 3.3
 
             c.addEventListener('dragstart', (e) => {
                 if(currentTurn !== 'PLAYER' || isExecuting) return e.preventDefault();
-                if(data.exhausted || data.queued) return e.preventDefault();
+                if(data.exhausted || data.queued || data.tauntedBy) return e.preventDefault();
                 e.dataTransfer.setData('text', id);
             });
             
@@ -893,7 +893,6 @@ Test 3.3
                         let counterDmg = Math.floor(Math.random() * 201) + 300;
                         addLog(`<b>System</b> [Dauntless]: Rolyn counter-attacks taunted unit for ${counterDmg} DMG!`, "var(--gold)");
                         if (rolynSfx1Url) playSound(rolynSfx1Url);
-                        triggerSlash(document.getElementById(payload.actor.id), true);
                         await applyDamage(taunter, payload.actor.id, counterDmg, "Dauntless");
                         
                         let healAmt = Math.floor(counterDmg / 2);
@@ -1224,8 +1223,8 @@ Test 3.3
             let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK");
             let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
-            if(actorDOM && skillName !== "Passive" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && skillName !== "Lion's Roar") {
-                if (actor.name === "Rolyn" && (skillName === "Lion's Challenge" || skillName === "Dauntless" || skillName === "ATTACK")) {
+            if(actorDOM && skillName !== "Passive" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && skillName !== "Lion's Roar" && skillName !== "Dauntless") {
+                if (actor.name === "Rolyn" && (skillName === "Lion's Challenge" || skillName === "ATTACK")) {
                     if(rolynSfx1Url) playSound(rolynSfx1Url);
                 }
 
@@ -1610,7 +1609,24 @@ Test 3.3
 
         // --- AI Turn Logic ---
         document.getElementById('end-turn-btn').addEventListener('click', async () => {
-            if (isExecuting) return; if(pQueue.length > 0) await processQueue('PLAYER', pQueue);
+            if (isExecuting) return; 
+            
+            // Inject force execution of taunted player units if the queue is empty upon clicking End Turn
+            let activePlayerUnits = Object.values(cardInstances).filter(c => c.side === 'PLAYER' && c.tauntedBy && c.hp > 0 && c.turnPlaced < turnCount && !c.exhausted);
+            activePlayerUnits.forEach(u => {
+                let taunterDOM = document.getElementById(u.tauntedBy);
+                if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) {
+                    if (!pQueue.some(a => a.actorId === u.id)) {
+                        pQueue.push({ actorId: u.id, actorName: u.name, side: u.side, skillName: "ATTACK", cost: 0, targetId: u.tauntedBy });
+                        addLog(`[TAUNTED] ${u.name} is forced to attack!`, "#e74c3c");
+                    }
+                } else {
+                    u.tauntedBy = null;
+                }
+            });
+
+            if(pQueue.length > 0) await processQueue('PLAYER', pQueue);
+            
             isExecuting = true; updateUI(); 
             currentTurn = 'ENEMY'; document.getElementById('turn-banner').innerText = "OPPONENT TURN"; document.getElementById('turn-banner').style.borderColor = "#e74c3c";
             addLog(`--- ENEMY TURN ${turnCount} ---`, "#e74c3c"); setTimeout(aiTurn, 1000);
@@ -1673,6 +1689,7 @@ Test 3.3
                     if(data.skills.length > 0 || data.type === 'unit') {
                         let validSkills = data.skills.filter(s => {
                             if (s.name === "Trigger Unbound" && (data.chamberedRounds || 0) === 0) return false;
+                            if (s.requiresBlessings && (data.blessings || 0) < s.requiresBlessings) return false;
                             return eMana >= s.manaCost;
                         });
                         
@@ -1687,7 +1704,10 @@ Test 3.3
 
                             if (data.tauntedBy) {
                                 let taunterDOM = document.getElementById(data.tauntedBy);
-                                if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "ATTACK", cost: 0, targetId: data.tauntedBy }; } else { data.tauntedBy = null; }
+                                if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) { 
+                                    let forcedSkill = data.skills.length > 0 ? data.skills[0].name : "ATTACK";
+                                    action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: forcedSkill, cost: 0, targetId: data.tauntedBy }; 
+                                } else { data.tauntedBy = null; }
                             }
                             if (!action) {
                                 if(data.type === 'ability') { 
