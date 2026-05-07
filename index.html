@@ -1,3 +1,4 @@
+Test 3.7
 Test 3.6
 <!DOCTYPE html>
 <html lang="en">
@@ -121,8 +122,6 @@ Test 3.6
         .placed-badge { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(231, 76, 60, 0.9); color: white; padding: 3px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 3px; z-index: 25; pointer-events: none; text-shadow: 1px 1px 0 #000; border: 1px solid #fff;}
         .badge-blessing { position: absolute; top: -8px; left: 20px; background: #f1c40f; color: #111; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 26; box-shadow: 0 0 10px #f1c40f;}
         .badge-shield { position: absolute; bottom: 28px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
-        .badge-taunted { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #e74c3c); }
-        .badge-barrier { position: absolute; top: -8px; right: 15px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #3498db); }
         .badge-block { background: #888 !important; box-shadow: 0 0 10px #888; }
 
         /* JADEN MECHANICS CSS */
@@ -309,7 +308,10 @@ Test 3.6
             "Taunted": "./assets/Taunted.png",
             "Barrier": "./assets/Barrier.png",
             "RolynSFX1": "./assets/RolynSFX1.mp3",
-            "RolynSFX2": "./assets/RolynSFX2.mp3"
+            "RolynSFX2": "./assets/RolynSFX2.mp3",
+            "Zombie": "./assets/Zombie.png",
+            "Militia": "./assets/Milita.png",
+            "Bleed": "./assets/Bleed.png"
         };
         // ============================================================================
 
@@ -343,6 +345,7 @@ Test 3.6
         let shieldBlockAudioUrl = '';
         let tauntedImgUrl = '';
         let barrierImgUrl = '';
+        let bleedImgUrl = '';
         
         // System Flags
         let pQueue = []; 
@@ -406,6 +409,7 @@ Test 3.6
             if(cleanName.includes('mainmenubg')) { return { isMenuBG: true, img: dataUrl }; }
             if(cleanName.includes('taunted')) { return { isIcon: true, iconType: 'taunted', img: dataUrl }; }
             if(cleanName.includes('barrier')) { return { isIcon: true, iconType: 'barrier', img: dataUrl }; }
+            if(cleanName.includes('bleed')) { return { isIcon: true, iconType: 'bleed', img: dataUrl }; }
 
             let type = 'unit';
             if (cleanName.includes('ability') || cleanName.includes('skill') || cleanName.includes('spell') || cleanName.includes('magic') || cleanName.includes('mana core') || cleanName.includes('one more time')) type = 'ability';
@@ -445,6 +449,17 @@ Test 3.6
                         { name: "Double-Shot", manaCost: 2, desc: "Shoots twice (300-500 DMG per shot). (+2 Chambered Rounds)" },
                         { name: "Trigger Unbound", manaCost: 4, desc: "Consumes all Rounds. Flurry of 150-300 DMG per round. Excess DMG hits backline." }
                     ], passives: [{ name: "Extra Shot", desc: "60% chance for an extra shot (+1 Round) on skill 1 or 2." }] };
+            }
+            else if(cleanName.includes('zombie')) {
+                return { isPlayable: true, type: 'unit', name: "Zombie", title: "Level 2", powerLevel: 2, summonCost: 1, faction: "Council of Darkness", race: "Undead", hp: 700, maxHp: 700, atk: 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, bleedStacks: 0, bleedTurns: 0,
+                    skills: [{ name: "Bite", manaCost: 0, desc: "Inflicts damage rolling from 100-200. (+1 Bleed Stack)" }], passives: [{ name: "Vigor of the Damned", desc: "If survives with <=100 HP, fully restores HP and gains 1000 shield." }] };
+            }
+            else if(cleanName.includes('militia') || cleanName.includes('milita')) {
+                return { isPlayable: true, type: 'unit', name: "Militia", title: "Level 1", powerLevel: 1, summonCost: 0, faction: "Neutral", race: "Human", hp: 600, maxHp: 600, atk: 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
+                    skills: [
+                        { name: "Uncoordinated attack", manaCost: 0, desc: "Attacks inflicting 100-200 damage roll." },
+                        { name: "Suicidal attack", manaCost: 2, desc: "Rolls 1-700 DMG. User dies. Grants 4 mana if target dies." }
+                    ], passives: [] };
             }
             else if(cleanName.includes('one more time')) {
                 return { isPlayable: true, type: 'ability', name: "One More Time", title: "Ability Card", powerLevel: 0, summonCost: 0, faction: "NA", race: "N/A", hp: 0, maxHp: 0, atk: 0, img: dataUrl, marks: 0, queued: false,
@@ -499,6 +514,7 @@ Test 3.6
                 } else if (cardData.isIcon) {
                     if (cardData.iconType === 'taunted') tauntedImgUrl = cardData.img;
                     if (cardData.iconType === 'barrier') barrierImgUrl = cardData.img;
+                    if (cardData.iconType === 'bleed') bleedImgUrl = cardData.img;
                 } else if (cardData.isAudio || cardData.isMenuBG || cardData.isFX) {
                     // Handled inside getCardTemplate side-effects
                 } else if (cardData.isPlayable) {
@@ -536,7 +552,7 @@ Test 3.6
                 const data = cardInstances[c.id];
                 if (!data) return;
                 
-                c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier, .badge-block').forEach(el => el.remove());
+                c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier, .badge-bleed, .badge-block').forEach(el => el.remove());
 
                 if(data.turnPlaced === turnCount) {
                     const b = document.createElement('div'); b.className = 'placed-badge'; b.innerText = '{PLACED}'; c.appendChild(b);
@@ -550,12 +566,15 @@ Test 3.6
                     cr.innerText = data.chamberedRounds; c.appendChild(cr);
                 }
                 
+                let topRightOffset = -8;
+
                 if (data.tauntedBy) {
                     c.classList.add('taunted-status');
                     if (tauntedImgUrl) {
                         const ti = document.createElement('div'); ti.className = 'badge-taunted';
-                        ti.style.cssText = `position:absolute; top:-8px; right:-8px; width:24px; height:24px; background-image:url('${tauntedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #e74c3c);`;
+                        ti.style.cssText = `position:absolute; top:-8px; right:${topRightOffset}px; width:24px; height:24px; background-image:url('${tauntedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #e74c3c);`;
                         c.appendChild(ti);
+                        topRightOffset += 24;
                     }
                 } else {
                     c.classList.remove('taunted-status');
@@ -565,11 +584,24 @@ Test 3.6
                     const sh = document.createElement('div'); sh.className = 'badge-shield'; sh.innerText = '🛡 ' + data.shield; c.appendChild(sh);
                     if (barrierImgUrl) {
                         const bi = document.createElement('div'); bi.className = 'badge-barrier';
-                        bi.style.cssText = `position:absolute; top:-8px; right:15px; width:24px; height:24px; background-image:url('${barrierImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #3498db);`;
+                        bi.style.cssText = `position:absolute; top:-8px; right:${topRightOffset}px; width:24px; height:24px; background-image:url('${barrierImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #3498db);`;
                         c.appendChild(bi);
+                        topRightOffset += 24;
                     }
                 } else {
                     data.shield = 0; 
+                }
+
+                if(data.bleedStacks && data.bleedStacks > 0 && data.bleedTurns >= turnCount) {
+                    if (bleedImgUrl) {
+                        const bl = document.createElement('div'); bl.className = 'badge-bleed';
+                        bl.style.cssText = `position:absolute; top:-8px; right:${topRightOffset}px; width:24px; height:24px; background-image:url('${bleedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #8e44ad); display:flex; justify-content:center; align-items:center; font-size:0.8rem; font-weight:bold; color:white; text-shadow:1px 1px 2px #000, -1px -1px 2px #000;`;
+                        bl.innerText = data.bleedStacks;
+                        c.appendChild(bl);
+                        topRightOffset += 24;
+                    }
+                } else {
+                    data.bleedStacks = 0;
                 }
 
                 if(data.blockActive) {
@@ -749,6 +781,7 @@ Test 3.6
             if(data.type === 'unit') html += `<div class="inspect-stat" style="color:var(--hp-color)"><b>HP:</b> ${data.hp} | <b style="color:#e74c3c">ATK:</b> ${data.atk}</div>`;
             html += `<div class="inspect-stat" style="color:var(--mana-color)"><b>Cost:</b> ${data.summonCost} Mana</div>`;
             if(data.marks > 0) html += `<div class="inspect-stat" style="color:#2ecc71"><b>Shinobi Marks:</b> ${data.marks}</div>`;
+            if(data.bleedStacks > 0) html += `<div class="inspect-stat" style="color:#8e44ad"><b>Bleed Stacks:</b> ${data.bleedStacks}</div>`;
 
             if(isDeployed && data.side === 'PLAYER') {
                 html += `<div class="inspect-section"><b style="color:white">Actions</b><br>`;
@@ -1238,7 +1271,7 @@ Test 3.6
             let targetInst = cardInstances[targetId]; let actorDOM = document.getElementById(actor.id);
             
             let isKinRyu = actor.name === "KIN-RYU"; 
-            let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK") || (actor.name === "Skeleton Warrior" && skillName === "SLASH");
+            let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK") || (actor.name === "Skeleton Warrior" && skillName === "SLASH") || (actor.name === "Zombie" && skillName === "Bite");
             let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
             // BLOCK INTERCEPTION logic
@@ -1309,6 +1342,20 @@ Test 3.6
                 if(dmg > 0) {
                      targetInst.hp -= dmg; 
                      addLog(`<b>${actor.name}</b> hits ${targetInst.name} for ${dmg} DMG!`, '#ff4d4d');
+
+                     // Vigor of the Damned Check
+                     if(targetInst.name === "Zombie" && targetInst.hp > 0 && targetInst.hp <= 100) {
+                         targetInst.hp = targetInst.maxHp;
+                         targetInst.shield = 1000;
+                         targetInst.shieldTurns = turnCount + 99;
+                         addLog(`<b>Zombie</b>'s Vigor of the Damned triggered! Restored to full HP and gained 1000 Shield!`, '#2ecc71');
+                         if(targetDOM) {
+                             showFloatingText(targetDOM, "VIGOR OF THE DAMNED", "#2ecc71", "1.5rem");
+                             targetDOM.classList.add('shimmer-fx');
+                             setTimeout(() => targetDOM.classList.remove('shimmer-fx'), 1000);
+                         }
+                     }
+
                      if(targetInst.hp <= 0) { died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); if(targetDOM) targetDOM.remove(); } 
                      else { if(targetDOM && targetDOM.querySelector('.badge-hp')) targetDOM.querySelector('.badge-hp').innerText = targetInst.hp; }
                 }
@@ -1600,6 +1647,11 @@ Test 3.6
                         if (action.skillName === "Lion's Challenge") dmg = 250;
                     } else if (actor.name === "Skeleton Warrior") {
                         if (action.skillName === "SLASH") dmg = Math.floor(Math.random() * (150 - 50 + 1)) + 50;
+                    } else if (actor.name === "Zombie" && action.skillName === "Bite") {
+                        dmg = Math.floor(Math.random() * (200 - 100 + 1)) + 100;
+                    } else if (actor.name === "Militia") {
+                        if (action.skillName === "Uncoordinated attack") dmg = Math.floor(Math.random() * (200 - 100 + 1)) + 100;
+                        else if (action.skillName === "Suicidal attack") dmg = Math.floor(Math.random() * (700 - 1 + 1)) + 1;
                     }
 
                     let targetsToHit = Array.isArray(action.targetId) ? action.targetId : [action.targetId]; 
@@ -1636,6 +1688,22 @@ Test 3.6
                                 targetInst.tauntedTurn = turnCount + (actor.side === 'ENEMY' ? 1 : 0); // Dynamic turn offset
                                 targetDOM.classList.add('taunted-status'); 
                                 setTimeout(() => showFloatingText(targetDOM, "TAUNTED", "#f39c12", "1.5rem"), 400); 
+                            }
+                            if (action.skillName === "Bite") {
+                                targetInst.bleedStacks = (targetInst.bleedStacks || 0) + 1;
+                                targetInst.bleedTurns = turnCount + 2; 
+                                setTimeout(() => showFloatingText(targetDOM, "BLEED", "#8e44ad", "1.5rem"), 400);
+                            }
+                        }
+
+                        if (action.skillName === "Suicidal attack") {
+                            actor.hp = 0; 
+                            if (actorDOM) actorDOM.remove();
+                            if (targetDied) {
+                                if (actor.side === 'PLAYER') { pMana += 4; addLog(`<b>Militia</b> sacrificed to destroy target! Grants +4 Mana!`, "var(--mana-color)"); }
+                                else { eMana += 4; addLog(`Enemy <b>Militia</b> sacrificed to destroy target! Grants +4 Mana!`, "var(--mana-color)"); }
+                            } else {
+                                addLog(`<b>Militia</b> sacrificed itself but failed to destroy the target!`, "#e74c3c");
                             }
                         }
 
@@ -1805,6 +1873,44 @@ Test 3.6
                 }
                 if(eQueue.length > 0) await processQueue('ENEMY', eQueue);
             }
+
+            // Bleed Logic Trigger
+            Object.values(cardInstances).forEach(c => {
+                if(c.hp > 0 && c.bleedStacks > 0 && c.bleedTurns >= turnCount) {
+                    let bleedDmg = Math.floor(c.maxHp * (0.05 * c.bleedStacks));
+                    c.hp -= bleedDmg;
+                    let cDOM = document.getElementById(c.id);
+                    if (cDOM) {
+                        showFloatingText(cDOM, `-${bleedDmg} BLEED`, "#8e44ad", "1.5rem");
+                        cDOM.classList.remove("shake-anim"); void cDOM.offsetWidth;
+                        cDOM.classList.add("shake-anim");
+                        if(cDOM.querySelector('.badge-hp')) cDOM.querySelector('.badge-hp').innerText = c.hp;
+                    }
+                    addLog(`<b>${c.name}</b> takes ${bleedDmg} Bleed damage!`, '#8e44ad');
+
+                    if(c.name === "Zombie" && c.hp > 0 && c.hp <= 100) {
+                         c.hp = c.maxHp;
+                         c.shield = 1000;
+                         c.shieldTurns = turnCount + 99;
+                         addLog(`<b>Zombie</b>'s Vigor of the Damned triggered from Bleed! Restored to full HP and gained 1000 Shield!`, '#2ecc71');
+                         if(cDOM) {
+                             showFloatingText(cDOM, "VIGOR OF THE DAMNED", "#2ecc71", "1.5rem");
+                             cDOM.classList.add('shimmer-fx');
+                             setTimeout(() => cDOM.classList.remove('shimmer-fx'), 1000);
+                             if(cDOM.querySelector('.badge-hp')) cDOM.querySelector('.badge-hp').innerText = c.hp;
+                         }
+                    }
+
+                    if(c.hp <= 0) {
+                        addLog(`${c.name} succumbed to Bleed!`, '#aaa');
+                        if(cDOM) cDOM.remove();
+                    }
+                } else if (c.bleedTurns < turnCount) {
+                    c.bleedStacks = 0;
+                }
+            });
+
+            await new Promise(r => setTimeout(r, 600));
 
             turnCount++; currentTurn = 'PLAYER'; isExecuting = false; 
             document.getElementById('turn-banner').innerText = `PLAYER TURN ${turnCount}`; document.getElementById('turn-banner').style.borderColor = "var(--gold)";
