@@ -1,4 +1,4 @@
-Test 3.0
+Test 3.1
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -638,7 +638,6 @@ Test 3.0
                     } else if(pendingSkill.skillName === "Punishment of the Blessed") {
                         if(targetInst.side !== currentTurn && c.parentElement.classList.contains('frontline')) validTarget = true;
                     } else if(pendingSkill.skillName === "Sniping Shot") {
-                        // Sniping Shot bypasses frontline, any enemy is valid
                         if(targetInst.side !== currentTurn) validTarget = true;
                     } else {
                         if(targetInst.side !== currentTurn) {
@@ -734,7 +733,6 @@ Test 3.0
                             let meetsCondition = true;
                             if(skill.requiresBlessings) meetsCondition = (data.blessings >= skill.requiresBlessings);
                             
-                            // FIX APPLIED HERE (skillName -> skill.name)
                             if(skill.name === "Trigger Unbound" && (!data.chamberedRounds || data.chamberedRounds === 0)) meetsCondition = false;
 
                             html += `<button class="skill-btn" ${canAct && costMet && meetsCondition ? '' : 'disabled'} onclick="queueAction('${id}', '${safeSkillName}', ${skill.manaCost}, false)">
@@ -1298,6 +1296,7 @@ Test 3.0
                     addLog(`<b>${actor.name}</b> shielded ${shieldedCount} allies!`, "#3498db");
                     await new Promise(r => setTimeout(r, 600));
                 } else if (action.skillName === "Double Action") {
+                    // Safe AI execution block for Double Action
                     let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
                     let targetInst = cardInstances[tId];
                     let targetDOM = document.getElementById(tId);
@@ -1401,7 +1400,7 @@ Test 3.0
                                 let dmg = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
                                 await applyDamage(actor, currentTargetId, dmg, action.skillName);
                                 
-                                if (i < rounds - 1) await new Promise(r=>setTimeout(r, 500));
+                                if (i < rounds - 1) await new Promise(r=>setTimeout(r, 50));
                             }
                             actor.chamberedRounds = 0;
                         }
@@ -1423,12 +1422,16 @@ Test 3.0
                             let tDOM = currentTargetId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(currentTargetId);
                             let lock = showJadenLock(tDOM);
                             await shootBullet(actorDOM, tDOM);
-                            playSound(sfx);
+                            
+                            if (action.skillName !== "Double-Shot" || i === 0) {
+                                playSound(sfx);
+                            }
+                            
                             if(lock) lock.remove();
                             
                             let dmg = Math.floor(Math.random() * (dmgMax - dmgMin + 1)) + dmgMin;
                             await applyDamage(actor, currentTargetId, dmg, action.skillName);
-                            if (i < shots - 1) await new Promise(r=>setTimeout(r, 500));
+                            if (i < shots - 1) await new Promise(r=>setTimeout(r, 90));
                         }
                         actor.chamberedRounds = (actor.chamberedRounds || 0) + roundGain;
                         
