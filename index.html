@@ -1,4 +1,5 @@
-Test 3.7
+Test 3.8
+Test 3.8
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,6 +89,11 @@ Test 3.7
         .ability-slot { border-color: #9b59b6; color: #9b59b6; }
         .slot-text { pointer-events: none; z-index: 1; }
 
+        /* BUFF SLOTS */
+        .buff-slot { position: absolute; top: 50%; transform: translateY(-50%); border-color: #f1c40f; color: #f1c40f; box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.1); z-index: 10; transition: 0.3s; }
+        #enemy-buff-slot { left: 40px; }
+        #player-buff-slot { right: 140px; } /* Placed before the deck */
+
         .card { width: 140px; height: 196px; border-radius: 6px; padding: 5px; box-sizing: border-box; cursor: grab; background: var(--card-unit); border: 1px solid #444; display: flex; flex-direction: column; justify-content: space-between; font-family: sans-serif; position: relative; flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s;}
         
         .slot .card { position: absolute; top: -1px; left: -1px; width: calc(100% + 2px); height: calc(100% + 2px); margin: 0; z-index: 10; border-radius: 6px; border: 1px solid #444; box-sizing: border-box; }
@@ -111,6 +117,9 @@ Test 3.7
         .buff-double-action { outline: 3px solid #9b59b6; box-shadow: 0 0 15px #9b59b6; animation: purple-burn 0.8s infinite alternate; }
         @keyframes purple-burn { from { box-shadow: 0 0 10px #9b59b6; } to { box-shadow: 0 0 25px #9b59b6; } }
 
+        .golden-glow { outline: 3px solid #f1c40f !important; box-shadow: 0 0 20px #f1c40f !important; animation: pulse-gold 1.5s infinite alternate; }
+        @keyframes pulse-gold { from { box-shadow: 0 0 10px #f1c40f; } to { box-shadow: 0 0 30px #f1c40f; } }
+
         .card-title { font-size: 0.8rem; font-weight: bold; text-align: center; color: var(--gold); line-height: 1; margin-top: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .card-level { text-align: center; font-size: 0.7rem; color: #aaa; margin-bottom: 4px;}
         .card-img-container { flex-grow: 1; margin: 3px 0; background-color: #111; border-radius: 3px; border: 1px solid #333; background-size: cover; background-position: center; pointer-events: none;}
@@ -121,6 +130,8 @@ Test 3.7
         .placed-badge { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(231, 76, 60, 0.9); color: white; padding: 3px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 3px; z-index: 25; pointer-events: none; text-shadow: 1px 1px 0 #000; border: 1px solid #fff;}
         .badge-blessing { position: absolute; top: -8px; left: 20px; background: #f1c40f; color: #111; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 26; box-shadow: 0 0 10px #f1c40f;}
         .badge-shield { position: absolute; bottom: 28px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
+        .badge-taunted { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #e74c3c); }
+        .badge-barrier { position: absolute; top: -8px; right: 15px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #3498db); }
         .badge-block { background: #888 !important; box-shadow: 0 0 10px #888; }
 
         /* JADEN MECHANICS CSS */
@@ -221,6 +232,9 @@ Test 3.7
         </div>
 
         <div class="center-panel">
+            <div id="enemy-buff-slot" class="slot buff-slot" data-side="ENEMY" data-allowed="buff"><span class="slot-text">BUFF</span></div>
+            <div id="player-buff-slot" class="slot buff-slot" data-side="PLAYER" data-allowed="buff"><span class="slot-text">BUFF</span></div>
+
             <div id="turn-banner">PLAYER TURN 1</div>
             <div class="battlefield">
                 <div class="core-container enemy-core" id="e-core-target"><div class="core-crystal"></div><div class="core-hp" id="enemy-core-hp">ENEMY CORE: 2000 | MANA: 8</div></div>
@@ -310,7 +324,11 @@ Test 3.7
             "RolynSFX2": "./assets/RolynSFX2.mp3",
             "Zombie": "./assets/Zombie.png",
             "Militia": "./assets/Milita.png",
-            "Bleed": "./assets/Bleed.png"
+            "Bleed": "./assets/Bleed.png",
+            "Last Stand": "./assets/Last%20Stand.png",
+            "DrawSFX": "./assets/DrawSFX.mp3",
+            "PlaceSFX": "./assets/PlaceSFX.mp3",
+            "AbilitySFX": "./assets/AbilitySFX.mp3"
         };
         // ============================================================================
 
@@ -345,6 +363,9 @@ Test 3.7
         let tauntedImgUrl = '';
         let barrierImgUrl = '';
         let bleedImgUrl = '';
+        let drawSfxUrl = '';
+        let placeSfxUrl = '';
+        let abilitySfxUrl = '';
         
         // System Flags
         let pQueue = []; 
@@ -399,6 +420,9 @@ Test 3.7
             if(cleanName.includes('rolynsfx1')) { rolynSfx1Url = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('rolynsfx2')) { rolynSfx2Url = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('shieldblockskel')) { shieldBlockAudioUrl = dataUrl; return { isAudio: true }; }
+            if(cleanName.includes('drawsfx')) { drawSfxUrl = dataUrl; return { isAudio: true }; }
+            if(cleanName.includes('placesfx')) { placeSfxUrl = dataUrl; return { isAudio: true }; }
+            if(cleanName.includes('abilitysfx')) { abilitySfxUrl = dataUrl; return { isAudio: true }; }
 
             if(cleanName.includes('back_card') || cleanName.includes('back card') || cleanName.includes('crown back')) { return { isCardBack: true, img: dataUrl }; }
             if(cleanName.includes('slash')) { return { isSlash: true, img: dataUrl }; }
@@ -411,7 +435,7 @@ Test 3.7
             if(cleanName.includes('bleed')) { return { isIcon: true, iconType: 'bleed', img: dataUrl }; }
 
             let type = 'unit';
-            if (cleanName.includes('ability') || cleanName.includes('skill') || cleanName.includes('spell') || cleanName.includes('magic') || cleanName.includes('mana core') || cleanName.includes('one more time')) type = 'ability';
+            if (cleanName.includes('ability') || cleanName.includes('skill') || cleanName.includes('spell') || cleanName.includes('magic') || cleanName.includes('mana core') || cleanName.includes('one more time') || cleanName.includes('last stand')) type = 'ability';
 
             if(cleanName.includes('kin-ryu') || cleanName.includes('kin ryu')) {
                 return { isPlayable: true, type: 'unit', name: "KIN-RYU", title: "YAMI NO SHINOBI (Level 7)", powerLevel: 7, summonCost: 5, faction: "Arashi", race: "Human", hp: 1200, maxHp: 1200, atk: 400, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
@@ -467,6 +491,10 @@ Test 3.7
             else if(cleanName.includes('mana core')) {
                 return { isPlayable: true, type: 'ability', name: "Mana Core", title: "Ability Card", powerLevel: 0, summonCost: 0, faction: "NA", race: "N/A", hp: 0, maxHp: 0, atk: 0, img: dataUrl, marks: 0, queued: false,
                     skills: [ { name: "Mana Initiation", manaCost: 0, desc: "Grants user +3 Mana when activated." } ], passives: [ { name: "Auto-Discard", desc: "Discards after use." } ] };
+            }
+            else if(cleanName.includes('last stand')) {
+                return { isPlayable: true, type: 'ability', isBuff: true, name: "Last Stand", title: "Buff Card", powerLevel: 0, summonCost: 2, faction: "Neutral", race: "N/A", hp: 0, maxHp: 0, atk: 0, img: dataUrl, marks: 0, queued: false, buffTurnsRemaining: 0,
+                    skills: [], passives: [ { name: "Last Stand", desc: "Drag to Buff slot next turn. All allied units survive fatal damage at 1 HP for 2 turns." } ] };
             }
             else {
                 let defaultHp = type==='ability'? 0 : 500;
@@ -546,6 +574,14 @@ Test 3.7
             
             document.getElementById('end-turn-btn').disabled = isExecuting;
             document.getElementById('draw-cards-btn').disabled = isExecuting;
+
+            // Check active buffs
+            let pLastStand = false;
+            let eLastStand = false;
+            let pBuffSlot = document.getElementById('player-buff-slot').querySelector('.card');
+            if (pBuffSlot && cardInstances[pBuffSlot.id].name === "Last Stand") pLastStand = true;
+            let eBuffSlot = document.getElementById('enemy-buff-slot').querySelector('.card');
+            if (eBuffSlot && cardInstances[eBuffSlot.id].name === "Last Stand") eLastStand = true;
             
             document.querySelectorAll('.card').forEach(c => {
                 const data = cardInstances[c.id];
@@ -607,6 +643,15 @@ Test 3.7
                     const blk = document.createElement('div'); blk.className = 'placed-badge badge-block'; blk.innerText = '{BLOCK}'; blk.style.background = '#888'; c.appendChild(blk);
                 }
 
+                const isDeployed = c.parentElement.classList.contains('slot');
+                if (isDeployed && data.type === 'unit') {
+                    if (data.side === 'PLAYER' && pLastStand) c.classList.add('golden-glow');
+                    else if (data.side === 'ENEMY' && eLastStand) c.classList.add('golden-glow');
+                    else c.classList.remove('golden-glow');
+                } else {
+                    c.classList.remove('golden-glow');
+                }
+
                 if(data.queued) c.classList.add('queued-status'); else c.classList.remove('queued-status');
                 if(data.exhausted) c.classList.add('exhausted'); else c.classList.remove('exhausted');
                 if(!data.extraAction) c.classList.remove('buff-double-action');
@@ -666,6 +711,7 @@ Test 3.7
                         setTimeout(() => {
                             flyingCard.remove();
                             if(sideTarget === 'PLAYER') {
+                                if(drawSfxUrl) playSound(drawSfxUrl);
                                 const realCard = createCardDOM(cardId, data);
                                 realCard.classList.add('flip-reveal');
                                 document.getElementById('hand').appendChild(realCard);
@@ -698,6 +744,15 @@ Test 3.7
             c.addEventListener('dragstart', (e) => {
                 if(currentTurn !== 'PLAYER' || isExecuting) return e.preventDefault();
                 if(data.exhausted || data.queued || data.tauntedBy) return e.preventDefault();
+
+                const isDeployed = c.parentElement.classList.contains('slot');
+                if (isDeployed) {
+                    if (data.isBuff && data.turnPlaced < turnCount && c.parentElement.classList.contains('ability-slot')) {
+                        // Allow dragging active buff to buff slot
+                    } else {
+                        return e.preventDefault();
+                    }
+                }
                 e.dataTransfer.setData('text', id);
             });
             
@@ -732,6 +787,14 @@ Test 3.7
                         showInspector(id, c);
                     }
                 } else {
+                    const isDeployed = c.parentElement.classList.contains('slot');
+                    if (isDeployed && data.side === 'PLAYER' && data.isBuff && data.turnPlaced < turnCount && c.parentElement.classList.contains('ability-slot')) {
+                        const buffSlot = document.getElementById('player-buff-slot');
+                        if (!buffSlot.querySelector('.card')) {
+                            buffSlot.classList.add('target-buff-glow');
+                            setTimeout(() => buffSlot.classList.remove('target-buff-glow'), 2000);
+                        }
+                    }
                     showInspector(id, c);
                 }
             });
@@ -753,12 +816,30 @@ Test 3.7
                 if (!cardId) return;
                 const cardEl = document.getElementById(cardId);
                 const data = cardInstances[cardId];
+                const isDeployed = cardEl.parentElement.classList.contains('slot');
 
-                if(slot.dataset.side === 'PLAYER' && !slot.querySelector('.card')) {
-                    if(data.type !== slot.dataset.allowed) return addLog(`Needs ${slot.dataset.allowed.toUpperCase()} slot.`, "red");
+                if (slot.classList.contains('buff-slot')) {
+                    if (!data.isBuff) return addLog("Only Buff cards can be placed here.", "red");
+                    if (!isDeployed || !cardEl.parentElement.classList.contains('ability-slot')) return addLog("Buff cards must be placed in the Ability slot first.", "red");
+                    if (data.turnPlaced === turnCount) return addLog("Card has Summoning Sickness!", "red");
+                    if (slot.dataset.side !== data.side) return addLog("Wrong side!", "red");
+                    if (slot.querySelector('.card')) return addLog("Buff slot is occupied!", "red");
+
+                    slot.appendChild(cardEl);
+                    data.buffTurnsRemaining = 2;
+                    if(abilitySfxUrl) playSound(abilitySfxUrl);
+                    addLog(`<b>${data.name}</b> moved to Buff Slot and activated!`, "#f1c40f");
+                    updateUI();
+                    showInspector(cardId, cardEl);
+                    return;
+                }
+
+                if(slot.dataset.side === 'PLAYER' && !slot.querySelector('.card') && !isDeployed) {
+                    if(data.type !== slot.dataset.allowed && !(data.isBuff && slot.dataset.allowed === 'ability')) return addLog(`Needs ${slot.dataset.allowed.toUpperCase()} slot.`, "red");
                     if(pMana >= data.summonCost) {
                         pMana -= data.summonCost; data.turnPlaced = turnCount;
                         slot.appendChild(cardEl);
+                        if(placeSfxUrl) playSound(placeSfxUrl);
                         if(data.type === 'ability') addLog(`Set Ability Card.`, "#9b59b6");
                         else addLog(`Summoned <b>${data.name}</b>`, "var(--mana-color)");
                         updateUI(); showInspector(cardId, cardEl);
@@ -781,6 +862,10 @@ Test 3.7
             html += `<div class="inspect-stat" style="color:var(--mana-color)"><b>Cost:</b> ${data.summonCost} Mana</div>`;
             if(data.marks > 0) html += `<div class="inspect-stat" style="color:#2ecc71"><b>Shinobi Marks:</b> ${data.marks}</div>`;
             if(data.bleedStacks > 0) html += `<div class="inspect-stat" style="color:#8e44ad"><b>Bleed Stacks:</b> ${data.bleedStacks}</div>`;
+
+            if (data.isBuff && isDeployed && cardElement.parentElement.classList.contains('ability-slot')) {
+                html += `<div style="color:#f1c40f; font-size:0.75rem; font-weight:bold; margin-top:5px; padding: 5px; border: 1px dashed #f1c40f; text-align: center;">[BUFF CARD: DRAG TO BUFF SLOT TO ACTIVATE]</div>`;
+            }
 
             if(isDeployed && data.side === 'PLAYER') {
                 html += `<div class="inspect-section"><b style="color:white">Actions</b><br>`;
@@ -806,7 +891,7 @@ Test 3.7
                                  </button>`;
                     }
                     
-                    if(data.name !== "Lionel Guard Tower") {
+                    if(data.name !== "Lionel Guard Tower" && !data.isBuff) {
                         data.skills.forEach(skill => {
                             const safeSkillName = skill.name.replace(/'/g, "\\'");
                             let costMet = pMana >= skill.manaCost;
@@ -1273,6 +1358,16 @@ Test 3.7
             let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK") || (actor.name === "Skeleton Warrior" && skillName === "SLASH") || (actor.name === "Zombie" && skillName === "Bite");
             let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
+            // Check Last Stand
+            let isLastStandActive = false;
+            if (targetInst && targetInst.side === 'PLAYER') {
+                let pBuff = document.getElementById('player-buff-slot').querySelector('.card');
+                if (pBuff && cardInstances[pBuff.id].name === "Last Stand") isLastStandActive = true;
+            } else if (targetInst && targetInst.side === 'ENEMY') {
+                let eBuff = document.getElementById('enemy-buff-slot').querySelector('.card');
+                if (eBuff && cardInstances[eBuff.id].name === "Last Stand") isLastStandActive = true;
+            }
+
             // BLOCK INTERCEPTION logic
             if (targetInst && targetInst.blockActive && targetId !== 'CORE') {
                 targetInst.blockActive = false;
@@ -1339,6 +1434,13 @@ Test 3.7
                 }
 
                 if(dmg > 0) {
+                     if (isLastStandActive && targetInst.hp - dmg < 1) {
+                         dmg = targetInst.hp - 1;
+                         if (dmg < 0) dmg = 0;
+                         if (dmg > 0) addLog(`<b>Last Stand</b> prevents fatal damage!`, '#f1c40f');
+                         else if (dmg === 0 && targetInst.hp === 1) addLog(`<b>Last Stand</b> holds HP at 1!`, '#f1c40f');
+                     }
+
                      targetInst.hp -= dmg; 
                      addLog(`<b>${actor.name}</b> hits ${targetInst.name} for ${dmg} DMG!`, '#ff4d4d');
 
@@ -1411,6 +1513,10 @@ Test 3.7
                     actor.exhausted = true;
                 }
                 updateUI(); 
+
+                if (actor.type === 'ability' || actor.isBuff) {
+                    if (abilitySfxUrl) playSound(abilitySfxUrl);
+                }
 
                 if (actor.extraAction && action.skillName !== "Double Action" && action.skillName !== "Mana Initiation") {
                     actor.extraAction = false;
@@ -1712,7 +1818,7 @@ Test 3.7
                     }
                 }
                 
-                if(actor.type === 'ability' && action.skillName !== "Double Action") { actor.hp = 0; if(actorDOM) actorDOM.remove(); }
+                if((actor.type === 'ability' || actor.isBuff) && action.skillName !== "Double Action") { actor.hp = 0; if(actorDOM) actorDOM.remove(); }
                 
                 updateUI(); await new Promise(r => setTimeout(r, 400)); 
             }
@@ -1742,6 +1848,18 @@ Test 3.7
             });
 
             if(pQueue.length > 0) await processQueue('PLAYER', pQueue);
+
+            // Manage Player Buffs Expiry
+            let pBuffSlot = document.getElementById('player-buff-slot');
+            let pBuffCard = pBuffSlot.querySelector('.card');
+            if (pBuffCard) {
+                let pData = cardInstances[pBuffCard.id];
+                pData.buffTurnsRemaining--;
+                if (pData.buffTurnsRemaining <= 0) {
+                    addLog(`Your <b>${pData.name}</b> expired.`, "#aaa");
+                    pBuffCard.remove();
+                }
+            }
             
             isExecuting = true; updateUI(); 
             currentTurn = 'ENEMY'; document.getElementById('turn-banner').innerText = "OPPONENT TURN"; document.getElementById('turn-banner').style.borderColor = "#e74c3c";
@@ -1751,6 +1869,22 @@ Test 3.7
         async function aiTurn() {
             let aiHandCount = eHandData.length; let aiToDraw = 6 - aiHandCount;
             if(aiToDraw > 0) { drawAnimated(aiToDraw, 'ENEMY'); await new Promise(r => setTimeout(r, 1000 + aiToDraw * 250)); }
+
+            // AI Buff Usage Logic
+            let eAbilSlot = document.querySelector('.slot.ability-slot[data-side="ENEMY"]');
+            let eBuffSlot = document.getElementById('enemy-buff-slot');
+            let buffInAbil = eAbilSlot.querySelector('.card');
+            if (buffInAbil) {
+                let bData = cardInstances[buffInAbil.id];
+                if (bData && bData.isBuff && bData.turnPlaced < turnCount && !eBuffSlot.querySelector('.card')) {
+                    eBuffSlot.appendChild(buffInAbil);
+                    bData.buffTurnsRemaining = 2;
+                    if(abilitySfxUrl) playSound(abilitySfxUrl);
+                    addLog(`ENEMY activated ${bData.name} in Buff Slot!`, "#f1c40f");
+                    updateUI();
+                    await new Promise(r => setTimeout(r, 500));
+                }
+            }
 
             let summonable = eHandData.filter(id => cardInstances[id].summonCost <= eMana); summonable.sort((a,b) => cardInstances[b].summonCost - cardInstances[a].summonCost);
             
@@ -1780,6 +1914,7 @@ Test 3.7
                             eHandData.splice(eHandData.indexOf(id), 1);
                             summonable.splice(i, 1);
                             slot.appendChild(createCardDOM(id, data)); 
+                            if(placeSfxUrl) playSound(placeSfxUrl);
                             addLog(`ENEMY Set an Ability Card`, "#9b59b6"); updateUI(); await new Promise(r => setTimeout(r, 500));
                         }
                     }
@@ -1792,14 +1927,16 @@ Test 3.7
                     let slots = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"][data-allowed="unit"]')); let empty = slots.filter(s => !s.querySelector('.card'));
                     if(empty.length > 0 && eMana >= data.summonCost) {
                         let targetSlot = empty.find(s => s.classList.contains('frontline')) || empty[0]; eMana -= data.summonCost; data.turnPlaced = turnCount; eHandData.splice(eHandData.indexOf(id), 1);
-                        targetSlot.appendChild(createCardDOM(id, data)); addLog(`ENEMY summoned Unit`, "#e74c3c"); updateUI(); await new Promise(r => setTimeout(r, 500));
+                        targetSlot.appendChild(createCardDOM(id, data)); 
+                        if(placeSfxUrl) playSound(placeSfxUrl);
+                        addLog(`ENEMY summoned Unit`, "#e74c3c"); updateUI(); await new Promise(r => setTimeout(r, 500));
                     }
                 }
             }
 
             eQueue = [];
             if(turnCount > 1) {
-                let activeEnemyUnits = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card')).map(c => cardInstances[c.id]).filter(d => d.turnPlaced < turnCount && !d.exhausted && d.name !== "Lionel Guard Tower");
+                let activeEnemyUnits = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card')).map(c => cardInstances[c.id]).filter(d => d.turnPlaced < turnCount && !d.exhausted && d.name !== "Lionel Guard Tower" && !d.isBuff);
                 for(let data of activeEnemyUnits) {
                     if (data.queued) continue; 
                     
@@ -1910,6 +2047,17 @@ Test 3.7
             });
 
             await new Promise(r => setTimeout(r, 600));
+
+            // Manage Enemy Buffs Expiry
+            let eActiveBuffCard = eBuffSlot.querySelector('.card');
+            if (eActiveBuffCard) {
+                let eData = cardInstances[eActiveBuffCard.id];
+                eData.buffTurnsRemaining--;
+                if (eData.buffTurnsRemaining <= 0) {
+                    addLog(`Enemy <b>${eData.name}</b> expired.`, "#aaa");
+                    eActiveBuffCard.remove();
+                }
+            }
 
             turnCount++; currentTurn = 'PLAYER'; isExecuting = false; 
             document.getElementById('turn-banner').innerText = `PLAYER TURN ${turnCount}`; document.getElementById('turn-banner').style.borderColor = "var(--gold)";
