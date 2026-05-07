@@ -1,4 +1,4 @@
-Test 2.8
+Test 2.9
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -332,6 +332,7 @@ Test 2.8
         
         // System Flags
         let pQueue = []; 
+        let eQueue = [];
         let isTargeting = false;
         let pendingSkill = null;
         let isExecuting = false;
@@ -637,7 +638,6 @@ Test 2.8
                     } else if(pendingSkill.skillName === "Punishment of the Blessed") {
                         if(targetInst.side !== currentTurn && c.parentElement.classList.contains('frontline')) validTarget = true;
                     } else if(pendingSkill.skillName === "Sniping Shot") {
-                        // Sniping Shot bypasses frontline, any enemy is valid
                         if(targetInst.side !== currentTurn) validTarget = true;
                     } else {
                         if(targetInst.side !== currentTurn) {
@@ -651,7 +651,8 @@ Test 2.8
                     if (validTarget) {
                         handleTargetSelection(id);
                     } else {
-                        addLog("Target protected or invalid.", "#e74c3c");
+                        addLog("Target protected or invalid. Inspecting instead.", "#e74c3c");
+                        showInspector(id, c);
                     }
                 } else {
                     showInspector(id, c);
@@ -926,6 +927,7 @@ Test 2.8
                 addLog("Select an Allied unit for One More Time...", "#9b59b6");
                 document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => {
                     let tInst = cardInstances[c.id];
+                    // Exhaustion Zombie Fix: Only highlight non-exhausted, active units
                     if(tInst && tInst.type === 'unit' && !tInst.exhausted && tInst.turnPlaced < turnCount) {
                         c.classList.add('target-buff-glow');
                     }
@@ -933,7 +935,7 @@ Test 2.8
             } 
             else if (skillName === "Punishment of the Blessed") {
                 if(actor.blessings < 7) {
-                    pMana += cost; actor.queued = false; // Refund
+                    pMana += cost; actor.queued = false; // Refund if blocked
                     return addLog("Needs 7 Blessings!", "red");
                 }
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
@@ -944,6 +946,7 @@ Test 2.8
             else if (skillName === "Sniping Shot") {
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
                 targetCountReq = 1;
+                actor.queued = true; 
                 let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
                 addLog("Select ANY Enemy target...", "var(--gold)");
                 // Bypasses protection
@@ -978,7 +981,11 @@ Test 2.8
                 });
 
                 if (validIds.length === 0) {
-                    addLog("All enemies down. Core exposed!", "#2ecc71");
+                    addLog("All enemies down. Use 'ATTACK CORE' instead.", "#e74c3c");
+                    isTargeting = false;
+                    actor.queued = false;
+                    pMana += cost; // Auto-Refund
+                    pendingSkill = null;
                 }
             }
             updateUI(); showInspector(actorId, document.getElementById(actorId));
@@ -1289,7 +1296,6 @@ Test 2.8
                     addLog(`<b>${actor.name}</b> shielded ${shieldedCount} allies!`, "#3498db");
                     await new Promise(r => setTimeout(r, 600));
                 } else if (action.skillName === "Double Action") {
-                    // Safe AI execution block for Double Action
                     let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
                     let targetInst = cardInstances[tId];
                     let targetDOM = document.getElementById(tId);
@@ -1362,7 +1368,6 @@ Test 2.8
                     }
                     if(actorDOM) { actorDOM.style.transform = "scale(1) translateY(0)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
                 } else if (actor.name === "Jaden" && ["Sniping Shot", "Double-Shot", "Trigger Unbound"].includes(action.skillName)) {
-                    // --- JADEN EXECUTION LOGIC ---
                     let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
                     let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
                     
@@ -1379,7 +1384,6 @@ Test 2.8
                             let currentTargetId = tId;
                             for(let i=0; i<rounds; i++) {
                                 let cTInst = cardInstances[currentTargetId];
-                                // Carry over logic: if dead, find valid target
                                 if (currentTargetId !== 'CORE' && (!cTInst || cTInst.hp <= 0)) {
                                     let valids = getValidEnemyTargetIds(defSide);
                                     currentTargetId = valids.length > 0 ? valids[0] : 'CORE';
@@ -1400,7 +1404,6 @@ Test 2.8
                             actor.chamberedRounds = 0;
                         }
                     } else {
-                        // Sniping Shot & Double-Shot
                         let shots = action.skillName === "Double-Shot" ? 2 : 1;
                         let dmgMin = action.skillName === "Double-Shot" ? 300 : 500;
                         let dmgMax = action.skillName === "Double-Shot" ? 500 : 800;
@@ -1409,7 +1412,6 @@ Test 2.8
                         
                         let currentTargetId = tId;
                         for(let i=0; i<shots; i++) {
-                            // Vacuum check for Double-Shot 2nd bullet if target died
                             let cTInst = cardInstances[currentTargetId];
                             if (currentTargetId !== 'CORE' && (!cTInst || cTInst.hp <= 0)) {
                                 let valids = getValidEnemyTargetIds(defSide);
@@ -1428,7 +1430,6 @@ Test 2.8
                         }
                         actor.chamberedRounds = (actor.chamberedRounds || 0) + roundGain;
                         
-                        // Extra Shot Passive Check
                         if (Math.random() < 0.6) {
                             addLog(`<b>Jaden</b> [Passive]: Extra Shot!`, "var(--gold)");
                             await new Promise(r=>setTimeout(r, 300));
@@ -1451,7 +1452,6 @@ Test 2.8
                     }
                     if(actorDOM) { actorDOM.style.transform = "scale(1)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
                 } else {
-                    // --- KIN-RYU AND GENERIC ATTACK LOGIC ---
                     let dmg = actor.atk || 150; let secondDmg = 0; let marksToApply = 0;
                     if (actor.name === "KIN-RYU") {
                         if (action.skillName === "ICHI") { dmg = Math.floor(Math.random() * (1100 - 300 + 1)) + 300; if (dmg < 500) { secondDmg = Math.floor(Math.random() * (1100 - 500 + 1)) + 500; marksToApply = 1; } } 
@@ -1466,7 +1466,6 @@ Test 2.8
                     let targetsToHit = Array.isArray(action.targetId) ? action.targetId : [action.targetId]; 
                     let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
                     
-                    // SMART VACUUM PROTECTION (Side-Aware)
                     let finalTargets = [];
                     for (let tId of targetsToHit) {
                         if (tId !== 'CORE' && action.skillName !== "Royal Assist" && action.skillName !== "ICHI_REROLL") {
@@ -1535,7 +1534,6 @@ Test 2.8
 
             let summonable = eHandData.filter(id => cardInstances[id].summonCost <= eMana); summonable.sort((a,b) => cardInstances[b].summonCost - cardInstances[a].summonCost);
             
-            // OMT and other Ability Deployment
             for(let i = summonable.length - 1; i >= 0; i--) {
                 let id = summonable[i];
                 let data = cardInstances[id];
@@ -1568,7 +1566,6 @@ Test 2.8
                 }
             }
 
-            // Unit Deployment
             for(let id of summonable) {
                 let data = cardInstances[id];
                 if(data.type === 'unit') {
@@ -1580,12 +1577,11 @@ Test 2.8
                 }
             }
 
-            let eQueue = [];
+            eQueue = [];
             if(turnCount > 1) {
                 let activeEnemyUnits = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card')).map(c => cardInstances[c.id]).filter(d => d.turnPlaced < turnCount && !d.exhausted && d.name !== "Lionel Guard Tower");
                 for(let data of activeEnemyUnits) {
                     if(data.skills.length > 0 || data.type === 'unit') {
-                        // AI SKILL ENFORCEMENT FIX
                         let validSkills = data.skills.filter(s => {
                             if (s.name === "Trigger Unbound" && (data.chamberedRounds || 0) === 0) return false;
                             return eMana >= s.manaCost;
