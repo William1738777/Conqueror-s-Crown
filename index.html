@@ -1,4 +1,4 @@
-Test 2.3
+Test 2.2 (rollback)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -104,110 +104,29 @@ Test 2.3
         
         /* Glows */
         .card.target-glow { outline: 3px solid #ff4d4d; box-shadow: 0 0 20px #ff4d4d; cursor: crosshair; animation: pulse-target 1s infinite alternate;}
-        @keyframes pulse-target { from { box-shadow: 0 0 10px #ff4d4d; } to { box-shadow: 0 0 25px #ff4d4d; } }
-        .target-line-glow { outline: 3px dashed #ff9f43; box-shadow: 0 0 20px #ff9f43; }
-        
-        .target-heal-glow { outline: 3px solid #2ecc71; box-shadow: 0 0 20px #2ecc71; cursor: crosshair; animation: pulse-heal 1s infinite alternate; }
-        @keyframes pulse-heal { from { box-shadow: 0 0 10px #2ecc71; } to { box-shadow: 0 0 25px #2ecc71; } }
-
-        .target-buff-glow { outline: 3px solid #9b59b6; box-shadow: 0 0 20px #9b59b6; cursor: crosshair; animation: pulse-buff 1s infinite alternate; }
-        @keyframes pulse-buff { from { box-shadow: 0 0 10px #9b59b6; } to { box-shadow: 0 0 25px #9b59b6; } }
-
+        .target-heal-glow { outline: 3px solid #2ecc71; box-shadow: 0 0 20px #2ecc71; cursor: crosshair; }
+        .target-buff-glow { outline: 3px solid #9b59b6; box-shadow: 0 0 20px #9b59b6; cursor: crosshair; }
         .buff-double-action { outline: 3px solid #9b59b6; box-shadow: 0 0 15px #9b59b6; animation: purple-burn 0.8s infinite alternate; }
-        @keyframes purple-burn { from { box-shadow: 0 0 10px #9b59b6; } to { box-shadow: 0 0 25px #9b59b6; } }
 
         .card-title { font-size: 0.8rem; font-weight: bold; text-align: center; color: var(--gold); line-height: 1; margin-top: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .card-level { text-align: center; font-size: 0.7rem; color: #aaa; margin-bottom: 4px;}
-        .card-img-container { flex-grow: 1; margin: 3px 0; background-color: #111; border-radius: 3px; border: 1px solid #333; background-size: cover; background-position: center; pointer-events: none;}
-
         .badge-mana { position: absolute; top: -5px; left: -5px; background: var(--mana-color); color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15;}
         .badge-hp { position: absolute; bottom: -5px; right: -5px; background: var(--hp-color); color: #111; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15;}
         
-        .placed-badge { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(231, 76, 60, 0.9); color: white; padding: 3px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 3px; z-index: 25; pointer-events: none; text-shadow: 1px 1px 0 #000; border: 1px solid #fff;}
-        .badge-blessing { position: absolute; top: -8px; left: 20px; background: #f1c40f; color: #111; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 26; box-shadow: 0 0 10px #f1c40f;}
-        .badge-shield { position: absolute; bottom: 28px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
-
-        /* --- DECKS --- */
+        /* DECKS */
         .deck-container { position: absolute; right: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 50; }
-        #enemy-deck-area { top: 20px; }
-        #player-deck-area { bottom: 20px; }
-        .deck-stack { width: 100px; height: 140px; border-radius: 6px; border: 1px solid #555; background-color: #1a1a24; background-size: cover; background-position: center; box-shadow: -2px 2px 0 #222, -4px 4px 0 #111, -6px 6px 0 #333, -8px 8px 10px rgba(0,0,0,0.8); transition: opacity 0.3s; }
-        #enemy-deck-area .deck-stack { transform: rotate(180deg); box-shadow: 2px -2px 0 #222, 4px -4px 0 #111, 6px -6px 0 #333, 8px -8px 10px rgba(0,0,0,0.8); }
-        .deck-count { width: 100%; text-align: center; font-weight: bold; color: var(--gold); font-size: 0.8rem; text-shadow: 0 2px 4px rgba(0,0,0,1); }
+        .deck-stack { width: 100px; height: 140px; border-radius: 6px; border: 1px solid #555; background-color: #1a1a24; background-size: cover; background-position: center; transition: opacity 0.3s; }
         
-        #draw-cards-btn { display: none; padding: 10px 15px; background: var(--gold); color: black; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; animation: pulse 1.5s infinite; font-size: 0.8rem;}
-        #draw-cards-btn:disabled { animation: none; filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
-
-        /* --- VISUAL EFFECTS --- */
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            20% { transform: translate(-4px, 0px) rotate(1deg); }
-            40% { transform: translate(2px, -2px) rotate(1deg); }
-            60% { transform: translate(-4px, 2px) rotate(0deg); }
-            80% { transform: translate(-1px, -2px) rotate(1deg); }
-            100% { transform: translate(2px, -2px) rotate(-1deg); }
-        }
-        .shake-anim { animation: shake 0.4s; }
-
-        @keyframes shimmer {
-            0% { filter: brightness(1) drop-shadow(0 0 0px var(--gold)); }
-            50% { filter: brightness(1.8) drop-shadow(0 0 25px var(--gold)); }
-            100% { filter: brightness(1) drop-shadow(0 0 0px var(--gold)); }
-        }
-        .shimmer-fx { animation: shimmer 1s ease-in-out; }
-
-        .floating-text { position: absolute; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; pointer-events: none; z-index: 1000; animation: floatUp 1.2s forwards ease-out; }
+        /* FX */
+        @keyframes purple-burn { from { box-shadow: 0 0 10px #9b59b6; } to { box-shadow: 0 0 25px #9b59b6; } }
+        .floating-text { position: absolute; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 2px 2px 0 #000; pointer-events: none; z-index: 1000; animation: floatUp 1.2s forwards ease-out; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.4); opacity: 0; } }
 
-        .slash-fx { position: absolute; top: 50%; left: 50%; width: 250%; height: 250%; transform: translate(-50%, -50%); background-image: var(--slash-url); background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 9999; opacity: 0; animation: slashFade 0.6s ease-out forwards; }
-        @keyframes slashFade { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.6); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); } }
-
-        .heal-fx { position: absolute; top: 50%; left: 50%; width: 250%; height: 250%; transform: translate(-50%, -50%); background-image: var(--healfx-url); background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 9999; opacity: 0; animation: healFade 0.8s ease-out forwards; }
-        @keyframes healFade { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); } }
-        
-        .arrow-fx { position: fixed; width: 40px; height: 10px; background-image: var(--arrow-url); background-size: contain; background-repeat: no-repeat; z-index: 9999; pointer-events: none; transition: all 0.3s linear; }
-
-        /* SAN OVERHAUL */
-        .san-text { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 6rem; color: #e74c3c; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 0 0 20px #000, 0 0 40px #e74c3c; z-index: 10000; pointer-events: none; animation: sanPulse 1s ease-out forwards; }
-        @keyframes sanPulse { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 85% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
-
-        .shuriken-fx { position: fixed; top: 0; left: 0; margin-top: -25px; margin-left: -25px; width: 50px; height: 50px; z-index: 9999; pointer-events: none; background-image: var(--shuriken-url); background-size: contain; background-repeat: no-repeat; }
-        @keyframes spinFly { 0% { transform: translate(var(--startX), var(--startY)) rotate(0deg); opacity: 1; } 100% { transform: translate(var(--endX), var(--endY)) rotate(1440deg); opacity: 0; } }
-
-        .flying-card { position: fixed; width: 140px; height: 196px; border-radius: 6px; border: 1px solid #555; background-color: #1a1a24; background-size: cover; background-position: center; z-index: 1000; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
-        .flip-reveal { animation: flipIn 0.6s ease-out forwards; }
-        @keyframes flipIn { 0% { transform: perspective(400px) rotateY(90deg); opacity: 0; } 100% { transform: perspective(400px) rotateY(0deg); opacity: 1; } }
-
-        /* --- Inspector Info --- */
+        /* INSPECTOR */
         .inspect-h { color: var(--gold); margin: 0 0 5px 0; font-family: 'Cinzel'; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px;}
-        .inspect-sub { font-size: 0.65rem; color: #888; margin-bottom: 10px; text-transform: uppercase;}
-        
-        .inspect-art { 
-            width: 100%; aspect-ratio: 2.5 / 3.5; max-height: 380px; object-fit: contain; 
-            border-radius: 6px; margin-bottom: 10px; display: block;
-            border: 2px solid rgba(212, 175, 55, 0.5); 
-            background: #000; 
-        }
-        
-        .inspect-stat { font-size: 0.75rem; margin: 2px 0; }
-        .inspect-section { margin-top: 10px; border-top: 1px solid #333; padding-top: 8px; }
-        
-        .skill-btn { 
-            width: 100%; color: white; padding: 6px; margin-top: 5px; cursor: pointer; text-align: left; transition: 0.2s; border-radius: 4px; font-family: 'Cinzel';
-            background: linear-gradient(to bottom, #2a2a35, #1a1a24);
-            border: 1px solid #444; border-bottom: 3px solid #111; 
-        }
-        .skill-btn:hover { 
-            border-color: var(--gold); 
-            background: linear-gradient(to bottom, #2c343f, #1e222a);
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-        }
-        .skill-btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: #444 !important; box-shadow: none;}
-        
-        .skill-name { color: var(--gold); font-weight: bold; font-size: 0.75rem;}
-        .skill-cost { color: var(--mana-color); font-size: 0.65rem; float: right;}
+        .inspect-art { width: 100%; aspect-ratio: 2.5 / 3.5; max-height: 380px; object-fit: contain; border-radius: 6px; margin-bottom: 10px; border: 2px solid rgba(212, 175, 55, 0.5); background: #000; display: block;}
+        .skill-btn { width: 100%; color: white; padding: 6px; margin-top: 5px; cursor: pointer; text-align: left; transition: 0.2s; border-radius: 4px; font-family: 'Cinzel'; background: linear-gradient(to bottom, #2a2a35, #1a1a24); border: 1px solid #444; border-bottom: 3px solid #111; }
+        .skill-btn:hover { border-color: var(--gold); background: linear-gradient(to bottom, #2c343f, #1e222a); box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
         .skill-desc { font-size: 0.65rem; color: #ccc; margin-top: 3px; display: block; font-family: sans-serif;}
-        .empty-inspector { text-align: center; color: #666; margin-top: 50%; font-style: italic; font-size: 0.9rem;}
     </style></head><body>
 
     <div id="start-screen">
@@ -241,26 +160,26 @@ Test 2.3
                 <div class="core-container enemy-core" id="e-core-target"><div class="core-crystal"></div><div class="core-hp" id="enemy-core-hp">ENEMY CORE: 2000 | MANA: 8</div></div>
                 <div class="board">
                     <div class="row">
-                        <div class="slot backline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">UNIT</span></div>
-                        <div class="slot backline ability-slot" data-side="ENEMY" data-allowed="ability"><span class="slot-text">ABILITY</span></div>
-                        <div class="slot backline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">UNIT</span></div>
+                        <div class="slot backline" data-side="ENEMY" data-allowed="unit"></div>
+                        <div class="slot backline ability-slot" data-side="ENEMY" data-allowed="ability"></div>
+                        <div class="slot backline" data-side="ENEMY" data-allowed="unit"></div>
                     </div>
                     <div class="row">
-                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
-                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
-                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"></div>
+                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"></div>
+                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"></div>
                     </div>
                 </div>
                 <div class="board" style="border-top: 1px solid #333; padding-top: 15px;">
                     <div class="row">
-                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
-                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
-                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"></div>
+                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"></div>
+                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"></div>
                     </div>
                     <div class="row">
-                        <div class="slot backline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">UNIT</span></div>
-                        <div class="slot backline ability-slot" data-side="PLAYER" data-allowed="ability"><span class="slot-text">ABILITY</span></div>
-                        <div class="slot backline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">UNIT</span></div>
+                        <div class="slot backline" data-side="PLAYER" data-allowed="unit"></div>
+                        <div class="slot backline ability-slot" data-side="PLAYER" data-allowed="ability"></div>
+                        <div class="slot backline" data-side="PLAYER" data-allowed="unit"></div>
                     </div>
                 </div>
                 <div class="core-container player-core" id="p-core-target"><div class="core-crystal"></div><div class="core-hp" id="player-core-hp">PLAYER CORE: 2000</div></div>
@@ -473,16 +392,15 @@ Test 2.3
                 const cardEl = document.getElementById(cardId); const data = cardInstances[cardId];
                 if(slot.dataset.side === 'PLAYER' && !slot.querySelector('.card')) {
                     if(data.type !== slot.dataset.allowed) return addLog(`Needs ${slot.dataset.allowed.toUpperCase()} slot.`, "red");
-                    
                     if (data.name === "One More Time") {
                         let vAllies = Array.from(document.querySelectorAll('.slot[data-side="PLAYER"] .card')).filter(c => { let inst = cardInstances[c.id]; return inst && inst.type === 'unit' && inst.name !== "Lionel Guard Tower"; });
-                        if (vAllies.length === 0) { addLog(`Cannot place: No valid units fielded for One More Time.`, "red"); return; }
+                        if (vAllies.length === 0) { addLog(`Cannot place: No valid attacking units fielded for One More Time.`, "red"); return; }
                     }
-
                     if(pMana >= data.summonCost) {
                         pMana -= data.summonCost; data.turnPlaced = turnCount; slot.appendChild(cardEl);
-                        if(data.type === 'ability') addLog(`Set Ability Card.`, "#9b59b6");
-                        else addLog(`Summoned <b>${data.name}</b>`, "var(--mana-color)");
+                        if(data.name === "One More Time") { addLog(`Played <b>One More Time</b>. Auto-activating...`, "#9b59b6"); window.queueAction(cardId, 'Double Action', 0, false);
+                        } else if(data.type === 'ability') { addLog(`Set Ability Card.`, "#9b59b6");
+                        } else { addLog(`Summoned <b>${data.name}</b>`, "var(--mana-color)"); }
                         updateUI(); showInspector(cardId, cardEl);
                     } else addLog(`Not enough Mana!`, "red");
                 }
@@ -500,7 +418,7 @@ Test 2.3
                 if(data.queued) { html += `<div style="color:#f39c12;">[ACTION QUEUED]</div>`;
                 } else if(data.exhausted) { html += `<div style="color:#888;">[EXHAUSTED]</div>`;
                 } else {
-                    const canAct = (data.turnPlaced < turnCount || data.name === "One More Time");
+                    const canAct = (data.turnPlaced < turnCount);
                     if(turnCount > 1 && data.type === 'unit' && data.name !== "Lionel Guard Tower" && document.querySelectorAll('.slot.frontline[data-side="ENEMY"] .card').length === 0) {
                         html += `<button class="skill-btn" style="border-color:#e74c3c" ${canAct ? '' : 'disabled'} onclick="queueAction('${id}', 'ATTACK CORE', 0, true)"><span class="skill-name" style="color:#e74c3c">[ATTACK CORE]</span></button>`;
                     }
@@ -704,7 +622,6 @@ Test 2.3
             let eQueue = [];
             for(let id of summonable) {
                 let data = cardInstances[id];
-                
                 if(data.name === "One More Time") {
                     let vAllies = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card')).filter(c => cardInstances[c.id] && cardInstances[c.id].type === 'unit' && cardInstances[c.id].name !== "Lionel Guard Tower");
                     if(vAllies.length > 0 && eMana >= data.summonCost) {
