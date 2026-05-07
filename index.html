@@ -1,4 +1,4 @@
-Test 3.1
+Test 3.2
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1393,14 +1393,14 @@ Test 3.1
                                 let tDOM = currentTargetId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(currentTargetId);
                                 
                                 let lock = showJadenLock(tDOM);
-                                await shootBullet(actorDOM, tDOM);
+                                shootBullet(actorDOM, tDOM);
                                 playSound(jadenSfx1);
-                                if(lock) lock.remove();
+                                if(lock) setTimeout(() => lock.remove(), 200);
                                 
                                 let dmg = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
                                 await applyDamage(actor, currentTargetId, dmg, action.skillName);
                                 
-                                if (i < rounds - 1) await new Promise(r=>setTimeout(r, 50));
+                                if (i < rounds - 1) await new Promise(r=>setTimeout(r, 25));
                             }
                             actor.chamberedRounds = 0;
                         }
@@ -1421,17 +1421,17 @@ Test 3.1
                             
                             let tDOM = currentTargetId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(currentTargetId);
                             let lock = showJadenLock(tDOM);
-                            await shootBullet(actorDOM, tDOM);
+                            shootBullet(actorDOM, tDOM);
                             
                             if (action.skillName !== "Double-Shot" || i === 0) {
                                 playSound(sfx);
                             }
                             
-                            if(lock) lock.remove();
+                            if(lock) setTimeout(() => lock.remove(), 200);
                             
                             let dmg = Math.floor(Math.random() * (dmgMax - dmgMin + 1)) + dmgMin;
                             await applyDamage(actor, currentTargetId, dmg, action.skillName);
-                            if (i < shots - 1) await new Promise(r=>setTimeout(r, 90));
+                            if (i < shots - 1) await new Promise(r=>setTimeout(r, 50));
                         }
                         actor.chamberedRounds = (actor.chamberedRounds || 0) + roundGain;
                         
@@ -1447,9 +1447,9 @@ Test 3.1
                             
                             let tDOM = currentTargetId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(currentTargetId);
                             let lock2 = showJadenLock(tDOM);
-                            await shootBullet(actorDOM, tDOM);
+                            shootBullet(actorDOM, tDOM);
                             playSound(jadenSfx3);
-                            if(lock2) lock2.remove();
+                            if(lock2) setTimeout(() => lock2.remove(), 200);
                             let dmg2 = Math.floor(Math.random() * (dmgMax - dmgMin + 1)) + dmgMin;
                             await applyDamage(actor, currentTargetId, dmg2, "Extra Shot");
                             actor.chamberedRounds++;
