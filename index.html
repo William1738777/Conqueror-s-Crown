@@ -1,4 +1,4 @@
-Test 2.1 (rollback)
+Test 2.2
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1061,23 +1061,44 @@ Test 2.1 (rollback)
 
         // --- ANIMATED EXECUTION QUEUE ---
         async function processQueue(sideProcessing, queueArr) {
-            isExecuting = true; const q = [...queueArr]; if(sideProcessing === 'PLAYER') pQueue = []; updateUI();
+            isExecuting = true; 
+            
+            // [FIX]: Pre-sort the queue so Buffs and Mana resolve BEFORE attacks!
+            let q = [...queueArr].sort((a, b) => {
+                let aPrio = (a.skillName === "Double Action" || a.skillName === "Mana Initiation") ? 0 : 1;
+                let bPrio = (b.skillName === "Double Action" || b.skillName === "Mana Initiation") ? 0 : 1;
+                return aPrio - bPrio;
+            });
+            
+            if(sideProcessing === 'PLAYER') pQueue = []; 
+            updateUI();
 
-            for(let action of q) {
-                const actor = cardInstances[action.actorId]; const actorDOM = document.getElementById(action.actorId);
-                if(!actor || actor.hp <= 0 && actor.type !== 'ability') continue; 
+            for(let i=0; i<q.length; i++) {
+                let action = q[i];
+                const actor = cardInstances[action.actorId]; 
+                const actorDOM = document.getElementById(action.actorId);
+                
+                if(!actor || (actor.hp <= 0 && actor.type !== 'ability')) continue; 
                 actor.queued = false; 
                 
-                // Allow One More Time logic to bypass exhaustion
-                if (actor.extraAction && action.skillName !== "Double Action") {
-                    actor.extraAction = false;
-                    actor.exhausted = false;
-                    if(actorDOM) actorDOM.classList.remove('buff-double-action');
-                } else {
+                // Only exhaust and consume mana on the initial cast, not the recast
+                if (!action.isRecast) {
                     actor.exhausted = true;
+                    if(sideProcessing === 'PLAYER') pMana -= action.cost; 
+                    else eMana -= action.cost; 
                 }
+                updateUI(); 
 
-                if(sideProcessing === 'PLAYER') pMana -= action.cost; else eMana -= action.cost; updateUI(); 
+                // [RECAST FIX]: If unit has the buff, inject a duplicate free action directly after this one
+                if (actor.extraAction && action.skillName !== "Double Action" && action.skillName !== "Mana Initiation") {
+                    actor.extraAction = false;
+                    if(actorDOM) actorDOM.classList.remove('buff-double-action');
+                    addLog(`[ONE MORE TIME] <b>${actor.name}</b>'s action will trigger twice!`, "#9b59b6");
+                    
+                    // Create a clone of the action and splice it into the execution loop
+                    let cloneAction = { ...action, cost: 0, isRecast: true };
+                    q.splice(i + 1, 0, cloneAction); 
+                }
 
                 if (action.skillName === "Mana Initiation") {
                     if(actorDOM) {
@@ -1111,14 +1132,13 @@ Test 2.1 (rollback)
                         actorDOM.style.transition = "transform 0.5s ease";
                         actorDOM.style.transform = "scale(2.5)";
                         actorDOM.style.zIndex = "9999";
-                        await new Promise(r => setTimeout(r, 1000));
+                        await new Promise(r => setTimeout(r, 800));
                     }
                     
                     if(targetInst && targetDOM) {
-                        targetInst.extraAction = true;
-                        targetInst.exhausted = false;
-                        targetDOM.classList.add('buff-double-action');
-                        addLog(`<b>${targetInst.name}</b> is granted One More Time!`, "#9b59b6");
+                        targetInst.extraAction = true; // Flags the unit for Recast
+                        targetDOM.classList.add('buff-double-action'); // Leaves a persistent purple aura until they attack
+                        addLog(`<b>${targetInst.name}</b> is granted One More Time! (Will recast next action)`, "#9b59b6");
                     }
                     
                     if(actorDOM) {
@@ -1126,7 +1146,7 @@ Test 2.1 (rollback)
                         await new Promise(r => setTimeout(r, 300));
                         actorDOM.remove();
                     }
-                    actor.hp = 0;
+                    actor.hp = 0; // Mark the ability card as spent
                 } else if (action.skillName === "Blessing of the Light") {
                     let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
                     let targetInst = cardInstances[tId];
