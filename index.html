@@ -1,4 +1,4 @@
-Test 2.2
+Test 2.3
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -824,36 +824,50 @@ Test 2.2
                 } else { actor.tauntedBy = null; } 
             }
 
-            actor.queued = true;
-
+            // --- THE FIX: Specific Targeted Skills must come FIRST ---
             if(isCore) {
+                actor.queued = true;
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'CORE' };
                 pQueue.push(action); addLog(`Queued [${skillName}] on Enemy Core.`, "#aaa"); systemDetector("QUEUE", { action });
-            } else if (skillName === "Mana Initiation" || actor.type === 'ability') {
-                let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
-                pQueue.push(action); addLog(`Queued [${skillName}].`, "#aaa"); systemDetector("QUEUE", { action });
-            } else if (skillName === "Shield of Hope") {
-                let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'ALLIES_FRONT' };
-                pQueue.push(action); addLog(`Queued [${skillName}] on Frontline.`, "#3498db"); systemDetector("QUEUE", { action });
-            } else if (skillName === "Blessing of the Light") {
+            } 
+            else if (skillName === "Blessing of the Light") {
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
-                targetCountReq = 1; addLog("Select an Allied target to heal...", "#2ecc71");
+                targetCountReq = 1; actor.queued = true; // Lock the card while targeting
+                addLog("Select an Allied target to heal...", "#2ecc71");
                 document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => {
                     if(cardInstances[c.id].type === 'unit') c.classList.add('target-heal-glow');
                 });
-            } else if (skillName === "Double Action") {
+            } 
+            else if (skillName === "Double Action") {
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
-                targetCountReq = 1; addLog("Select an Allied unit for One More Time...", "#9b59b6");
+                targetCountReq = 1; actor.queued = true; // Lock the card while targeting
+                addLog("Select an Allied unit for One More Time...", "#9b59b6");
                 document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => {
                     if(cardInstances[c.id].type === 'unit') c.classList.add('target-buff-glow');
                 });
-            } else if (skillName === "Punishment of the Blessed") {
+            } 
+            else if (skillName === "Punishment of the Blessed") {
                 if(actor.blessings < 7) return addLog("Needs 7 Blessings!", "red");
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
-                targetCountReq = 1; addLog("Select an Enemy Frontline target...", "var(--gold)");
+                targetCountReq = 1; actor.queued = true;
+                addLog("Select an Enemy Frontline target...", "var(--gold)");
                 document.querySelectorAll('.slot.frontline[data-side="ENEMY"] .card').forEach(c => c.classList.add('target-glow'));
-            } else {
-                isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
+            } 
+            else if (skillName === "Shield of Hope") {
+                actor.queued = true;
+                let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'ALLIES_FRONT' };
+                pQueue.push(action); addLog(`Queued [${skillName}] on Frontline.`, "#3498db"); systemDetector("QUEUE", { action });
+            }
+            // --- The "Catch-All" for abilities that don't need targets (like Mana Core) ---
+            else if (skillName === "Mana Initiation" || actor.type === 'ability') {
+                actor.queued = true;
+                let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
+                pQueue.push(action); addLog(`Queued [${skillName}].`, "#aaa"); systemDetector("QUEUE", { action });
+            } 
+            else {
+                // Multi-target skills (NI) or standard Unit Attacks
+                isTargeting = true; actor.queued = true;
+                pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
                 if (skillName === "NI") {
                     let availableTargets = document.querySelectorAll('.slot[data-side="ENEMY"] .card').length;
                     targetCountReq = Math.min(2, availableTargets); 
@@ -865,26 +879,6 @@ Test 2.2
             }
             updateUI(); showInspector(actorId, document.getElementById(actorId));
         };
-
-        function handleTargetSelection(targetId) {
-            if (targetCountReq > 1) {
-                if (selectedTargets.includes(targetId)) return; 
-                selectedTargets.push(targetId);
-                document.getElementById(targetId).classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'target-buff-glow'); 
-                
-                if (selectedTargets.length < targetCountReq) { addLog(`Select Target ${selectedTargets.length + 1}...`, "var(--gold)"); return; }
-                
-                isTargeting = false; document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'target-buff-glow'));
-                let action = { ...pendingSkill, targetId: selectedTargets }; pQueue.push(action);
-                addLog(`Queued [${pendingSkill.skillName}] on ${selectedTargets.length} targets.`, "#aaa");
-                systemDetector("QUEUE", { action }); pendingSkill = null; selectedTargets = []; updateUI();
-            } else {
-                isTargeting = false; document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'target-buff-glow'));
-                let action = { ...pendingSkill, targetId }; pQueue.push(action);
-                addLog(`Queued [${pendingSkill.skillName}] on ${cardInstances[targetId].name}.`, "#aaa");
-                systemDetector("QUEUE", { action }); pendingSkill = null; updateUI();
-            }
-        }
 
         // --- Visual Effects ---
         function showFloatingText(targetDOM, text, color="#ff4d4d", fontSize="2rem") {
