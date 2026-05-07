@@ -1,4 +1,4 @@
-Test 3.2
+Test 3.3
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -121,6 +121,8 @@ Test 3.2
         .placed-badge { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(231, 76, 60, 0.9); color: white; padding: 3px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 3px; z-index: 25; pointer-events: none; text-shadow: 1px 1px 0 #000; border: 1px solid #fff;}
         .badge-blessing { position: absolute; top: -8px; left: 20px; background: #f1c40f; color: #111; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 26; box-shadow: 0 0 10px #f1c40f;}
         .badge-shield { position: absolute; bottom: 28px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
+        .badge-taunted { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #e74c3c); }
+        .badge-barrier { position: absolute; top: -8px; right: 15px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #3498db); }
 
         /* JADEN MECHANICS CSS */
         @keyframes pulse-lock {
@@ -300,7 +302,11 @@ Test 3.2
             "ArrowHit": "./assets/ArrowHit.mp3",
             "HealSound": "./assets/Heal.mp3",
             "KinSFX1": "./assets/KinSFX1.mp3",
-            "KinSFX2": "./assets/KinSFX2.mp3"
+            "KinSFX2": "./assets/KinSFX2.mp3",
+            "Taunted": "./assets/Taunted.png",
+            "Barrier": "./assets/Barrier.png",
+            "RolynSFX1": "./assets/RolynSFX1.mp3",
+            "RolynSFX2": "./assets/RolynSFX2.mp3"
         };
         // ============================================================================
 
@@ -329,6 +335,10 @@ Test 3.2
         let jadenSfx1 = '';
         let jadenSfx2 = '';
         let jadenSfx3 = '';
+        let rolynSfx1Url = '';
+        let rolynSfx2Url = '';
+        let tauntedImgUrl = '';
+        let barrierImgUrl = '';
         
         // System Flags
         let pQueue = []; 
@@ -380,6 +390,8 @@ Test 3.2
             if(cleanName.includes('jadensfx1')) { jadenSfx1 = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('jadensfx2')) { jadenSfx2 = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('jadensfx3')) { jadenSfx3 = dataUrl; return { isAudio: true }; }
+            if(cleanName.includes('rolynsfx1')) { rolynSfx1Url = dataUrl; return { isAudio: true }; }
+            if(cleanName.includes('rolynsfx2')) { rolynSfx2Url = dataUrl; return { isAudio: true }; }
 
             if(cleanName.includes('back_card') || cleanName.includes('back card') || cleanName.includes('crown back')) { return { isCardBack: true, img: dataUrl }; }
             if(cleanName.includes('slash')) { return { isSlash: true, img: dataUrl }; }
@@ -387,6 +399,8 @@ Test 3.2
             if(cleanName.includes('arrow_fx') || cleanName.includes('arrow fx')) { return { isArrow: true, img: dataUrl }; }
             if(cleanName.includes('shurikenkin_fx') || cleanName.includes('shuriken')) { return { isShuriken: true, img: dataUrl }; }
             if(cleanName.includes('mainmenubg')) { return { isMenuBG: true, img: dataUrl }; }
+            if(cleanName.includes('taunted')) { return { isIcon: true, iconType: 'taunted', img: dataUrl }; }
+            if(cleanName.includes('barrier')) { return { isIcon: true, iconType: 'barrier', img: dataUrl }; }
 
             let type = 'unit';
             if (cleanName.includes('ability') || cleanName.includes('skill') || cleanName.includes('spell') || cleanName.includes('magic') || cleanName.includes('mana core') || cleanName.includes('one more time')) type = 'ability';
@@ -404,8 +418,8 @@ Test 3.2
                     skills: [], passives: [{ name: "Guard Tower", desc: "Retaliates on allied attack (200 DMG)." }, { name: "Attack Tower", desc: "Assists allied attacks (100 DMG)." }, { name: "Structure Info", desc: "Passive rely." }] };
             }
             else if(cleanName.includes('rolyn')) {
-                return { isPlayable: true, type: 'unit', name: "Rolyn", title: "King of Leonia", powerLevel: 8, summonCost: 6, faction: "Leonia", race: "Human", hp: 2500, maxHp: 2500, atk: 300, img: dataUrl, marks: 0, queued: false, extraAction: false,
-                    skills: [{ name: "Lion's Challenge", manaCost: 2, desc: "Taunts target for 1 turn. 250 DMG." }, { name: "Royal Command", manaCost: 4, desc: "Commands 1-2 allies to team up on target." }], passives: [{ name: "Dauntless", desc: "Auto counter-attacks taunted units (300 DMG)." }] };
+                return { isPlayable: true, type: 'unit', name: "Rolyn", title: "King of Leonia", powerLevel: 7, summonCost: 6, faction: "Leonia", race: "Human", hp: 3000, maxHp: 3000, atk: 300, img: dataUrl, marks: 0, queued: false, extraAction: false,
+                    skills: [{ name: "Lion's Challenge", manaCost: 2, desc: "Slash the target enemy card to taunt them for 1 turn. Deals 250 damage." }, { name: "Lion's Roar", manaCost: 4, desc: "Target up to 3 enemy units and taunt them for 2 turns." }], passives: [{ name: "Dauntless", desc: "Counterattack taunted units (300-500 DMG). Heals for 50% of damage dealt." }] };
             }
             else if(cleanName.includes('althea')) {
                 return { isPlayable: true, type: 'unit', name: "Althea", title: "Guardian Deity (Level 7)", powerLevel: 7, summonCost: 4, faction: "Neutral", race: "Deity", hp: 1000, maxHp: 1000, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blessings: 0,
@@ -473,6 +487,9 @@ Test 3.2
                 } else if (cardData.isShuriken) {
                     shurikenImgUrl = cardData.img;
                     document.documentElement.style.setProperty('--shuriken-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
+                } else if (cardData.isIcon) {
+                    if (cardData.iconType === 'taunted') tauntedImgUrl = cardData.img;
+                    if (cardData.iconType === 'barrier') barrierImgUrl = cardData.img;
                 } else if (cardData.isAudio || cardData.isMenuBG || cardData.isFX) {
                     // Handled inside getCardTemplate side-effects
                 } else if (cardData.isPlayable) {
@@ -510,7 +527,7 @@ Test 3.2
                 const data = cardInstances[c.id];
                 if (!data) return;
                 
-                c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered').forEach(el => el.remove());
+                c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier').forEach(el => el.remove());
 
                 if(data.turnPlaced === turnCount) {
                     const b = document.createElement('div'); b.className = 'placed-badge'; b.innerText = '{PLACED}'; c.appendChild(b);
@@ -523,15 +540,31 @@ Test 3.2
                     cr.style.cssText = "position:absolute; top:20px; right:-5px; background:#e74c3c; color:white; border-radius:50%; width:24px; height:24px; display:flex; justify-content:center; align-items:center; font-size:0.8rem; font-weight:bold; border:1px solid #111; z-index:26; box-shadow:0 0 10px #e74c3c;";
                     cr.innerText = data.chamberedRounds; c.appendChild(cr);
                 }
+                
+                if (data.tauntedBy) {
+                    c.classList.add('taunted-status');
+                    if (tauntedImgUrl) {
+                        const ti = document.createElement('div'); ti.className = 'badge-taunted';
+                        ti.style.cssText = `position:absolute; top:-8px; right:-8px; width:24px; height:24px; background-image:url('${tauntedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #e74c3c);`;
+                        c.appendChild(ti);
+                    }
+                } else {
+                    c.classList.remove('taunted-status');
+                }
+
                 if(data.shield && data.shield > 0 && data.shieldTurns >= turnCount) {
                     const sh = document.createElement('div'); sh.className = 'badge-shield'; sh.innerText = '🛡 ' + data.shield; c.appendChild(sh);
+                    if (barrierImgUrl) {
+                        const bi = document.createElement('div'); bi.className = 'badge-barrier';
+                        bi.style.cssText = `position:absolute; top:-8px; right:15px; width:24px; height:24px; background-image:url('${barrierImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #3498db);`;
+                        c.appendChild(bi);
+                    }
                 } else {
                     data.shield = 0; 
                 }
 
                 if(data.queued) c.classList.add('queued-status'); else c.classList.remove('queued-status');
                 if(data.exhausted) c.classList.add('exhausted'); else c.classList.remove('exhausted');
-                if(data.tauntedBy) c.classList.add('taunted-status'); else c.classList.remove('taunted-status');
                 if(!data.extraAction) c.classList.remove('buff-double-action');
             });
         }
@@ -637,7 +670,7 @@ Test 3.2
                         if(targetInst.side === currentTurn && targetInst.type === 'unit' && !targetInst.exhausted && targetInst.turnPlaced < turnCount) validTarget = true;
                     } else if(pendingSkill.skillName === "Punishment of the Blessed") {
                         if(targetInst.side !== currentTurn && c.parentElement.classList.contains('frontline')) validTarget = true;
-                    } else if(pendingSkill.skillName === "Sniping Shot") {
+                    } else if(pendingSkill.skillName === "Sniping Shot" || pendingSkill.skillName === "Lion's Roar") {
                         if(targetInst.side !== currentTurn) validTarget = true;
                     } else {
                         if(targetInst.side !== currentTurn) {
@@ -707,7 +740,9 @@ Test 3.2
             if(isDeployed && data.side === 'PLAYER') {
                 html += `<div class="inspect-section"><b style="color:white">Actions</b><br>`;
                 
-                if(data.queued) {
+                if (data.tauntedBy) {
+                    html += `<div style="color:#e74c3c; font-size:0.75rem; font-weight:bold; margin-top:5px;">[TAUNTED: WILL AUTO-ATTACK]</div>`;
+                } else if(data.queued) {
                     html += `<div style="color:#f39c12; font-size:0.75rem; font-weight:bold; margin-top:5px;">[ACTION QUEUED]</div>`;
                 } else if(data.exhausted) {
                     html += `<div style="color:#888; font-size:0.75rem; font-weight:bold; margin-top:5px;">[EXHAUSTED]</div>`;
@@ -855,8 +890,18 @@ Test 3.2
                     let taunter = cardInstances[payload.actor.tauntedBy];
                     let tDOM = document.getElementById(payload.actor.tauntedBy);
                     if (taunter && taunter.hp > 0 && tDOM && tDOM.parentElement.classList.contains('slot') && taunter.name === "Rolyn") {
-                        addLog(`<b>System</b> [Dauntless]: Rolyn counter-attacks taunted unit for 300 DMG!`, "var(--gold)");
-                        await applyDamage(taunter, payload.actor.id, 300, "Dauntless");
+                        let counterDmg = Math.floor(Math.random() * 201) + 300;
+                        addLog(`<b>System</b> [Dauntless]: Rolyn counter-attacks taunted unit for ${counterDmg} DMG!`, "var(--gold)");
+                        if (rolynSfx1Url) playSound(rolynSfx1Url);
+                        triggerSlash(document.getElementById(payload.actor.id), true);
+                        await applyDamage(taunter, payload.actor.id, counterDmg, "Dauntless");
+                        
+                        let healAmt = Math.floor(counterDmg / 2);
+                        taunter.hp = Math.min(taunter.maxHp, taunter.hp + healAmt);
+                        if (tDOM && tDOM.querySelector('.badge-hp')) tDOM.querySelector('.badge-hp').innerText = taunter.hp;
+                        showFloatingText(tDOM, `+${healAmt}`, "#2ecc71", "1.5rem");
+                        triggerHeal(tDOM);
+                        addLog(`<b>Rolyn</b> heals for ${healAmt} HP from Dauntless!`, "#2ecc71");
                     }
                 }
 
@@ -892,22 +937,12 @@ Test 3.2
             if(actor.turnPlaced === turnCount) return addLog("Card has Summoning Sickness!", "red");
             if(turnCount === 1) return addLog("No combat allowed on Turn 1!", "red");
             if(actor.exhausted || actor.queued) return addLog("Card has already acted this turn!", "red");
+            if(actor.tauntedBy) return addLog("Taunted unit cannot be selected. It will auto-attack upon execution.", "red");
             
             // INSTANT MANA DEDUCTION
             if(pMana < cost) return addLog("Not enough Mana!", "red");
             pMana -= cost;
             
-            if (actor.tauntedBy) {
-                let taunterDOM = document.getElementById(actor.tauntedBy);
-                if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) {
-                    if (isCore || skillName !== "ATTACK") { addLog(`[TAUNTED] ${actor.name} must attack their taunter!`, "var(--gold)"); }
-                    actor.queued = true;
-                    let action = { actorId, actorName: actor.name, side: actor.side, skillName: "ATTACK", cost: actor.atk?1:0, targetId: actor.tauntedBy };
-                    pQueue.push(action); addLog(`Queued [Forced Attack] on Taunter.`, "#e74c3c");
-                    systemDetector("QUEUE", { action }); updateUI(); showInspector(actorId, document.getElementById(actorId)); return;
-                } else { actor.tauntedBy = null; } 
-            }
-
             actor.queued = true;
 
             if(isCore) {
@@ -951,6 +986,18 @@ Test 3.2
                 addLog("Select ANY Enemy target...", "var(--gold)");
                 // Bypasses protection
                 document.querySelectorAll(`.slot[data-side="${defSide}"] .card`).forEach(c => c.classList.add('target-glow'));
+            }
+            else if (skillName === "Lion's Roar") {
+                isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
+                let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+                let validIds = Array.from(document.querySelectorAll(`.slot[data-side="${defSide}"] .card`)).map(c => c.id);
+                targetCountReq = Math.min(3, validIds.length);
+                selectedTargets = []; addLog(`Select up to ${targetCountReq} Enemy targets for Lion's Roar...`, "var(--gold)");
+                validIds.forEach(tId => document.getElementById(tId).classList.add('target-glow'));
+                if (validIds.length === 0) {
+                    addLog("No enemies to target.", "#e74c3c");
+                    isTargeting = false; actor.queued = false; pMana += cost; pendingSkill = null;
+                }
             }
             else if (skillName === "Shield of Hope") {
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'ALLIES_FRONT' };
@@ -1056,9 +1103,9 @@ Test 3.2
             document.body.appendChild(el); setTimeout(() => el.remove(), 1200);
         }
 
-        function triggerSlash(targetDOM) {
+        function triggerSlash(targetDOM, muteBodyShot = false) {
             if(!targetDOM) return;
-            if(bodyShotAudioUrl) playSound(bodyShotAudioUrl);
+            if(!muteBodyShot && bodyShotAudioUrl) playSound(bodyShotAudioUrl);
             const slash = document.createElement('div'); slash.className = 'slash-fx'; targetDOM.appendChild(slash); setTimeout(() => slash.remove(), 600);
         }
 
@@ -1177,7 +1224,11 @@ Test 3.2
             let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK");
             let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
-            if(actorDOM && skillName !== "Passive" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden") {
+            if(actorDOM && skillName !== "Passive" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && skillName !== "Lion's Roar") {
+                if (actor.name === "Rolyn" && (skillName === "Lion's Challenge" || skillName === "Dauntless" || skillName === "ATTACK")) {
+                    if(rolynSfx1Url) playSound(rolynSfx1Url);
+                }
+
                 const aRect = actorDOM.getBoundingClientRect(); const cx = window.innerWidth / 2; const cy = window.innerHeight / 2;
                 const tX = cx - (aRect.left + aRect.width/2); const tY = cy - (aRect.top + aRect.height/2);
                 actorDOM.style.zIndex = "9999"; actorDOM.style.transition = "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
@@ -1185,15 +1236,19 @@ Test 3.2
                 actorDOM.style.transition = "transform 0.2s ease-in"; actorDOM.style.transform = "translate(0px, 0px) scale(1)"; await new Promise(r => setTimeout(r, 250));
             }
 
-            if(actorDOM && actor.type === 'unit' && targetDOM && actor.name !== "Lionel Guard Tower" && actor.name !== "Jaden" && skillName !== "SAN" && !skillName.includes("Punishment")) {
+            if(actorDOM && actor.type === 'unit' && targetDOM && actor.name !== "Lionel Guard Tower" && actor.name !== "Jaden" && skillName !== "SAN" && !skillName.includes("Punishment") && skillName !== "Lion's Roar") {
                 const aRect2 = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
                 const dX = (tRect.left + tRect.width/2) - (aRect2.left + aRect2.width/2); const dY = (tRect.top + tRect.height/2) - (aRect2.top + aRect2.height/2);
                 actorDOM.style.transition = "transform 0.15s cubic-bezier(0.4, 0, 1, 1)"; actorDOM.style.transform = `translate(${dX * 0.5}px, ${dY * 0.5}px) scale(1.3)`;
                 await new Promise(r => setTimeout(r, 150));
             }
 
-            if(targetDOM && skillName !== "SAN") {
-                if(isSlash) triggerSlash(targetDOM); 
+            if(targetDOM && skillName !== "SAN" && skillName !== "Lion's Roar") {
+                if(isSlash) {
+                    let muteBS = false;
+                    if (actor.name === "Rolyn" && (skillName === "Lion's Challenge" || skillName === "Dauntless" || skillName === "ATTACK")) muteBS = true;
+                    triggerSlash(targetDOM, muteBS); 
+                }
                 targetDOM.classList.remove("shake-anim"); void targetDOM.offsetWidth;
                 targetDOM.classList.add("shake-anim"); 
             }
@@ -1217,7 +1272,7 @@ Test 3.2
                           showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
                           addLog(`${targetInst.name}'s shield absorbed ${absorbed} damage and broke!`, '#3498db');
                      }
-                } else if(skillName !== "SAN") {
+                } else if(skillName !== "SAN" && skillName !== "Lion's Roar") {
                      showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
                 }
 
@@ -1230,7 +1285,7 @@ Test 3.2
             }
 
             await new Promise(r => setTimeout(r, 300)); 
-            if(actorDOM && skillName !== "SAN" && actor.name !== "Jaden") {
+            if(actorDOM && skillName !== "SAN" && actor.name !== "Jaden" && skillName !== "Lion's Roar") {
                 actorDOM.style.transition = "transform 0.3s ease-out"; actorDOM.style.transform = "scale(1) translate(0, 0)";
                 await new Promise(r => setTimeout(r, 300)); actorDOM.style.zIndex = ""; actorDOM.style.transition = ""; 
             }
@@ -1240,6 +1295,23 @@ Test 3.2
         // --- ANIMATED EXECUTION QUEUE ---
         async function processQueue(sideProcessing, queueArr) {
             isExecuting = true; 
+
+            // Auto-queue forced attacks for taunted player units
+            if (sideProcessing === 'PLAYER') {
+                let activePlayerUnits = Object.values(cardInstances).filter(c => c.side === 'PLAYER' && c.tauntedBy && c.hp > 0 && c.turnPlaced < turnCount && !c.exhausted);
+                activePlayerUnits.forEach(u => {
+                    let taunterDOM = document.getElementById(u.tauntedBy);
+                    if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) {
+                        u.queued = true;
+                        if (!queueArr.some(a => a.actorId === u.id)) {
+                            queueArr.push({ actorId: u.id, actorName: u.name, side: u.side, skillName: "ATTACK", cost: 0, targetId: u.tauntedBy });
+                            addLog(`[TAUNTED] ${u.name} is forced to attack!`, "#e74c3c");
+                        }
+                    } else {
+                        u.tauntedBy = null;
+                    }
+                });
+            }
             
             let q = [...queueArr].sort((a, b) => {
                 let aPrio = (a.skillName === "Double Action" || a.skillName === "Mana Initiation") ? 0 : 1;
@@ -1296,7 +1368,6 @@ Test 3.2
                     addLog(`<b>${actor.name}</b> shielded ${shieldedCount} allies!`, "#3498db");
                     await new Promise(r => setTimeout(r, 600));
                 } else if (action.skillName === "Double Action") {
-                    // Safe AI execution block for Double Action
                     let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
                     let targetInst = cardInstances[tId];
                     let targetDOM = document.getElementById(tId);
@@ -1368,6 +1439,27 @@ Test 3.2
                          await applyDamage(actor, tId, dmg, action.skillName);
                     }
                     if(actorDOM) { actorDOM.style.transform = "scale(1) translateY(0)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
+                } else if (action.skillName === "Lion's Roar") {
+                    if (rolynSfx2Url) playSound(rolynSfx2Url);
+                    if(actorDOM) {
+                        actorDOM.style.transition = "transform 0.4s ease"; actorDOM.style.transform = "scale(1.2)";
+                        await new Promise(r => setTimeout(r, 400));
+                    }
+                    let targetsToTaunt = Array.isArray(action.targetId) ? action.targetId : [action.targetId];
+                    for (let tId of targetsToTaunt) {
+                        let targetInst = cardInstances[tId];
+                        let targetDOM = document.getElementById(tId);
+                        if (targetInst && targetInst.hp > 0 && tId !== 'CORE') {
+                            targetInst.tauntedBy = actor.id;
+                            targetInst.tauntedTurn = turnCount + 1; // 2 turns
+                            if (targetDOM) {
+                                targetDOM.classList.add('taunted-status');
+                                showFloatingText(targetDOM, "TAUNTED", "#f39c12", "1.5rem");
+                            }
+                            addLog(`<b>${actor.name}</b> taunted ${targetInst.name}!`, "#f39c12");
+                        }
+                    }
+                    if(actorDOM) { actorDOM.style.transform = "scale(1)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
                 } else if (actor.name === "Jaden" && ["Sniping Shot", "Double-Shot", "Trigger Unbound"].includes(action.skillName)) {
                     let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
                     let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
@@ -1465,7 +1557,7 @@ Test 3.2
                             dmg = Math.floor(Math.random() * 101) + 300; marksToApply = 1; 
                         } else dmg = actor.atk;
                     } else if (actor.name === "Rolyn") {
-                        if (action.skillName === "Lion's Challenge") dmg = 250; else if (action.skillName === "Royal Command") dmg = 200;
+                        if (action.skillName === "Lion's Challenge") dmg = 250;
                     }
 
                     let targetsToHit = Array.isArray(action.targetId) ? action.targetId : [action.targetId]; 
@@ -1473,7 +1565,7 @@ Test 3.2
                     
                     let finalTargets = [];
                     for (let tId of targetsToHit) {
-                        if (tId !== 'CORE' && action.skillName !== "Royal Assist" && action.skillName !== "ICHI_REROLL") {
+                        if (tId !== 'CORE' && action.skillName !== "ICHI_REROLL") {
                             let validIds = getValidEnemyTargetIds(defSide);
                             if (validIds.length > 0 && !validIds.includes(tId)) {
                                 let newTid = validIds[Math.floor(Math.random() * validIds.length)];
@@ -1498,15 +1590,6 @@ Test 3.2
                         if (!targetDied && targetInst && tId !== 'CORE') {
                             if (marksToApply > 0) { targetInst.marks += marksToApply; setTimeout(() => showFloatingText(targetDOM, "Shinobi's Mark Inflicted", "#2ecc71", "1rem"), 400); }
                             if (action.skillName === "Lion's Challenge") { targetInst.tauntedBy = actor.id; targetInst.tauntedTurn = turnCount; targetDOM.classList.add('taunted-status'); setTimeout(() => showFloatingText(targetDOM, "TAUNTED", "#f39c12", "1.5rem"), 400); }
-                        }
-
-                        if (action.skillName === "Royal Command" && (!targetDied || tId === 'CORE')) {
-                            let activeCardsOnBoard = Object.values(cardInstances).filter(c => { let el = document.getElementById(c.id); return el && el.parentElement && el.parentElement.classList.contains('slot'); });
-                            let allies = activeCardsOnBoard.filter(c => c.side === actor.side && c.type === 'unit' && c.id !== actor.id); allies = allies.sort(() => Math.random() - 0.5).slice(0, 2);
-                            for(let ally of allies) {
-                                let assistDmg = Math.floor((ally.atk || 150) * 1.2); addLog(`<b>${ally.name}</b> follows Royal Command!`, "var(--gold)");
-                                targetDied = await applyDamage(ally, tId, assistDmg, "Royal Assist"); if (targetDied && tId !== 'CORE') break;
-                            }
                         }
 
                         if (secondDmg > 0 && (!targetDied || tId === 'CORE')) { addLog(`<b>KIN-RYU</b> [ICHI Reroll]: Strikes again!`, '#e74c3c'); targetDied = await applyDamage(actor, tId, secondDmg, "ICHI_REROLL"); }
@@ -1586,6 +1669,7 @@ Test 3.2
             if(turnCount > 1) {
                 let activeEnemyUnits = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card')).map(c => cardInstances[c.id]).filter(d => d.turnPlaced < turnCount && !d.exhausted && d.name !== "Lionel Guard Tower");
                 for(let data of activeEnemyUnits) {
+                    if (data.queued) continue; 
                     if(data.skills.length > 0 || data.type === 'unit') {
                         let validSkills = data.skills.filter(s => {
                             if (s.name === "Trigger Unbound" && (data.chamberedRounds || 0) === 0) return false;
@@ -1618,6 +1702,15 @@ Test 3.2
                                     }
                                     if (!action && isFrontClear && Math.random() > 0.3) { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "ATTACK", cost: 0, targetId: 'CORE' }; }
                                     else if (!action && pTargets.length > 0 && validSkills.length > 0) { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: validSkills[Math.floor(Math.random() * validSkills.length)].name, cost: cost, targetId: pTargets[Math.floor(Math.random()*pTargets.length)].id }; }
+                                }
+                                else if (data.name === "Rolyn") {
+                                     let allPTargets = Array.from(document.querySelectorAll('.slot[data-side="PLAYER"] .card')).filter(c=>c);
+                                     if (eMana >= 4 && allPTargets.length > 0) { 
+                                         let tIds = allPTargets.sort(() => 0.5 - Math.random()).slice(0, 3).map(c=>c.id);
+                                         action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "Lion's Roar", cost: 4, targetId: tIds }; 
+                                     } else if (eMana >= 2 && pTargets.length > 0) {
+                                         action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "Lion's Challenge", cost: 2, targetId: pTargets[Math.floor(Math.random()*pTargets.length)].id };
+                                     }
                                 }
                                 else if(isFrontClear && Math.random() > 0.3) { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "ATTACK", cost: 0, targetId: 'CORE' }; } 
                                 else if(pTargets.length > 0 && validSkills.length > 0) { 
