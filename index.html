@@ -1,4 +1,4 @@
-Test 3.4
+Test 3.5
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -899,7 +899,12 @@ Test 3.4
                         taunter.hp = Math.min(taunter.maxHp, taunter.hp + healAmt);
                         if (tDOM && tDOM.querySelector('.badge-hp')) tDOM.querySelector('.badge-hp').innerText = taunter.hp;
                         showFloatingText(tDOM, `+${healAmt}`, "#2ecc71", "1.5rem");
-                        triggerHeal(tDOM);
+                        
+                        // Custom green glow for Rolyn
+                        tDOM.style.transition = "box-shadow 0.3s ease";
+                        tDOM.style.boxShadow = "0 0 25px #2ecc71, inset 0 0 15px #2ecc71";
+                        setTimeout(() => { tDOM.style.boxShadow = ""; setTimeout(() => { tDOM.style.transition = ""; }, 300); }, 500);
+
                         addLog(`<b>Rolyn</b> heals for ${healAmt} HP from Dauntless!`, "#2ecc71");
                     }
                 }
@@ -1450,7 +1455,7 @@ Test 3.4
                         let targetDOM = document.getElementById(tId);
                         if (targetInst && targetInst.hp > 0 && tId !== 'CORE') {
                             targetInst.tauntedBy = actor.id;
-                            targetInst.tauntedTurn = turnCount + 1; // 2 turns
+                            targetInst.tauntedTurn = turnCount + (actor.side === 'ENEMY' ? 2 : 1); // Dynamic turn offset
                             if (targetDOM) {
                                 targetDOM.classList.add('taunted-status');
                                 showFloatingText(targetDOM, "TAUNTED", "#f39c12", "1.5rem");
@@ -1588,7 +1593,12 @@ Test 3.4
                         
                         if (!targetDied && targetInst && tId !== 'CORE') {
                             if (marksToApply > 0) { targetInst.marks += marksToApply; setTimeout(() => showFloatingText(targetDOM, "Shinobi's Mark Inflicted", "#2ecc71", "1rem"), 400); }
-                            if (action.skillName === "Lion's Challenge") { targetInst.tauntedBy = actor.id; targetInst.tauntedTurn = turnCount; targetDOM.classList.add('taunted-status'); setTimeout(() => showFloatingText(targetDOM, "TAUNTED", "#f39c12", "1.5rem"), 400); }
+                            if (action.skillName === "Lion's Challenge") { 
+                                targetInst.tauntedBy = actor.id; 
+                                targetInst.tauntedTurn = turnCount + (actor.side === 'ENEMY' ? 1 : 0); // Dynamic turn offset
+                                targetDOM.classList.add('taunted-status'); 
+                                setTimeout(() => showFloatingText(targetDOM, "TAUNTED", "#f39c12", "1.5rem"), 400); 
+                            }
                         }
 
                         if (secondDmg > 0 && (!targetDied || tId === 'CORE')) { addLog(`<b>KIN-RYU</b> [ICHI Reroll]: Strikes again!`, '#e74c3c'); targetDied = await applyDamage(actor, tId, secondDmg, "ICHI_REROLL"); }
