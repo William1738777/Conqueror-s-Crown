@@ -1,4 +1,4 @@
-test 2.6
+Test 2.7
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -414,6 +414,7 @@ test 2.6
             document.getElementById('upload-box').style.display = 'none';
             document.getElementById('absorbing-text').style.display = 'block';
 
+            // Start music immediately after user interaction grants audio permissions
             if(menuMusicUrl && !menuAudioEl) {
                 menuAudioEl = new Audio(menuMusicUrl);
                 menuAudioEl.loop = true;
@@ -471,6 +472,7 @@ test 2.6
             document.getElementById('exec-btn').innerText = `EXECUTE PENDING (${pQueue.length})`;
             document.getElementById('exec-btn').disabled = isExecuting || pQueue.length === 0;
             
+            // --- FIX A: Cancel button is visible during targeting ---
             document.getElementById('cancel-btn').style.display = (pQueue.length > 0 || isTargeting) ? "block" : "none";
             document.getElementById('cancel-btn').disabled = isExecuting || (pQueue.length === 0 && !isTargeting);
             
@@ -481,6 +483,7 @@ test 2.6
                 const data = cardInstances[c.id];
                 if (!data) return;
                 
+                // Clear dynamic badges
                 c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield').forEach(el => el.remove());
 
                 if(data.turnPlaced === turnCount) {
@@ -492,7 +495,7 @@ test 2.6
                 if(data.shield && data.shield > 0 && data.shieldTurns >= turnCount) {
                     const sh = document.createElement('div'); sh.className = 'badge-shield'; sh.innerText = '🛡 ' + data.shield; c.appendChild(sh);
                 } else {
-                    data.shield = 0; 
+                    data.shield = 0; // Shield expired
                 }
 
                 if(data.queued) c.classList.add('queued-status'); else c.classList.remove('queued-status');
@@ -597,8 +600,11 @@ test 2.6
                     let validTarget = false;
                     let targetInst = cardInstances[id]; 
                     
-                    if(pendingSkill.skillName === "Blessing of the Light" || pendingSkill.skillName === "Double Action") {
+                    if(pendingSkill.skillName === "Blessing of the Light") {
                         if(targetInst.side === currentTurn && targetInst.type === 'unit') validTarget = true;
+                    } else if(pendingSkill.skillName === "Double Action") {
+                        // Exhaustion Zombie Fix: Target must not be exhausted and not summoned this turn
+                        if(targetInst.side === currentTurn && targetInst.type === 'unit' && !targetInst.exhausted && targetInst.turnPlaced < turnCount) validTarget = true;
                     } else if(pendingSkill.skillName === "Punishment of the Blessed") {
                         if(targetInst.side !== currentTurn && c.parentElement.classList.contains('frontline')) validTarget = true;
                     } else {
@@ -715,14 +721,41 @@ test 2.6
             inspect.innerHTML = html;
         }
 
-        // --- CANCEL QUEUE ---
+        // --- CANCEL PENDING WITH MANA & GHOST AURA REFUND ---
         document.getElementById('cancel-btn').addEventListener('click', () => {
             if(isExecuting) return;
-            pQueue.forEach(a => { if(cardInstances[a.actorId]) cardInstances[a.actorId].queued = false; });
             
+            // Refund Queued Actions
+            pQueue.forEach(a => { 
+                if(cardInstances[a.actorId]) cardInstances[a.actorId].queued = false; 
+                pMana += a.cost;
+            });
+            
+            // Refund Active Targeting Action
             if(pendingSkill && cardInstances[pendingSkill.actorId]) {
                 cardInstances[pendingSkill.actorId].queued = false;
+                pMana += pendingSkill.cost;
             }
+
+            // OMT Ghost Aura Wipe & Card Refund
+            let omtRefundCount = 0;
+            Object.values(cardInstances).forEach(c => {
+                if (c.extraAction && c.side === 'PLAYER') {
+                    c.extraAction = false;
+                    let dDOM = document.getElementById(c.id);
+                    if(dDOM) dDOM.classList.remove('buff-double-action');
+                    omtRefundCount++;
+                }
+            });
+            
+            // Re-create the OMT cards back in hand so they aren't lost
+            for(let i=0; i<omtRefundCount; i++) {
+                const omtData = getCardTemplate("One More Time", ASSET_LINKS["One More Time"]);
+                const cardId = 'card_' + Math.random().toString(36).substr(2, 9);
+                cardInstances[cardId] = { ...omtData, id: cardId, exhausted: false, queued: false, side: 'PLAYER', turnPlaced: turnCount, tauntedBy: null };
+                document.getElementById('hand').appendChild(createCardDOM(cardId, cardInstances[cardId]));
+            }
+            if(omtRefundCount > 0) addLog(`${omtRefundCount}x One More Time cancelled & refunded to hand.`, "#9b59b6");
             
             pQueue = []; isTargeting = false; pendingSkill = null; selectedTargets = [];
             document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'target-buff-glow'));
@@ -822,6 +855,10 @@ test 2.6
             if(turnCount === 1) return addLog("No combat allowed on Turn 1!", "red");
             if(actor.exhausted || actor.queued) return addLog("Card has already acted this turn!", "red");
             
+            // INSTANT MANA DEDUCTION FIX
+            if(pMana < cost) return addLog("Not enough Mana!", "red");
+            pMana -= cost;
+            
             if (actor.tauntedBy) {
                 let taunterDOM = document.getElementById(actor.tauntedBy);
                 if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) {
@@ -833,14 +870,15 @@ test 2.6
                 } else { actor.tauntedBy = null; } 
             }
 
+            actor.queued = true;
+
             if(isCore) {
-                actor.queued = true;
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'CORE' };
                 pQueue.push(action); addLog(`Queued [${skillName}] on Enemy Core.`, "#aaa"); systemDetector("QUEUE", { action });
             } 
             else if (skillName === "Blessing of the Light") {
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
-                targetCountReq = 1; actor.queued = true;
+                targetCountReq = 1; 
                 addLog("Select an Allied target to heal...", "#2ecc71");
                 document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => {
                     if(cardInstances[c.id].type === 'unit') c.classList.add('target-heal-glow');
@@ -848,31 +886,36 @@ test 2.6
             } 
             else if (skillName === "Double Action") {
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
-                targetCountReq = 1; actor.queued = true;
+                targetCountReq = 1; 
                 addLog("Select an Allied unit for One More Time...", "#9b59b6");
                 document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => {
-                    if(cardInstances[c.id].type === 'unit') c.classList.add('target-buff-glow');
+                    let tInst = cardInstances[c.id];
+                    // Exhaustion Zombie Fix: Only highlight non-exhausted, active units
+                    if(tInst && tInst.type === 'unit' && !tInst.exhausted && tInst.turnPlaced < turnCount) {
+                        c.classList.add('target-buff-glow');
+                    }
                 });
             } 
             else if (skillName === "Punishment of the Blessed") {
-                if(actor.blessings < 7) return addLog("Needs 7 Blessings!", "red");
+                if(actor.blessings < 7) {
+                    pMana += cost; actor.queued = false; // Refund if blocked
+                    return addLog("Needs 7 Blessings!", "red");
+                }
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
-                targetCountReq = 1; actor.queued = true;
+                targetCountReq = 1; 
                 addLog("Select an Enemy Frontline target...", "var(--gold)");
                 document.querySelectorAll('.slot.frontline[data-side="ENEMY"] .card').forEach(c => c.classList.add('target-glow'));
             } 
             else if (skillName === "Shield of Hope") {
-                actor.queued = true;
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'ALLIES_FRONT' };
                 pQueue.push(action); addLog(`Queued [${skillName}] on Frontline.`, "#3498db"); systemDetector("QUEUE", { action });
             }
             else if (skillName === "Mana Initiation" || actor.type === 'ability') {
-                actor.queued = true;
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
                 pQueue.push(action); addLog(`Queued [${skillName}].`, "#aaa"); systemDetector("QUEUE", { action });
             } 
             else {
-                isTargeting = true; actor.queued = true;
+                isTargeting = true; 
                 pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
                 
                 let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
@@ -899,7 +942,7 @@ test 2.6
         };
 
         function handleTargetSelection(targetId) {
-            // --- INSTANT CAST FIX FOR ONE MORE TIME ---
+            // --- INSTANT CAST OMT ---
             if (pendingSkill && pendingSkill.skillName === "Double Action") {
                 isTargeting = false; 
                 document.querySelectorAll('.card').forEach(c => c.classList.remove('target-buff-glow', 'target-glow', 'target-heal-glow', 'target-line-glow'));
@@ -933,6 +976,7 @@ test 2.6
                 return;
             }
 
+            // Normal Target Queuing
             if (targetCountReq > 1) {
                 if (selectedTargets.includes(targetId)) return; 
                 selectedTargets.push(targetId);
@@ -1149,8 +1193,7 @@ test 2.6
                 
                 if (!action.isRecast) {
                     actor.exhausted = true;
-                    if(sideProcessing === 'PLAYER') pMana -= action.cost; 
-                    else eMana -= action.cost; 
+                    // Note: Mana is no longer deducted here. It is locked in immediately at targeting!
                 }
                 updateUI(); 
 
@@ -1222,7 +1265,7 @@ test 2.6
                          targetInst.hp = Math.min(targetInst.maxHp || targetInst.hp + heal, targetInst.hp + heal);
                          showFloatingText(targetDOM, `+${heal}`, "#2ecc71", "2.5rem");
                          targetDOM.classList.add('shimmer-fx');
-                         triggerHeal(targetDOM); 
+                         triggerHeal(targetDOM); // Added HealFX execution
                          if(healAudioUrl) playSound(healAudioUrl);
                          actor.blessings = (actor.blessings || 0) + 1;
                          targetDOM.querySelector('.badge-hp').innerText = targetInst.hp;
@@ -1273,8 +1316,30 @@ test 2.6
                         if (action.skillName === "Lion's Challenge") dmg = 250; else if (action.skillName === "Royal Command") dmg = 200;
                     }
 
-                    let targetsToHit = Array.isArray(action.targetId) ? action.targetId : [action.targetId]; let defSide = sideProcessing === 'PLAYER' ? 'ENEMY' : 'PLAYER';
-                    for(let tId of targetsToHit) {
+                    let targetsToHit = Array.isArray(action.targetId) ? action.targetId : [action.targetId]; 
+                    let defSide = sideProcessing === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+                    
+                    // THE PROTECTION WALL VACUUM 
+                    let finalTargets = [];
+                    for (let tId of targetsToHit) {
+                        if (tId !== 'CORE' && action.skillName !== "Royal Assist" && action.skillName !== "ICHI_REROLL") {
+                            let validIds = getValidEnemyTargetIds(defSide);
+                            if (validIds.length > 0 && !validIds.includes(tId)) {
+                                let newTid = validIds[Math.floor(Math.random() * validIds.length)];
+                                addLog(`Target protected! Redirected to ${cardInstances[newTid].name}.`, "#3498db");
+                                finalTargets.push(newTid);
+                            } else if (validIds.length === 0) {
+                                addLog(`Defenses broken! Redirected to CORE.`, "#2ecc71");
+                                finalTargets.push('CORE');
+                            } else {
+                                finalTargets.push(tId);
+                            }
+                        } else {
+                            finalTargets.push(tId);
+                        }
+                    }
+
+                    for(let tId of finalTargets) {
                         if (tId !== 'CORE' && (!cardInstances[tId] || cardInstances[tId].hp <= 0)) continue;
                         let targetDied = await applyDamage(actor, tId, dmg, action.skillName);
                         let targetInst = cardInstances[tId]; let targetDOM = document.getElementById(tId);
@@ -1378,7 +1443,12 @@ test 2.6
                                 else if(isFrontClear && Math.random() > 0.3) { action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "ATTACK", cost: cost, targetId: 'CORE' }; } 
                                 else if(pTargets.length > 0) { let target = pTargets[Math.floor(Math.random()*pTargets.length)]; action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "ATTACK", cost: cost, targetId: target.id }; }
                             }
-                            if (action) { data.queued = true; eQueue.push(action); systemDetector("QUEUE", { action }); }
+                            if (action) { 
+                                eMana -= action.cost; 
+                                data.queued = true; 
+                                eQueue.push(action); 
+                                systemDetector("QUEUE", { action }); 
+                            }
                         }
                     }
                 }
