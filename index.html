@@ -1,4 +1,4 @@
-Test 4.12 (Massive UI Update)
+Test 4.13
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -132,14 +132,15 @@ Test 4.12 (Massive UI Update)
             flex-shrink: 0; 
         }
         .left-panel { 
-            width: 500px; 
+            flex: 1; /* Changed to flex proportions to let center breathe */
+            max-width: 500px;
             position: relative;
         }
         .right-panel { 
             width: 320px; 
         }
         .center-panel { 
-            flex-grow: 1; 
+            flex: 2.5; /* Emphasizes the battlefield */
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -151,14 +152,13 @@ Test 4.12 (Massive UI Update)
 
         /* --- OVERHAULED COLORLESS SECTOR UI --- */
         #card-inspector { 
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr; 
-            grid-template-rows: auto 1fr 90px; 
-            gap: 12px; 
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             height: 100%; 
             flex-grow: 1;
             background: rgba(10, 10, 15, 0.95);
-            border: 1px solid #444; 
+            border: 1px solid #333; 
             border-radius: 12px;
             padding: 15px; 
             box-sizing: border-box; 
@@ -166,17 +166,16 @@ Test 4.12 (Massive UI Update)
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
 
-        /* Centered Header Logic */
         #inspect-header-sector { 
-            grid-column: 1 / span 2; 
-            grid-row: 1; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
             border-bottom: 1px solid #333; 
             padding-bottom: 10px;
+            flex-shrink: 0;
         }
+
         #inspect-logo-box { 
             width: 120px; 
             height: 35px; 
@@ -186,6 +185,7 @@ Test 4.12 (Massive UI Update)
             background-position: center; 
             margin-bottom: 5px;
         }
+
         #inspect-title-group { 
             display: flex; 
             flex-direction: column; 
@@ -193,54 +193,91 @@ Test 4.12 (Massive UI Update)
             text-align: center;
         }
 
-        #inspect-skills-sector { 
-            grid-column: 1; 
-            grid-row: 2 / span 2; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 8px; 
-            overflow-y: auto; 
-            padding-right: 5px; 
-        }
-        #inspect-skills-sector::-webkit-scrollbar { width: 5px; } 
-        #inspect-skills-sector::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 5px;}
-        
-        #inspect-card-sector { 
-            grid-column: 2; 
-            grid-row: 2; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 10px; 
+        #inspect-body {
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+            flex-grow: 1;
             overflow: hidden;
         }
 
-        /* Stripped neon green - now wireframe/colorless */
+        .inspect-col-left {
+            width: 160px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .inspect-col-right {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .inspect-art { 
+            width: 100%; 
+            aspect-ratio: 140 / 196;
+            object-fit: cover; 
+            border-radius: 6px; 
+            border: 1px solid #444; 
+            background: #111; 
+            display: block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
         .inspect-status-green-box { 
             width: 100%; 
             flex-grow: 1; 
-            background: rgba(255, 255, 255, 0.03); 
+            background: rgba(0, 0, 0, 0.4); 
             border: 1px solid #333; 
             border-radius: 6px; 
-            padding: 8px; 
+            padding: 10px; 
             font-size: 0.75rem; 
             color: #ccc; 
             overflow-y: auto; 
             box-sizing: border-box;
         }
-        
-        /* Stripped neon red - now wireframe/colorless */
+
+        #inspect-skills-sector { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            overflow-y: auto; 
+            padding-right: 5px; 
+            flex-grow: 1;
+        }
+        #inspect-skills-sector::-webkit-scrollbar { width: 5px; } 
+        #inspect-skills-sector::-webkit-scrollbar-thumb { background: #444; border-radius: 5px;}
+
         #inspect-summoning-sector { 
-            grid-column: 2; 
-            grid-row: 3; 
-            border: 1px solid #444; 
-            background: rgba(255, 255, 255, 0.03); 
+            border: 1px dashed #444; 
+            background: rgba(0, 0, 0, 0.6); 
             border-radius: 8px; 
+            padding: 15px; 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             align-items: center; 
             text-align: center; 
+            flex-shrink: 0;
+        }
+
+        .summon-label {
+            font-size: 0.65rem; 
+            color: #888; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            margin-bottom: 5px;
+        }
+
+        #inspect-summon-val { 
+            font-size: 1.8rem; 
+            color: var(--mana-color); 
+            font-weight: bold; 
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.4);
         }
 
         /* NEW DYNAMIC MANA UI */
@@ -531,6 +568,12 @@ Test 4.12 (Massive UI Update)
             transition: 0.3s ease;
         }
         
+        /* Bug Fix: Animation Race Condition Fix */
+        .slot.attacking-slot {
+            overflow: visible !important;
+            z-index: 9999 !important;
+        }
+
         /* Aether Swirl Backgrounds */
         .slot::before { 
             content: ''; 
@@ -701,7 +744,6 @@ Test 4.12 (Massive UI Update)
         .inspect-hp-trail { position: absolute; top: 0; left: 0; height: 100%; width: 100%; background: #e74c3c; box-shadow: 0 0 12px #e74c3c; transition: width 0.5s ease-out 0.4s; }
         .inspect-hp-current { position: absolute; top: 0; left: 0; height: 100%; width: 100%; background: linear-gradient(90deg, #1e8449, #2ecc71); box-shadow: 0 0 18px #2ecc71, inset 0 0 8px rgba(255,255,255,0.6); border-right: 2px solid #fff; transition: width 0.15s ease-out; animation: hp-glow-pulse 1.5s infinite alternate; }
         .inspect-hp-number { width: 45px; background: #2ecc71; color: #000; font-weight: bold; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: background 0.15s ease-out, color 0.15s ease-out; box-shadow: inset 2px 0 8px rgba(0,0,0,0.4);}
-        .inspect-art { width: 100%; flex: 1 1 auto; min-height: 0; object-fit: contain; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: transparent; display: block;}
         .status-item { display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px dotted rgba(255,255,255,0.2); padding-bottom: 6px; margin-bottom: 6px;}
         .status-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0;}
         .status-icon { width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; flex-shrink: 0; filter: drop-shadow(0 0 2px #000); }
@@ -786,7 +828,7 @@ Test 4.12 (Massive UI Update)
         }
 
     </style>
-</head>
+    </head>
 <body onclick="playClickSound()">
 
     <div id="start-screen">
@@ -805,6 +847,7 @@ Test 4.12 (Massive UI Update)
 
     <div id="game-area">
         <div class="side-panel left-panel">
+            
             <div id="card-inspector">
                 <div id="inspect-header-sector">
                     <div id="inspect-logo-box"></div>
@@ -814,21 +857,26 @@ Test 4.12 (Massive UI Update)
                     </div>
                 </div>
 
-                <div id="inspect-skills-sector">
-                    <div class="empty-inspector">No actions available.</div>
-                </div>
-
-                <div id="inspect-card-sector">
-                    <img id="inspect-art-fixed" class="inspect-art" style="width:100%; max-height:160px; object-fit:cover; display:none;">
-                    <div id="inspect-hp-target" style="width:100%;"></div>
-                    <div class="inspect-status-green-box" id="inspect-status-box">
-                        <div style="text-align:center; color:#666; font-style:italic; margin-top:20px;">No card selected.</div>
+                <div id="inspect-body">
+                    <div class="inspect-col-left">
+                        <img id="inspect-art-fixed" class="inspect-art" style="display:none;">
+                        <div id="inspect-hp-target" style="width:100%;"></div>
+                        
+                        <div class="inspect-status-green-box" id="inspect-status-box">
+                            <div style="text-align:center; color:#666; font-style:italic; margin-top:20px;">No card selected.</div>
+                        </div>
                     </div>
-                </div>
 
-                <div id="inspect-summoning-sector">
-                    <span style="font-size:0.65rem; color:#888; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px;">Requirements</span>
-                    <div id="inspect-summon-val" style="font-size:1.5rem; color:var(--mana-color); font-weight:bold;">0 MANA</div>
+                    <div class="inspect-col-right">
+                        <div id="inspect-skills-sector">
+                            <div class="empty-inspector">No actions available.</div>
+                        </div>
+
+                        <div id="inspect-summoning-sector">
+                            <span class="summon-label">SUMMONING CONDITIONS</span>
+                            <div id="inspect-summon-val">0 MANA</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -950,7 +998,6 @@ Test 4.12 (Massive UI Update)
             "Taunted": "./assets/Taunted.png",
             "Barrier": "./assets/Barrier.png",
             "Bleed": "./assets/Bleed.png",
-            "Last Stand": "./assets/Last%20Stand.png",
             "DrawSFX": "./assets/DrawSFX.mp3",
             "PlaceSFX": "./assets/PlaceSFX.mp3",
             "VillagerSuicideSFX": "./assets/VillagerSuicideSFX.mp3",
@@ -962,7 +1009,8 @@ Test 4.12 (Massive UI Update)
             "MyMana": "./assets/MyMana.png",
             "ManaGain": "./assets/ManaGain.png",
             "Zombie": "./assets/Zombie.png",
-            "Militia": "./assets/Militia.png"
+            "Militia": "./assets/Militia.png",
+            "Beam": "./assets/Beam.mp3"
         };
         // ============================================================================
 
@@ -1011,6 +1059,7 @@ Test 4.12 (Massive UI Update)
         let shieldSfxVoiceUrl = '';
         let shieldSfxVoice2Url = '';
         let shieldSfxUrl = '';
+        let beamAudioUrl = '';
         
         // System Flags
         let pQueue = []; 
@@ -1287,6 +1336,7 @@ Test 4.12 (Massive UI Update)
             if(cleanName.includes('abilityactivated')) { abilityActivatedUrl = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('buffactivated')) { buffActivatedUrl = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('clicksfx')) { clickSfxUrl = dataUrl; return { isAudio: true }; }
+            if(cleanName.includes('beam')) { beamAudioUrl = dataUrl; return { isAudio: true }; }
 
             if(cleanName.includes('kinsansound') || cleanName.includes('kin san sound')) { kinSanAudioUrl = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('kinsfx1')) { kinSfx1Url = dataUrl; return { isAudio: true }; }
@@ -1793,6 +1843,12 @@ Test 4.12 (Massive UI Update)
                                 realCard.classList.add('flip-reveal');
                                 document.getElementById('hand').appendChild(realCard);
                                 document.getElementById('hand').scrollBy({ left: 100, behavior: 'smooth' });
+                                
+                                // BUG FIX: Clean up the animation class so it doesn't re-trigger later
+                                setTimeout(() => {
+                                    if (realCard) realCard.classList.remove('flip-reveal');
+                                }, 650);
+                                
                             } else { 
                                 eHandData.push(cardId); 
                             }
@@ -1802,7 +1858,6 @@ Test 4.12 (Massive UI Update)
                 }, i * 250); 
             }
         }
-
         // --- NEW DRAG AND DROP LOGIC (WITH BUG FIXES) ---
         function createCardDOM(id, data) {
             const c = document.createElement('div');
@@ -1999,6 +2054,7 @@ Test 4.12 (Massive UI Update)
             log.appendChild(p); 
             log.scrollTop = log.scrollHeight;
         }
+
         // --- NEW SECTOR UI INSPECTOR LOGIC ---
         function showInspector(id, cardElement) {
             const nameUI = document.getElementById('inspect-name');
@@ -2037,11 +2093,23 @@ Test 4.12 (Massive UI Update)
                 <div class="inspect-hp-number" id="inspect-hp-num" style="background:${pct < 30 ? '#e74c3c' : '#2ecc71'}; color:${pct < 30 ? '#fff' : '#000'}">${Math.ceil(data.hp)}</div>
             </div>`;
 
-            let statusHtml = `<div style="color:#e74c3c; font-weight:bold; font-size:0.8rem; margin-bottom:5px;">ATK: ${data.atk || 0}</div>`;
-            if (data.tauntedBy) statusHtml += `<div class="status-item"><div class="status-desc"><b>TAUNTED:</b> Must attack taunter.</div></div>`;
-            if (data.bleedStacks > 0) statusHtml += `<div class="status-item"><div class="status-desc"><b>BLEED:</b> Takes damage at end of turn. (${data.bleedStacks} Stacks)</div></div>`;
-            if (data.shield && data.shield > 0) statusHtml += `<div class="status-item"><div class="status-desc"><b>SHIELDED:</b> Absorbs up to ${data.shield} damage.</div></div>`;
-            if (statusHtml === `<div style="color:#e74c3c; font-weight:bold; font-size:0.8rem; margin-bottom:5px;">ATK: ${data.atk || 0}</div>`) statusHtml += `<div style="color:#888;">No active effects.</div>`;
+            // NEW: Status Icons UI implementation
+            let statusHtml = `<div style="color:#e74c3c; font-weight:bold; font-size:0.85rem; margin-bottom:8px; padding-bottom:8px; border-bottom: 1px solid #333; text-align:center;">BASE ATK: ${data.atk || 0}</div>`;
+
+            if (data.tauntedBy) {
+                statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${tauntedImgUrl ? tauntedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>TAUNTED:</b> Must attack taunting unit.</div></div>`;
+            }
+            if (data.bleedStacks > 0) {
+                statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${bleedImgUrl ? bleedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>BLEED:</b> Takes damage at end of turn. (${data.bleedStacks} Stacks)</div></div>`;
+            }
+            if (data.shield && data.shield > 0) {
+                statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${barrierImgUrl ? barrierImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>SHIELDED:</b> Absorbs up to ${data.shield} damage.</div></div>`;
+            }
+
+            if (statusHtml === `<div style="color:#e74c3c; font-weight:bold; font-size:0.85rem; margin-bottom:8px; padding-bottom:8px; border-bottom: 1px solid #333; text-align:center;">BASE ATK: ${data.atk || 0}</div>`) {
+                statusHtml += `<div style="color:#666; text-align:center; font-style:italic; padding-top:10px;">No active effects.</div>`;
+            }
+
             statusUI.innerHTML = statusHtml;
 
             let actionHtml = '';
@@ -2115,12 +2183,17 @@ Test 4.12 (Massive UI Update)
             }
 
             let omtRefundCount = 0;
+            // BUG FIX: One More Time duplication glitch memory fix
             Object.values(cardInstances).forEach(c => {
                 if (c.extraAction && c.side === 'PLAYER') {
                     c.extraAction = false;
                     let dDOM = document.getElementById(c.id);
                     if(dDOM) dDOM.classList.remove('buff-double-action');
                     omtRefundCount++;
+                }
+                // Memory Cleanup of old dead One More Time instances
+                if (c.hp === 0 && c.side === 'PLAYER' && c.name === "One More Time") {
+                    delete cardInstances[c.id];
                 }
             });
             
@@ -2534,7 +2607,6 @@ Test 4.12 (Massive UI Update)
             setTimeout(() => s.remove(), totalAnimTime);
         }
 
-        // --- NEW: LUX ULT BEAM ANIMATION ---
         async function triggerLuxBeam(actorDOM, targetDOM) {
             if(!actorDOM || !targetDOM) return;
             
@@ -2543,8 +2615,8 @@ Test 4.12 (Massive UI Update)
 
             const beamContainer = document.createElement('div');
             beamContainer.className = 'lux-beam-container';
-            beamContainer.style.left = (beamX - 60) + 'px'; // 120px width / 2
-
+            beamContainer.style.left = (beamX - 60) + 'px';
+            
             const core = document.createElement('div');
             core.className = 'lux-beam-core';
             const outer = document.createElement('div');
@@ -2554,13 +2626,11 @@ Test 4.12 (Massive UI Update)
             beamContainer.appendChild(core);
             document.body.appendChild(beamContainer);
 
-            // 1. The Tell (0.2s) - very thin line
             beamContainer.style.transition = "opacity 0.2s ease, transform 0.2s ease";
             beamContainer.style.opacity = "0.5";
             beamContainer.style.transform = "scaleX(0.1)";
             await new Promise(r => setTimeout(r, 200));
 
-            // 2. The Blast (0.4s) - expands, shake screen
             if (abilityActivatedUrl) playSound(abilityActivatedUrl); 
             document.body.classList.add('shake-anim');
             beamContainer.style.transition = "opacity 0.1s ease, transform 0.1s ease";
@@ -2568,7 +2638,6 @@ Test 4.12 (Massive UI Update)
             beamContainer.style.transform = "scaleX(1)";
             await new Promise(r => setTimeout(r, 400));
 
-            // 3. The Fade (0.3s)
             document.body.classList.remove('shake-anim');
             beamContainer.style.transition = "opacity 0.3s ease";
             beamContainer.style.opacity = "0";
@@ -2672,19 +2741,20 @@ Test 4.12 (Massive UI Update)
             let targetInst = cardInstances[targetId]; 
             let actorDOM = document.getElementById(actor.id);
             
-            // BUG FIX: Capture Slot DOM to override overflow:hidden during zoom
+            // BUG FIX: Capture Slot DOM to toggle CSS class during zoom
             let actorSlotDOM = (actorDOM && actorDOM.parentElement && actorDOM.parentElement.classList.contains('slot')) ? actorDOM.parentElement : null;
             
             let isKinRyu = actor.name === "KIN-RYU"; 
             let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK") || (actor.name === "Skeleton Warrior" && skillName === "SLASH") || (actor.name === "Zombie" && skillName === "Bite");
             let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
-            // Check Last Stand
+            // Core Check for Last Stand
             let isLastStandActive = false;
-            if (targetInst && targetInst.side === 'PLAYER') {
+            let checkSide = targetId === 'CORE' ? (actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER') : targetInst.side;
+            if (checkSide === 'PLAYER') {
                 let pBuff = document.getElementById('player-buff-slot').querySelector('.card');
                 if (pBuff && cardInstances[pBuff.id].name === "Last Stand") isLastStandActive = true;
-            } else if (targetInst && targetInst.side === 'ENEMY') {
+            } else if (checkSide === 'ENEMY') {
                 let eBuff = document.getElementById('enemy-buff-slot').querySelector('.card');
                 if (eBuff && cardInstances[eBuff.id].name === "Last Stand") isLastStandActive = true;
             }
@@ -2705,8 +2775,8 @@ Test 4.12 (Massive UI Update)
                     if(rolynSfx1Url) playSound(rolynSfx1Url);
                 }
                 
-                // BUG FIX: Temporarily disable slot overflow to prevent card from being cropped
-                if(actorSlotDOM) { actorSlotDOM.style.zIndex = "9999"; actorSlotDOM.style.overflow = "visible"; }
+                // BUG FIX: Temporarily apply class to prevent slot overflow cropping
+                if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
 
                 const aRect = actorDOM.getBoundingClientRect(); 
                 const cx = window.innerWidth / 2; 
@@ -2726,8 +2796,8 @@ Test 4.12 (Massive UI Update)
 
             if(actorDOM && actor.type === 'unit' && targetDOM && actor.name !== "Lionel Guard Tower" && actor.name !== "Jaden" && skillName !== "SAN" && !skillName.includes("Punishment") && skillName !== "Lion's Roar" && skillName !== "BLOCK") {
                 
-                // BUG FIX: Disable overflow for the slight lunge animation as well
-                if(actorSlotDOM) { actorSlotDOM.style.zIndex = "9999"; actorSlotDOM.style.overflow = "visible"; }
+                // BUG FIX: Ensure class is applied for lunge too
+                if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
                 actorDOM.style.zIndex = "9999";
                 
                 const aRect2 = actorDOM.getBoundingClientRect(); 
@@ -2758,18 +2828,30 @@ Test 4.12 (Massive UI Update)
             
             let died = false;
             if(targetId === 'CORE') {
-                showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
-                if(actor.side === 'PLAYER') { 
-                    eCoreHP = Math.max(0, eCoreHP - dmg); 
-                    syncVisualHP(targetDOM, eCoreHP, 2000);
-                    addLog(`<b>${actor.name}</b> strikes ENEMY CORE for ${dmg}!`, '#ff4d4d'); 
-                    if(eCoreHP<=0) died=true; 
-                } 
-                else { 
-                    pCoreHP = Math.max(0, pCoreHP - dmg); 
-                    syncVisualHP(targetDOM, pCoreHP, 2000);
-                    addLog(`ENEMY <b>${actor.name}</b> strikes YOUR CORE for ${dmg}!`, '#ff4d4d'); 
-                    if(pCoreHP<=0) died=true; 
+                if (isLastStandActive && dmg > 0) {
+                    let currentCoreHp = actor.side === 'PLAYER' ? eCoreHP : pCoreHP;
+                    if (currentCoreHp - dmg < 1) {
+                        dmg = currentCoreHp - 1;
+                        if (dmg < 0) dmg = 0;
+                        if (dmg > 0) addLog(`<b>Last Stand</b> prevents fatal damage to the CORE!`, '#f1c40f');
+                        else if (dmg === 0 && currentCoreHp === 1) addLog(`<b>Last Stand</b> holds CORE HP at 1!`, '#f1c40f');
+                    }
+                }
+
+                if (dmg > 0) {
+                    showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
+                    if(actor.side === 'PLAYER') { 
+                        eCoreHP = Math.max(0, eCoreHP - dmg); 
+                        syncVisualHP(targetDOM, eCoreHP, 2000);
+                        addLog(`<b>${actor.name}</b> strikes ENEMY CORE for ${dmg}!`, '#ff4d4d'); 
+                        if(eCoreHP<=0) died=true; 
+                    } 
+                    else { 
+                        pCoreHP = Math.max(0, pCoreHP - dmg); 
+                        syncVisualHP(targetDOM, pCoreHP, 2000);
+                        addLog(`ENEMY <b>${actor.name}</b> strikes YOUR CORE for ${dmg}!`, '#ff4d4d'); 
+                        if(pCoreHP<=0) died=true; 
+                    }
                 }
             } else if (targetInst) {
                 if(targetInst.shield && targetInst.shield > 0 && targetInst.shieldTurns >= turnCount && dmg > 0) {
@@ -2832,8 +2914,8 @@ Test 4.12 (Massive UI Update)
                 actorDOM.style.transition = ""; 
             }
             
-            // BUG FIX REVERT: Snap slot back to hidden so the particle swirls don't spill
-            if(actorSlotDOM) { actorSlotDOM.style.zIndex = ""; actorSlotDOM.style.overflow = ""; }
+            // BUG FIX: Revert slot CSS class
+            if(actorSlotDOM) actorSlotDOM.classList.remove('attacking-slot');
             
             return died;
         }
@@ -2850,8 +2932,14 @@ Test 4.12 (Massive UI Update)
                     if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) {
                         u.queued = true;
                         if (!queueArr.some(a => a.actorId === u.id)) {
-                            let forcedSkill = (u.skills && u.skills.length > 0) ? u.skills[0].name : "ATTACK";
-                            queueArr.push({ actorId: u.id, actorName: u.name, side: u.side, skillName: forcedSkill, cost: 0, targetId: u.tauntedBy });
+                            // BUG FIX: Taunt Free-Mana exploit dynamically finds cost
+                            let forcedSkill = "ATTACK";
+                            let forcedCost = 0;
+                            if (u.skills && u.skills.length > 0 && pMana >= u.skills[0].manaCost) {
+                                forcedSkill = u.skills[0].name;
+                                forcedCost = u.skills[0].manaCost;
+                            }
+                            queueArr.push({ actorId: u.id, actorName: u.name, side: u.side, skillName: forcedSkill, cost: forcedCost, targetId: u.tauntedBy });
                             addLog(`[TAUNTED] ${u.name} is forced to attack!`, "#e74c3c");
                         }
                     } else {
@@ -2898,7 +2986,6 @@ Test 4.12 (Massive UI Update)
                 updateUI(); 
 
                 if (actor.type === 'ability' || actor.isBuff) {
-                    // NEW AUDIO FIX: Play Activated audio
                     if (abilityActivatedUrl && !action.isRecast) playSound(abilityActivatedUrl);
                 }
 
@@ -3039,8 +3126,9 @@ Test 4.12 (Massive UI Update)
                         await new Promise(r => setTimeout(r, 400)); 
                     }
 
-                    // NEW BUG FIX / FEATURE: The Lux Ult Beam Sequence
                     if (frontDOM) {
+                        // NEW FIX: Play Beam Audio
+                        if (beamAudioUrl) playSound(beamAudioUrl);
                         await triggerLuxBeam(actorDOM, frontDOM);
                     }
 
@@ -3099,6 +3187,8 @@ Test 4.12 (Massive UI Update)
                             let currentTargetId = tId;
                             for(let i=0; i<rounds; i++) {
                                 let cTInst = cardInstances[currentTargetId];
+                                
+                                // BUG FIX: Jaden target switching dynamically pulls new enemies if current is dead
                                 if (currentTargetId !== 'CORE' && (!cTInst || cTInst.hp <= 0)) {
                                     let valids = getValidEnemyTargetIds(defSide);
                                     currentTargetId = valids.length > 0 ? valids[0] : 'CORE';
@@ -3372,8 +3462,14 @@ Test 4.12 (Massive UI Update)
                 let taunterDOM = document.getElementById(u.tauntedBy);
                 if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) {
                     if (!pQueue.some(a => a.actorId === u.id)) {
-                        let forcedSkill = (u.skills && u.skills.length > 0) ? u.skills[0].name : "ATTACK";
-                        pQueue.push({ actorId: u.id, actorName: u.name, side: u.side, skillName: forcedSkill, cost: 0, targetId: u.tauntedBy });
+                        // BUG FIX: Calculate fallback skill mana cost
+                        let forcedSkill = "ATTACK";
+                        let forcedCost = 0;
+                        if (u.skills && u.skills.length > 0 && pMana >= u.skills[0].manaCost) {
+                            forcedSkill = u.skills[0].name;
+                            forcedCost = u.skills[0].manaCost;
+                        }
+                        pQueue.push({ actorId: u.id, actorName: u.name, side: u.side, skillName: forcedSkill, cost: forcedCost, targetId: u.tauntedBy });
                         addLog(`[TAUNTED] ${u.name} is forced to attack!`, "#e74c3c");
                     }
                 } else {
