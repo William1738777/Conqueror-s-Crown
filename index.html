@@ -1,4 +1,4 @@
-Test 4.2
+Test 4.3
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +13,7 @@ Test 4.2
             --arrow-url: none;
             --shuriken-url: none;
             --healfx-url: none;
+            --empty-slot-url: none;
         }
 
         body {
@@ -80,6 +81,40 @@ Test 4.2
         #event-log { flex-grow: 1; background: rgba(10, 10, 15, 0.95); border: 1px solid #333; border-radius: 6px; padding: 10px; overflow-y: auto; font-family: monospace; font-size: 0.75rem; box-sizing: border-box; }
         #event-log::-webkit-scrollbar { width: 5px; } #event-log::-webkit-scrollbar-thumb { background: #444; border-radius: 5px;}
 
+        /* --- TEKKEN HP BAR SYSTEM (HORIZONTAL WITH NUMBER) --- */
+        .card-hp-footer {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 16px;
+            display: flex; background: #111; border-top: 1px solid #222; 
+            border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; overflow: hidden; z-index: 15;
+        }
+        .card-hp-bar-container {
+            flex-grow: 1; position: relative; height: 100%; border-right: 1px solid #000;
+        }
+        .card-hp-trail {
+            position: absolute; top: 0; left: 0; height: 100%; background: #e74c3c; width: 100%;
+            transition: width 0.5s ease-out 0.4s;
+        }
+        .card-hp-current {
+            position: absolute; top: 0; left: 0; height: 100%; background: #2ecc71; width: 100%;
+            transition: width 0.15s ease-out;
+        }
+        .card-hp-number {
+            width: 32px; background: #2ecc71; color: #000; font-weight: bold; font-size: 0.7rem;
+            display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+            transition: background 0.15s ease-out, color 0.15s ease-out;
+        }
+
+        /* Core HP Bars */
+        .horizontal-bar { 
+            width: 160px; height: 8px; border-radius: 4px; border: 1px solid #444; margin-top: 5px; position: relative; overflow: hidden; background: #111;
+        }
+        .horizontal-bar .hp-bar-trail, .horizontal-bar .hp-bar-current {
+            height: 100%; position: absolute; bottom: 0; left: 0;
+        }
+        .horizontal-bar .hp-bar-trail { background: #e74c3c; z-index: 1; transition: width 0.5s ease-out 0.4s; }
+        .horizontal-bar .hp-bar-current { background: #2ecc71; z-index: 2; transition: width 0.15s ease-out; }
+        .player-core .hp-bar-current { background: #3498db; }
+
         /* --- CENTER PANEL --- */
         #turn-banner { background: rgba(0,0,0,0.8); border: 2px solid var(--gold); padding: 4px 30px; font-size: 0.9rem; border-radius: 20px; margin-bottom: 5px; flex-shrink: 0;}
         
@@ -92,18 +127,19 @@ Test 4.2
         .board { display: flex; flex-direction: column; gap: 8px; padding: 8px; background: rgba(255,255,255,0.02); border-radius: 10px; }
         .row { display: flex; gap: 12px; justify-content: center;}
         
-        /* Slot & Card Alignment OVERHAUL - Enlarged Dimensions */
-        .slot { width: 140px; height: 196px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 6px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #555; position: relative; box-sizing: border-box; padding: 0;}
-        .slot.drag-over { border-color: var(--gold); background: rgba(212, 175, 55, 0.1); }
+        /* Slot & Card Alignment OVERHAUL - Empty Slot Implementation */
+        .slot { width: 140px; height: 196px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 6px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #555; position: relative; box-sizing: border-box; padding: 0;
+                background-image: var(--empty-slot-url); background-size: cover; background-position: center; background-repeat: no-repeat; }
+        .slot.drag-over { border-color: var(--gold); box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.5); }
         .ability-slot { border-color: #9b59b6; color: #9b59b6; }
-        .slot-text { pointer-events: none; z-index: 1; }
+        .slot-text { pointer-events: none; z-index: 1; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; }
 
-        /* BUFF SLOTS - MOVED CLOSER TO BOARD */
+        /* BUFF SLOTS */
         .buff-slot { position: absolute; top: 50%; transform: translateY(-50%); border-color: #f1c40f; color: #f1c40f; box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.1); z-index: 10; transition: 0.3s; }
         #enemy-buff-slot { left: calc(50% - 380px); }
         #player-buff-slot { right: calc(50% - 380px); } 
 
-        .card { width: 140px; height: 196px; border-radius: 6px; padding: 5px; box-sizing: border-box; cursor: grab; background: var(--card-unit); border: 1px solid #444; display: flex; flex-direction: column; justify-content: space-between; font-family: sans-serif; position: relative; flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s;}
+        .card { width: 140px; height: 196px; border-radius: 6px; padding: 5px; box-sizing: border-box; cursor: grab; background: var(--card-unit); border: 1px solid #444; display: flex; flex-direction: column; font-family: sans-serif; position: relative; flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s;}
         
         .slot .card { position: absolute; top: -1px; left: -1px; width: calc(100% + 2px); height: calc(100% + 2px); margin: 0; z-index: 10; border-radius: 6px; border: 1px solid #444; box-sizing: border-box; }
         
@@ -129,16 +165,15 @@ Test 4.2
         .golden-glow { outline: 3px solid #f1c40f !important; box-shadow: 0 0 20px #f1c40f !important; animation: pulse-gold 1.5s infinite alternate; }
         @keyframes pulse-gold { from { box-shadow: 0 0 10px #f1c40f; } to { box-shadow: 0 0 30px #f1c40f; } }
 
-        .card-title { font-size: 0.8rem; font-weight: bold; text-align: center; color: var(--gold); line-height: 1; margin-top: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .card-level { text-align: center; font-size: 0.7rem; color: #aaa; margin-bottom: 4px;}
-        .card-img-container { flex-grow: 1; margin: 3px 0; background-color: #111; border-radius: 3px; border: 1px solid #333; background-size: cover; background-position: center; pointer-events: none;}
+        .card-title { font-size: 0.8rem; font-weight: bold; text-align: center; color: var(--gold); line-height: 1; margin-top: 10px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .card-level { text-align: center; font-size: 0.7rem; color: #aaa; margin-bottom: 2px;}
+        .card-img-container { flex-grow: 1; margin-bottom: 12px; background-color: #111; border-radius: 3px; border: 1px solid #333; background-size: cover; background-position: center; pointer-events: none;}
 
         .badge-mana { position: absolute; top: -5px; left: -5px; background: var(--mana-color); color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15;}
-        .badge-hp { position: absolute; bottom: -5px; right: -5px; background: var(--hp-color); color: #111; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15;}
         
         .placed-badge { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(231, 76, 60, 0.9); color: white; padding: 3px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 3px; z-index: 25; pointer-events: none; text-shadow: 1px 1px 0 #000; border: 1px solid #fff;}
         .badge-blessing { position: absolute; top: -8px; left: 20px; background: #f1c40f; color: #111; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 26; box-shadow: 0 0 10px #f1c40f;}
-        .badge-shield { position: absolute; bottom: 28px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
+        .badge-shield { position: absolute; bottom: 20px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
         .badge-taunted { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #e74c3c); }
         .badge-barrier { position: absolute; top: -8px; right: 15px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #3498db); }
         .badge-block { background: #888 !important; box-shadow: 0 0 10px #888; }
@@ -202,18 +237,43 @@ Test 4.2
         .flip-reveal { animation: flipIn 0.6s ease-out forwards; }
         @keyframes flipIn { 0% { transform: perspective(400px) rotateY(90deg); opacity: 0; } 100% { transform: perspective(400px) rotateY(0deg); opacity: 1; } }
 
-        /* --- Inspector Info --- */
+        /* --- Inspector Info UI Overhaul --- */
         .inspect-h { color: var(--gold); margin: 0 0 5px 0; font-family: 'Cinzel'; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px; flex-shrink: 0;}
         .inspect-sub { font-size: 0.65rem; color: #888; margin-bottom: 10px; text-transform: uppercase; flex-shrink: 0;}
+        
         .inspect-art { width: 100%; flex: 1 1 auto; min-height: 0; object-fit: contain; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 10px; background: transparent; display: block;}
-        .inspect-stat { font-size: 0.75rem; margin: 2px 0; flex-shrink: 0;}
+        
+        /* Inspector HP Bar */
+        .inspect-hp-wrapper {
+            width: 100%; height: 24px; display: flex; background: #111; border-radius: 4px; border: 1px solid #444; overflow: hidden; margin-bottom: 10px; flex-shrink: 0;
+        }
+        .inspect-hp-bar-container { flex-grow: 1; position: relative; height: 100%; border-right: 1px solid #000; }
+        .inspect-hp-trail { position: absolute; top: 0; left: 0; height: 100%; background: #e74c3c; width: 100%; transition: width 0.5s ease-out 0.4s; }
+        .inspect-hp-current { position: absolute; top: 0; left: 0; height: 100%; background: #2ecc71; width: 100%; transition: width 0.15s ease-out; }
+        .inspect-hp-number { width: 45px; background: #2ecc71; color: #000; font-weight: bold; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: background 0.15s ease-out, color 0.15s ease-out; }
+
+        /* Inspector Buff/Debuff Box */
+        .status-fx-box { border: 1px solid #e74c3c; background: rgba(231, 76, 60, 0.1); border-radius: 4px; padding: 8px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .status-item { display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px dotted rgba(231, 76, 60, 0.4); padding-bottom: 6px; }
+        .status-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .status-icon { width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; flex-shrink: 0; filter: drop-shadow(0 0 2px #000); }
+        .status-desc { font-size: 0.65rem; color: #ccc; line-height: 1.3; }
+        .status-desc b { color: white; }
+
+        /* Inspector Right Side */
         .inspect-section { margin-top: 10px; border-top: 1px solid #333; padding-top: 8px; }
+        .inspect-section:first-child { margin-top: 0; border-top: none; padding-top: 0;}
         .skill-btn { width: 100%; background: #222; color: white; border: 1px solid #444; padding: 6px; margin-top: 5px; cursor: pointer; text-align: left; transition: 0.2s; border-radius: 4px;}
         .skill-btn:hover { border-color: var(--gold); background: #333; }
         .skill-btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: #444 !important; }
         .skill-name { color: var(--gold); font-weight: bold; font-size: 0.75rem;}
         .skill-cost { color: var(--mana-color); font-size: 0.65rem; float: right;}
         .skill-desc { font-size: 0.65rem; color: #ccc; margin-top: 3px; display: block;}
+        
+        .summon-conditions { margin-top: auto; padding-top: 15px; text-align: center; border-top: 1px dashed #555; }
+        .summon-title { font-size: 0.6rem; color: #888; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px;}
+        .summon-val { font-size: 0.8rem; color: var(--mana-color); font-weight: bold; }
+
         .empty-inspector { text-align: center; color: #666; margin-top: 50%; font-style: italic; font-size: 0.9rem;}
     </style></head><body>
 
@@ -251,7 +311,10 @@ Test 4.2
 
             <div id="turn-banner">PLAYER TURN 1</div>
             <div class="battlefield">
-                <div class="core-container enemy-core" id="e-core-target"><div class="core-crystal"></div><div class="core-hp" id="enemy-core-hp">ENEMY CORE: 2000 | MANA: 8</div></div>
+                <div class="core-container enemy-core" id="e-core-target">
+                    <div class="core-crystal"></div><div class="core-hp" id="enemy-core-hp">ENEMY CORE: 2000 | MANA: 8</div>
+                    <div class="horizontal-bar"><div class="hp-bar-trail" style="width: 100%"></div><div class="hp-bar-current" style="width: 100%"></div></div>
+                </div>
                 <div class="board">
                     <div class="row">
                         <div class="slot backline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">UNIT</span></div>
@@ -276,7 +339,93 @@ Test 4.2
                         <div class="slot backline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">UNIT</span></div>
                     </div>
                 </div>
-                <div class="core-container player-core" id="p-core-target"><div class="core-crystal"></div><div class="core-hp" id="player-core-hp">PLAYER CORE: 2000</div></div>
+                <div class="core-container player-core" id="p-core-target">
+                    <div class="core-crystal"></div><div class="core-hp" id="player-core-hp">PLAYER CORE: 2000</div>
+                    <div class="horizontal-bar"><div class="hp-bar-trail" style="width: 100%"></div><div class="hp-bar-current" style="width: 100%"></div></div>
+                </div>
+            </div>
+
+            <div class="deck-container" id="enemy-deck-area">
+                <div id="enemy-deck-stack" class="deck-stack"></div>
+                <div id="e-deck-count" class="deck-count">Infinite</div>
+            </div>
+            <div class="deck-container" id="player-deck-area">
+                <button id="draw-cards-btn">DRAW TO 6</button>
+                <div id="player-deck-stack" class="deck-stack"></div>
+                <div id="p-deck-count" class="deck-count">Infinite</div>
+            </div>
+        </div>
+
+        <div class="side-panel right-panel">
+            <button id="cancel-btn" class="btn-main">CANCEL PENDING</button>
+            <button id="exec-btn" class="btn-main">EXECUTE PENDING (0)</button>
+            <button id="end-turn-btn" class="btn-main">END TURN</button>
+            <div id="event-log"></div>
+        </div>
+    </div>
+    <div class="upload-area" id="upload-box" onclick="initializeGame()">
+            <h2>START GAME</h2>
+            <p style="font-size: 0.8rem; color: #aaa;">Enter the battlefield.</p>
+        </div>
+        <div id="absorbing-text">Loading Assets...</div>
+    </div>
+
+    <div id="game-header">
+        <span>CONQUEROR'S CROWN</span>
+        <span id="mana-display">MANA: 8</span>
+    </div>
+
+    <div id="game-area">
+        <div class="side-panel left-panel">
+            <div id="card-inspector">
+                <div id="inspect-left"><div class="empty-inspector">Select a card to inspect.</div></div>
+                <div id="inspect-right"><div class="empty-inspector">No actions available.</div></div>
+            </div>
+            <div id="hand-container">
+                <button class="scroll-btn" id="scroll-left">&#9664;</button>
+                <div id="hand"></div>
+                <button class="scroll-btn" id="scroll-right">&#9654;</button>
+            </div>
+        </div>
+
+        <div class="center-panel">
+            <div id="enemy-buff-slot" class="slot buff-slot" data-side="ENEMY" data-allowed="buff"><span class="slot-text">BUFF</span></div>
+            <div id="player-buff-slot" class="slot buff-slot" data-side="PLAYER" data-allowed="buff"><span class="slot-text">BUFF</span></div>
+
+            <div id="turn-banner">PLAYER TURN 1</div>
+            <div class="battlefield">
+                <div class="core-container enemy-core" id="e-core-target">
+                    <div class="core-crystal"></div><div class="core-hp" id="enemy-core-hp">ENEMY CORE: 2000 | MANA: 8</div>
+                    <div class="horizontal-bar"><div class="hp-bar-trail" style="width: 100%"></div><div class="hp-bar-current" style="width: 100%"></div></div>
+                </div>
+                <div class="board">
+                    <div class="row">
+                        <div class="slot backline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">UNIT</span></div>
+                        <div class="slot backline ability-slot" data-side="ENEMY" data-allowed="ability"><span class="slot-text">ABILITY</span></div>
+                        <div class="slot backline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">UNIT</span></div>
+                    </div>
+                    <div class="row">
+                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                    </div>
+                </div>
+                <div class="board" style="border-top: 1px solid #333; padding-top: 15px;">
+                    <div class="row">
+                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                    </div>
+                    <div class="row">
+                        <div class="slot backline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">UNIT</span></div>
+                        <div class="slot backline ability-slot" data-side="PLAYER" data-allowed="ability"><span class="slot-text">ABILITY</span></div>
+                        <div class="slot backline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">UNIT</span></div>
+                    </div>
+                </div>
+                <div class="core-container player-core" id="p-core-target">
+                    <div class="core-crystal"></div><div class="core-hp" id="player-core-hp">PLAYER CORE: 2000</div>
+                    <div class="horizontal-bar"><div class="hp-bar-trail" style="width: 100%"></div><div class="hp-bar-current" style="width: 100%"></div></div>
+                </div>
             </div>
 
             <div class="deck-container" id="enemy-deck-area">
@@ -303,6 +452,7 @@ Test 4.2
         // ⚙️ GITHUB ASSET CONFIGURATION ⚙️
         // ============================================================================
         const ASSET_LINKS = {
+            "Empty Slot": "./assets/Empty%20Slot.png",
             "KIN-RYU": "./assets/Kin-Ryu.png",
             "Shadow Stalker": "./assets/Shadow%20Stalker.png",
             "Lionel Guard Tower": "./assets/Lionel%20Guard%20Tower.png",
@@ -334,10 +484,6 @@ Test 4.2
             "ShieldBlockSkel": "./assets/ShieldBlockSkel.mp3",
             "Taunted": "./assets/Taunted.png",
             "Barrier": "./assets/Barrier.png",
-            "RolynSFX1": "./assets/RolynSFX1.mp3",
-            "RolynSFX2": "./assets/RolynSFX2.mp3",
-            "Zombie": "./assets/Zombie.png",
-            "Militia": "./assets/Militia.png",
             "Bleed": "./assets/Bleed.png",
             "Last Stand": "./assets/Last%20Stand.png",
             "DrawSFX": "./assets/DrawSFX.mp3",
@@ -414,13 +560,41 @@ Test 4.2
             audio.play().catch(e => console.log("Audio play failed:", e));
         }
 
-        // --- ENEMY TARGET HELPER (Frontline Protection) ---
+        // --- ENEMY TARGET HELPER ---
         function getValidEnemyTargetIds(attackSide) {
             let front = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${attackSide}"] .card`)).map(c => c.id);
             if (front.length > 0) return front;
             let back = Array.from(document.querySelectorAll(`.slot.backline[data-side="${attackSide}"] .card`)).map(c => c.id);
             if (back.length > 0) return back;
-            return []; // Empty means Core is exposed
+            return [];
+        }
+
+        // --- DYNAMIC HP SYNC HELPER ---
+        function syncVisualHP(targetDOM, currentHP, maxHP) {
+            if(!targetDOM) return;
+            let pct = Math.max(0, Math.min(100, (currentHP / maxHP) * 100));
+            
+            // Check if it's a Card (Vertical Bar)
+            let vTrail = targetDOM.querySelector('.vertical-bar .hp-bar-trail');
+            let vCurr = targetDOM.querySelector('.vertical-bar .hp-bar-current');
+            if (vTrail) vTrail.style.height = pct + '%';
+            if (vCurr) vCurr.style.height = pct + '%';
+
+            // Check if it's a Core or Inspector (Horizontal Bar)
+            let hTrail = targetDOM.querySelector('.horizontal-bar .hp-bar-trail') || targetDOM.querySelector('.inspect-hp-trail') || targetDOM.querySelector('.card-hp-trail');
+            let hCurr = targetDOM.querySelector('.horizontal-bar .hp-bar-current') || targetDOM.querySelector('.inspect-hp-current') || targetDOM.querySelector('.card-hp-current');
+            if (hTrail) hTrail.style.width = pct + '%';
+            if (hCurr) hCurr.style.width = pct + '%';
+
+            // Update Numbers
+            let numCard = targetDOM.querySelector('.card-hp-number');
+            if (numCard) { numCard.innerText = Math.ceil(currentHP); numCard.style.background = pct < 30 ? '#e74c3c' : '#2ecc71'; numCard.style.color = pct < 30 ? '#fff' : '#000'; }
+            
+            let numInspect = document.getElementById('inspect-hp-num');
+            if (numInspect && targetDOM.classList.contains('card') && targetDOM.id === document.getElementById('inspect-left').dataset.inspectedId) {
+                numInspect.innerText = Math.ceil(currentHP); 
+                numInspect.style.background = pct < 30 ? '#e74c3c' : '#2ecc71'; numInspect.style.color = pct < 30 ? '#fff' : '#000';
+            }
         }
 
         // --- Template Engine ---
@@ -428,6 +602,9 @@ Test 4.2
             let name = fileName.replace(/\.[^/.]+$/, ""); 
             let cleanName = name.toLowerCase();
 
+            // Background & Assets
+            if(cleanName.includes('empty slot')) { return { isEmptySlot: true, img: dataUrl }; }
+            
             // Audio/FX checks
             if(cleanName.includes('kinsansound') || cleanName.includes('kin san sound')) { kinSanAudioUrl = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('kinsfx1')) { kinSfx1Url = dataUrl; return { isAudio: true }; }
@@ -555,7 +732,9 @@ Test 4.2
                 
                 const cardData = getCardTemplate(key, fileUrl);
                 
-                if (cardData.isCardBack) {
+                if (cardData.isEmptySlot) {
+                    document.documentElement.style.setProperty('--empty-slot-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
+                } else if (cardData.isCardBack) {
                     deckBackImg = cardData.img;
                     document.getElementById('player-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
                     document.getElementById('enemy-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
@@ -594,8 +773,8 @@ Test 4.2
 
         function updateUI() {
             document.getElementById('mana-display').innerText = `MANA: ${pMana}`;
-            document.getElementById('enemy-core-hp').innerText = `ENEMY CORE: ${eCoreHP} | MANA: ${eMana}`;
-            document.getElementById('player-core-hp').innerText = `PLAYER CORE: ${pCoreHP}`;
+            document.getElementById('enemy-core-hp').innerText = `ENEMY CORE: ${Math.ceil(eCoreHP)} | MANA: ${eMana}`;
+            document.getElementById('player-core-hp').innerText = `PLAYER CORE: ${Math.ceil(pCoreHP)}`;
             
             document.getElementById('exec-btn').innerText = `EXECUTE PENDING (${pQueue.length})`;
             document.getElementById('exec-btn').disabled = isExecuting || pQueue.length === 0;
@@ -768,7 +947,18 @@ Test 4.2
             let html = `<div class="badge-mana">${data.summonCost}</div>`;
             if(data.side === 'PLAYER' || data.type !== 'ability') html += `<div class="card-title">${data.name}</div>`;
             html += `<div class="card-img-container" style="${bgImg}"></div>`;
-            if(data.type === 'unit') html += `<div class="card-level">${"★".repeat(data.powerLevel)}</div><div class="badge-hp">${data.hp}</div>`;
+            if(data.type === 'unit') {
+                html += `<div class="card-level">${"★".repeat(data.powerLevel)}</div>`;
+                
+                // VERTICAL LEFT BAR
+                html += `<div class="vertical-bar"><div class="hp-bar-trail" style="height: ${(data.hp/data.maxHp)*100}%"></div><div class="hp-bar-current" style="height: ${(data.hp/data.maxHp)*100}%"></div></div>`;
+                
+                // HORIZONTAL BOTTOM BAR
+                html += `<div class="card-hp-footer">
+                            <div class="card-hp-bar-container"><div class="card-hp-trail" style="width: ${(data.hp/data.maxHp)*100}%"></div><div class="card-hp-current" style="width: ${(data.hp/data.maxHp)*100}%"></div></div>
+                            <div class="card-hp-number">${Math.ceil(data.hp)}</div>
+                         </div>`;
+            }
 
             c.innerHTML = html;
 
@@ -883,31 +1073,62 @@ Test 4.2
 
         // --- Split Inspector ---
         function showInspector(id, cardElement) {
+            let leftUI = document.getElementById('inspect-left');
+            let rightUI = document.getElementById('inspect-right');
+            
             if (id === 'none' || !cardInstances[id]) {
-                document.getElementById('inspect-left').innerHTML = `<div class="empty-inspector">Select a card to inspect.</div>`;
-                document.getElementById('inspect-right').innerHTML = `<div class="empty-inspector">No actions available.</div>`;
+                leftUI.innerHTML = `<div class="empty-inspector">Select a card to inspect.</div>`;
+                rightUI.innerHTML = `<div class="empty-inspector">No actions available.</div>`;
+                leftUI.dataset.inspectedId = "";
                 return;
             }
 
             const data = cardInstances[id];
             const isDeployed = cardElement && cardElement.parentElement.classList.contains('slot');
+            leftUI.dataset.inspectedId = id;
 
             if(data.side === 'ENEMY' && data.type === 'ability') {
-                document.getElementById('inspect-left').innerHTML = `<div class="empty-inspector">Hidden Enemy Ability Card.</div>`; 
-                document.getElementById('inspect-right').innerHTML = `<div class="empty-inspector">No actions available.</div>`;
+                leftUI.innerHTML = `<div class="empty-inspector">Hidden Enemy Ability Card.</div>`; 
+                rightUI.innerHTML = `<div class="empty-inspector">No actions available.</div>`;
                 return;
             }
 
             // 1. Populate the Locked Left Inspector (Stats & Art)
+            let pct = Math.max(0, Math.min(100, (data.hp / data.maxHp) * 100)) || 100;
             let html = `<h3 class="inspect-h">${data.name}</h3><div class="inspect-sub">${data.title}</div><img src="${data.img}" class="inspect-art">`;
-            if(data.type === 'unit') html += `<div class="inspect-stat" style="color:var(--hp-color)"><b>HP:</b> ${data.hp} | <b style="color:#e74c3c">ATK:</b> ${data.atk}</div>`;
-            html += `<div class="inspect-stat" style="color:var(--mana-color)"><b>Cost:</b> ${data.summonCost} Mana</div>`;
+            
+            if(data.type === 'unit') {
+                html += `<div class="inspect-hp-wrapper">
+                            <div class="inspect-hp-bar-container"><div class="inspect-hp-trail" style="width: ${pct}%"></div><div class="inspect-hp-current" style="width: ${pct}%"></div></div>
+                            <div class="inspect-hp-number" id="inspect-hp-num" style="background:${pct < 30 ? '#e74c3c' : '#2ecc71'}; color:${pct < 30 ? '#fff' : '#000'}">${Math.ceil(data.hp)}</div>
+                         </div>`;
+            }
+            
+            if(data.type === 'unit') html += `<div class="inspect-stat"><b style="color:#e74c3c">ATK:</b> ${data.atk}</div>`;
             if(data.marks > 0) html += `<div class="inspect-stat" style="color:#2ecc71"><b>Shinobi Marks:</b> ${data.marks}</div>`;
-            if(data.bleedStacks > 0) html += `<div class="inspect-stat" style="color:#8e44ad"><b>Bleed Stacks:</b> ${data.bleedStacks}</div>`;
-            document.getElementById('inspect-left').innerHTML = html;
+            
+            leftUI.innerHTML = html;
 
             // 2. Populate the Right Action Menu
             let actionHtml = '';
+            
+            // RED STATUS BOX logic
+            let statusHtml = '';
+            if (data.tauntedBy && tauntedImgUrl) {
+                statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${tauntedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}')"></div><div class="status-desc"><b>TAUNTED:</b> Must attack the taunter during action phase.</div></div>`;
+            }
+            if (data.bleedStacks > 0 && bleedImgUrl) {
+                let bleedDmg = Math.floor(data.maxHp * (0.05 * data.bleedStacks));
+                statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${bleedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}')"></div><div class="status-desc"><b>BLEED:</b> Takes ${bleedDmg} damage at end of turn. (${data.bleedStacks} Stacks)</div></div>`;
+            }
+            if (data.shield && data.shield > 0 && barrierImgUrl) {
+                statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${barrierImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}')"></div><div class="status-desc"><b>SHIELDED:</b> Absorbs up to ${data.shield} damage.</div></div>`;
+            }
+            
+            if (statusHtml !== '') {
+                actionHtml += `<div class="status-fx-box">${statusHtml}</div>`;
+            }
+
             if (data.isBuff && isDeployed && cardElement.parentElement.classList.contains('ability-slot')) {
                 actionHtml += `<div style="color:#f1c40f; font-size:0.75rem; font-weight:bold; margin-top:5px; padding: 5px; border: 1px dashed #f1c40f; text-align: center;">[BUFF CARD: DRAG TO BUFF SLOT TO ACTIVATE]</div>`;
             }
@@ -964,11 +1185,16 @@ Test 4.2
                 actionHtml += `</div>`;
             }
 
+            let summonHtml = `<div class="summon-conditions">
+                <div class="summon-title">Summoning Conditions</div>
+                <div class="summon-val">${data.summonCost} MANA</div>
+            </div>`;
+
             if(actionHtml === '') {
                 actionHtml = `<div class="empty-inspector">No actions available.</div>`;
             }
 
-            document.getElementById('inspect-right').innerHTML = actionHtml;
+            rightUI.innerHTML = actionHtml + summonHtml;
         }
 
         // --- CANCEL PENDING WITH MANA & GHOST AURA REFUND ---
@@ -1077,7 +1303,7 @@ Test 4.2
                         
                         let healAmt = Math.floor(counterDmg / 2);
                         taunter.hp = Math.min(taunter.maxHp, taunter.hp + healAmt);
-                        if (tDOM && tDOM.querySelector('.badge-hp')) tDOM.querySelector('.badge-hp').innerText = taunter.hp;
+                        syncVisualHP(tDOM, taunter.hp, taunter.maxHp);
                         showFloatingText(tDOM, `+${healAmt}`, "#2ecc71", "1.5rem");
                         
                         // Custom green glow for Rolyn
@@ -1111,6 +1337,7 @@ Test 4.2
                      payload.targetInst.marks += 2;
                      let tDOM = document.getElementById(payload.action.targetId);
                      setTimeout(() => showFloatingText(tDOM, "Shinobi's Mark Inflicted", "#2ecc71", "1rem"), 400);
+                     showInspector(payload.action.targetId, tDOM); // refresh inspector if marked
                 }
             }
         }
@@ -1466,8 +1693,18 @@ Test 4.2
             let died = false;
             if(targetId === 'CORE') {
                 showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
-                if(actor.side === 'PLAYER') { eCoreHP = Math.max(0, eCoreHP - dmg); addLog(`<b>${actor.name}</b> strikes ENEMY CORE for ${dmg}!`, '#ff4d4d'); if(eCoreHP<=0) died=true; } 
-                else { pCoreHP = Math.max(0, pCoreHP - dmg); addLog(`ENEMY <b>${actor.name}</b> strikes YOUR CORE for ${dmg}!`, '#ff4d4d'); if(pCoreHP<=0) died=true; }
+                if(actor.side === 'PLAYER') { 
+                    eCoreHP = Math.max(0, eCoreHP - dmg); 
+                    syncVisualHP(targetDOM, eCoreHP, 2000);
+                    addLog(`<b>${actor.name}</b> strikes ENEMY CORE for ${dmg}!`, '#ff4d4d'); 
+                    if(eCoreHP<=0) died=true; 
+                } 
+                else { 
+                    pCoreHP = Math.max(0, pCoreHP - dmg); 
+                    syncVisualHP(targetDOM, pCoreHP, 2000);
+                    addLog(`ENEMY <b>${actor.name}</b> strikes YOUR CORE for ${dmg}!`, '#ff4d4d'); 
+                    if(pCoreHP<=0) died=true; 
+                }
             } else if (targetInst) {
                 if(targetInst.shield && targetInst.shield > 0 && targetInst.shieldTurns >= turnCount && dmg > 0) {
                      if(dmg <= targetInst.shield) {
@@ -1495,11 +1732,13 @@ Test 4.2
                      }
 
                      targetInst.hp -= dmg; 
+                     syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
                      addLog(`<b>${actor.name}</b> hits ${targetInst.name} for ${dmg} DMG!`, '#ff4d4d');
 
                      // Vigor of the Damned Check
                      if(targetInst.name === "Zombie" && targetInst.hp > 0 && targetInst.hp <= 100) {
                          targetInst.hp = targetInst.maxHp;
+                         syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
                          targetInst.shield = 1000;
                          targetInst.shieldTurns = turnCount + 99;
                          addLog(`<b>Zombie</b>'s Vigor of the Damned triggered! Restored to full HP and gained 1000 Shield!`, '#2ecc71');
@@ -1511,7 +1750,6 @@ Test 4.2
                      }
 
                      if(targetInst.hp <= 0) { died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); if(targetDOM) targetDOM.remove(); } 
-                     else { if(targetDOM && targetDOM.querySelector('.badge-hp')) targetDOM.querySelector('.badge-hp').innerText = targetInst.hp; }
                 }
             }
 
@@ -1603,7 +1841,7 @@ Test 4.2
                         if (roll < 0.5 && shieldSfxVoiceUrl) playSound(shieldSfxVoiceUrl);
                         else if (roll >= 0.5 && shieldSfxVoice2Url) playSound(shieldSfxVoice2Url);
                     }
-                    await new Promise(r => setTimeout(r, 100)); // 100ms delay before execution
+                    await new Promise(r => setTimeout(r, 100)); 
 
                     if (shieldSfxUrl) playSound(shieldSfxUrl);
 
@@ -1652,7 +1890,7 @@ Test 4.2
                         if (roll < 0.5 && healSfxVoiceUrl) playSound(healSfxVoiceUrl);
                         else if (roll >= 0.5 && healSfxVoice2Url) playSound(healSfxVoice2Url);
                     }
-                    await new Promise(r => setTimeout(r, 100)); // 100ms delay before execution
+                    await new Promise(r => setTimeout(r, 100)); 
 
                     let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
                     let targetInst = cardInstances[tId];
@@ -1660,12 +1898,12 @@ Test 4.2
                     if(targetInst && targetDOM && targetDOM.querySelector('.badge-hp')) {
                          let heal = Math.floor(Math.random() * 151) + 150;
                          targetInst.hp = Math.min(targetInst.maxHp || targetInst.hp + heal, targetInst.hp + heal);
+                         syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
                          showFloatingText(targetDOM, `+${heal}`, "#2ecc71", "2.5rem");
                          targetDOM.classList.add('shimmer-fx');
                          triggerHeal(targetDOM); 
                          if(healAudioUrl) playSound(healAudioUrl);
                          actor.blessings = (actor.blessings || 0) + 1;
-                         targetDOM.querySelector('.badge-hp').innerText = targetInst.hp;
                          addLog(`<b>${actor.name}</b> heals ${targetInst.name} for ${heal}!`, "#2ecc71");
                     }
                     await new Promise(r => setTimeout(r, 1000));
@@ -1860,17 +2098,23 @@ Test 4.2
                         let targetInst = cardInstances[tId]; let targetDOM = document.getElementById(tId);
                         
                         if (!targetDied && targetInst && tId !== 'CORE') {
-                            if (marksToApply > 0) { targetInst.marks += marksToApply; setTimeout(() => showFloatingText(targetDOM, "Shinobi's Mark Inflicted", "#2ecc71", "1rem"), 400); }
+                            if (marksToApply > 0) { 
+                                targetInst.marks += marksToApply; 
+                                setTimeout(() => showFloatingText(targetDOM, "Shinobi's Mark Inflicted", "#2ecc71", "1rem"), 400); 
+                                showInspector(tId, targetDOM); 
+                            }
                             if (action.skillName === "Lion's Challenge") { 
                                 targetInst.tauntedBy = actor.id; 
-                                targetInst.tauntedTurn = turnCount + (actor.side === 'ENEMY' ? 1 : 0); // Dynamic turn offset
+                                targetInst.tauntedTurn = turnCount + (actor.side === 'ENEMY' ? 1 : 0); 
                                 targetDOM.classList.add('taunted-status'); 
                                 setTimeout(() => showFloatingText(targetDOM, "TAUNTED", "#f39c12", "1.5rem"), 400); 
+                                showInspector(tId, targetDOM); 
                             }
                             if (action.skillName === "Bite") {
                                 targetInst.bleedStacks = (targetInst.bleedStacks || 0) + 1;
                                 targetInst.bleedTurns = turnCount + 2; 
                                 setTimeout(() => showFloatingText(targetDOM, "BLEED", "#8e44ad", "1.5rem"), 400);
+                                showInspector(tId, targetDOM); 
                             }
                         }
 
@@ -2099,7 +2343,7 @@ Test 4.2
                         showFloatingText(cDOM, `-${bleedDmg} BLEED`, "#8e44ad", "1.5rem");
                         cDOM.classList.remove("shake-anim"); void cDOM.offsetWidth;
                         cDOM.classList.add("shake-anim");
-                        if(cDOM.querySelector('.badge-hp')) cDOM.querySelector('.badge-hp').innerText = c.hp;
+                        syncVisualHP(cDOM, c.hp, c.maxHp);
                     }
                     addLog(`<b>${c.name}</b> takes ${bleedDmg} Bleed damage!`, '#8e44ad');
 
@@ -2112,7 +2356,7 @@ Test 4.2
                              showFloatingText(cDOM, "VIGOR OF THE DAMNED", "#2ecc71", "1.5rem");
                              cDOM.classList.add('shimmer-fx');
                              setTimeout(() => cDOM.classList.remove('shimmer-fx'), 1000);
-                             if(cDOM.querySelector('.badge-hp')) cDOM.querySelector('.badge-hp').innerText = c.hp;
+                             syncVisualHP(cDOM, c.hp, c.maxHp);
                          }
                     }
 
@@ -2147,7 +2391,10 @@ Test 4.2
                 c.exhausted = false; c.queued = false; c.extraAction = false; c.blockActive = false;
                 if(c.tauntedTurn && c.tauntedTurn < turnCount) { c.tauntedBy = null; } 
                 let dDOM = document.getElementById(c.id);
-                if(dDOM) dDOM.classList.remove('buff-double-action');
+                if(dDOM) {
+                    dDOM.classList.remove('buff-double-action');
+                    showInspector(c.id, dDOM); // Refresh inspector state for debuff removals
+                }
 
                 if (c.name === "Skeleton Warrior" && c.hp > 0) {
                     if (dDOM && dDOM.parentElement && dDOM.parentElement.classList.contains('slot')) {
