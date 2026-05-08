@@ -1,4 +1,4 @@
-Test 4.5 Reloaded
+Test 4.6
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,7 +66,7 @@ Test 4.5 Reloaded
         #inspect-right { width: 50%; display: flex; flex-direction: column; overflow-y: auto; padding-left: 5px; }
         #inspect-right::-webkit-scrollbar { width: 5px; } #inspect-right::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 5px;}
         
-        /* NEW DYNAMIC MANA UI */
+        /* DYNAMIC MANA UI */
         #player-mana-wrapper {
             align-self: center; margin-bottom: -15px; z-index: 20;
             display: flex; align-items: center; gap: 8px;
@@ -93,36 +93,19 @@ Test 4.5 Reloaded
         #event-log { flex-grow: 1; background: rgba(10, 10, 15, 0.95); border: 1px solid #333; border-radius: 6px; padding: 10px; overflow-y: auto; font-family: monospace; font-size: 0.75rem; box-sizing: border-box; }
         #event-log::-webkit-scrollbar { width: 5px; } #event-log::-webkit-scrollbar-thumb { background: #444; border-radius: 5px;}
 
-        /* --- TEKKEN HP BAR SYSTEM (HORIZONTAL WITH NUMBER) --- */
+        /* --- TEKKEN HP BAR SYSTEM --- */
         .card-hp-footer {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 16px;
             display: flex; background: #111; border-top: 1px solid #222; 
             border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; overflow: hidden; z-index: 15;
         }
-        .card-hp-bar-container {
-            flex-grow: 1; position: relative; height: 100%; border-right: 1px solid #000;
-        }
-        .card-hp-trail {
-            position: absolute; top: 0; left: 0; height: 100%; background: #e74c3c; width: 100%;
-            transition: width 0.5s ease-out 0.4s;
-        }
-        .card-hp-current {
-            position: absolute; top: 0; left: 0; height: 100%; background: #2ecc71; width: 100%;
-            transition: width 0.15s ease-out;
-        }
-        .card-hp-number {
-            width: 32px; background: #2ecc71; color: #000; font-weight: bold; font-size: 0.7rem;
-            display: flex; justify-content: center; align-items: center; flex-shrink: 0;
-            transition: background 0.15s ease-out, color 0.15s ease-out;
-        }
+        .card-hp-bar-container { flex-grow: 1; position: relative; height: 100%; border-right: 1px solid #000; }
+        .card-hp-trail { position: absolute; top: 0; left: 0; height: 100%; background: #e74c3c; width: 100%; transition: width 0.5s ease-out 0.4s; }
+        .card-hp-current { position: absolute; top: 0; left: 0; height: 100%; background: #2ecc71; width: 100%; transition: width 0.15s ease-out; }
+        .card-hp-number { width: 32px; background: #2ecc71; color: #000; font-weight: bold; font-size: 0.7rem; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: background 0.15s ease-out, color 0.15s ease-out; }
 
-        /* Core HP Bars */
-        .horizontal-bar { 
-            width: 160px; height: 8px; border-radius: 4px; border: 1px solid #444; margin-top: 5px; position: relative; overflow: hidden; background: #111;
-        }
-        .horizontal-bar .hp-bar-trail, .horizontal-bar .hp-bar-current {
-            height: 100%; position: absolute; bottom: 0; left: 0;
-        }
+        .horizontal-bar { width: 160px; height: 8px; border-radius: 4px; border: 1px solid #444; margin-top: 5px; position: relative; overflow: hidden; background: #111; }
+        .horizontal-bar .hp-bar-trail, .horizontal-bar .hp-bar-current { height: 100%; position: absolute; bottom: 0; left: 0; }
         .horizontal-bar .hp-bar-trail { background: #e74c3c; z-index: 1; transition: width 0.5s ease-out 0.4s; }
         .horizontal-bar .hp-bar-current { background: #2ecc71; z-index: 2; transition: width 0.15s ease-out; }
         .player-core .hp-bar-current { background: #3498db; }
@@ -139,20 +122,18 @@ Test 4.5 Reloaded
         .board { display: flex; flex-direction: column; gap: 8px; padding: 8px; background: rgba(255,255,255,0.02); border-radius: 10px; }
         .row { display: flex; gap: 12px; justify-content: center;}
         
-        /* Slot & Card Alignment OVERHAUL - Empty Slot Fit */
+        /* Slot & Card Alignment OVERHAUL - PERFECT EMPTY SLOT FIT */
         .slot { width: 140px; height: 196px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 6px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #555; position: relative; box-sizing: border-box; padding: 0;
-                background-image: var(--empty-slot-url); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; }
+                background-image: var(--empty-slot-url); background-size: 100% 100% !important; background-position: center; background-repeat: no-repeat; }
         .slot.drag-over { border-color: var(--gold); box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.5); }
         .ability-slot { border-color: #9b59b6; color: #9b59b6; }
-        .slot-text { pointer-events: none; z-index: 1; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; display: none; /* Hidden since we have the empty slot image now */ }
+        .slot-text { pointer-events: none; z-index: 1; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; display: none; }
 
-        /* BUFF SLOTS */
         .buff-slot { position: absolute; top: 50%; transform: translateY(-50%); border-color: #f1c40f; color: #f1c40f; box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.1); z-index: 10; transition: 0.3s; }
         #enemy-buff-slot { left: calc(50% - 380px); }
         #player-buff-slot { right: calc(50% - 380px); } 
 
         .card { width: 140px; height: 196px; border-radius: 6px; padding: 5px; box-sizing: border-box; cursor: grab; background: var(--card-unit); border: 1px solid #444; display: flex; flex-direction: column; font-family: sans-serif; position: relative; flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s;}
-        
         .slot .card { position: absolute; top: -1px; left: -1px; width: calc(100% + 2px); height: calc(100% + 2px); margin: 0; z-index: 10; border-radius: 6px; border: 1px solid #444; box-sizing: border-box; }
         
         .card:hover { transform: translateY(-5px); border-color: var(--gold); z-index: 20;}
@@ -164,16 +145,12 @@ Test 4.5 Reloaded
         .card.target-glow { outline: 3px solid #ff4d4d; box-shadow: 0 0 20px #ff4d4d; cursor: crosshair; animation: pulse-target 1s infinite alternate;}
         @keyframes pulse-target { from { box-shadow: 0 0 10px #ff4d4d; } to { box-shadow: 0 0 25px #ff4d4d; } }
         .target-line-glow { outline: 3px dashed #ff9f43; box-shadow: 0 0 20px #ff9f43; }
-        
         .target-heal-glow { outline: 3px solid #2ecc71; box-shadow: 0 0 20px #2ecc71; cursor: crosshair; animation: pulse-heal 1s infinite alternate; }
         @keyframes pulse-heal { from { box-shadow: 0 0 10px #2ecc71; } to { box-shadow: 0 0 25px #2ecc71; } }
-
         .target-buff-glow { outline: 3px solid #9b59b6; box-shadow: 0 0 20px #9b59b6; cursor: crosshair; animation: pulse-buff 1s infinite alternate; }
         @keyframes pulse-buff { from { box-shadow: 0 0 10px #9b59b6; } to { box-shadow: 0 0 25px #9b59b6; } }
-
         .buff-double-action { outline: 3px solid #9b59b6; box-shadow: 0 0 15px #9b59b6; animation: purple-burn 0.8s infinite alternate; }
         @keyframes purple-burn { from { box-shadow: 0 0 10px #9b59b6; } to { box-shadow: 0 0 25px #9b59b6; } }
-
         .golden-glow { outline: 3px solid #f1c40f !important; box-shadow: 0 0 20px #f1c40f !important; animation: pulse-gold 1.5s infinite alternate; }
         @keyframes pulse-gold { from { box-shadow: 0 0 10px #f1c40f; } to { box-shadow: 0 0 30px #f1c40f; } }
 
@@ -201,43 +178,31 @@ Test 4.5 Reloaded
         #draw-cards-btn { display: none; padding: 10px 15px; background: var(--gold); color: black; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; animation: pulse 1.5s infinite; font-size: 0.8rem;}
         #draw-cards-btn:disabled { animation: none; filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
 
-        .mana-particle { position: fixed; width: 40px; height: 40px; background-image: var(--managain-url); background-size: contain; background-repeat: no-repeat; z-index: 10000; pointer-events: none; transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 0 10px var(--mana-color)); }
+        /* MANA GAIN MOTION BLUR ANIMATION */
+        .mana-particle { 
+            position: fixed; width: 40px; height: 40px; background-image: var(--managain-url); background-size: contain; background-repeat: no-repeat; 
+            z-index: 10000; pointer-events: none; transition: left 0.7s cubic-bezier(0.25, 1, 0.5, 1), top 0.7s cubic-bezier(0.25, 1, 0.5, 1); 
+            filter: drop-shadow(0 0 15px var(--mana-color)) blur(1.5px); 
+        }
 
         /* --- VISUAL EFFECTS --- */
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            20% { transform: translate(-4px, 0px) rotate(1deg); }
-            40% { transform: translate(2px, -2px) rotate(1deg); }
-            60% { transform: translate(-4px, 2px) rotate(0deg); }
-            80% { transform: translate(-1px, -2px) rotate(1deg); }
-            100% { transform: translate(2px, -2px) rotate(-1deg); }
-        }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 20% { transform: translate(-4px, 0px) rotate(1deg); } 40% { transform: translate(2px, -2px) rotate(1deg); } 60% { transform: translate(-4px, 2px) rotate(0deg); } 80% { transform: translate(-1px, -2px) rotate(1deg); } 100% { transform: translate(2px, -2px) rotate(-1deg); } }
         .shake-anim { animation: shake 0.4s; }
-
-        @keyframes shimmer {
-            0% { filter: brightness(1) drop-shadow(0 0 0px var(--gold)); }
-            50% { filter: brightness(1.8) drop-shadow(0 0 25px var(--gold)); }
-            100% { filter: brightness(1) drop-shadow(0 0 0px var(--gold)); }
-        }
+        @keyframes shimmer { 0% { filter: brightness(1) drop-shadow(0 0 0px var(--gold)); } 50% { filter: brightness(1.8) drop-shadow(0 0 25px var(--gold)); } 100% { filter: brightness(1) drop-shadow(0 0 0px var(--gold)); } }
         .shimmer-fx { animation: shimmer 1s ease-in-out; }
-
         .floating-text { position: absolute; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; pointer-events: none; z-index: 1000; animation: floatUp 1.2s forwards ease-out; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.4); opacity: 0; } }
 
         .militia-text { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; color: #3498db; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 0 0 10px #000, 0 0 20px #3498db; z-index: 10000; pointer-events: none; animation: sanPulse 2s ease-out forwards; text-align: center;}
-
         .slash-fx { position: absolute; top: 50%; left: 50%; width: 250%; height: 250%; transform: translate(-50%, -50%); background-image: var(--slash-url); background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 9999; opacity: 0; animation: slashFade 0.6s ease-out forwards; }
         @keyframes slashFade { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.6); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); } }
-
         .heal-fx { position: absolute; top: 50%; left: 50%; width: 250%; height: 250%; transform: translate(-50%, -50%); background-image: var(--healfx-url); background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 9999; opacity: 0; animation: healFade 0.8s ease-out forwards; }
         @keyframes healFade { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); } }
-        
         .arrow-fx { position: fixed; width: 40px; height: 10px; background-image: var(--arrow-url); background-size: contain; background-repeat: no-repeat; z-index: 9999; pointer-events: none; transition: all 0.3s linear; }
 
         /* SAN OVERHAUL */
         .san-text { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 6rem; color: #e74c3c; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 0 0 20px #000, 0 0 40px #e74c3c; z-index: 10000; pointer-events: none; animation: sanPulse 1s ease-out forwards; }
         @keyframes sanPulse { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 85% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
-
         .shuriken-fx { position: fixed; top: 0; left: 0; margin-top: -25px; margin-left: -25px; width: 50px; height: 50px; z-index: 9999; pointer-events: none; background-image: var(--shuriken-url); background-size: contain; background-repeat: no-repeat; }
         @keyframes spinFly { 0% { transform: translate(var(--startX), var(--startY)) rotate(0deg); opacity: 1; } 100% { transform: translate(var(--endX), var(--endY)) rotate(1440deg); opacity: 0; } }
 
@@ -248,19 +213,14 @@ Test 4.5 Reloaded
         /* --- Inspector Info UI Overhaul --- */
         .inspect-h { color: var(--gold); margin: 0 0 5px 0; font-family: 'Cinzel'; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px; flex-shrink: 0;}
         .inspect-sub { font-size: 0.65rem; color: #888; margin-bottom: 10px; text-transform: uppercase; flex-shrink: 0;}
-        
         .inspect-art { width: 100%; flex: 1 1 auto; min-height: 0; object-fit: contain; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 10px; background: transparent; display: block;}
         
-        /* Inspector HP Bar */
-        .inspect-hp-wrapper {
-            width: 100%; height: 24px; display: flex; background: #111; border-radius: 4px; border: 1px solid #444; overflow: hidden; margin-bottom: 10px; flex-shrink: 0;
-        }
+        .inspect-hp-wrapper { width: 100%; height: 24px; display: flex; background: #111; border-radius: 4px; border: 1px solid #444; overflow: hidden; margin-bottom: 10px; flex-shrink: 0; }
         .inspect-hp-bar-container { flex-grow: 1; position: relative; height: 100%; border-right: 1px solid #000; }
         .inspect-hp-trail { position: absolute; top: 0; left: 0; height: 100%; background: #e74c3c; width: 100%; transition: width 0.5s ease-out 0.4s; }
         .inspect-hp-current { position: absolute; top: 0; left: 0; height: 100%; background: #2ecc71; width: 100%; transition: width 0.15s ease-out; }
         .inspect-hp-number { width: 45px; background: #2ecc71; color: #000; font-weight: bold; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: background 0.15s ease-out, color 0.15s ease-out; }
 
-        /* Inspector Buff/Debuff Box */
         .status-fx-box { border: 1px solid #e74c3c; background: rgba(231, 76, 60, 0.1); border-radius: 4px; padding: 8px; flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         .status-item { display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px dotted rgba(231, 76, 60, 0.4); padding-bottom: 6px; }
         .status-item:last-child { border-bottom: none; padding-bottom: 0; }
@@ -268,7 +228,6 @@ Test 4.5 Reloaded
         .status-desc { font-size: 0.65rem; color: #ccc; line-height: 1.3; }
         .status-desc b { color: white; }
 
-        /* Inspector Right Side */
         .inspect-section { margin-top: 10px; border-top: 1px solid #333; padding-top: 8px; }
         .inspect-section:first-child { margin-top: 0; border-top: none; padding-top: 0;}
         .skill-btn { width: 100%; background: #222; color: white; border: 1px solid #444; padding: 6px; margin-top: 5px; cursor: pointer; text-align: left; transition: 0.2s; border-radius: 4px;}
@@ -297,7 +256,7 @@ Test 4.5 Reloaded
 
     <div id="game-header">
         <span>CONQUEROR'S CROWN</span>
-        </div>
+    </div>
 
     <div id="game-area">
         <div class="side-panel left-panel">
@@ -389,6 +348,8 @@ Test 4.5 Reloaded
             "Althea": "./assets/Althea.png",
             "Jaden": "./assets/Jaden.png",
             "Skeleton Warrior": "./assets/Skeleton%20Warrior.png",
+            "Zombie": "./assets/Zombie.png",
+            "Militia": "./assets/Militia.png",
             "JadenLock": "./assets/JadenLock.png",
             "JadenBullet": "./assets/JadenBullet.gif",
             "JadenSFX1": "./assets/JadenSFX1.mp3",
@@ -415,6 +376,8 @@ Test 4.5 Reloaded
             "Barrier": "./assets/Barrier.png",
             "Bleed": "./assets/Bleed.png",
             "Last Stand": "./assets/Last%20Stand.png",
+            "RolynSFX1": "./assets/RolynSFX1.mp3",
+            "RolynSFX2": "./assets/RolynSFX2.mp3",
             "DrawSFX": "./assets/DrawSFX.mp3",
             "PlaceSFX": "./assets/PlaceSFX.mp3",
             "AbilitySFX": "./assets/AbilitySFX.mp3",
@@ -426,8 +389,6 @@ Test 4.5 Reloaded
             "ShieldSFX": "./assets/ShieldSFX.mp3",
             "MyMana": "./assets/MyMana.png",
             "ManaGain": "./assets/ManaGain.png"
-            "Zombie": "./assets/Zombie.png",
-            "Militia": "./assets/Militia.png",
         };
         // ============================================================================
 
@@ -807,17 +768,22 @@ Test 4.5 Reloaded
             drawBtn.innerText = "DRAW HAND";
         }
 
-        async function animateManaGain(amount) {
-            const startEl = document.getElementById('player-deck-stack');
-            const endEl = document.getElementById('mana-display-num');
+        // --- MANA GAIN ANIMATION ENGINE ---
+        async function animateManaGain(amount, sourceDOM) {
+            const endEl = document.getElementById('player-mana-wrapper');
             
-            // Only animate if assets exist and elements are ready
-            if(!startEl || !endEl || !document.documentElement.style.getPropertyValue('--managain-url')) return;
+            if(!endEl || !document.documentElement.style.getPropertyValue('--managain-url')) return;
             
-            const sRect = startEl.getBoundingClientRect();
+            let sRect;
+            if (sourceDOM) {
+                sRect = sourceDOM.getBoundingClientRect();
+            } else {
+                const stack = document.getElementById('player-deck-stack');
+                sRect = stack.getBoundingClientRect();
+            }
             const eRect = endEl.getBoundingClientRect();
             
-            let particles = Math.min(amount, 5); // visually cap spam
+            let particles = Math.min(amount, 5); 
             
             for(let i=0; i<particles; i++) {
                 let p = document.createElement('div');
@@ -826,15 +792,15 @@ Test 4.5 Reloaded
                 p.style.top = (sRect.top + sRect.height/2 - 20) + 'px';
                 document.body.appendChild(p);
                 
-                void p.offsetWidth; // trigger reflow
+                void p.offsetWidth; 
                 
                 p.style.left = (eRect.left + eRect.width/2 - 20) + 'px';
                 p.style.top = (eRect.top + eRect.height/2 - 20) + 'px';
                 
-                setTimeout(() => p.remove(), 800);
-                await new Promise(r => setTimeout(r, 150));
+                setTimeout(() => p.remove(), 700);
+                await new Promise(r => setTimeout(r, 100)); 
             }
-            if(particles > 0) await new Promise(r => setTimeout(r, 650)); // let last particle land
+            if(particles > 0) await new Promise(r => setTimeout(r, 600)); 
         }
 
         document.getElementById('draw-cards-btn').addEventListener('click', () => {
@@ -979,53 +945,6 @@ Test 4.5 Reloaded
             return c;
         }
 
-        function addLog(msg, color="white") {
-            const p = document.createElement('div');
-            p.style.color = color; p.style.marginBottom = "4px"; p.innerHTML = `> ${msg}`;
-            log.appendChild(p); log.scrollTop = log.scrollHeight;
-        }
-
-        // --- Drag & Drop ---
-        document.querySelectorAll('.slot').forEach(slot => {
-            slot.ondragover = (e) => e.preventDefault();
-            slot.ondrop = (e) => {
-                if (isExecuting) return;
-                const cardId = e.dataTransfer.getData('text');
-                if (!cardId) return;
-                const cardEl = document.getElementById(cardId);
-                const liveData = cardInstances[cardId];
-                const isDeployed = cardEl.parentElement.classList.contains('slot');
-
-                if (slot.classList.contains('buff-slot')) {
-                    if (!liveData.isBuff) return addLog("Only Buff cards can be placed here.", "red");
-                    if (!isDeployed || !cardEl.parentElement.classList.contains('ability-slot')) return addLog("Buff cards must be placed in the Ability slot first.", "red");
-                    if (liveData.turnPlaced === turnCount) return addLog("Card has Summoning Sickness!", "red");
-                    if (slot.dataset.side !== liveData.side) return addLog("Wrong side!", "red");
-                    if (slot.querySelector('.card')) return addLog("Buff slot is occupied!", "red");
-
-                    slot.appendChild(cardEl);
-                    liveData.buffTurnsRemaining = 2;
-                    if(abilitySfxUrl) playSound(abilitySfxUrl);
-                    addLog(`<b>${liveData.name}</b> moved to Buff Slot and activated!`, "#f1c40f");
-                    updateUI();
-                    showInspector(cardId, cardEl);
-                    return;
-                }
-
-                if(slot.dataset.side === 'PLAYER' && !slot.querySelector('.card') && !isDeployed) {
-                    if(liveData.type !== slot.dataset.allowed && !(liveData.isBuff && slot.dataset.allowed === 'ability')) return addLog(`Needs ${slot.dataset.allowed.toUpperCase()} slot.`, "red");
-                    if(pMana >= liveData.summonCost) {
-                        pMana -= liveData.summonCost; liveData.turnPlaced = turnCount;
-                        slot.appendChild(cardEl);
-                        if(placeSfxUrl) playSound(placeSfxUrl);
-                        if(liveData.type === 'ability') addLog(`Set Ability Card.`, "#9b59b6");
-                        else addLog(`Summoned <b>${liveData.name}</b>`, "var(--mana-color)");
-                        updateUI(); showInspector(cardId, cardEl);
-                    } else addLog(`Not enough Mana!`, "red");
-                }
-            };
-        });
-
         // --- Split Inspector ---
         function showInspector(id, cardElement) {
             let leftUI = document.getElementById('inspect-left');
@@ -1146,7 +1065,6 @@ Test 4.5 Reloaded
 
             rightUI.innerHTML = actionHtml + summonHtml;
         }
-
         // --- CANCEL PENDING WITH MANA & GHOST AURA REFUND ---
         document.getElementById('cancel-btn').addEventListener('click', () => {
             if(isExecuting) return;
@@ -1574,7 +1492,6 @@ Test 4.5 Reloaded
             let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK") || (actor.name === "Skeleton Warrior" && skillName === "SLASH") || (actor.name === "Zombie" && skillName === "Bite");
             let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
-            // Check Last Stand
             let isLastStandActive = false;
             if (targetInst && targetInst.side === 'PLAYER') {
                 let pBuff = document.getElementById('player-buff-slot').querySelector('.card');
@@ -1584,9 +1501,9 @@ Test 4.5 Reloaded
                 if (eBuff && cardInstances[eBuff.id].name === "Last Stand") isLastStandActive = true;
             }
 
-            // BLOCK INTERCEPTION logic
+            // BLOCK INTERCEPTION logic (Only block FIRST hit of multi-hit attacks)
             if (targetInst && targetInst.blockActive && targetId !== 'CORE') {
-                targetInst.blockActive = false;
+                targetInst.blockActive = false; // Immediately removes block so next hit goes through
                 dmg = 0;
                 if (targetDOM) {
                     showFloatingText(targetDOM, `BLOCKED`, "#ccc", "2.5rem");
@@ -1759,6 +1676,9 @@ Test 4.5 Reloaded
                     if(actorDOM) {
                         actorDOM.style.transition = "transform 0.3s ease"; actorDOM.style.transform = "scale(1.5)"; actorDOM.style.zIndex = "1000";
                         await new Promise(r => setTimeout(r, 600)); showFloatingText(actorDOM, "+3", "var(--mana-color)", "2.5rem");
+                        
+                        if(sideProcessing === 'PLAYER') await animateManaGain(3, actorDOM); // Mid-turn animation spawn before destroying
+                        
                         await new Promise(r => setTimeout(r, 400)); actorDOM.style.transform = "scale(1)"; actorDOM.style.zIndex = "";
                     }
                     if(sideProcessing === 'PLAYER') { pMana += 3; addLog(`<b>${actor.name}</b> grants +3 Mana!`, "var(--mana-color)"); } 
@@ -1776,7 +1696,7 @@ Test 4.5 Reloaded
                     let slots = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${sideProcessing}"]`));
                     let validTargets = slots.map(s => s.querySelector('.card')).filter(c => c && cardInstances[c.id]);
                     
-                    if (validTargets.length > 0) {
+                    if (validTargets.length > 0) { // Althea validation check
                         if (!action.isRecast && actor.name === "Althea") {
                             let roll = Math.random();
                             if (roll < 0.5 && shieldSfxVoiceUrl) playSound(shieldSfxVoiceUrl);
@@ -1826,7 +1746,7 @@ Test 4.5 Reloaded
                     let targetInst = cardInstances[tId];
                     let targetDOM = document.getElementById(tId);
                     
-                    if(targetInst && targetDOM && targetInst.hp > 0) {
+                    if(targetInst && targetDOM && targetInst.hp > 0) { // Althea validation check
                          if (!action.isRecast && actor.name === "Althea") {
                              let roll = Math.random();
                              if (roll < 0.5 && healSfxVoiceUrl) playSound(healSfxVoiceUrl);
@@ -2057,10 +1977,23 @@ Test 4.5 Reloaded
                         }
 
                         if (action.skillName === "Suicidal attack") {
+                            let mRect = actorDOM ? actorDOM.getBoundingClientRect() : null; // Save location before removal
                             actor.hp = 0; 
                             if (actorDOM) actorDOM.remove();
                             if (targetDied) {
-                                if (actor.side === 'PLAYER') { pMana += 4; addLog(`<b>Militia</b> sacrificed to destroy target! Grants +4 Mana!`, "var(--mana-color)"); }
+                                if (actor.side === 'PLAYER') { 
+                                    let tempDiv = document.createElement('div');
+                                    if (mRect) {
+                                        tempDiv.style.position = 'absolute'; tempDiv.style.left = mRect.left + 'px'; tempDiv.style.top = mRect.top + 'px';
+                                        tempDiv.style.width = mRect.width + 'px'; tempDiv.style.height = mRect.height + 'px';
+                                        document.body.appendChild(tempDiv);
+                                        await animateManaGain(4, tempDiv);
+                                        tempDiv.remove();
+                                    } else {
+                                        await animateManaGain(4);
+                                    }
+                                    pMana += 4; addLog(`<b>Militia</b> sacrificed to destroy target! Grants +4 Mana!`, "var(--mana-color)"); 
+                                }
                                 else { eMana += 4; addLog(`Enemy <b>Militia</b> sacrificed to destroy target! Grants +4 Mana!`, "var(--mana-color)"); }
                                 
                                 let mText = document.createElement('div');
@@ -2093,7 +2026,6 @@ Test 4.5 Reloaded
         document.getElementById('end-turn-btn').addEventListener('click', async () => {
             if (isExecuting) return; 
             
-            // Remove block correctly at start of enemy turn
             Object.values(cardInstances).forEach(c => {
                 if(c.side === 'ENEMY') {
                     c.exhausted = false; c.queued = false; c.extraAction = false; c.blockActive = false;
@@ -2289,6 +2221,7 @@ Test 4.5 Reloaded
 
                     if(c.name === "Zombie" && c.hp > 0 && c.hp <= 100) {
                          c.hp = c.maxHp;
+                         syncVisualHP(cDOM, c.hp, c.maxHp);
                          c.shield = 1000;
                          c.shieldTurns = turnCount + 99;
                          addLog(`<b>Zombie</b>'s Vigor of the Damned triggered from Bleed! Restored to full HP and gained 1000 Shield!`, '#2ecc71');
@@ -2296,7 +2229,6 @@ Test 4.5 Reloaded
                              showFloatingText(cDOM, "VIGOR OF THE DAMNED", "#2ecc71", "1.5rem");
                              cDOM.classList.add('shimmer-fx');
                              setTimeout(() => cDOM.classList.remove('shimmer-fx'), 1000);
-                             syncVisualHP(cDOM, c.hp, c.maxHp);
                          }
                     }
 
@@ -2333,7 +2265,6 @@ Test 4.5 Reloaded
                     showInspector(c.id, dDOM);
                 }
 
-                // Restore player stats at start of player turn
                 if(c.side === 'PLAYER') {
                     c.exhausted = false; c.queued = false; c.extraAction = false; c.blockActive = false;
                 }
@@ -2365,3 +2296,4 @@ Test 4.5 Reloaded
     </script>
 </body>
 </html>
+    
