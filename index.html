@@ -1,4 +1,4 @@
-Test 4.4
+Test 4.5 Reloaded
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +14,8 @@ Test 4.4
             --shuriken-url: none;
             --healfx-url: none;
             --empty-slot-url: none;
+            --mymana-url: none;
+            --managain-url: none;
         }
 
         body {
@@ -38,7 +40,6 @@ Test 4.4
 
         /* --- Game Header --- */
         #game-header { width: 100%; height: 50px; padding: 0 20px; background: rgba(0,0,0,0.9); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; color: var(--gold); font-weight: bold; flex-shrink: 0; z-index: 50;}
-        #mana-display { color: var(--mana-color); font-size: 1.2rem; }
         
         /* --- Master Layout Grid --- */
         #game-area { 
@@ -48,7 +49,7 @@ Test 4.4
         }
 
         .side-panel { display: flex; flex-direction: column; gap: 10px; height: 100%; flex-shrink: 0; }
-        .left-panel { width: 500px; }
+        .left-panel { width: 500px; position: relative;}
         .right-panel { width: 320px; }
         
         .center-panel { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; overflow: hidden; position: relative;}
@@ -65,7 +66,18 @@ Test 4.4
         #inspect-right { width: 50%; display: flex; flex-direction: column; overflow-y: auto; padding-left: 5px; }
         #inspect-right::-webkit-scrollbar { width: 5px; } #inspect-right::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 5px;}
         
-        #hand-container { height: 280px; background: rgba(0,0,0,0.85); padding: 15px; border: 2px solid #333; border-radius: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); flex-shrink: 0; }
+        /* NEW DYNAMIC MANA UI */
+        #player-mana-wrapper {
+            align-self: center; margin-bottom: -15px; z-index: 20;
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(0,0,0,0.9); padding: 6px 18px;
+            border: 2px solid var(--mana-color); border-radius: 20px;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.6);
+        }
+        .mana-icon { width: 28px; height: 28px; background-image: var(--mymana-url); background-size: contain; background-repeat: no-repeat; background-position: center; }
+        .mana-num { color: white; font-weight: bold; font-size: 1.4rem; text-shadow: 0 0 10px var(--mana-color); font-family: 'Courier New', monospace; }
+
+        #hand-container { height: 280px; background: rgba(0,0,0,0.85); padding: 15px; padding-top: 25px; border: 2px solid #333; border-radius: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); flex-shrink: 0; position: relative;}
         #hand { display: flex; gap: 8px; flex-grow: 1; overflow-x: hidden; scroll-behavior: smooth; padding: 5px; }
         .scroll-btn { background: #222; color: var(--gold); border: 1px solid #444; border-radius: 5px; font-size: 1.4rem; cursor: pointer; padding: 5px; height: 100%; display: flex; align-items: center; transition: 0.2s; }
         .scroll-btn:hover { background: #444; border-color: var(--gold); }
@@ -127,12 +139,12 @@ Test 4.4
         .board { display: flex; flex-direction: column; gap: 8px; padding: 8px; background: rgba(255,255,255,0.02); border-radius: 10px; }
         .row { display: flex; gap: 12px; justify-content: center;}
         
-        /* Slot & Card Alignment OVERHAUL - Empty Slot Implementation */
+        /* Slot & Card Alignment OVERHAUL - Empty Slot Fit */
         .slot { width: 140px; height: 196px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 6px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #555; position: relative; box-sizing: border-box; padding: 0;
-                background-image: var(--empty-slot-url); background-size: cover; background-position: center; background-repeat: no-repeat; }
+                background-image: var(--empty-slot-url); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; }
         .slot.drag-over { border-color: var(--gold); box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.5); }
         .ability-slot { border-color: #9b59b6; color: #9b59b6; }
-        .slot-text { pointer-events: none; z-index: 1; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; }
+        .slot-text { pointer-events: none; z-index: 1; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; display: none; /* Hidden since we have the empty slot image now */ }
 
         /* BUFF SLOTS */
         .buff-slot { position: absolute; top: 50%; transform: translateY(-50%); border-color: #f1c40f; color: #f1c40f; box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.1); z-index: 10; transition: 0.3s; }
@@ -178,13 +190,7 @@ Test 4.4
         .badge-barrier { position: absolute; top: -8px; right: 15px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #3498db); }
         .badge-block { background: #888 !important; box-shadow: 0 0 10px #888; }
 
-        /* JADEN MECHANICS CSS */
-        @keyframes pulse-lock {
-            from { transform: translate(-50%, -50%) scale(0.7); opacity: 0.6; }
-            to { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
-        }
-
-        /* --- DECKS --- */
+        /* --- DECKS & ANIMATIONS --- */
         .deck-container { position: absolute; right: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 50; }
         #enemy-deck-area { top: 20px; }
         #player-deck-area { bottom: 20px; }
@@ -194,6 +200,8 @@ Test 4.4
         
         #draw-cards-btn { display: none; padding: 10px 15px; background: var(--gold); color: black; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; animation: pulse 1.5s infinite; font-size: 0.8rem;}
         #draw-cards-btn:disabled { animation: none; filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
+
+        .mana-particle { position: fixed; width: 40px; height: 40px; background-image: var(--managain-url); background-size: contain; background-repeat: no-repeat; z-index: 10000; pointer-events: none; transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 0 10px var(--mana-color)); }
 
         /* --- VISUAL EFFECTS --- */
         @keyframes shake {
@@ -289,8 +297,7 @@ Test 4.4
 
     <div id="game-header">
         <span>CONQUEROR'S CROWN</span>
-        <span id="mana-display">MANA: 8</span>
-    </div>
+        </div>
 
     <div id="game-area">
         <div class="side-panel left-panel">
@@ -298,6 +305,12 @@ Test 4.4
                 <div id="inspect-left"><div class="empty-inspector">Select a card to inspect.</div></div>
                 <div id="inspect-right"><div class="empty-inspector">No actions available.</div></div>
             </div>
+            
+            <div id="player-mana-wrapper">
+                <div class="mana-icon"></div>
+                <div class="mana-num" id="mana-display-num">8</div>
+            </div>
+            
             <div id="hand-container">
                 <button class="scroll-btn" id="scroll-left">&#9664;</button>
                 <div id="hand"></div>
@@ -363,90 +376,6 @@ Test 4.4
             <div id="event-log"></div>
         </div>
     </div>
-    <div class="upload-area" id="upload-box" onclick="initializeGame()">
-            <h2>START GAME</h2>
-            <p style="font-size: 0.8rem; color: #aaa;">Enter the battlefield.</p>
-        </div>
-        <div id="absorbing-text">Loading Assets...</div>
-    </div>
-
-    <div id="game-header">
-        <span>CONQUEROR'S CROWN</span>
-        <span id="mana-display">MANA: 8</span>
-    </div>
-
-    <div id="game-area">
-        <div class="side-panel left-panel">
-            <div id="card-inspector">
-                <div id="inspect-left"><div class="empty-inspector">Select a card to inspect.</div></div>
-                <div id="inspect-right"><div class="empty-inspector">No actions available.</div></div>
-            </div>
-            <div id="hand-container">
-                <button class="scroll-btn" id="scroll-left">&#9664;</button>
-                <div id="hand"></div>
-                <button class="scroll-btn" id="scroll-right">&#9654;</button>
-            </div>
-        </div>
-
-        <div class="center-panel">
-            <div id="enemy-buff-slot" class="slot buff-slot" data-side="ENEMY" data-allowed="buff"><span class="slot-text">BUFF</span></div>
-            <div id="player-buff-slot" class="slot buff-slot" data-side="PLAYER" data-allowed="buff"><span class="slot-text">BUFF</span></div>
-
-            <div id="turn-banner">PLAYER TURN 1</div>
-            <div class="battlefield">
-                <div class="core-container enemy-core" id="e-core-target">
-                    <div class="core-crystal"></div><div class="core-hp" id="enemy-core-hp">ENEMY CORE: 2000 | MANA: 8</div>
-                    <div class="horizontal-bar"><div class="hp-bar-trail" style="width: 100%"></div><div class="hp-bar-current" style="width: 100%"></div></div>
-                </div>
-                <div class="board">
-                    <div class="row">
-                        <div class="slot backline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">UNIT</span></div>
-                        <div class="slot backline ability-slot" data-side="ENEMY" data-allowed="ability"><span class="slot-text">ABILITY</span></div>
-                        <div class="slot backline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">UNIT</span></div>
-                    </div>
-                    <div class="row">
-                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
-                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
-                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
-                    </div>
-                </div>
-                <div class="board" style="border-top: 1px solid #333; padding-top: 15px;">
-                    <div class="row">
-                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
-                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
-                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
-                    </div>
-                    <div class="row">
-                        <div class="slot backline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">UNIT</span></div>
-                        <div class="slot backline ability-slot" data-side="PLAYER" data-allowed="ability"><span class="slot-text">ABILITY</span></div>
-                        <div class="slot backline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">UNIT</span></div>
-                    </div>
-                </div>
-                <div class="core-container player-core" id="p-core-target">
-                    <div class="core-crystal"></div><div class="core-hp" id="player-core-hp">PLAYER CORE: 2000</div>
-                    <div class="horizontal-bar"><div class="hp-bar-trail" style="width: 100%"></div><div class="hp-bar-current" style="width: 100%"></div></div>
-                </div>
-            </div>
-
-            <div class="deck-container" id="enemy-deck-area">
-                <div id="enemy-deck-stack" class="deck-stack"></div>
-                <div id="e-deck-count" class="deck-count">Infinite</div>
-            </div>
-            <div class="deck-container" id="player-deck-area">
-                <button id="draw-cards-btn">DRAW TO 6</button>
-                <div id="player-deck-stack" class="deck-stack"></div>
-                <div id="p-deck-count" class="deck-count">Infinite</div>
-            </div>
-        </div>
-
-        <div class="side-panel right-panel">
-            <button id="cancel-btn" class="btn-main">CANCEL PENDING</button>
-            <button id="exec-btn" class="btn-main">EXECUTE PENDING (0)</button>
-            <button id="end-turn-btn" class="btn-main">END TURN</button>
-            <div id="event-log"></div>
-        </div>
-    </div>
-
     <script>
         // ============================================================================
         // ⚙️ GITHUB ASSET CONFIGURATION ⚙️
@@ -494,7 +423,9 @@ Test 4.4
             "HealSFXVoice2": "./assets/HealSFXVoice2.mp3",
             "ShieldSFXVoice": "./assets/ShieldSFXVoice.mp3",
             "ShieldSFXVoice2": "./assets/ShieldSFXVoice2.mp3",
-            "ShieldSFX": "./assets/ShieldSFX.mp3"
+            "ShieldSFX": "./assets/ShieldSFX.mp3",
+            "MyMana": "./assets/MyMana.png",
+            "ManaGain": "./assets/ManaGain.png"
         };
         // ============================================================================
 
@@ -574,19 +505,16 @@ Test 4.4
             if(!targetDOM) return;
             let pct = Math.max(0, Math.min(100, (currentHP / maxHP) * 100));
             
-            // Check if it's a Card (Vertical Bar)
             let vTrail = targetDOM.querySelector('.vertical-bar .hp-bar-trail');
             let vCurr = targetDOM.querySelector('.vertical-bar .hp-bar-current');
             if (vTrail) vTrail.style.height = pct + '%';
             if (vCurr) vCurr.style.height = pct + '%';
 
-            // Check if it's a Core or Inspector (Horizontal Bar)
             let hTrail = targetDOM.querySelector('.horizontal-bar .hp-bar-trail') || targetDOM.querySelector('.inspect-hp-trail') || targetDOM.querySelector('.card-hp-trail');
             let hCurr = targetDOM.querySelector('.horizontal-bar .hp-bar-current') || targetDOM.querySelector('.inspect-hp-current') || targetDOM.querySelector('.card-hp-current');
             if (hTrail) hTrail.style.width = pct + '%';
             if (hCurr) hCurr.style.width = pct + '%';
 
-            // Update Numbers
             let numCard = targetDOM.querySelector('.card-hp-number');
             if (numCard) { numCard.innerText = Math.ceil(currentHP); numCard.style.background = pct < 30 ? '#e74c3c' : '#2ecc71'; numCard.style.color = pct < 30 ? '#fff' : '#000'; }
             
@@ -602,10 +530,10 @@ Test 4.4
             let name = fileName.replace(/\.[^/.]+$/, ""); 
             let cleanName = name.toLowerCase();
 
-            // Background & Assets
-            if(cleanName.includes('empty slot')) { return { isEmptySlot: true, img: dataUrl }; }
+            if(cleanName.includes('empty slot')) { document.documentElement.style.setProperty('--empty-slot-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isEmptySlot: true, img: dataUrl }; }
+            if(cleanName.includes('mymana')) { document.documentElement.style.setProperty('--mymana-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
+            if(cleanName.includes('managain')) { document.documentElement.style.setProperty('--managain-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
             
-            // Audio/FX checks
             if(cleanName.includes('kinsansound') || cleanName.includes('kin san sound')) { kinSanAudioUrl = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('kinsfx1')) { kinSfx1Url = dataUrl; return { isAudio: true }; }
             if(cleanName.includes('kinsfx2')) { kinSfx2Url = dataUrl; return { isAudio: true }; }
@@ -732,9 +660,7 @@ Test 4.4
                 
                 const cardData = getCardTemplate(key, fileUrl);
                 
-                if (cardData.isEmptySlot) {
-                    document.documentElement.style.setProperty('--empty-slot-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
-                } else if (cardData.isCardBack) {
+                if (cardData.isCardBack) {
                     deckBackImg = cardData.img;
                     document.getElementById('player-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
                     document.getElementById('enemy-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
@@ -752,7 +678,7 @@ Test 4.4
                     if (cardData.iconType === 'taunted') tauntedImgUrl = cardData.img;
                     if (cardData.iconType === 'barrier') barrierImgUrl = cardData.img;
                     if (cardData.iconType === 'bleed') bleedImgUrl = cardData.img;
-                } else if (cardData.isAudio || cardData.isMenuBG || cardData.isFX) {
+                } else if (cardData.isAudio || cardData.isMenuBG || cardData.isFX || cardData.isEmptySlot) {
                     // Handled inside getCardTemplate side-effects
                 } else if (cardData.isPlayable) {
                     cardLibrary.push({...cardData}); 
@@ -772,7 +698,9 @@ Test 4.4
         }
 
         function updateUI() {
-            document.getElementById('mana-display').innerText = `MANA: ${pMana}`;
+            let manaDisp = document.getElementById('mana-display-num');
+            if(manaDisp) manaDisp.innerText = pMana;
+            
             document.getElementById('enemy-core-hp').innerText = `ENEMY CORE: ${Math.ceil(eCoreHP)} | MANA: ${eMana}`;
             document.getElementById('player-core-hp').innerText = `PLAYER CORE: ${Math.ceil(pCoreHP)}`;
             
@@ -785,7 +713,6 @@ Test 4.4
             document.getElementById('end-turn-btn').disabled = isExecuting;
             document.getElementById('draw-cards-btn').disabled = isExecuting;
 
-            // Check active buffs
             let pLastStand = false;
             let eLastStand = false;
             let pBuffSlot = document.getElementById('player-buff-slot').querySelector('.card');
@@ -878,6 +805,36 @@ Test 4.4
             drawBtn.innerText = "DRAW HAND";
         }
 
+        async function animateManaGain(amount) {
+            const startEl = document.getElementById('player-deck-stack');
+            const endEl = document.getElementById('mana-display-num');
+            
+            // Only animate if assets exist and elements are ready
+            if(!startEl || !endEl || !document.documentElement.style.getPropertyValue('--managain-url')) return;
+            
+            const sRect = startEl.getBoundingClientRect();
+            const eRect = endEl.getBoundingClientRect();
+            
+            let particles = Math.min(amount, 5); // visually cap spam
+            
+            for(let i=0; i<particles; i++) {
+                let p = document.createElement('div');
+                p.className = 'mana-particle';
+                p.style.left = (sRect.left + sRect.width/2 - 20) + 'px';
+                p.style.top = (sRect.top + sRect.height/2 - 20) + 'px';
+                document.body.appendChild(p);
+                
+                void p.offsetWidth; // trigger reflow
+                
+                p.style.left = (eRect.left + eRect.width/2 - 20) + 'px';
+                p.style.top = (eRect.top + eRect.height/2 - 20) + 'px';
+                
+                setTimeout(() => p.remove(), 800);
+                await new Promise(r => setTimeout(r, 150));
+            }
+            if(particles > 0) await new Promise(r => setTimeout(r, 650)); // let last particle land
+        }
+
         document.getElementById('draw-cards-btn').addEventListener('click', () => {
             if (isExecuting) return;
             document.getElementById('draw-cards-btn').style.display = "none";
@@ -949,11 +906,7 @@ Test 4.4
             html += `<div class="card-img-container" style="${bgImg}"></div>`;
             if(data.type === 'unit') {
                 html += `<div class="card-level">${"★".repeat(data.powerLevel)}</div>`;
-                
-                // VERTICAL LEFT BAR
                 html += `<div class="vertical-bar"><div class="hp-bar-trail" style="height: ${(data.hp/data.maxHp)*100}%"></div><div class="hp-bar-current" style="height: ${(data.hp/data.maxHp)*100}%"></div></div>`;
-                
-                // HORIZONTAL BOTTOM BAR
                 html += `<div class="card-hp-footer">
                             <div class="card-hp-bar-container"><div class="card-hp-trail" style="width: ${(data.hp/data.maxHp)*100}%"></div><div class="card-hp-current" style="width: ${(data.hp/data.maxHp)*100}%"></div></div>
                             <div class="card-hp-number">${Math.ceil(data.hp)}</div>
@@ -1093,7 +1046,7 @@ Test 4.4
                 return;
             }
 
-            // 1. Populate the Locked Left Inspector (Stats & Art)
+            // 1. Populate the Locked Left Inspector
             let pct = Math.max(0, Math.min(100, (data.hp / data.maxHp) * 100)) || 100;
             let html = `<h3 class="inspect-h">${data.name}</h3><div class="inspect-sub">${data.title}</div><img src="${data.img}" class="inspect-art">`;
             
@@ -1112,7 +1065,7 @@ Test 4.4
             // 2. Populate the Right Action Menu
             let actionHtml = '';
             
-            // RED STATUS BOX logic
+            // RED STATUS BOX
             let statusHtml = '';
             if (data.tauntedBy && tauntedImgUrl) {
                 statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${tauntedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}')"></div><div class="status-desc"><b>TAUNTED:</b> Must attack the taunter during action phase.</div></div>`;
@@ -1125,9 +1078,7 @@ Test 4.4
                 statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${barrierImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}')"></div><div class="status-desc"><b>SHIELDED:</b> Absorbs up to ${data.shield} damage.</div></div>`;
             }
             
-            if (statusHtml !== '') {
-                actionHtml += `<div class="status-fx-box">${statusHtml}</div>`;
-            }
+            if (statusHtml !== '') actionHtml += `<div class="status-fx-box">${statusHtml}</div>`;
 
             if (data.isBuff && isDeployed && cardElement.parentElement.classList.contains('ability-slot')) {
                 actionHtml += `<div style="color:#f1c40f; font-size:0.75rem; font-weight:bold; margin-top:5px; padding: 5px; border: 1px dashed #f1c40f; text-align: center;">[BUFF CARD: DRAG TO BUFF SLOT TO ACTIVATE]</div>`;
@@ -1163,7 +1114,6 @@ Test 4.4
                             let costMet = pMana >= skill.manaCost;
                             let meetsCondition = true;
                             if(skill.requiresBlessings) meetsCondition = (data.blessings >= skill.requiresBlessings);
-                            
                             if(skill.name === "Trigger Unbound" && (!data.chamberedRounds || data.chamberedRounds === 0)) meetsCondition = false;
 
                             actionHtml += `<button class="skill-btn" ${canAct && costMet && meetsCondition ? '' : 'disabled'} onclick="queueAction('${id}', '${safeSkillName}', ${skill.manaCost}, false)">
@@ -1190,9 +1140,7 @@ Test 4.4
                 <div class="summon-val">${data.summonCost} MANA</div>
             </div>`;
 
-            if(actionHtml === '') {
-                actionHtml = `<div class="empty-inspector">No actions available.</div>`;
-            }
+            if(actionHtml === '') actionHtml = `<div class="empty-inspector">No actions available.</div>`;
 
             rightUI.innerHTML = actionHtml + summonHtml;
         }
@@ -1201,19 +1149,16 @@ Test 4.4
         document.getElementById('cancel-btn').addEventListener('click', () => {
             if(isExecuting) return;
             
-            // Refund Queued Actions
             pQueue.forEach(a => { 
                 if(cardInstances[a.actorId]) cardInstances[a.actorId].queued = false; 
                 pMana += a.cost;
             });
             
-            // Refund Active Targeting Action
             if(pendingSkill && cardInstances[pendingSkill.actorId]) {
                 cardInstances[pendingSkill.actorId].queued = false;
                 pMana += pendingSkill.cost;
             }
 
-            // OMT Ghost Aura Wipe & Card Refund
             let omtRefundCount = 0;
             Object.values(cardInstances).forEach(c => {
                 if (c.extraAction && c.side === 'PLAYER') {
@@ -1224,7 +1169,6 @@ Test 4.4
                 }
             });
             
-            // Re-create the OMT cards back in hand so they aren't lost
             for(let i=0; i<omtRefundCount; i++) {
                 const omtData = getCardTemplate("One More Time", ASSET_LINKS["One More Time"]);
                 const cardId = 'card_' + Math.random().toString(36).substr(2, 9);
@@ -1239,7 +1183,6 @@ Test 4.4
             updateUI(); showInspector('none', null); 
         });
 
-        // --- Target Line Glow for Althea Beam ---
         document.addEventListener('mouseover', (e) => {
             if(!isTargeting || pendingSkill?.skillName !== "Punishment of the Blessed") return;
             const cardEl = e.target.closest('.card');
@@ -1270,7 +1213,6 @@ Test 4.4
                     for (let ally of allies) {
                         if (!ally.exhausted && !ally.queued && ally.turnPlaced < turnCount) {
                             ally.queued = true;
-                            // SYNCED MIMICRY: Push to the correct queue side
                             let mimicAction = { actorId: ally.id, actorName: ally.name, side: ally.side, skillName: payload.action.skillName, cost: 0, targetId: payload.action.targetId };
                             if (ally.side === 'PLAYER') pQueue.push(mimicAction);
                             else eQueue.push(mimicAction);
@@ -1306,7 +1248,6 @@ Test 4.4
                         syncVisualHP(tDOM, taunter.hp, taunter.maxHp);
                         showFloatingText(tDOM, `+${healAmt}`, "#2ecc71", "1.5rem");
                         
-                        // Custom green glow for Rolyn
                         tDOM.style.transition = "box-shadow 0.3s ease";
                         tDOM.style.boxShadow = "0 0 25px #2ecc71, inset 0 0 15px #2ecc71";
                         setTimeout(() => { tDOM.style.boxShadow = ""; setTimeout(() => { tDOM.style.transition = ""; }, 300); }, 500);
@@ -1337,7 +1278,7 @@ Test 4.4
                      payload.targetInst.marks += 2;
                      let tDOM = document.getElementById(payload.action.targetId);
                      setTimeout(() => showFloatingText(tDOM, "Shinobi's Mark Inflicted", "#2ecc71", "1rem"), 400);
-                     showInspector(payload.action.targetId, tDOM); // refresh inspector if marked
+                     showInspector(payload.action.targetId, tDOM); 
                 }
             }
         }
@@ -1350,7 +1291,6 @@ Test 4.4
             if(actor.exhausted || actor.queued) return addLog("Card has already acted this turn!", "red");
             if(actor.tauntedBy) return addLog("Taunted unit cannot be selected. It will auto-attack upon execution.", "red");
             
-            // INSTANT MANA DEDUCTION
             if(pMana < cost) return addLog("Not enough Mana!", "red");
             pMana -= cost;
             
@@ -1374,7 +1314,6 @@ Test 4.4
                 addLog("Select an Allied unit for One More Time...", "#9b59b6");
                 document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => {
                     let tInst = cardInstances[c.id];
-                    // Exhaustion Zombie Fix: Only highlight non-exhausted, active units
                     if(tInst && tInst.type === 'unit' && !tInst.exhausted && tInst.turnPlaced < turnCount) {
                         c.classList.add('target-buff-glow');
                     }
@@ -1382,7 +1321,7 @@ Test 4.4
             } 
             else if (skillName === "Punishment of the Blessed") {
                 if(actor.blessings < 7) {
-                    pMana += cost; actor.queued = false; // Refund if blocked
+                    pMana += cost; actor.queued = false; 
                     return addLog("Needs 7 Blessings!", "red");
                 }
                 isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
@@ -1395,7 +1334,6 @@ Test 4.4
                 targetCountReq = 1;
                 let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
                 addLog("Select ANY Enemy target...", "var(--gold)");
-                // Bypasses protection
                 document.querySelectorAll(`.slot[data-side="${defSide}"] .card`).forEach(c => c.classList.add('target-glow'));
             }
             else if (skillName === "Lion's Roar") {
@@ -1442,7 +1380,7 @@ Test 4.4
                     addLog("All enemies down. Use 'ATTACK CORE' instead.", "#e74c3c");
                     isTargeting = false;
                     actor.queued = false;
-                    pMana += cost; // Auto-Refund
+                    pMana += cost; 
                     pendingSkill = null;
                 }
             }
@@ -1484,7 +1422,6 @@ Test 4.4
                 return;
             }
 
-            // Normal Target Queuing
             if (targetCountReq > 1) {
                 if (selectedTargets.includes(targetId)) return; 
                 selectedTargets.push(targetId);
@@ -1735,7 +1672,6 @@ Test 4.4
                      syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
                      addLog(`<b>${actor.name}</b> hits ${targetInst.name} for ${dmg} DMG!`, '#ff4d4d');
 
-                     // Vigor of the Damned Check
                      if(targetInst.name === "Zombie" && targetInst.hp > 0 && targetInst.hp <= 100) {
                          targetInst.hp = targetInst.maxHp;
                          syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
@@ -1765,7 +1701,6 @@ Test 4.4
         async function processQueue(sideProcessing, queueArr) {
             isExecuting = true; 
 
-            // Auto-queue forced attacks for taunted player units
             if (sideProcessing === 'PLAYER') {
                 let activePlayerUnits = Object.values(cardInstances).filter(c => c.side === 'PLAYER' && c.tauntedBy && c.hp > 0 && c.turnPlaced < turnCount && !c.exhausted);
                 activePlayerUnits.forEach(u => {
@@ -1836,29 +1771,29 @@ Test 4.4
                     }
                     addLog(`<b>${actor.name}</b> enters Block Stance!`, "#ccc");
                 } else if (action.skillName === "Shield of Hope") {
-                    if (!action.isRecast) {
-                        let roll = Math.random();
-                        if (roll < 0.5 && shieldSfxVoiceUrl) playSound(shieldSfxVoiceUrl);
-                        else if (roll >= 0.5 && shieldSfxVoice2Url) playSound(shieldSfxVoice2Url);
-                    }
-                    await new Promise(r => setTimeout(r, 100)); 
-
-                    if (shieldSfxUrl) playSound(shieldSfxUrl);
-
                     let slots = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${sideProcessing}"]`));
-                    let shieldedCount = 0;
-                    slots.forEach(slot => {
-                         let cEl = slot.querySelector('.card');
-                         if(cEl && cardInstances[cEl.id]) {
+                    let validTargets = slots.map(s => s.querySelector('.card')).filter(c => c && cardInstances[c.id]);
+                    
+                    if (validTargets.length > 0) {
+                        if (!action.isRecast && actor.name === "Althea") {
+                            let roll = Math.random();
+                            if (roll < 0.5 && shieldSfxVoiceUrl) playSound(shieldSfxVoiceUrl);
+                            else if (roll >= 0.5 && shieldSfxVoice2Url) playSound(shieldSfxVoice2Url);
+                            await new Promise(r => setTimeout(r, 100)); 
+                        }
+                        if (shieldSfxUrl) playSound(shieldSfxUrl);
+
+                        let shieldedCount = 0;
+                        validTargets.forEach(cEl => {
                               cardInstances[cEl.id].shield = 500;
                               cardInstances[cEl.id].shieldTurns = turnCount + 1;
                               showFloatingText(cEl, "SHIELDED", "#3498db", "1.5rem");
                               shieldedCount++;
-                         }
-                    });
-                    actor.blessings = (actor.blessings || 0) + shieldedCount;
-                    addLog(`<b>${actor.name}</b> shielded ${shieldedCount} allies!`, "#3498db");
-                    await new Promise(r => setTimeout(r, 600));
+                        });
+                        actor.blessings = (actor.blessings || 0) + shieldedCount;
+                        addLog(`<b>${actor.name}</b> shielded ${shieldedCount} allies!`, "#3498db");
+                        await new Promise(r => setTimeout(r, 600));
+                    }
                 } else if (action.skillName === "Double Action") {
                     let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
                     let targetInst = cardInstances[tId];
@@ -1885,17 +1820,18 @@ Test 4.4
                     }
                     actor.hp = 0; 
                 } else if (action.skillName === "Blessing of the Light") {
-                    if (!action.isRecast) {
-                        let roll = Math.random();
-                        if (roll < 0.5 && healSfxVoiceUrl) playSound(healSfxVoiceUrl);
-                        else if (roll >= 0.5 && healSfxVoice2Url) playSound(healSfxVoice2Url);
-                    }
-                    await new Promise(r => setTimeout(r, 100)); 
-
                     let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
                     let targetInst = cardInstances[tId];
                     let targetDOM = document.getElementById(tId);
-                    if(targetInst && targetDOM && targetDOM.querySelector('.badge-hp')) {
+                    
+                    if(targetInst && targetDOM && targetInst.hp > 0) {
+                         if (!action.isRecast && actor.name === "Althea") {
+                             let roll = Math.random();
+                             if (roll < 0.5 && healSfxVoiceUrl) playSound(healSfxVoiceUrl);
+                             else if (roll >= 0.5 && healSfxVoice2Url) playSound(healSfxVoice2Url);
+                             await new Promise(r => setTimeout(r, 100)); 
+                         }
+
                          let heal = Math.floor(Math.random() * 151) + 150;
                          targetInst.hp = Math.min(targetInst.maxHp || targetInst.hp + heal, targetInst.hp + heal);
                          syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
@@ -1905,9 +1841,9 @@ Test 4.4
                          if(healAudioUrl) playSound(healAudioUrl);
                          actor.blessings = (actor.blessings || 0) + 1;
                          addLog(`<b>${actor.name}</b> heals ${targetInst.name} for ${heal}!`, "#2ecc71");
+                         await new Promise(r => setTimeout(r, 1000));
+                         if(targetDOM) targetDOM.classList.remove('shimmer-fx');
                     }
-                    await new Promise(r => setTimeout(r, 1000));
-                    if(targetDOM) targetDOM.classList.remove('shimmer-fx');
                 } else if(action.skillName === "Punishment of the Blessed") {
                     actor.blessings = Math.max(0, actor.blessings - 7);
                     let frontTargetId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
@@ -1950,7 +1886,7 @@ Test 4.4
                         let targetDOM = document.getElementById(tId);
                         if (targetInst && targetInst.hp > 0 && tId !== 'CORE') {
                             targetInst.tauntedBy = actor.id;
-                            targetInst.tauntedTurn = turnCount + (actor.side === 'ENEMY' ? 2 : 1); // Dynamic turn offset
+                            targetInst.tauntedTurn = turnCount + (actor.side === 'ENEMY' ? 2 : 1);
                             if (targetDOM) {
                                 targetDOM.classList.add('taunted-status');
                                 showFloatingText(targetDOM, "TAUNTED", "#f39c12", "1.5rem");
@@ -2065,7 +2001,7 @@ Test 4.4
                         if (action.skillName === "Uncoordinated attack") dmg = Math.floor(Math.random() * (200 - 100 + 1)) + 100;
                         else if (action.skillName === "Suicidal attack") {
                             if (villagerSuicideSfxUrl) playSound(villagerSuicideSfxUrl);
-                            await new Promise(r => setTimeout(r, 100)); // Queue sound 100ms before
+                            await new Promise(r => setTimeout(r, 100));
                             dmg = Math.floor(Math.random() * (700 - 1 + 1)) + 1;
                         }
                     }
@@ -2155,7 +2091,13 @@ Test 4.4
         document.getElementById('end-turn-btn').addEventListener('click', async () => {
             if (isExecuting) return; 
             
-            // Inject force execution of taunted player units if the queue is empty upon clicking End Turn
+            // Remove block correctly at start of enemy turn
+            Object.values(cardInstances).forEach(c => {
+                if(c.side === 'ENEMY') {
+                    c.exhausted = false; c.queued = false; c.extraAction = false; c.blockActive = false;
+                }
+            });
+            
             let activePlayerUnits = Object.values(cardInstances).filter(c => c.side === 'PLAYER' && c.tauntedBy && c.hp > 0 && c.turnPlaced < turnCount && !c.exhausted);
             activePlayerUnits.forEach(u => {
                 let taunterDOM = document.getElementById(u.tauntedBy);
@@ -2172,7 +2114,6 @@ Test 4.4
 
             if(pQueue.length > 0) await processQueue('PLAYER', pQueue);
 
-            // Manage Player Buffs Expiry
             let pBuffSlot = document.getElementById('player-buff-slot');
             let pBuffCard = pBuffSlot.querySelector('.card');
             if (pBuffCard) {
@@ -2193,7 +2134,6 @@ Test 4.4
             let aiHandCount = eHandData.length; let aiToDraw = 6 - aiHandCount;
             if(aiToDraw > 0) { drawAnimated(aiToDraw, 'ENEMY'); await new Promise(r => setTimeout(r, 1000 + aiToDraw * 250)); }
 
-            // AI Buff Usage Logic
             let eAbilSlot = document.querySelector('.slot.ability-slot[data-side="ENEMY"]');
             let eBuffSlot = document.getElementById('enemy-buff-slot');
             let buffInAbil = eAbilSlot.querySelector('.card');
@@ -2265,7 +2205,6 @@ Test 4.4
                     
                     let action = null;
 
-                    // Taunt Override (Bypasses mana check entirely)
                     if (data.tauntedBy) {
                         let taunterDOM = document.getElementById(data.tauntedBy);
                         if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) { 
@@ -2274,7 +2213,6 @@ Test 4.4
                         } else { data.tauntedBy = null; }
                     }
 
-                    // Standard AI Logic
                     if (!action) {
                         if(data.skills.length > 0 || data.type === 'ability') {
                             let validSkills = data.skills.filter(s => {
@@ -2371,7 +2309,6 @@ Test 4.4
 
             await new Promise(r => setTimeout(r, 600));
 
-            // Manage Enemy Buffs Expiry
             let eActiveBuffCard = eBuffSlot.querySelector('.card');
             if (eActiveBuffCard) {
                 let eData = cardInstances[eActiveBuffCard.id];
@@ -2385,15 +2322,18 @@ Test 4.4
             turnCount++; currentTurn = 'PLAYER'; isExecuting = false; 
             document.getElementById('turn-banner').innerText = `PLAYER TURN ${turnCount}`; document.getElementById('turn-banner').style.borderColor = "var(--gold)";
             
-            // Undead Presence Passive & Block Reset Loop
             let pSkeletonMana = 0, eSkeletonMana = 0;
             Object.values(cardInstances).forEach(c => { 
-                c.exhausted = false; c.queued = false; c.extraAction = false; c.blockActive = false;
                 if(c.tauntedTurn && c.tauntedTurn < turnCount) { c.tauntedBy = null; } 
                 let dDOM = document.getElementById(c.id);
                 if(dDOM) {
                     dDOM.classList.remove('buff-double-action');
-                    showInspector(c.id, dDOM); // Refresh inspector state for debuff removals
+                    showInspector(c.id, dDOM);
+                }
+
+                // Restore player stats at start of player turn
+                if(c.side === 'PLAYER') {
+                    c.exhausted = false; c.queued = false; c.extraAction = false; c.blockActive = false;
                 }
 
                 if (c.name === "Skeleton Warrior" && c.hp > 0) {
@@ -2406,7 +2346,13 @@ Test 4.4
             }); 
             
             let manaGain = (turnCount <= 10 ? 2 : turnCount <= 20 ? 3 : turnCount <= 30 ? 4 : 5); 
-            pMana += manaGain + pSkeletonMana; eMana += manaGain + eSkeletonMana;
+            let totalPGain = manaGain + pSkeletonMana;
+            let totalEGain = manaGain + eSkeletonMana;
+
+            await animateManaGain(totalPGain);
+            
+            pMana += totalPGain; 
+            eMana += totalEGain;
             
             if (pSkeletonMana > 0) addLog(`<b>Skeleton Warrior</b> generated ${pSkeletonMana} Mana!`, "var(--mana-color)");
             if (eSkeletonMana > 0) addLog(`Enemy <b>Skeleton Warrior</b> generated ${eSkeletonMana} Mana!`, "var(--mana-color)");
