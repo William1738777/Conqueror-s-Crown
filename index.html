@@ -1024,6 +1024,184 @@ Test 4.11 (Massive UI Update)
 
         const log = document.getElementById('event-log');
 
+        // --- GITHUB ASSET INITIALIZER ---
+        async function initializeGame() {
+            document.getElementById('upload-box').style.display = 'none';
+            document.getElementById('absorbing-text').style.display = 'block';
+
+            if(menuMusicUrl && !menuAudioEl) {
+                menuAudioEl = new Audio(menuMusicUrl);
+                menuAudioEl.loop = true;
+                menuAudioEl.volume = 0.4;
+                menuAudioEl.play().catch(e=>console.log("Audio play failed:", e));
+            }
+
+            let keys = Object.keys(ASSET_LINKS);
+            for(let i=0; i<keys.length; i++) {
+                let key = keys[i];
+                let fileUrl = ASSET_LINKS[key];
+                
+                document.getElementById('absorbing-text').innerText = `Loading Asset ${i + 1} of ${keys.length}...`;
+                
+                const cardData = getCardTemplate(key, fileUrl);
+                
+                if (cardData.isCardBack) {
+                    deckBackImg = cardData.img;
+                    document.getElementById('player-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
+                    document.getElementById('enemy-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
+                } else if (cardData.isSlash) {
+                    document.documentElement.style.setProperty('--slash-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
+                } else if (cardData.isHealFx) {
+                    document.documentElement.style.setProperty('--healfx-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
+                } else if (cardData.isArrow) {
+                    arrowImgUrl = cardData.img;
+                    document.documentElement.style.setProperty('--arrow-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
+                } else if (cardData.isShuriken) {
+                    shurikenImgUrl = cardData.img;
+                    document.documentElement.style.setProperty('--shuriken-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
+                } else if (cardData.isIcon) {
+                    if (cardData.iconType === 'taunted') tauntedImgUrl = cardData.img;
+                    if (cardData.iconType === 'barrier') barrierImgUrl = cardData.img;
+                    if (cardData.iconType === 'bleed') bleedImgUrl = cardData.img;
+                } else if (cardData.isAudio || cardData.isMenuBG || cardData.isFX || cardData.isEmptySlot) {
+                    // Handled inside getCardTemplate side-effects
+                } else if (cardData.isPlayable) {
+                    cardLibrary.push({...cardData}); 
+                }
+                
+                await new Promise(r => setTimeout(r, 60)); 
+            }
+            
+            if (cardLibrary.length === 0) {
+                alert("No playable cards found! Please verify your GITHUB links inside ASSET_LINKS.");
+                document.getElementById('upload-box').style.display = 'block';
+                document.getElementById('absorbing-text').style.display = 'none';
+                return;
+            }
+            
+            setTimeout(startGame, 500); 
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-area').style.display = 'flex';
+            addLog("BATTLE COMMENCED. No combat allowed on Turn 1.", "var(--gold)");
+            updateUI(); 
+            const drawBtn = document.getElementById('draw-cards-btn');
+            drawBtn.style.display = "block";
+            drawBtn.innerText = "DRAW HAND";
+        }
+
+        function updateUI() {
+            let manaDisp = document.getElementById('mana-display-num');
+            if(manaDisp) manaDisp.innerText = pMana;
+            
+            document.getElementById('enemy-core-hp').innerText = `ENEMY CORE: ${Math.ceil(eCoreHP)} | MANA: ${eMana}`;
+            document.getElementById('player-core-hp').innerText = `PLAYER CORE: ${Math.ceil(pCoreHP)}`;
+            
+            document.getElementById('exec-btn').innerText = `EXECUTE PENDING (${pQueue.length})`;
+            document.getElementById('exec-btn').disabled = isExecuting || pQueue.length === 0;
+            
+            document.getElementById('cancel-btn').style.display = (pQueue.length > 0 || isTargeting) ? "block" : "none";
+            document.getElementById('cancel-btn').disabled = isExecuting || (pQueue.length === 0 && !isTargeting);
+            
+            document.getElementById('end-turn-btn').disabled = isExecuting;
+            document.getElementById('draw-cards-btn').disabled = isExecuting;
+
+            let pLastStand = false;
+            let eLastStand = false;
+            let pBuffSlot = document.getElementById('player-buff-slot').querySelector('.card');
+            if (pBuffSlot && cardInstances[pBuffSlot.id].name === "Last Stand") pLastStand = true;
+            let eBuffSlot = document.getElementById('enemy-buff-slot').querySelector('.card');
+            if (eBuffSlot && cardInstances[eBuffSlot.id].name === "Last Stand") eLastStand = true;
+            
+            document.querySelectorAll('.card').forEach(c => {
+                const data = cardInstances[c.id];
+                if (!data) return;
+                
+                if(data.side === 'ENEMY' && data.type === 'ability' && data.isRevealed) {
+                    let imgCont = c.querySelector('.card-img-container');
+                    let titleEl = c.querySelector('.card-title');
+                    if (imgCont) imgCont.style.backgroundImage = `url('${data.img.replace(/"/g, '&quot;').replace(/'/g, '%27')}')`;
+                    if (!titleEl) {
+                        let newTitle = document.createElement('div');
+                        newTitle.className = 'card-title';
+                        newTitle.innerText = data.name;
+                        c.insertBefore(newTitle, imgCont);
+                    }
+                }
+
+                c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier, .badge-bleed, .badge-block').forEach(el => el.remove());
+
+                if(data.turnPlaced === turnCount) {
+                    const b = document.createElement('div'); b.className = 'placed-badge'; b.innerText = '{PLACED}'; c.appendChild(b);
+                }
+                if(data.blessings > 0) {
+                    const bl = document.createElement('div'); bl.className = 'badge-blessing'; bl.innerText = '+' + data.blessings; c.appendChild(bl);
+                }
+                if(data.chamberedRounds > 0) {
+                    const cr = document.createElement('div'); cr.className = 'badge-chambered';
+                    cr.style.cssText = "position:absolute; top:20px; right:-5px; background:#e74c3c; color:white; border-radius:50%; width:24px; height:24px; display:flex; justify-content:center; align-items:center; font-size:0.8rem; font-weight:bold; border:1px solid #111; z-index:26; box-shadow:0 0 10px #e74c3c;";
+                    cr.innerText = data.chamberedRounds; c.appendChild(cr);
+                }
+                
+                let topRightOffset = -8;
+
+                if (data.tauntedBy) {
+                    c.classList.add('taunted-status');
+                    if (tauntedImgUrl) {
+                        const ti = document.createElement('div'); ti.className = 'badge-taunted';
+                        ti.style.cssText = `position:absolute; top:-8px; right:${topRightOffset}px; width:24px; height:24px; background-image:url('${tauntedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #e74c3c);`;
+                        c.appendChild(ti);
+                        topRightOffset += 24;
+                    }
+                } else {
+                    c.classList.remove('taunted-status');
+                }
+
+                if(data.shield && data.shield > 0 && data.shieldTurns >= turnCount) {
+                    const sh = document.createElement('div'); sh.className = 'badge-shield'; sh.innerText = '🛡 ' + data.shield; c.appendChild(sh);
+                    if (barrierImgUrl) {
+                        const bi = document.createElement('div'); bi.className = 'badge-barrier';
+                        bi.style.cssText = `position:absolute; top:-8px; right:${topRightOffset}px; width:24px; height:24px; background-image:url('${barrierImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #3498db);`;
+                        c.appendChild(bi);
+                        topRightOffset += 24;
+                    }
+                } else {
+                    data.shield = 0; 
+                }
+
+                if(data.bleedStacks && data.bleedStacks > 0 && data.bleedTurns >= turnCount) {
+                    if (bleedImgUrl) {
+                        const bl = document.createElement('div'); bl.className = 'badge-bleed';
+                        bl.style.cssText = `position:absolute; top:-8px; right:${topRightOffset}px; width:24px; height:24px; background-image:url('${bleedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #8e44ad); display:flex; justify-content:center; align-items:center; font-size:0.8rem; font-weight:bold; color:white; text-shadow:1px 1px 2px #000, -1px -1px 2px #000;`;
+                        bl.innerText = data.bleedStacks;
+                        c.appendChild(bl);
+                        topRightOffset += 24;
+                    }
+                } else {
+                    data.bleedStacks = 0;
+                }
+
+                if(data.blockActive) {
+                    const blk = document.createElement('div'); blk.className = 'placed-badge badge-block'; blk.innerText = '{BLOCK}'; blk.style.background = '#888'; c.appendChild(blk);
+                }
+
+                const isDeployed = c.parentElement.classList.contains('slot');
+                if (isDeployed && data.type === 'unit') {
+                    if (data.side === 'PLAYER' && pLastStand) c.classList.add('golden-glow');
+                    else if (data.side === 'ENEMY' && eLastStand) c.classList.add('golden-glow');
+                    else c.classList.remove('golden-glow');
+                } else {
+                    c.classList.remove('golden-glow');
+                }
+
+                if(data.queued) c.classList.add('queued-status'); else c.classList.remove('queued-status');
+                if(data.exhausted) c.classList.add('exhausted'); else c.classList.remove('exhausted');
+                if(!data.extraAction) c.classList.remove('buff-double-action');
+            });
+        }
+
         window.playClickSound = function() {
             if (clickSfxUrl && !isExecuting) {
                 let audio = new Audio(clickSfxUrl);
