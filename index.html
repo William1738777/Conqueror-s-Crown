@@ -1,4 +1,4 @@
-Test 4.6 (rollback)
+Test 4.7
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -140,7 +140,7 @@ Test 4.6 (rollback)
         .row { display: flex; gap: 12px; justify-content: center;}
         
         /* Slot & Card Alignment OVERHAUL - Empty Slot Fit */
-        .slot { width: 140px; height: 196px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 6px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #555; position: relative; box-sizing: border-box; padding: 0;
+        .slot { width: 140px; height: 196px; border: none; border-radius: 6px; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #555; position: relative; box-sizing: border-box; padding: 0;
                 background-image: var(--empty-slot-url); background-size: 100% 100%; background-position: center; background-repeat: no-repeat; }
         .slot.drag-over { border-color: var(--gold); box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.5); }
         .ability-slot { border-color: #9b59b6; color: #9b59b6; }
@@ -153,7 +153,7 @@ Test 4.6 (rollback)
 
         .card { width: 140px; height: 196px; border-radius: 6px; padding: 5px; box-sizing: border-box; cursor: grab; background: var(--card-unit); border: 1px solid #444; display: flex; flex-direction: column; font-family: sans-serif; position: relative; flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s;}
         
-        .slot .card { position: absolute; top: -1px; left: -1px; width: calc(100% + 2px); height: calc(100% + 2px); margin: 0; z-index: 10; border-radius: 6px; border: 1px solid #444; box-sizing: border-box; }
+        .slot .card { position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0; z-index: 10; border-radius: 6px; border: 1px solid #444; box-sizing: border-box; }
         
         .card:hover { transform: translateY(-5px); border-color: var(--gold); z-index: 20;}
         .card.exhausted { filter: grayscale(1) brightness(0.5); cursor: not-allowed; }
@@ -389,6 +389,7 @@ Test 4.6 (rollback)
             "Althea": "./assets/Althea.png",
             "Jaden": "./assets/Jaden.png",
             "Skeleton Warrior": "./assets/Skeleton%20Warrior.png",
+            "Cursed Crow": "./assets/CursedCrow.png",
             "JadenLock": "./assets/JadenLock.png",
             "JadenBullet": "./assets/JadenBullet.gif",
             "JadenSFX1": "./assets/JadenSFX1.mp3",
@@ -492,12 +493,17 @@ Test 4.6 (rollback)
             audio.volume = 0.6;
             audio.play().catch(e => console.log("Audio play failed:", e));
         }
-
         // --- ENEMY TARGET HELPER ---
-        function getValidEnemyTargetIds(attackSide) {
-            let front = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${attackSide}"] .card`)).map(c => c.id);
+        function getValidEnemyTargetIds(defendSide) {
+            let attackSide = defendSide === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+            let front = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${defendSide}"] .card`)).map(c => c.id);
+            let back = Array.from(document.querySelectorAll(`.slot.backline[data-side="${defendSide}"] .card`)).map(c => c.id);
+            
+            // "Eye of the Crow" Check
+            let hasCrow = Array.from(document.querySelectorAll(`.slot[data-side="${attackSide}"] .card`)).some(c => cardInstances[c.id] && cardInstances[c.id].name === "Cursed Crow" && cardInstances[c.id].hp > 0);
+
+            if (hasCrow) return front.concat(back); // Passive activates: all deployed units and abilities exposed
             if (front.length > 0) return front;
-            let back = Array.from(document.querySelectorAll(`.slot.backline[data-side="${attackSide}"] .card`)).map(c => c.id);
             if (back.length > 0) return back;
             return [];
         }
@@ -576,27 +582,31 @@ Test 4.6 (rollback)
             if (cleanName.includes('ability') || cleanName.includes('skill') || cleanName.includes('spell') || cleanName.includes('magic') || cleanName.includes('mana core') || cleanName.includes('one more time') || cleanName.includes('last stand')) type = 'ability';
 
             if(cleanName.includes('kin-ryu') || cleanName.includes('kin ryu')) {
-                return { isPlayable: true, type: 'unit', name: "KIN-RYU", title: "YAMI NO SHINOBI (Level 7)", powerLevel: 7, summonCost: 5, faction: "Arashi", race: "Human", hp: 1200, maxHp: 1200, atk: 400, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
+                return { isPlayable: true, type: 'unit', name: "KIN-RYU", title: "YAMI NO SHINOBI (Level 7)", powerLevel: 7, summonCost: 5, faction: "Arashi", race: "Human", hp: 1200, maxHp: 1200, atk: 400, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false,
                     skills: [{ name: "ICHI", manaCost: 1, desc: "Cuts target. 300-1100 DMG. If <500, rerolls." }, { name: "NI", manaCost: 2, desc: "Hits 2 targets for 300-400 damage each." }], passives: [{ name: "SHADOW STANCE", desc: "Shinobi Marks make targets take +18% DMG." }, { name: "SAN", desc: "Auto-chains shurikens upon kill." }] };
             }
             else if(cleanName.includes('shadow stalker')) {
-                return { isPlayable: true, type: 'unit', name: "Shadow Stalker", title: "Level 3", powerLevel: 3, summonCost: 1, faction: "Arashi", race: "Human", hp: 800, maxHp: 800, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
+                return { isPlayable: true, type: 'unit', name: "Shadow Stalker", title: "Level 3", powerLevel: 3, summonCost: 1, faction: "Arashi", race: "Human", hp: 800, maxHp: 800, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false,
                     skills: [{ name: "SHADOW STAR", manaCost: 0, desc: "Throws a Shuriken inflicting 150 damage." }, { name: "BLADE STRIKE", manaCost: 1, desc: "Lunges forward to inflict 225 damage." }], passives: [{ name: "SHADOW SYNC", desc: "Mimics other stalkers." }] };
             }
             else if(cleanName.includes('skeleton warrior')) {
-                return { isPlayable: true, type: 'unit', name: "Skeleton Warrior", title: "Wandering Swordsman", powerLevel: 1, summonCost: 0, faction: "Council of Darkness", race: "Undead", hp: 500, maxHp: 500, atk: 100, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
+                return { isPlayable: true, type: 'unit', name: "Skeleton Warrior", title: "Wandering Swordsman", powerLevel: 1, summonCost: 0, faction: "Council of Darkness", race: "Undead", hp: 500, maxHp: 500, atk: 100, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false,
                     skills: [{ name: "SLASH", manaCost: 0, desc: "Inflicts damage rolling from 50-150." }, { name: "BLOCK", manaCost: 0, desc: "Blocks the first attack cast on this unit during the enemy turn." }], passives: [{ name: "UNDEAD PRESENCE", desc: "Every time this unit is alive on the field, it generates 1 energy for the user." }] };
             }
+            else if(cleanName.includes('cursed crow')) {
+                return { isPlayable: true, type: 'unit', name: "Cursed Crow", title: "Level 2", powerLevel: 2, summonCost: 2, faction: "Council of Darkness", race: "Undead", hp: 300, maxHp: 300, atk: 100, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, bleedStacks: 0, bleedTurns: 0, isRevealed: false,
+                    skills: [{ name: "Peck", manaCost: 0, desc: "Inflicts damage rolling from 1-100. (+1 Bleed Stack)" }], passives: [{ name: "Eye of the Crow", desc: "Exposes enemy backline units to attacks." }] };
+            }
             else if(cleanName.includes('lionel guard') || cleanName.includes('guard tower')) {
-                return { isPlayable: true, type: 'unit', name: "Lionel Guard Tower", title: "Structure", powerLevel: 5, summonCost: 4, faction: "Leonia", race: "Structure", hp: 2000, maxHp: 2000, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
+                return { isPlayable: true, type: 'unit', name: "Lionel Guard Tower", title: "Structure", powerLevel: 5, summonCost: 4, faction: "Leonia", race: "Structure", hp: 2000, maxHp: 2000, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false,
                     skills: [], passives: [{ name: "Guard Tower", desc: "Retaliates on allied attack (200 DMG)." }, { name: "Attack Tower", desc: "Assists allied attacks (100 DMG)." }, { name: "Structure Info", desc: "Passive rely." }] };
             }
             else if(cleanName.includes('rolyn')) {
-                return { isPlayable: true, type: 'unit', name: "Rolyn", title: "King of Leonia", powerLevel: 7, summonCost: 6, faction: "Leonia", race: "Human", hp: 3000, maxHp: 3000, atk: 300, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
+                return { isPlayable: true, type: 'unit', name: "Rolyn", title: "King of Leonia", powerLevel: 7, summonCost: 6, faction: "Leonia", race: "Human", hp: 3000, maxHp: 3000, atk: 300, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false,
                     skills: [{ name: "Lion's Challenge", manaCost: 2, desc: "Slash the target enemy card to taunt them for 1 turn. Deals 250 damage." }, { name: "Lion's Roar", manaCost: 4, desc: "Target up to 3 enemy units and taunt them for 2 turns." }], passives: [{ name: "Dauntless", desc: "Counterattack taunted units (300-500 DMG). Heals for 50% of damage dealt." }] };
             }
             else if(cleanName.includes('althea')) {
-                return { isPlayable: true, type: 'unit', name: "Althea", title: "Guardian Deity (Level 7)", powerLevel: 7, summonCost: 4, faction: "Neutral", race: "Deity", hp: 1000, maxHp: 1000, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, blessings: 0,
+                return { isPlayable: true, type: 'unit', name: "Althea", title: "Guardian Deity (Level 7)", powerLevel: 7, summonCost: 4, faction: "Neutral", race: "Deity", hp: 1000, maxHp: 1000, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, blessings: 0, isRevealed: false,
                     skills: [
                         { name: "Blessing of the Light", manaCost: 1, desc: "Heal target ally for 150-300. Gains +1 Blessing." },
                         { name: "Shield of Hope", manaCost: 3, desc: "Shields frontline allies for 500 DMG (2 turns). +1 Blessing per ally." },
@@ -604,7 +614,7 @@ Test 4.6 (rollback)
                     ], passives: [] };
             }
             else if(cleanName.includes('jaden')) {
-                return { isPlayable: true, type: 'unit', name: "Jaden", title: "The Crown’s Enforcer", powerLevel: 6, summonCost: 4, faction: "Leonia", race: "Human", hp: 1000, maxHp: 1000, atk: 250, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, chamberedRounds: 0,
+                return { isPlayable: true, type: 'unit', name: "Jaden", title: "The Crown’s Enforcer", powerLevel: 6, summonCost: 4, faction: "Leonia", race: "Human", hp: 1000, maxHp: 1000, atk: 250, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, chamberedRounds: 0, isRevealed: false,
                     skills: [
                         { name: "Sniping Shot", manaCost: 2, desc: "Deals 500-800 DMG. Bypasses frontlines. (+1 Chambered Round)" },
                         { name: "Double-Shot", manaCost: 2, desc: "Shoots twice (300-500 DMG per shot). (+2 Chambered Rounds)" },
@@ -612,31 +622,31 @@ Test 4.6 (rollback)
                     ], passives: [{ name: "Extra Shot", desc: "60% chance for an extra shot (+1 Round) on skill 1 or 2." }] };
             }
             else if(cleanName.includes('zombie')) {
-                return { isPlayable: true, type: 'unit', name: "Zombie", title: "Level 2", powerLevel: 2, summonCost: 1, faction: "Council of Darkness", race: "Undead", hp: 700, maxHp: 700, atk: 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, bleedStacks: 0, bleedTurns: 0,
+                return { isPlayable: true, type: 'unit', name: "Zombie", title: "Level 2", powerLevel: 2, summonCost: 1, faction: "Council of Darkness", race: "Undead", hp: 700, maxHp: 700, atk: 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, bleedStacks: 0, bleedTurns: 0, isRevealed: false,
                     skills: [{ name: "Bite", manaCost: 0, desc: "Inflicts damage rolling from 100-200. (+1 Bleed Stack)" }], passives: [{ name: "Vigor of the Damned", desc: "If survives with <=100 HP, fully restores HP and gains 1000 shield." }] };
             }
             else if(cleanName.includes('militia') || cleanName.includes('milita')) {
-                return { isPlayable: true, type: 'unit', name: "Militia", title: "Level 1", powerLevel: 1, summonCost: 0, faction: "Neutral", race: "Human", hp: 600, maxHp: 600, atk: 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
+                return { isPlayable: true, type: 'unit', name: "Militia", title: "Level 1", powerLevel: 1, summonCost: 0, faction: "Neutral", race: "Human", hp: 600, maxHp: 600, atk: 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false,
                     skills: [
                         { name: "Uncoordinated attack", manaCost: 0, desc: "Attacks inflicting 100-200 damage roll." },
                         { name: "Suicidal attack", manaCost: 2, desc: "Rolls 1-700 DMG. User dies. Grants 4 mana if target dies." }
                     ], passives: [] };
             }
             else if(cleanName.includes('one more time')) {
-                return { isPlayable: true, type: 'ability', name: "One More Time", title: "Ability Card", powerLevel: 0, summonCost: 0, faction: "NA", race: "N/A", hp: 0, maxHp: 0, atk: 0, img: dataUrl, marks: 0, queued: false,
+                return { isPlayable: true, type: 'ability', name: "One More Time", title: "Ability Card", powerLevel: 0, summonCost: 0, faction: "NA", race: "N/A", hp: 1, maxHp: 1, atk: 0, img: dataUrl, marks: 0, queued: false, isRevealed: false,
                     skills: [ { name: "Double Action", manaCost: 0, desc: "Target allied unit can act twice this turn." } ], passives: [ { name: "Consumable", desc: "Destroyed after execution." } ] };
             }
             else if(cleanName.includes('mana core')) {
-                return { isPlayable: true, type: 'ability', name: "Mana Core", title: "Ability Card", powerLevel: 0, summonCost: 0, faction: "NA", race: "N/A", hp: 0, maxHp: 0, atk: 0, img: dataUrl, marks: 0, queued: false,
+                return { isPlayable: true, type: 'ability', name: "Mana Core", title: "Ability Card", powerLevel: 0, summonCost: 0, faction: "NA", race: "N/A", hp: 1, maxHp: 1, atk: 0, img: dataUrl, marks: 0, queued: false, isRevealed: false,
                     skills: [ { name: "Mana Initiation", manaCost: 0, desc: "Grants user +3 Mana when activated." } ], passives: [ { name: "Auto-Discard", desc: "Discards after use." } ] };
             }
             else if(cleanName.includes('last stand')) {
-                return { isPlayable: true, type: 'ability', isBuff: true, name: "Last Stand", title: "Buff Card", powerLevel: 0, summonCost: 2, faction: "Neutral", race: "N/A", hp: 0, maxHp: 0, atk: 0, img: dataUrl, marks: 0, queued: false, buffTurnsRemaining: 0,
+                return { isPlayable: true, type: 'ability', isBuff: true, name: "Last Stand", title: "Buff Card", powerLevel: 0, summonCost: 2, faction: "Neutral", race: "N/A", hp: 1, maxHp: 1, atk: 0, img: dataUrl, marks: 0, queued: false, buffTurnsRemaining: 0, isRevealed: false,
                     skills: [], passives: [ { name: "Last Stand", desc: "Drag to Buff slot next turn. All allied units survive fatal damage at 1 HP for 2 turns." } ] };
             }
             else {
-                let defaultHp = type==='ability'? 0 : 500;
-                return { isPlayable: true, type: type, name: name, title: type === 'ability' ? "Spell Card" : "Basic Unit", powerLevel: type==='ability'? 0 : 1, summonCost: 1, faction: "Unknown", race: "Unknown", hp: defaultHp, maxHp: defaultHp, atk: type==='ability'? 0 : 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false,
+                let defaultHp = type === 'ability' ? 1 : 500;
+                return { isPlayable: true, type: type, name: name, title: type === 'ability' ? "Spell Card" : "Basic Unit", powerLevel: type==='ability'? 0 : 1, summonCost: 1, faction: "Unknown", race: "Unknown", hp: defaultHp, maxHp: defaultHp, atk: type==='ability'? 0 : 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false,
                     skills: type === 'ability' ? [{ name: "CAST SPELL", manaCost: 1, desc: "Activate ability effect." }] : [{ name: "ATTACK", manaCost: 1, desc: "Basic attack for 100 damage." }], passives: [] };
             }
         }
@@ -726,6 +736,19 @@ Test 4.6 (rollback)
                 const data = cardInstances[c.id];
                 if (!data) return;
                 
+                // Flip enemy ability visually if revealed
+                if(data.side === 'ENEMY' && data.type === 'ability' && data.isRevealed) {
+                    let imgCont = c.querySelector('.card-img-container');
+                    let titleEl = c.querySelector('.card-title');
+                    if (imgCont) imgCont.style.backgroundImage = `url('${data.img.replace(/"/g, '&quot;').replace(/'/g, '%27')}')`;
+                    if (!titleEl) {
+                        let newTitle = document.createElement('div');
+                        newTitle.className = 'card-title';
+                        newTitle.innerText = data.name;
+                        c.insertBefore(newTitle, imgCont);
+                    }
+                }
+
                 c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier, .badge-bleed, .badge-block').forEach(el => el.remove());
 
                 if(data.turnPlaced === turnCount) {
@@ -857,7 +880,7 @@ Test 4.6 (rollback)
                 setTimeout(() => {
                     const data = JSON.parse(JSON.stringify(cardLibrary[Math.floor(Math.random() * cardLibrary.length)]));
                     const cardId = 'card_' + Math.random().toString(36).substr(2, 9);
-                    cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: sideTarget, turnPlaced: 0, tauntedBy: null };
+                    cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: sideTarget, turnPlaced: 0, tauntedBy: null, isRevealed: false };
 
                     const flyingCard = document.createElement('div');
                     flyingCard.className = 'flying-card';
@@ -901,13 +924,16 @@ Test 4.6 (rollback)
             let safeBackImgUrl = deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27');
 
             let bgImg = `background-image: url('${safeImgUrl}');`;
-            if(data.side === 'ENEMY' && data.type === 'ability' && data.turnPlaced > 0) bgImg = `background-image: url('${safeBackImgUrl}');`;
+            if(data.side === 'ENEMY' && data.type === 'ability' && data.turnPlaced > 0 && !data.isRevealed) {
+                bgImg = `background-image: url('${safeBackImgUrl}');`;
+            }
 
             let html = `<div class="badge-mana">${data.summonCost}</div>`;
-            if(data.side === 'PLAYER' || data.type !== 'ability') html += `<div class="card-title">${data.name}</div>`;
+            if(data.side === 'PLAYER' || data.type !== 'ability' || data.isRevealed) html += `<div class="card-title">${data.name}</div>`;
             html += `<div class="card-img-container" style="${bgImg}"></div>`;
-            if(data.type === 'unit') {
-                html += `<div class="card-level">${"★".repeat(data.powerLevel)}</div>`;
+            
+            if(data.type === 'unit' || data.type === 'ability') {
+                if (data.type === 'unit') html += `<div class="card-level">${"★".repeat(data.powerLevel)}</div>`;
                 html += `<div class="vertical-bar"><div class="hp-bar-trail" style="height: ${(data.hp/data.maxHp)*100}%"></div><div class="hp-bar-current" style="height: ${(data.hp/data.maxHp)*100}%"></div></div>`;
                 html += `<div class="card-hp-footer">
                             <div class="card-hp-bar-container"><div class="card-hp-trail" style="width: ${(data.hp/data.maxHp)*100}%"></div><div class="card-hp-current" style="width: ${(data.hp/data.maxHp)*100}%"></div></div>
@@ -1042,8 +1068,12 @@ Test 4.6 (rollback)
             const isDeployed = cardElement && cardElement.parentElement.classList.contains('slot');
             leftUI.dataset.inspectedId = id;
 
-            if(data.side === 'ENEMY' && data.type === 'ability') {
-                leftUI.innerHTML = `<div class="empty-inspector">Hidden Enemy Ability Card.</div>`; 
+            if(data.side === 'ENEMY' && data.type === 'ability' && !data.isRevealed) {
+                leftUI.innerHTML = `<div class="empty-inspector">Hidden Enemy Ability Card.</div>
+                <div class="inspect-hp-wrapper" style="margin-top: 20px;">
+                    <div class="inspect-hp-bar-container"><div class="inspect-hp-trail" style="width: ${(data.hp/data.maxHp)*100}%"></div><div class="inspect-hp-current" style="width: ${(data.hp/data.maxHp)*100}%"></div></div>
+                    <div class="inspect-hp-number">${Math.ceil(data.hp)}</div>
+                </div>`; 
                 rightUI.innerHTML = `<div class="empty-inspector">No actions available.</div>`;
                 return;
             }
@@ -1052,7 +1082,7 @@ Test 4.6 (rollback)
             let pct = Math.max(0, Math.min(100, (data.hp / data.maxHp) * 100)) || 100;
             let html = `<h3 class="inspect-h">${data.name}</h3><div class="inspect-sub">${data.title}</div><img src="${data.img}" class="inspect-art">`;
             
-            if(data.type === 'unit') {
+            if(data.type === 'unit' || data.type === 'ability') {
                 html += `<div class="inspect-hp-wrapper">
                             <div class="inspect-hp-bar-container"><div class="inspect-hp-trail" style="width: ${pct}%"></div><div class="inspect-hp-current" style="width: ${pct}%"></div></div>
                             <div class="inspect-hp-number" id="inspect-hp-num" style="background:${pct < 30 ? '#e74c3c' : '#2ecc71'}; color:${pct < 30 ? '#fff' : '#000'}">${Math.ceil(data.hp)}</div>
@@ -1174,7 +1204,7 @@ Test 4.6 (rollback)
             for(let i=0; i<omtRefundCount; i++) {
                 const omtData = getCardTemplate("One More Time", ASSET_LINKS["One More Time"]);
                 const cardId = 'card_' + Math.random().toString(36).substr(2, 9);
-                cardInstances[cardId] = { ...omtData, id: cardId, exhausted: false, queued: false, side: 'PLAYER', turnPlaced: turnCount, tauntedBy: null };
+                cardInstances[cardId] = { ...omtData, id: cardId, exhausted: false, queued: false, side: 'PLAYER', turnPlaced: turnCount, tauntedBy: null, isRevealed: false };
                 document.getElementById('hand').appendChild(createCardDOM(cardId, cardInstances[cardId]));
             }
             if(omtRefundCount > 0) addLog(`${omtRefundCount}x One More Time cancelled & refunded to hand.`, "#9b59b6");
@@ -1284,7 +1314,6 @@ Test 4.6 (rollback)
                 }
             }
         }
-
         window.queueAction = function(actorId, skillName, cost, isCore) {
             if(currentTurn !== 'PLAYER' || isExecuting) return;
             const actor = cardInstances[actorId];
@@ -1734,8 +1763,25 @@ Test 4.6 (rollback)
                 const actor = cardInstances[action.actorId]; 
                 const actorDOM = document.getElementById(action.actorId);
                 
-                if(!actor || (actor.hp <= 0 && actor.type !== 'ability')) continue; 
+                // DESTRUCTIBLE ABILITY MECHANIC: If HP is 0 (destroyed), execution is skipped!
+                if(!actor || actor.hp <= 0) {
+                    if (actor && actor.hp <= 0) addLog(`${actor.name}'s action was cancelled because it was destroyed!`, "#e74c3c");
+                    continue; 
+                }
+                
                 actor.queued = false; 
+
+                // AI ABILITY REVEAL MECHANIC
+                if (actor.side === 'ENEMY' && actor.type === 'ability' && !actor.isRevealed) {
+                    actor.isRevealed = true;
+                    updateUI(); // Updates the image from card back to art
+                    if(actorDOM) {
+                        actorDOM.classList.remove('flip-reveal'); void actorDOM.offsetWidth;
+                        actorDOM.classList.add('flip-reveal');
+                    }
+                    addLog(`Enemy reveals hidden ability: <b>${actor.name}</b>!`, "#9b59b6");
+                    await new Promise(r => setTimeout(r, 800)); // Dramatic pause for the flip
+                }
                 
                 if (!action.isRecast) {
                     actor.exhausted = true;
@@ -2365,3 +2411,4 @@ Test 4.6 (rollback)
     </script>
 </body>
 </html>
+        
