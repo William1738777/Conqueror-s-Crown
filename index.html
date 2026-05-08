@@ -1,4 +1,4 @@
-Test 4.0
+Test 4.1
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,14 +49,16 @@ Test 4.0
         .side-panel { width: 320px; display: flex; flex-direction: column; gap: 10px; height: 100%; flex-shrink: 0; }
         .center-panel { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; overflow: hidden; position: relative;}
 
-        /* --- LEFT PANEL --- */
-        #card-inspector { flex-grow: 1; background: rgba(17, 17, 17, 0.95); border: 1px solid var(--gold); border-radius: 8px; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
-        #inspect-content { height: 100%; padding-right: 5px; }
-        #inspect-content::-webkit-scrollbar { width: 5px; } #inspect-content::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 5px;}
+        /* --- LEFT PANEL & NEW ACTION MENU --- */
+        #card-inspector { flex-grow: 1; background: rgba(17, 17, 17, 0.95); border: 1px solid var(--gold); border-radius: 8px; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        #inspect-content { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
         
-        #hand-container { height: 230px; background: rgba(0,0,0,0.85); padding: 10px; border: 2px solid #333; border-radius: 12px; display: flex; align-items: center; gap: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); flex-shrink: 0; }
+        #action-menu { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 240px; max-height: 80%; background: rgba(17, 17, 17, 0.95); border: 1px solid var(--gold); border-radius: 8px; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; overflow-y: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); z-index: 40; }
+        #action-menu::-webkit-scrollbar { width: 5px; } #action-menu::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 5px;}
+
+        #hand-container { height: 280px; background: rgba(0,0,0,0.85); padding: 15px; border: 2px solid #333; border-radius: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); flex-shrink: 0; }
         #hand { display: flex; gap: 8px; flex-grow: 1; overflow-x: hidden; scroll-behavior: smooth; padding: 5px; }
-        .scroll-btn { background: #222; color: var(--gold); border: 1px solid #444; border-radius: 5px; font-size: 1.2rem; cursor: pointer; padding: 5px; height: 100%; display: flex; align-items: center; transition: 0.2s; }
+        .scroll-btn { background: #222; color: var(--gold); border: 1px solid #444; border-radius: 5px; font-size: 1.4rem; cursor: pointer; padding: 5px; height: 100%; display: flex; align-items: center; transition: 0.2s; }
         .scroll-btn:hover { background: #444; border-color: var(--gold); }
 
         /* --- RIGHT PANEL --- */
@@ -88,10 +90,10 @@ Test 4.0
         .ability-slot { border-color: #9b59b6; color: #9b59b6; }
         .slot-text { pointer-events: none; z-index: 1; }
 
-        /* BUFF SLOTS */
+        /* BUFF SLOTS - MOVED CLOSER TO BOARD */
         .buff-slot { position: absolute; top: 50%; transform: translateY(-50%); border-color: #f1c40f; color: #f1c40f; box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.1); z-index: 10; transition: 0.3s; }
-        #enemy-buff-slot { left: 40px; }
-        #player-buff-slot { right: 140px; } /* Placed before the deck */
+        #enemy-buff-slot { left: calc(50% - 380px); }
+        #player-buff-slot { right: calc(50% - 380px); } 
 
         .card { width: 140px; height: 196px; border-radius: 6px; padding: 5px; box-sizing: border-box; cursor: grab; background: var(--card-unit); border: 1px solid #444; display: flex; flex-direction: column; justify-content: space-between; font-family: sans-serif; position: relative; flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s;}
         
@@ -193,10 +195,10 @@ Test 4.0
         @keyframes flipIn { 0% { transform: perspective(400px) rotateY(90deg); opacity: 0; } 100% { transform: perspective(400px) rotateY(0deg); opacity: 1; } }
 
         /* --- Inspector Info --- */
-        .inspect-h { color: var(--gold); margin: 0 0 5px 0; font-family: 'Cinzel'; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px;}
-        .inspect-sub { font-size: 0.65rem; color: #888; margin-bottom: 10px; text-transform: uppercase;}
-        .inspect-art { width: 100%; aspect-ratio: 2.5 / 3.5; max-height: 380px; object-fit: contain; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 10px; background: transparent; display: block;}
-        .inspect-stat { font-size: 0.75rem; margin: 2px 0; }
+        .inspect-h { color: var(--gold); margin: 0 0 5px 0; font-family: 'Cinzel'; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px; flex-shrink: 0;}
+        .inspect-sub { font-size: 0.65rem; color: #888; margin-bottom: 10px; text-transform: uppercase; flex-shrink: 0;}
+        .inspect-art { width: 100%; flex: 1 1 auto; min-height: 0; object-fit: contain; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 10px; background: transparent; display: block;}
+        .inspect-stat { font-size: 0.75rem; margin: 2px 0; flex-shrink: 0;}
         .inspect-section { margin-top: 10px; border-top: 1px solid #333; padding-top: 8px; }
         .skill-btn { width: 100%; background: #222; color: white; border: 1px solid #444; padding: 6px; margin-top: 5px; cursor: pointer; text-align: left; transition: 0.2s; border-radius: 4px;}
         .skill-btn:hover { border-color: var(--gold); background: #333; }
@@ -233,6 +235,10 @@ Test 4.0
         </div>
 
         <div class="center-panel">
+            <div id="action-menu">
+                <div class="empty-inspector">Select a valid unit to view actions.</div>
+            </div>
+
             <div id="enemy-buff-slot" class="slot buff-slot" data-side="ENEMY" data-allowed="buff"><span class="slot-text">BUFF</span></div>
             <div id="player-buff-slot" class="slot buff-slot" data-side="PLAYER" data-allowed="buff"><span class="slot-text">BUFF</span></div>
 
@@ -391,6 +397,7 @@ Test 4.0
 
         const log = document.getElementById('event-log');
         const inspect = document.getElementById('inspect-content');
+        const actionMenu = document.getElementById('action-menu');
 
         document.getElementById('scroll-left').addEventListener('click', () => document.getElementById('hand').scrollBy({ left: -120, behavior: 'smooth' }));
         document.getElementById('scroll-right').addEventListener('click', () => document.getElementById('hand').scrollBy({ left: 120, behavior: 'smooth' }));
@@ -869,34 +876,46 @@ Test 4.0
             };
         });
 
-        // --- Inspector ---
+        // --- Split Inspector ---
         function showInspector(id, cardElement) {
+            if (id === 'none' || !cardInstances[id]) {
+                inspect.innerHTML = `<div class="empty-inspector">Select a card to inspect.</div>`;
+                actionMenu.innerHTML = `<div class="empty-inspector">Select a valid unit to view actions.</div>`;
+                return;
+            }
+
             const data = cardInstances[id];
             const isDeployed = cardElement && cardElement.parentElement.classList.contains('slot');
 
             if(data.side === 'ENEMY' && data.type === 'ability') {
-                inspect.innerHTML = `<div class="empty-inspector">Hidden Enemy Ability Card.</div>`; return;
+                inspect.innerHTML = `<div class="empty-inspector">Hidden Enemy Ability Card.</div>`; 
+                actionMenu.innerHTML = `<div class="empty-inspector">No actions available.</div>`;
+                return;
             }
 
+            // 1. Populate the Locked Top Inspector (Stats & Art)
             let html = `<h3 class="inspect-h">${data.name}</h3><div class="inspect-sub">${data.title}</div><img src="${data.img}" class="inspect-art">`;
             if(data.type === 'unit') html += `<div class="inspect-stat" style="color:var(--hp-color)"><b>HP:</b> ${data.hp} | <b style="color:#e74c3c">ATK:</b> ${data.atk}</div>`;
             html += `<div class="inspect-stat" style="color:var(--mana-color)"><b>Cost:</b> ${data.summonCost} Mana</div>`;
             if(data.marks > 0) html += `<div class="inspect-stat" style="color:#2ecc71"><b>Shinobi Marks:</b> ${data.marks}</div>`;
             if(data.bleedStacks > 0) html += `<div class="inspect-stat" style="color:#8e44ad"><b>Bleed Stacks:</b> ${data.bleedStacks}</div>`;
+            inspect.innerHTML = html;
 
+            // 2. Populate the New Action Menu (Gold Box)
+            let actionHtml = '';
             if (data.isBuff && isDeployed && cardElement.parentElement.classList.contains('ability-slot')) {
-                html += `<div style="color:#f1c40f; font-size:0.75rem; font-weight:bold; margin-top:5px; padding: 5px; border: 1px dashed #f1c40f; text-align: center;">[BUFF CARD: DRAG TO BUFF SLOT TO ACTIVATE]</div>`;
+                actionHtml += `<div style="color:#f1c40f; font-size:0.75rem; font-weight:bold; margin-top:5px; padding: 5px; border: 1px dashed #f1c40f; text-align: center;">[BUFF CARD: DRAG TO BUFF SLOT TO ACTIVATE]</div>`;
             }
 
             if(isDeployed && data.side === 'PLAYER') {
-                html += `<div class="inspect-section"><b style="color:white">Actions</b><br>`;
+                actionHtml += `<div class="inspect-section"><b style="color:white">Actions</b><br>`;
                 
                 if (data.tauntedBy) {
-                    html += `<div style="color:#e74c3c; font-size:0.75rem; font-weight:bold; margin-top:5px;">[TAUNTED: WILL AUTO-ATTACK]</div>`;
+                    actionHtml += `<div style="color:#e74c3c; font-size:0.75rem; font-weight:bold; margin-top:5px;">[TAUNTED: WILL AUTO-ATTACK]</div>`;
                 } else if(data.queued) {
-                    html += `<div style="color:#f39c12; font-size:0.75rem; font-weight:bold; margin-top:5px;">[ACTION QUEUED]</div>`;
+                    actionHtml += `<div style="color:#f39c12; font-size:0.75rem; font-weight:bold; margin-top:5px;">[ACTION QUEUED]</div>`;
                 } else if(data.exhausted) {
-                    html += `<div style="color:#888; font-size:0.75rem; font-weight:bold; margin-top:5px;">[EXHAUSTED]</div>`;
+                    actionHtml += `<div style="color:#888; font-size:0.75rem; font-weight:bold; margin-top:5px;">[EXHAUSTED]</div>`;
                 } else {
                     const canAct = (data.turnPlaced < turnCount);
                     let canAttackCoreUI = false;
@@ -907,7 +926,7 @@ Test 4.0
                     }
 
                     if(canAttackCoreUI) {
-                        html += `<button class="skill-btn" style="border-color:#e74c3c" ${canAct ? '' : 'disabled'} onclick="queueAction('${id}', 'ATTACK CORE', 0, true)">
+                        actionHtml += `<button class="skill-btn" style="border-color:#e74c3c" ${canAct ? '' : 'disabled'} onclick="queueAction('${id}', 'ATTACK CORE', 0, true)">
                                     <span class="skill-name" style="color:#e74c3c">[ATTACK CORE]</span><span class="skill-desc">Strike enemy core.</span>
                                  </button>`;
                     }
@@ -921,25 +940,30 @@ Test 4.0
                             
                             if(skill.name === "Trigger Unbound" && (!data.chamberedRounds || data.chamberedRounds === 0)) meetsCondition = false;
 
-                            html += `<button class="skill-btn" ${canAct && costMet && meetsCondition ? '' : 'disabled'} onclick="queueAction('${id}', '${safeSkillName}', ${skill.manaCost}, false)">
+                            actionHtml += `<button class="skill-btn" ${canAct && costMet && meetsCondition ? '' : 'disabled'} onclick="queueAction('${id}', '${safeSkillName}', ${skill.manaCost}, false)">
                                 <span class="skill-name">[${skill.name}]</span><span class="skill-cost">${skill.manaCost} MP</span><span class="skill-desc">${skill.desc}</span>
                             </button>`;
                         });
                     }
                 }
-                html += `</div>`;
+                actionHtml += `</div>`;
             } else if(data.skills && data.skills.length > 0) {
-                html += `<div class="inspect-section"><b style="color:white">Skills</b><br>`;
-                data.skills.forEach(skill => { html += `<div style="margin-top:5px;"><span class="skill-name">[${skill.name}]</span> <span class="skill-cost">${skill.manaCost} MP</span></div>`; });
-                html += `</div>`;
+                actionHtml += `<div class="inspect-section"><b style="color:white">Skills</b><br>`;
+                data.skills.forEach(skill => { actionHtml += `<div style="margin-top:5px;"><span class="skill-name">[${skill.name}]</span> <span class="skill-cost">${skill.manaCost} MP</span></div>`; });
+                actionHtml += `</div>`;
             }
             
             if(data.passives && data.passives.length > 0) {
-                html += `<div class="inspect-section"><b style="color:white">Passives</b><br>`;
-                data.passives.forEach(p => { html += `<div style="margin-top:5px;"><span style="color:#e67e22; font-size:0.75rem; font-weight:bold;">[${p.name}]</span><span class="skill-desc">${p.desc}</span></div>`; });
-                html += `</div>`;
+                actionHtml += `<div class="inspect-section"><b style="color:white">Passives</b><br>`;
+                data.passives.forEach(p => { actionHtml += `<div style="margin-top:5px;"><span style="color:#e67e22; font-size:0.75rem; font-weight:bold;">[${p.name}]</span><span class="skill-desc">${p.desc}</span></div>`; });
+                actionHtml += `</div>`;
             }
-            inspect.innerHTML = html;
+
+            if(actionHtml === '') {
+                actionHtml = `<div class="empty-inspector">No actions available.</div>`;
+            }
+
+            actionMenu.innerHTML = actionHtml;
         }
 
         // --- CANCEL PENDING WITH MANA & GHOST AURA REFUND ---
