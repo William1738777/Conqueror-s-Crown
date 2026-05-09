@@ -1,4 +1,4 @@
-Test 4.14
+Test 4.15
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -131,7 +131,6 @@ Test 4.14
             height: 100%; 
             flex-shrink: 0; 
         }
-        /* MASSIVE INSPECTOR UPGRADE: Increased flex and max-width */
         .left-panel { 
             flex: 1.5; 
             max-width: 480px;
@@ -194,7 +193,6 @@ Test 4.14
             text-align: center;
         }
 
-        /* MASSIVE INSPECTOR UPGRADE: Split columns for huge art */
         #inspect-body {
             display: flex;
             flex-direction: row;
@@ -220,7 +218,6 @@ Test 4.14
             overflow: hidden;
         }
 
-        /* MASSIVE INSPECTOR UPGRADE: Scaled up Art */
         .inspect-art { 
             width: 100%; 
             aspect-ratio: 140 / 196;
@@ -257,16 +254,17 @@ Test 4.14
         #inspect-skills-sector::-webkit-scrollbar-thumb { background: #444; border-radius: 5px;}
 
         #inspect-summoning-sector { 
-            border: 1px dashed #444; 
+            border: 1px solid #444; 
             background: rgba(0, 0, 0, 0.6); 
             border-radius: 8px; 
-            padding: 15px; 
+            padding: 10px; 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             align-items: center; 
             text-align: center; 
             flex-shrink: 0;
+            transition: 0.3s;
         }
 
         .summon-label {
@@ -275,13 +273,6 @@ Test 4.14
             text-transform: uppercase; 
             letter-spacing: 2px; 
             margin-bottom: 5px;
-        }
-
-        #inspect-summon-val { 
-            font-size: 1.8rem; 
-            color: var(--mana-color); 
-            font-weight: bold; 
-            text-shadow: 0 0 10px rgba(52, 152, 219, 0.4);
         }
 
         /* NEW DYNAMIC MANA UI */
@@ -314,7 +305,6 @@ Test 4.14
             font-family: 'Courier New', monospace; 
         }
 
-        /* HAND OPTIMIZATION: Shrunk height to 170px */
         #hand-container { 
             height: 170px; 
             background: rgba(0,0,0,0.85); 
@@ -575,7 +565,10 @@ Test 4.14
             transition: 0.3s ease;
         }
         
-        /* Bug Fix: Animation Race Condition Fix */
+        /* BUG FIX: Makes glows and icons visible when card is placed! */
+        .slot:has(.card) {
+            overflow: visible !important;
+        }
         .slot.attacking-slot {
             overflow: visible !important;
             z-index: 9999 !important;
@@ -646,7 +639,6 @@ Test 4.14
             background-repeat: no-repeat; 
             border-radius: 6px; 
         }
-        /* Now anchored directly to the left and right edges so they never disappear */
         #enemy-buff-slot { left: 10px; }
         #player-buff-slot { right: 10px; } 
 
@@ -668,11 +660,10 @@ Test 4.14
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        /* HAND OPTIMIZATION: Cards scaled down to 65% visually, margins collapsed to save horizontal space */
         #hand .card {
             transform: scale(0.65);
             transform-origin: center center;
-            margin: -35px -25px; /* Negates the extra blank space created by scaling */
+            margin: -35px -25px;
         }
         #hand .card:hover {
             transform: scale(0.75) translateY(-15px);
@@ -892,8 +883,9 @@ Test 4.14
                         </div>
 
                         <div id="inspect-summoning-sector">
-                            <span class="summon-label">SUMMONING CONDITIONS</span>
+                            <span class="summon-label" id="summon-condition-label">SUMMONING CONDITIONS</span>
                             <div id="inspect-summon-val">0 MANA</div>
+                            <div id="inspect-summon-req" style="font-size: 0.75rem; color: #e74c3c; margin-top: 5px; font-weight: bold; display: none;"></div>
                         </div>
                     </div>
                 </div>
@@ -902,6 +894,7 @@ Test 4.14
             <div id="player-mana-wrapper">
                 <div class="mana-icon"></div>
                 <div class="mana-num" id="mana-display-num">8</div>
+                <div style="color:#e74c3c; margin-left:15px; font-weight:bold; font-size:1rem; text-shadow: 0 0 10px #e74c3c; border-left: 2px solid #555; padding-left: 15px;">ARASHI SOULS: <span id="arashi-souls-num">0</span></div>
             </div>
             
             <div id="hand-container">
@@ -1020,6 +1013,7 @@ Test 4.14
             "Taunted": "./assets/Taunted.png",
             "Barrier": "./assets/Barrier.png",
             "Bleed": "./assets/Bleed.png",
+            "ShinobiMark": "./assets/Bleed.png", // Temporarily using bleed icon if you don't have ShinobiMark.png yet, change this URL!
             "DrawSFX": "./assets/DrawSFX.mp3",
             "PlaceSFX": "./assets/PlaceSFX.mp3",
             "VillagerSuicideSFX": "./assets/VillagerSuicideSFX.mp3",
@@ -1041,6 +1035,7 @@ Test 4.14
         let currentTurn = 'PLAYER', turnCount = 1;
         let pMana = 8, eMana = 8;
         let pCoreHP = 2000, eCoreHP = 2000;
+        let pArashiSouls = 0, eArashiSouls = 0; // NEW GLOBAL RESOURCE
         let cardInstances = {};
         
         // Visual & Audio Assets
@@ -1067,6 +1062,7 @@ Test 4.14
         let tauntedImgUrl = '';
         let barrierImgUrl = '';
         let bleedImgUrl = '';
+        let shinobiMarkImgUrl = ''; // NEW DEBUFF ICON
         let drawSfxUrl = '';
         let placeSfxUrl = '';
         let abilityActivatedUrl = '';
@@ -1134,6 +1130,7 @@ Test 4.14
                     if (cardData.iconType === 'taunted') tauntedImgUrl = cardData.img;
                     if (cardData.iconType === 'barrier') barrierImgUrl = cardData.img;
                     if (cardData.iconType === 'bleed') bleedImgUrl = cardData.img;
+                    if (cardData.iconType === 'shinobimark') shinobiMarkImgUrl = cardData.img;
                 } else if (cardData.isAudio || cardData.isMenuBG || cardData.isFX || cardData.isEmptySlot) {
                     // Handled inside getCardTemplate side-effects
                 } else if (cardData.isPlayable) {
@@ -1166,6 +1163,9 @@ Test 4.14
         function updateUI() {
             let manaDisp = document.getElementById('mana-display-num');
             if(manaDisp) manaDisp.innerText = pMana;
+
+            let soulsDisp = document.getElementById('arashi-souls-num');
+            if(soulsDisp) soulsDisp.innerText = pArashiSouls;
             
             document.getElementById('enemy-core-hp').innerText = `ENEMY CORE: ${Math.ceil(eCoreHP)} | MANA: ${eMana}`;
             document.getElementById('player-core-hp').innerText = `PLAYER CORE: ${Math.ceil(pCoreHP)}`;
@@ -1202,7 +1202,7 @@ Test 4.14
                     }
                 }
 
-                c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier, .badge-bleed, .badge-block').forEach(el => el.remove());
+                c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier, .badge-bleed, .badge-block, .badge-shinobi').forEach(el => el.remove());
 
                 if(data.turnPlaced === turnCount) {
                     const b = document.createElement('div'); b.className = 'placed-badge'; b.innerText = '{PLACED}'; c.appendChild(b);
@@ -1217,6 +1217,7 @@ Test 4.14
                 }
                 
                 let topRightOffset = -8;
+                let topLeftOffset = -8;
 
                 if (data.tauntedBy) {
                     c.classList.add('taunted-status');
@@ -1252,6 +1253,16 @@ Test 4.14
                     }
                 } else {
                     data.bleedStacks = 0;
+                }
+
+                if (data.marks && data.marks > 0) {
+                    let actualMarks = Math.min(3, data.marks);
+                    if (shinobiMarkImgUrl) {
+                        const mk = document.createElement('div'); mk.className = 'badge-shinobi';
+                        mk.style.cssText = `position:absolute; top:-8px; left:${topLeftOffset}px; width:24px; height:24px; background-image:url('${shinobiMarkImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #e74c3c); display:flex; justify-content:center; align-items:center; font-size:0.8rem; font-weight:bold; color:white; text-shadow:1px 1px 2px #000, -1px -1px 2px #000;`;
+                        mk.innerText = actualMarks;
+                        c.appendChild(mk);
+                    }
                 }
 
                 if(data.blockActive) {
@@ -1393,7 +1404,8 @@ Test 4.14
             if(cleanName.includes('mainmenubg')) { return { isMenuBG: true, img: dataUrl }; }
             if(cleanName.includes('taunted')) { return { isIcon: true, iconType: 'taunted', img: dataUrl }; }
             if(cleanName.includes('barrier')) { return { isIcon: true, iconType: 'barrier', img: dataUrl }; }
-            if(cleanName.includes('bleed')) { return { isIcon: true, iconType: 'bleed', img: dataUrl }; }
+            if(cleanName.includes('bleed') && !cleanName.includes('mark')) { return { isIcon: true, iconType: 'bleed', img: dataUrl }; }
+            if(cleanName.includes('shinobimark') || cleanName.includes('mark')) { return { isIcon: true, iconType: 'shinobimark', img: dataUrl }; }
 
             let type = 'unit';
             if (cleanName.includes('ability') || cleanName.includes('skill') || cleanName.includes('spell') || cleanName.includes('magic') || cleanName.includes('mana core') || cleanName.includes('one more time') || cleanName.includes('last stand')) type = 'ability';
@@ -1405,7 +1417,8 @@ Test 4.14
                     name: "KIN-RYU", 
                     title: "YAMI NO SHINOBI (Level 7)", 
                     powerLevel: 7, 
-                    summonCost: 5, 
+                    summonCost: 8, // UPDATED MANA COST
+                    summonRequires: { type: 'arashiSouls', amount: 4 }, // NEW SUMMONING CONDITION
                     faction: "Arashi", 
                     race: "Human", 
                     hp: 1200, 
@@ -1422,8 +1435,8 @@ Test 4.14
                         { name: "NI", manaCost: 2, desc: "Hits 2 targets for 300-400 damage each." }
                     ], 
                     passives: [
-                        { name: "SHADOW STANCE", desc: "Shinobi Marks make targets take +18% DMG." }, 
-                        { name: "SAN", desc: "Auto-chains shurikens upon kill." }
+                        { name: "SHADOW STANCE", desc: "Shinobi Marks (Max 3) grant Arashi Faction units +6/12/18% DMG against the target." }, 
+                        { name: "SAN", desc: "Auto-chains shurikens upon killing a target afflicted with Shinobi Mark." }
                     ] 
                 };
             }
@@ -1451,7 +1464,8 @@ Test 4.14
                         { name: "BLADE STRIKE", manaCost: 1, desc: "Lunges forward to inflict 225 damage." }
                     ], 
                     passives: [
-                        { name: "SHADOW SYNC", desc: "Mimics other stalkers." }
+                        { name: "SHADOW SYNC", desc: "Mimics other stalkers." },
+                        { name: "ASSASSIN'S MARK", desc: "Attacks have a 40% chance to apply Shinobi Mark." }
                     ] 
                 };
             }
@@ -1866,7 +1880,6 @@ Test 4.14
                                 document.getElementById('hand').appendChild(realCard);
                                 document.getElementById('hand').scrollBy({ left: 100, behavior: 'smooth' });
                                 
-                                // BUG FIX: Clean up the animation class so it doesn't re-trigger later
                                 setTimeout(() => {
                                     if (realCard) realCard.classList.remove('flip-reveal');
                                 }, 650);
@@ -1916,9 +1929,7 @@ Test 4.14
 
                 const isDeployed = c.parentElement.classList.contains('slot');
                 
-                // BUG FIX: Prevent dragging already placed units!
                 if (isDeployed) {
-                    // Only exception: Buff cards in Ability Slots that have survived summoning sickness
                     if (liveData.isBuff && liveData.turnPlaced < turnCount && c.parentElement.classList.contains('ability-slot')) {
                         // Allow dragging to final Buff Slot
                     } else {
@@ -1926,11 +1937,29 @@ Test 4.14
                     }
                 }
 
+                // NEW: Validate Arashi Souls before picking up Kin-Ryu
+                if (!isDeployed && liveData.summonRequires && liveData.side === 'PLAYER') {
+                    if (liveData.summonRequires.type === 'arashiSouls' && pArashiSouls < liveData.summonRequires.amount) {
+                        addLog(`Cannot deploy ${liveData.name}. Requires ${liveData.summonRequires.amount} Arashi Souls.`, "#e74c3c");
+                        showInspector(id, c);
+                        return e.preventDefault();
+                    }
+                }
+
                 draggedCardId = id;
                 
-                // AUDIO FIX: Do not loop the drag sound, play it once naturally
                 if(dragAudioEl) dragAudioEl.pause();
                 dragAudioEl = playSound(dragSoundUrl, false);
+
+                // --- DRAG GHOST FIX: Force browser to render a clean, un-scaled visual image ---
+                const dragGhost = c.cloneNode(true);
+                dragGhost.style.transform = "none"; 
+                dragGhost.style.position = "absolute";
+                dragGhost.style.top = "-1000px";
+                dragGhost.style.left = "-1000px";
+                document.body.appendChild(dragGhost);
+                e.dataTransfer.setDragImage(dragGhost, 70, 98); 
+                setTimeout(() => { if(dragGhost.parentNode) dragGhost.parentNode.removeChild(dragGhost); }, 10);
 
                 // Placement Outline Validation
                 document.querySelectorAll('.slot[data-side="PLAYER"]').forEach(s => {
@@ -1945,7 +1974,6 @@ Test 4.14
                         s.classList.add('valid-drop-zone');
                     }
                     else if (liveData.isBuff && s.dataset.allowed === 'ability' && !isDeployed) {
-                        // Allow Buffs to be dragged from Hand -> Ability Slot first
                         s.classList.add('valid-drop-zone');
                     }
                     else {
@@ -1987,7 +2015,6 @@ Test 4.14
                     if (validTarget) {
                         handleTargetSelection(id);
                     } else {
-                        // TARGETING FIREWALL FIX: Auto-cancel if attacking an ally
                         if (targetInst.side === currentTurn && pendingSkill.skillName !== "Blessing of the Light" && pendingSkill.skillName !== "Double Action") {
                             addLog("Invalid allied target clicked! Action auto-cancelled.", "#e74c3c");
                             document.getElementById('cancel-btn').click();
@@ -2029,7 +2056,6 @@ Test 4.14
                 const liveData = cardInstances[cardId];
                 const isDeployed = cardEl.parentElement.classList.contains('slot');
 
-                // BUG FIX: BUFF CARD PIPELINE
                 if (slot.classList.contains('buff-slot')) {
                     if (!liveData.isBuff) return addLog("Only Buff cards can be placed here.", "red");
                     if (!isDeployed || !cardEl.parentElement.classList.contains('ability-slot')) return addLog("Buff cards must be set in the Ability slot for 1 turn first.", "red");
@@ -2053,9 +2079,21 @@ Test 4.14
                     if(liveData.type !== slot.dataset.allowed && !(liveData.isBuff && slot.dataset.allowed === 'ability')) {
                         return addLog(`Needs ${slot.dataset.allowed.toUpperCase()} slot.`, "red");
                     }
+
+                    // NEW: Validate Arashi Souls before placement
+                    if (liveData.summonRequires && liveData.summonRequires.type === 'arashiSouls') {
+                        if (pArashiSouls < liveData.summonRequires.amount) {
+                            return addLog(`Requires ${liveData.summonRequires.amount} Arashi Souls to summon!`, "red");
+                        }
+                    }
                     
                     if(pMana >= liveData.summonCost) {
                         pMana -= liveData.summonCost; 
+
+                        if (liveData.summonRequires && liveData.summonRequires.type === 'arashiSouls') {
+                            pArashiSouls -= liveData.summonRequires.amount;
+                        }
+
                         liveData.turnPlaced = turnCount;
                         slot.appendChild(cardEl);
                         
@@ -2089,6 +2127,7 @@ Test 4.14
             const skillsUI = document.getElementById('inspect-skills-sector');
             const statusUI = document.getElementById('inspect-status-box');
             const sumUI = document.getElementById('inspect-summon-val');
+            const reqUI = document.getElementById('inspect-summon-req');
             const artUI = document.getElementById('inspect-art-fixed');
             const hpTargetUI = document.getElementById('inspect-hp-target');
             const inspector = document.getElementById('card-inspector');
@@ -2099,6 +2138,7 @@ Test 4.14
                 skillsUI.innerHTML = `<div class="empty-inspector">No actions available.</div>`;
                 statusUI.innerHTML = `<div style="text-align:center; color:#666; font-style:italic; margin-top:20px;">No card selected.</div>`;
                 sumUI.innerText = "0 MANA";
+                reqUI.style.display = "none";
                 artUI.style.display = "none"; 
                 hpTargetUI.innerHTML = "";
                 inspector.dataset.inspectedId = ""; 
@@ -2128,6 +2168,11 @@ Test 4.14
             }
             if (data.bleedStacks > 0) {
                 statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${bleedImgUrl ? bleedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>BLEED:</b> Takes damage at end of turn. (${data.bleedStacks} Stacks)</div></div>`;
+            }
+            if (data.marks > 0) {
+                let actualMarks = Math.min(3, data.marks);
+                let dmgInc = actualMarks * 6;
+                statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${shinobiMarkImgUrl ? shinobiMarkImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>SHINOBI MARK:</b> Takes +${dmgInc}% damage from Arashi Faction units. (${actualMarks} Stacks)</div></div>`;
             }
             if (data.shield && data.shield > 0) {
                 statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${barrierImgUrl ? barrierImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>SHIELDED:</b> Absorbs up to ${data.shield} damage.</div></div>`;
@@ -2193,6 +2238,17 @@ Test 4.14
             skillsUI.innerHTML = actionHtml || `<div class="empty-inspector">No actions available.</div>`;
 
             sumUI.innerText = `${data.summonCost} MANA`;
+
+            // NEW: Render the specific summoning requirement text if present
+            if (data.summonRequires && data.summonRequires.type === 'arashiSouls') {
+                reqUI.style.display = 'block';
+                let currentSouls = data.side === 'PLAYER' ? pArashiSouls : eArashiSouls;
+                let met = currentSouls >= data.summonRequires.amount;
+                reqUI.style.color = met ? '#2ecc71' : '#e74c3c';
+                reqUI.innerText = `REQUIRES ${data.summonRequires.amount} ARASHI SOULS (HAVE: ${currentSouls})`;
+            } else {
+                reqUI.style.display = 'none';
+            }
         }
 
         // --- CANCEL PENDING ---
@@ -2210,7 +2266,6 @@ Test 4.14
             }
 
             let omtRefundCount = 0;
-            // BUG FIX: One More Time duplication glitch memory fix
             Object.values(cardInstances).forEach(c => {
                 if (c.extraAction && c.side === 'PLAYER') {
                     c.extraAction = false;
@@ -2218,7 +2273,6 @@ Test 4.14
                     if(dDOM) dDOM.classList.remove('buff-double-action');
                     omtRefundCount++;
                 }
-                // Memory Cleanup of old dead One More Time instances
                 if (c.hp === 0 && c.side === 'PLAYER' && c.name === "One More Time") {
                     delete cardInstances[c.id];
                 }
@@ -2286,8 +2340,10 @@ Test 4.14
             
             if (trigger === "DAMAGE_CALC") {
                 let dmg = payload.baseDmg;
-                if (payload.actor.name === "KIN-RYU" && payload.targetInst && payload.targetInst.marks > 0) {
-                    dmg = Math.floor(dmg * (1 + 0.18 * payload.targetInst.marks));
+                // NEW: Shinobi Mark grants Arashi Faction units 6% scaling per mark (Max 3 marks = 18%)
+                if (payload.actor.faction === "Arashi" && payload.targetInst && payload.targetInst.marks > 0) {
+                    let activeMarks = Math.min(3, payload.targetInst.marks);
+                    dmg = Math.floor(dmg * (1 + (0.06 * activeMarks)));
                 }
                 return dmg;
             }
@@ -2339,11 +2395,33 @@ Test 4.14
                     }
                 }
 
+                // NEW: Shadow Stalker 40% chance to apply Shinobi Mark
+                if (payload.actor.name === "Shadow Stalker" && !payload.targetDied && payload.targetInst) {
+                    if (Math.random() < 0.40) {
+                        payload.targetInst.marks = Math.min(3, (payload.targetInst.marks || 0) + 1);
+                        let tDOM = document.getElementById(payload.action.targetId);
+                        setTimeout(() => showFloatingText(tDOM, "Shinobi Mark", "#e74c3c", "1rem"), 400);
+                        showInspector(payload.action.targetId, tDOM); 
+                    }
+                }
+
+                // NEW: Kin-Ryu Ichi Marks
                 if (payload.actor.name === "KIN-RYU" && payload.targetInst && payload.action.skillName !== "SAN" && !payload.targetDied) {
-                     payload.targetInst.marks += 2;
+                     payload.targetInst.marks = Math.min(3, (payload.targetInst.marks || 0) + 2);
                      let tDOM = document.getElementById(payload.action.targetId);
-                     setTimeout(() => showFloatingText(tDOM, "Shinobi's Mark Inflicted", "#2ecc71", "1rem"), 400);
+                     setTimeout(() => showFloatingText(tDOM, "Shinobi Mark", "#e74c3c", "1rem"), 400);
                      showInspector(payload.action.targetId, tDOM); 
+                }
+
+                // NEW: Arashi Souls check (Destroyed Enemy)
+                if (payload.targetDied && payload.actor.faction === "Arashi") {
+                    if (payload.actor.side === 'PLAYER') {
+                        pArashiSouls++;
+                        addLog(`<b>System</b>: Arashi unit eliminated a target! (+1 Arashi Soul)`, "var(--hp-color)");
+                        updateUI();
+                    } else {
+                        eArashiSouls++;
+                    }
                 }
             }
         }
@@ -2672,7 +2750,6 @@ Test 4.14
             beamContainer.remove();
         }
 
-        // --- JADEN EFFECTS ---
         function showJadenLock(targetDOM) {
             if(!targetDOM || !jadenLockUrl) return null;
             const lock = document.createElement('div');
@@ -2762,20 +2839,18 @@ Test 4.14
             }
         }
 
-        // --- INTERNAL COMBAT HANDLER (WITH OVERFLOW FIX) ---
+        // --- INTERNAL COMBAT HANDLER ---
         async function applyDamage(actor, targetId, baseDmg, skillName) {
             let targetDOM = targetId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(targetId);
             let targetInst = cardInstances[targetId]; 
             let actorDOM = document.getElementById(actor.id);
             
-            // BUG FIX: Capture Slot DOM to toggle CSS class during zoom
             let actorSlotDOM = (actorDOM && actorDOM.parentElement && actorDOM.parentElement.classList.contains('slot')) ? actorDOM.parentElement : null;
             
             let isKinRyu = actor.name === "KIN-RYU"; 
             let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK") || (actor.name === "Skeleton Warrior" && skillName === "SLASH") || (actor.name === "Zombie" && skillName === "Bite");
             let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
-            // Core Check for Last Stand
             let isLastStandActive = false;
             let checkSide = targetId === 'CORE' ? (actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER') : targetInst.side;
             if (checkSide === 'PLAYER') {
@@ -2786,7 +2861,6 @@ Test 4.14
                 if (eBuff && cardInstances[eBuff.id].name === "Last Stand") isLastStandActive = true;
             }
 
-            // BLOCK INTERCEPTION logic
             if (targetInst && targetInst.blockActive && targetId !== 'CORE') {
                 targetInst.blockActive = false;
                 dmg = 0;
@@ -2802,7 +2876,6 @@ Test 4.14
                     if(rolynSfx1Url) playSound(rolynSfx1Url);
                 }
                 
-                // BUG FIX: Temporarily apply class to prevent slot overflow cropping
                 if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
 
                 const aRect = actorDOM.getBoundingClientRect(); 
@@ -2823,7 +2896,6 @@ Test 4.14
 
             if(actorDOM && actor.type === 'unit' && targetDOM && actor.name !== "Lionel Guard Tower" && actor.name !== "Jaden" && skillName !== "SAN" && !skillName.includes("Punishment") && skillName !== "Lion's Roar" && skillName !== "BLOCK") {
                 
-                // BUG FIX: Ensure class is applied for lunge too
                 if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
                 actorDOM.style.zIndex = "9999";
                 
@@ -2927,6 +2999,17 @@ Test 4.14
                          died = true; 
                          addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
                          if(targetDOM) targetDOM.remove(); 
+
+                         // NEW: Arashi Souls check (Destroyed Ally)
+                         if (targetInst.faction === "Arashi") {
+                             if (targetInst.side === 'PLAYER') {
+                                 pArashiSouls++;
+                                 addLog(`<b>System</b>: Allied Arashi unit destroyed! (+1 Arashi Soul)`, "#2ecc71");
+                                 updateUI();
+                             } else {
+                                 eArashiSouls++;
+                             }
+                         }
                      } 
                 }
             }
@@ -2941,7 +3024,6 @@ Test 4.14
                 actorDOM.style.transition = ""; 
             }
             
-            // BUG FIX: Revert slot CSS class
             if(actorSlotDOM) actorSlotDOM.classList.remove('attacking-slot');
             
             return died;
@@ -2959,7 +3041,6 @@ Test 4.14
                     if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) {
                         u.queued = true;
                         if (!queueArr.some(a => a.actorId === u.id)) {
-                            // BUG FIX: Taunt Free-Mana exploit dynamically finds cost
                             let forcedSkill = "ATTACK";
                             let forcedCost = 0;
                             if (u.skills && u.skills.length > 0 && pMana >= u.skills[0].manaCost) {
@@ -3214,7 +3295,6 @@ Test 4.14
                             for(let i=0; i<rounds; i++) {
                                 let cTInst = cardInstances[currentTargetId];
                                 
-                                // BUG FIX: Jaden target switching dynamically pulls new enemies if current is dead
                                 if (currentTargetId !== 'CORE' && (!cTInst || cTInst.hp <= 0)) {
                                     let valids = getValidEnemyTargetIds(defSide);
                                     currentTargetId = valids.length > 0 ? valids[0] : 'CORE';
@@ -3352,8 +3432,8 @@ Test 4.14
                         
                         if (!targetDied && targetInst && tId !== 'CORE') {
                             if (marksToApply > 0) { 
-                                targetInst.marks += marksToApply; 
-                                setTimeout(() => showFloatingText(targetDOM, "Shinobi's Mark Inflicted", "#2ecc71", "1rem"), 400); 
+                                targetInst.marks = Math.min(3, (targetInst.marks || 0) + marksToApply); 
+                                setTimeout(() => showFloatingText(targetDOM, "Shinobi Mark Inflicted", "#e74c3c", "1rem"), 400); 
                                 showInspector(tId, targetDOM); 
                             }
                             if (action.skillName === "Lion's Challenge") { 
@@ -3397,9 +3477,12 @@ Test 4.14
                             addLog(`<b>KIN-RYU</b> [ICHI Reroll]: Strikes again!`, '#e74c3c'); 
                             targetDied = await applyDamage(actor, tId, secondDmg, "ICHI_REROLL"); 
                         }
+                        // NEW: San Chain Conditional trigger - Only if marked
                         if (actor.name === "KIN-RYU" && targetDied && action.skillName !== "SAN") { 
-                            addLog(`<b>System</b> [SAN]: Kin-Ryu chains attack!`, "var(--gold)"); 
-                            await triggerSanChain(actor, defSide); 
+                            if (targetInst && targetInst.marks > 0) {
+                                addLog(`<b>System</b> [SAN]: Marked target destroyed! Kin-Ryu chains attack!`, "var(--gold)"); 
+                                await triggerSanChain(actor, defSide); 
+                            }
                         }
                         await systemDetector("ATTACK_END", { actor, targetInst, action, targetDied });
                     }
@@ -3488,7 +3571,6 @@ Test 4.14
                 let taunterDOM = document.getElementById(u.tauntedBy);
                 if (taunterDOM && taunterDOM.parentElement.classList.contains('slot')) {
                     if (!pQueue.some(a => a.actorId === u.id)) {
-                        // BUG FIX: Calculate fallback skill mana cost
                         let forcedSkill = "ATTACK";
                         let forcedCost = 0;
                         if (u.skills && u.skills.length > 0 && pMana >= u.skills[0].manaCost) {
@@ -3592,11 +3674,19 @@ Test 4.14
             for(let id of summonable) {
                 let data = cardInstances[id];
                 if(data.type === 'unit') {
+                    // NEW: AI Arashi Soul checking logic
+                    if (data.summonRequires && data.summonRequires.type === 'arashiSouls' && eArashiSouls < data.summonRequires.amount) continue;
+
                     let slots = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"][data-allowed="unit"]')); 
                     let empty = slots.filter(s => !s.querySelector('.card'));
                     if(empty.length > 0 && eMana >= data.summonCost) {
                         let targetSlot = empty.find(s => s.classList.contains('frontline')) || empty[0]; 
                         eMana -= data.summonCost; 
+                        
+                        if (data.summonRequires && data.summonRequires.type === 'arashiSouls') {
+                            eArashiSouls -= data.summonRequires.amount;
+                        }
+
                         data.turnPlaced = turnCount; 
                         eHandData.splice(eHandData.indexOf(id), 1);
                         await aiDragAndDrop(id, data, targetSlot);
@@ -3695,7 +3785,6 @@ Test 4.14
                 if(eQueue.length > 0) await processQueue('ENEMY', eQueue);
             }
 
-            // Bleed Logic Trigger
             Object.values(cardInstances).forEach(c => {
                 if(c.hp > 0 && c.bleedStacks > 0 && c.bleedTurns >= turnCount) {
                     let bleedDmg = Math.floor(c.maxHp * (0.05 * c.bleedStacks));
