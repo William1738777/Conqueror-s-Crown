@@ -1,4 +1,4 @@
-Test 4.13
+Test 4.14
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -131,16 +131,17 @@ Test 4.13
             height: 100%; 
             flex-shrink: 0; 
         }
+        /* MASSIVE INSPECTOR UPGRADE: Increased flex and max-width */
         .left-panel { 
-            flex: 1; /* Changed to flex proportions to let center breathe */
-            max-width: 500px;
+            flex: 1.5; 
+            max-width: 480px;
             position: relative;
         }
         .right-panel { 
             width: 320px; 
         }
         .center-panel { 
-            flex: 2.5; /* Emphasizes the battlefield */
+            flex: 2.5; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -193,6 +194,7 @@ Test 4.13
             text-align: center;
         }
 
+        /* MASSIVE INSPECTOR UPGRADE: Split columns for huge art */
         #inspect-body {
             display: flex;
             flex-direction: row;
@@ -202,7 +204,7 @@ Test 4.13
         }
 
         .inspect-col-left {
-            width: 160px;
+            width: 55%;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
@@ -210,6 +212,7 @@ Test 4.13
         }
 
         .inspect-col-right {
+            width: 45%;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -217,10 +220,11 @@ Test 4.13
             overflow: hidden;
         }
 
+        /* MASSIVE INSPECTOR UPGRADE: Scaled up Art */
         .inspect-art { 
             width: 100%; 
             aspect-ratio: 140 / 196;
-            object-fit: cover; 
+            object-fit: contain; 
             border-radius: 6px; 
             border: 1px solid #444; 
             background: #111; 
@@ -283,7 +287,7 @@ Test 4.13
         /* NEW DYNAMIC MANA UI */
         #player-mana-wrapper {
             align-self: center; 
-            margin-bottom: -15px; 
+            margin-bottom: -10px; 
             z-index: 20;
             display: flex; 
             align-items: center; 
@@ -310,11 +314,11 @@ Test 4.13
             font-family: 'Courier New', monospace; 
         }
 
+        /* HAND OPTIMIZATION: Shrunk height to 170px */
         #hand-container { 
-            height: 280px; 
+            height: 170px; 
             background: rgba(0,0,0,0.85); 
-            padding: 15px; 
-            padding-top: 25px; 
+            padding: 10px; 
             border: 2px solid #333; 
             border-radius: 12px; 
             display: flex; 
@@ -326,11 +330,13 @@ Test 4.13
         }
         #hand { 
             display: flex; 
-            gap: 8px; 
+            gap: 5px; 
             flex-grow: 1; 
             overflow-x: hidden; 
+            overflow-y: hidden;
             scroll-behavior: smooth; 
             padding: 5px; 
+            align-items: center;
         }
         .scroll-btn { 
             background: #222; 
@@ -344,6 +350,7 @@ Test 4.13
             display: flex; 
             align-items: center; 
             transition: 0.2s; 
+            z-index: 10;
         }
         .scroll-btn:hover { 
             background: #444; 
@@ -623,7 +630,7 @@ Test 4.13
             display: none; 
         }
 
-        /* BUFF SLOTS */
+        /* BUFF SLOT CSS FIX: Firmly anchored inside the center panel */
         .buff-slot { 
             position: absolute; 
             top: 50%; 
@@ -639,8 +646,9 @@ Test 4.13
             background-repeat: no-repeat; 
             border-radius: 6px; 
         }
-        #enemy-buff-slot { left: calc(50% - 380px); }
-        #player-buff-slot { right: calc(50% - 380px); } 
+        /* Now anchored directly to the left and right edges so they never disappear */
+        #enemy-buff-slot { left: 10px; }
+        #player-buff-slot { right: 10px; } 
 
         /* Main Card */
         .card { 
@@ -659,6 +667,17 @@ Test 4.13
             flex-shrink: 0; 
             transition: transform 0.2s, box-shadow 0.2s;
         }
+
+        /* HAND OPTIMIZATION: Cards scaled down to 65% visually, margins collapsed to save horizontal space */
+        #hand .card {
+            transform: scale(0.65);
+            transform-origin: center center;
+            margin: -35px -25px; /* Negates the extra blank space created by scaling */
+        }
+        #hand .card:hover {
+            transform: scale(0.75) translateY(-15px);
+            z-index: 50;
+        }
         
         .slot .card { 
             position: absolute; 
@@ -673,7 +692,7 @@ Test 4.13
             box-sizing: border-box; 
         }
         
-        .card:hover { transform: translateY(-5px); border-color: var(--gold); z-index: 20;}
+        .slot .card:hover { transform: translateY(-5px); border-color: var(--gold); z-index: 20;}
         .card.exhausted { filter: grayscale(1) brightness(0.5); cursor: not-allowed; }
         .card.queued-status { outline: 2px solid #f39c12; filter: brightness(0.8); }
         .card.taunted-status { outline: 2px solid #e74c3c; box-shadow: 0 0 10px #e74c3c; }
@@ -1968,8 +1987,14 @@ Test 4.13
                     if (validTarget) {
                         handleTargetSelection(id);
                     } else {
-                        addLog("Target protected or invalid. Inspecting instead.", "#e74c3c");
-                        showInspector(id, c);
+                        // TARGETING FIREWALL FIX: Auto-cancel if attacking an ally
+                        if (targetInst.side === currentTurn && pendingSkill.skillName !== "Blessing of the Light" && pendingSkill.skillName !== "Double Action") {
+                            addLog("Invalid allied target clicked! Action auto-cancelled.", "#e74c3c");
+                            document.getElementById('cancel-btn').click();
+                        } else {
+                            addLog("Target protected or invalid. Inspecting instead.", "#e74c3c");
+                            showInspector(id, c);
+                        }
                     }
                 } else {
                     const isDeployed = c.parentElement.classList.contains('slot');
@@ -2015,7 +2040,6 @@ Test 4.13
                     slot.appendChild(cardEl);
                     liveData.buffTurnsRemaining = 2;
                     
-                    // AUDIO FIX: Explicitly play Buff sound when dropping here
                     if(buffActivatedUrl) playSound(buffActivatedUrl);
                     addLog(`<b>${liveData.name}</b> moved to Buff Slot and activated!`, "#f1c40f");
                     
@@ -3130,7 +3154,6 @@ Test 4.13
                     }
 
                     if (frontDOM) {
-                        // NEW FIX: Play Beam Audio
                         if (beamAudioUrl) playSound(beamAudioUrl);
                         await triggerLuxBeam(actorDOM, frontDOM);
                     }
