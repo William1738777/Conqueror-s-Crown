@@ -1655,6 +1655,111 @@ Test 4.17
                 };
             }
         }
+        async function animateManaGain(amount) {
+            const startEl = document.getElementById('player-deck-stack');
+            const endEl = document.getElementById('mana-display-num');
+            
+            if(!startEl || !endEl || !document.documentElement.style.getPropertyValue('--managain-url')) return;
+            
+            const sRect = startEl.getBoundingClientRect();
+            const eRect = endEl.getBoundingClientRect();
+            
+            let particles = Math.min(amount, 5);
+            
+            for(let i=0; i<particles; i++) {
+                let p = document.createElement('div');
+                p.className = 'mana-particle';
+                p.style.left = (sRect.left + sRect.width/2 - 20) + 'px';
+                p.style.top = (sRect.top + sRect.height/2 - 20) + 'px';
+                document.body.appendChild(p);
+                
+                void p.offsetWidth;
+                
+                p.style.left = (eRect.left + eRect.width/2 - 20) + 'px';
+                p.style.top = (eRect.top + eRect.height/2 - 20) + 'px';
+                
+                setTimeout(() => p.remove(), 800);
+                await new Promise(r => setTimeout(r, 150));
+            }
+            if(particles > 0) await new Promise(r => setTimeout(r, 650));
+        }
+
+        document.getElementById('draw-cards-btn').addEventListener('click', () => {
+            if (isExecuting) return;
+            document.getElementById('draw-cards-btn').style.display = "none";
+            if (turnCount === 1) {
+                drawAnimated(5, 'PLAYER'); 
+                setTimeout(() => drawAnimated(5, 'ENEMY'), 1500); 
+            } else {
+                let currentHandCount = document.getElementById('hand').children.length;
+                let toDraw = 6 - currentHandCount;
+                if(toDraw > 0) drawAnimated(toDraw, 'PLAYER');
+                else addLog("Your hand is full.", "var(--gold)");
+            }
+        });
+
+        function drawAnimated(n, sideTarget) {
+            const stack = document.getElementById(sideTarget === 'PLAYER' ? 'player-deck-stack' : 'enemy-deck-stack');
+            const countUI = document.getElementById(sideTarget === 'PLAYER' ? 'p-deck-count' : 'e-deck-count');
+            let targetDeck = sideTarget === 'PLAYER' ? pDeck : eDeck;
+            
+            for(let i=0; i<n; i++) {
+                setTimeout(() => {
+                    // NEW RNG DECK MECHANIC: Checks if you ran out of cards
+                    if (targetDeck.length === 0) {
+                        if (i === 0) addLog(`${sideTarget === 'PLAYER' ? 'You have' : 'Enemy has'} no cards left in deck!`, "#e74c3c");
+                        return;
+                    }
+
+                    // POPS directly from your structured 40-card RNG array
+                    const data = targetDeck.pop();
+                    countUI.innerText = `${targetDeck.length} Cards`;
+
+                    const cardId = 'card_' + Math.random().toString(36).substr(2, 9);
+                    cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: sideTarget, turnPlaced: 0, tauntedBy: null, isRevealed: false };
+
+                    const flyingCard = document.createElement('div');
+                    flyingCard.className = 'flying-card';
+                    flyingCard.style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
+                    
+                    const deckRect = stack.getBoundingClientRect();
+                    flyingCard.style.left = deckRect.left + 'px'; 
+                    flyingCard.style.top = deckRect.top + 'px';
+                    document.body.appendChild(flyingCard);
+
+                    setTimeout(() => {
+                        if(sideTarget === 'PLAYER') {
+                            const handRect = document.getElementById('hand').getBoundingClientRect();
+                            flyingCard.style.left = (handRect.left + handRect.width / 2 - 42) + 'px';
+                            flyingCard.style.top = handRect.top + 'px';
+                            flyingCard.style.transform = "rotateY(180deg) scale(0.9)";
+                        } else {
+                            flyingCard.style.left = (window.innerWidth / 2) + 'px'; 
+                            flyingCard.style.top = '-150px';
+                        }
+
+                        setTimeout(() => {
+                            flyingCard.remove();
+                            if(sideTarget === 'PLAYER') {
+                                if(drawSfxUrl) playSound(drawSfxUrl);
+                                const realCard = createCardDOM(cardId, cardInstances[cardId]);
+                                realCard.classList.add('flip-reveal');
+                                document.getElementById('hand').appendChild(realCard);
+                                document.getElementById('hand').scrollBy({ left: 100, behavior: 'smooth' });
+                                
+                                setTimeout(() => {
+                                    if (realCard) realCard.classList.remove('flip-reveal');
+                                }, 650);
+                                
+                            } else { 
+                                eHandData.push(cardId); 
+                            }
+                            updateUI();
+                        }, 500); 
+                    }, 50); 
+                }, i * 250); 
+            }
+        }
         // --- NEW DRAG AND DROP LOGIC (WITH BUFF FIXES) ---
         function createCardDOM(id, data) {
             const c = document.createElement('div');
