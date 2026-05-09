@@ -275,6 +275,7 @@ Test 4.17 (reloaded)
             margin-bottom: 5px;
         }
 
+        /* NEW DYNAMIC MANA UI */
         #player-mana-wrapper {
             align-self: center; 
             margin-bottom: -10px; 
@@ -346,6 +347,7 @@ Test 4.17 (reloaded)
             border-color: var(--gold); 
         }
 
+        /* --- RIGHT PANEL --- */
         .btn-main { 
             width: 100%; 
             padding: 12px; 
@@ -539,7 +541,430 @@ Test 4.17 (reloaded)
             gap: 12px; 
             justify-content: center;
         }
-        <script>
+        
+        /* Slot & Card Alignment OVERHAUL - AETHER SWIRLS ADDED */
+        .slot { 
+            width: 140px; 
+            height: 196px; 
+            border: none; 
+            border-radius: 6px; 
+            background: rgba(0,0,0,0.4); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 0.85rem; 
+            color: #555; 
+            position: relative; 
+            box-sizing: border-box; 
+            padding: 0;
+            background-image: var(--empty-slot-url); 
+            background-size: 100% 100%; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            overflow: hidden; 
+            transition: 0.3s ease;
+        }
+        
+        /* BUG FIX: Makes glows and icons visible when card is placed! */
+        .slot:has(.card) {
+            overflow: visible !important;
+        }
+        .slot.attacking-slot {
+            overflow: visible !important;
+            z-index: 9999 !important;
+        }
+
+        /* Aether Swirl Backgrounds */
+        .slot::before { 
+            content: ''; 
+            position: absolute; 
+            inset: -50%; 
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%); 
+            opacity: 0.6; 
+            animation: swirl 4s infinite linear; 
+            pointer-events: none; 
+            z-index: 1; 
+            mix-blend-mode: screen;
+        }
+        .slot[data-allowed="unit"]::before { filter: drop-shadow(0 0 10px rgba(255,255,255,0.8)); }
+        .slot.ability-slot::before { 
+            background: radial-gradient(circle, rgba(155,89,182,0.4) 0%, transparent 60%); 
+            filter: drop-shadow(0 0 15px #9b59b6); 
+            animation: swirl 3s infinite linear reverse; 
+        }
+        .slot.buff-slot::before { 
+            background: radial-gradient(circle, rgba(241,196,15,0.4) 0%, transparent 60%); 
+            filter: drop-shadow(0 0 15px #f1c40f); 
+        }
+        .slot:has(.card)::before { display: none !important; }
+
+        @keyframes swirl { 
+            0% { transform: scale(0.8) rotate(0deg); opacity: 0.4; } 
+            50% { transform: scale(1.1) rotate(180deg); opacity: 0.8; } 
+            100% { transform: scale(0.8) rotate(360deg); opacity: 0.4; } 
+        }
+
+        /* Drag Validation Classes */
+        .slot.valid-drop-zone { outline: 3px dashed #2ecc71; box-shadow: inset 0 0 30px rgba(46, 204, 113, 0.4); }
+        .slot.invalid-drop-zone { filter: brightness(0.2) grayscale(1); pointer-events: none; }
+        .slot.drag-over { border-color: var(--gold); box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.6) !important; }
+
+        .ability-slot { 
+            color: #9b59b6; 
+            background-image: var(--empty-ability-url, var(--empty-slot-url)); 
+            border-color: transparent; 
+        }
+        .slot-text { 
+            pointer-events: none; 
+            z-index: 2; 
+            background: rgba(0,0,0,0.7); 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            display: none; 
+        }
+
+        /* BUFF SLOT CSS FIX: Firmly anchored inside the center panel */
+        .buff-slot { 
+            position: absolute; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            border-color: transparent; 
+            color: #f1c40f; 
+            box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.1); 
+            z-index: 10; 
+            transition: 0.3s; 
+            background-image: var(--empty-buff-url, var(--empty-slot-url)); 
+            background-size: 100% 100%; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            border-radius: 6px; 
+        }
+        #enemy-buff-slot { left: 10px; }
+        #player-buff-slot { right: 10px; } 
+
+        /* Main Card */
+        .card { 
+            width: 140px; 
+            height: 196px; 
+            border-radius: 6px; 
+            padding: 0; 
+            box-sizing: border-box; 
+            cursor: grab; 
+            background: var(--card-unit); 
+            border: 1px solid #444; 
+            display: flex; 
+            flex-direction: column; 
+            font-family: sans-serif; 
+            position: relative; 
+            flex-shrink: 0; 
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .ambush-stance { opacity: 0.4; }
+
+        #hand .card {
+            transform: scale(0.65);
+            transform-origin: center center;
+            margin: -35px -25px;
+        }
+        #hand .card:hover {
+            transform: scale(0.75) translateY(-15px);
+            z-index: 50;
+        }
+        
+        .slot .card { 
+            position: absolute; 
+            top: -1px; 
+            left: -1px; 
+            width: calc(100% + 2px); 
+            height: calc(100% + 2px); 
+            margin: 0; 
+            z-index: 10; 
+            border-radius: 6px; 
+            border: 1px solid #444; 
+            box-sizing: border-box; 
+        }
+        
+        .slot .card:hover { transform: translateY(-5px); border-color: var(--gold); z-index: 20;}
+        .card.exhausted { filter: grayscale(1) brightness(0.5); cursor: not-allowed; }
+        .card.queued-status { outline: 2px solid #f39c12; filter: brightness(0.8); }
+        .card.taunted-status { outline: 2px solid #e74c3c; box-shadow: 0 0 10px #e74c3c; }
+        
+        /* Dynamic Targeting Glows */
+        .card.target-glow { outline: 3px solid #ff4d4d !important; box-shadow: 0 0 20px #ff4d4d !important; cursor: crosshair; animation: pulse-target 1s infinite alternate; filter: grayscale(0) brightness(1.2) !important; z-index: 25;}
+        @keyframes pulse-target { from { box-shadow: 0 0 10px #ff4d4d; } to { box-shadow: 0 0 25px #ff4d4d; } }
+        
+        .card.target-line-glow { outline: 3px dashed #ff9f43 !important; box-shadow: 0 0 20px #ff9f43 !important; filter: grayscale(0) brightness(1.2) !important; z-index: 25;}
+        
+        .card.target-heal-glow { outline: 3px solid #2ecc71 !important; box-shadow: 0 0 20px #2ecc71 !important; cursor: crosshair; animation: pulse-heal 1s infinite alternate; filter: grayscale(0) brightness(1.2) !important; z-index: 25;}
+        @keyframes pulse-heal { from { box-shadow: 0 0 10px #2ecc71; } to { box-shadow: 0 0 25px #2ecc71; } }
+
+        .card.target-buff-glow { outline: 3px solid #9b59b6 !important; box-shadow: 0 0 20px #9b59b6 !important; cursor: crosshair; animation: pulse-buff 1s infinite alternate; filter: grayscale(0) brightness(1.2) !important; z-index: 25;}
+        @keyframes pulse-buff { from { box-shadow: 0 0 10px #9b59b6; } to { box-shadow: 0 0 25px #9b59b6; } }
+
+        /* Combat Hype Mode: Remove exhausted filter during execution phase */
+        body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !important; }
+
+        .buff-double-action { outline: 3px solid #9b59b6; box-shadow: 0 0 15px #9b59b6; animation: purple-burn 0.8s infinite alternate; }
+        @keyframes purple-burn { from { box-shadow: 0 0 10px #9b59b6; } to { box-shadow: 0 0 25px #9b59b6; } }
+
+        .golden-glow { outline: 3px solid #f1c40f !important; box-shadow: 0 0 20px #f1c40f !important; animation: pulse-gold 1.5s infinite alternate; }
+        @keyframes pulse-gold { from { box-shadow: 0 0 10px #f1c40f; } to { box-shadow: 0 0 30px #f1c40f; } }
+
+        .card-title { font-size: 0.8rem; font-weight: bold; text-align: center; color: var(--gold); line-height: 1; margin-top: 10px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .card-level { text-align: center; font-size: 0.7rem; color: #aaa; margin-bottom: 2px;}
+        
+        .card-img-container { 
+            flex-grow: 1; 
+            margin-bottom: 0; 
+            background-color: transparent; 
+            border: none; 
+            background-size: 100% 100%; 
+            background-position: center; 
+            pointer-events: none;
+            border-top-left-radius: 5px; 
+            border-top-right-radius: 5px;
+        }
+
+        .badge-mana { position: absolute; top: -5px; left: -5px; background: var(--mana-color); color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15;}
+        
+        .placed-badge { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(231, 76, 60, 0.9); color: white; padding: 3px 8px; font-size: 0.8rem; font-weight: bold; border-radius: 3px; z-index: 25; pointer-events: none; text-shadow: 1px 1px 0 #000; border: 1px solid #fff;}
+        .badge-blessing { position: absolute; top: -8px; left: 20px; background: #f1c40f; color: #111; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 26; box-shadow: 0 0 10px #f1c40f;}
+        .badge-shield { position: absolute; bottom: 20px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
+        .badge-taunted { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #e74c3c); }
+        .badge-barrier { position: absolute; top: -8px; right: 15px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #3498db); }
+        .badge-block { background: #888 !important; box-shadow: 0 0 10px #888; }
+
+        /* --- DECKS & ANIMATIONS --- */
+        .deck-container { position: absolute; right: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 50; }
+        #enemy-deck-area { top: 20px; }
+        #player-deck-area { bottom: 20px; }
+        .deck-stack { width: 100px; height: 140px; border-radius: 6px; border: 1px solid #555; background-color: #1a1a24; background-size: cover; background-position: center; box-shadow: -2px 2px 0 #222, -4px 4px 0 #111, -6px 6px 0 #333, -8px 8px 10px rgba(0,0,0,0.8); transition: opacity 0.3s; }
+        #enemy-deck-area .deck-stack { transform: rotate(180deg); box-shadow: 2px -2px 0 #222, 4px -4px 0 #111, 6px -6px 0 #333, 8px -8px 10px rgba(0,0,0,0.8); }
+        .deck-count { width: 100%; text-align: center; font-weight: bold; color: var(--gold); font-size: 0.8rem; text-shadow: 0 2px 4px rgba(0,0,0,1); }
+        
+        #draw-cards-btn { display: none; padding: 10px 15px; background: var(--gold); color: black; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; animation: pulse 1.5s infinite; font-size: 0.8rem;}
+        #draw-cards-btn:disabled { animation: none; filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
+
+        .mana-particle { position: fixed; width: 40px; height: 40px; background-image: var(--managain-url); background-size: contain; background-repeat: no-repeat; z-index: 10000; pointer-events: none; transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 0 10px var(--mana-color)); }
+
+        .ai-dragging-card { position: fixed; width: 140px; height: 196px; border-radius: 6px; border: 1px solid #555; z-index: 9999; box-shadow: 0 15px 30px rgba(0,0,0,0.9); pointer-events: none; transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1); transform-origin: center; background-size: cover; background-position: center; }
+
+        /* Inspector Components Styling */
+        .inspect-hp-wrapper { width: 100%; height: 24px; display: flex; background: #111; border-radius: 4px; border: 1px solid #444; overflow: hidden; margin-bottom: 10px; flex-shrink: 0; box-shadow: 0 5px 10px rgba(0,0,0,0.5);}
+        .inspect-hp-bar-container { flex-grow: 1; position: relative; height: 100%; border-right: 1px solid #000; }
+        .inspect-hp-trail { position: absolute; top: 0; left: 0; height: 100%; width: 100%; background: #e74c3c; box-shadow: 0 0 12px #e74c3c; transition: width 0.5s ease-out 0.4s; }
+        .inspect-hp-current { position: absolute; top: 0; left: 0; height: 100%; width: 100%; background: linear-gradient(90deg, #1e8449, #2ecc71); box-shadow: 0 0 18px #2ecc71, inset 0 0 8px rgba(255,255,255,0.6); border-right: 2px solid #fff; transition: width 0.15s ease-out; animation: hp-glow-pulse 1.5s infinite alternate; }
+        .inspect-hp-number { width: 45px; background: #2ecc71; color: #000; font-weight: bold; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: background 0.15s ease-out, color 0.15s ease-out; box-shadow: inset 2px 0 8px rgba(0,0,0,0.4);}
+        .status-item { display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px dotted rgba(255,255,255,0.2); padding-bottom: 6px; margin-bottom: 6px;}
+        .status-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0;}
+        .status-icon { width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; flex-shrink: 0; filter: drop-shadow(0 0 2px #000); }
+        .status-desc { font-size: 0.7rem; color: #ccc; line-height: 1.3; }
+        .skill-btn { width: 100%; background: #222; color: white; border: 1px solid #444; padding: 6px; margin-top: 5px; cursor: pointer; text-align: left; transition: 0.2s; border-radius: 4px;}
+        .skill-btn:hover { border-color: var(--gold); background: #333; }
+        .skill-btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: #444 !important; }
+        .skill-name { color: var(--gold); font-weight: bold; font-size: 0.75rem;}
+        .skill-cost { color: var(--mana-color); font-size: 0.65rem; float: right;}
+        .skill-desc { font-size: 0.65rem; color: #ccc; margin-top: 3px; display: block;}
+        .empty-inspector { text-align: center; color: #666; margin-top: 50%; font-style: italic; font-size: 0.9rem; grid-column: 1 / span 2;}
+
+        /* --- VISUAL EFFECTS --- */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-4px, 0px) rotate(1deg); }
+            40% { transform: translate(2px, -2px) rotate(1deg); }
+            60% { transform: translate(-4px, 2px) rotate(0deg); }
+            80% { transform: translate(-1px, -2px) rotate(1deg); }
+            100% { transform: translate(2px, -2px) rotate(-1deg); }
+        }
+        .shake-anim { animation: shake 0.4s; }
+
+        @keyframes shimmer {
+            0% { filter: brightness(1) drop-shadow(0 0 0px var(--gold)); }
+            50% { filter: brightness(1.8) drop-shadow(0 0 25px var(--gold)); }
+            100% { filter: brightness(1) drop-shadow(0 0 0px var(--gold)); }
+        }
+        .shimmer-fx { animation: shimmer 1s ease-in-out; }
+
+        .floating-text { position: absolute; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; pointer-events: none; z-index: 1000; animation: floatUp 1.2s forwards ease-out; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-70px) scale(1.4); opacity: 0; } }
+
+        .militia-text { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; color: #3498db; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 0 0 10px #000, 0 0 20px #3498db; z-index: 10000; pointer-events: none; animation: sanPulse 2s ease-out forwards; text-align: center;}
+
+        .slash-fx { position: absolute; top: 50%; left: 50%; width: 250%; height: 250%; transform: translate(-50%, -50%); background-image: var(--slash-url); background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 9999; opacity: 0; animation: slashFade 0.6s ease-out forwards; }
+        @keyframes slashFade { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.6); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); } }
+
+        .heal-fx { position: absolute; top: 50%; left: 50%; width: 250%; height: 250%; transform: translate(-50%, -50%); background-image: var(--healfx-url); background-size: contain; background-repeat: no-repeat; background-position: center; pointer-events: none; z-index: 9999; opacity: 0; animation: healFade 0.8s ease-out forwards; }
+        @keyframes healFade { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); } }
+        
+        .arrow-fx { position: fixed; width: 40px; height: 10px; background-image: var(--arrow-url); background-size: contain; background-repeat: no-repeat; z-index: 9999; pointer-events: none; transition: all 0.3s linear; }
+
+        /* SAN OVERHAUL */
+        .san-text { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 6rem; color: #e74c3c; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 0 0 20px #000, 0 0 40px #e74c3c; z-index: 10000; pointer-events: none; animation: sanPulse 1s ease-out forwards; }
+        @keyframes sanPulse { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 85% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
+
+        .shuriken-fx { position: fixed; top: 0; left: 0; margin-top: -25px; margin-left: -25px; width: 50px; height: 50px; z-index: 9999; pointer-events: none; background-image: var(--shuriken-url); background-size: contain; background-repeat: no-repeat; }
+        @keyframes spinFly { 0% { transform: translate(var(--startX), var(--startY)) rotate(0deg); opacity: 1; } 100% { transform: translate(var(--endX), var(--endY)) rotate(1440deg); opacity: 0; } }
+
+        .flying-card { position: fixed; width: 140px; height: 196px; border-radius: 6px; border: 1px solid #555; background-color: #1a1a24; background-size: cover; background-position: center; z-index: 1000; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
+        .flip-reveal { animation: flipIn 0.6s ease-out forwards; }
+        @keyframes flipIn { 0% { transform: perspective(400px) rotateY(90deg); opacity: 0; } 100% { transform: perspective(400px) rotateY(0deg); opacity: 1; } }
+
+        /* --- LUX ULT BEAM CSS --- */
+        .lux-beam-container {
+            position: fixed;
+            bottom: -100px;
+            width: 120px;
+            height: 200vh;
+            pointer-events: none;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            transform-origin: bottom center;
+            opacity: 0;
+        }
+        .lux-beam-core {
+            width: 30%;
+            height: 100%;
+            background: #fff;
+            box-shadow: 0 0 20px #fff, 0 0 40px #f1c40f, 0 0 80px #3498db;
+            filter: blur(2px);
+        }
+        .lux-beam-outer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.5), rgba(241, 196, 15, 0.8), rgba(255,255,255,1), rgba(241, 196, 15, 0.8), rgba(52, 152, 219, 0.5), transparent);
+            filter: blur(8px);
+            mix-blend-mode: screen;
+        }
+
+    </style>
+    </head>
+<body onclick="playClickSound()">
+
+    <div id="start-screen">
+        <h1>CONQUEROR'S CROWN</h1>
+        <div class="subtitle">Tactical Deployment</div>
+        <div class="upload-area" id="upload-box" onclick="initializeGame()">
+            <h2>START GAME</h2>
+            <p style="font-size: 0.8rem; color: #aaa;">Enter the battlefield.</p>
+        </div>
+        <div id="absorbing-text">Loading Assets...</div>
+    </div>
+
+    <div id="game-header">
+        <span>CONQUEROR'S CROWN</span>
+    </div>
+
+    <div id="game-area">
+        <div class="side-panel left-panel">
+            
+            <div id="card-inspector">
+                <div id="inspect-header-sector">
+                    <div id="inspect-logo-box"></div>
+                    <div id="inspect-title-group">
+                        <h3 id="inspect-name" style="margin:0; color:var(--gold); font-size:1.1rem; font-family:'Cinzel';">Select Card</h3>
+                        <div id="inspect-sub" style="font-size:0.65rem; color:#888; text-transform:uppercase;">N/A</div>
+                    </div>
+                </div>
+
+                <div id="inspect-body">
+                    <div class="inspect-col-left">
+                        <img id="inspect-art-fixed" class="inspect-art" style="display:none;">
+                        <div id="inspect-hp-target" style="width:100%;"></div>
+                        
+                        <div class="inspect-status-green-box" id="inspect-status-box">
+                            <div style="text-align:center; color:#666; font-style:italic; margin-top:20px;">No card selected.</div>
+                        </div>
+                    </div>
+
+                    <div class="inspect-col-right">
+                        <div id="inspect-skills-sector">
+                            <div class="empty-inspector">No actions available.</div>
+                        </div>
+
+                        <div id="inspect-summoning-sector">
+                            <span class="summon-label" id="summon-condition-label">SUMMONING CONDITIONS</span>
+                            <div id="inspect-summon-val">0 MANA</div>
+                            <div id="inspect-summon-req" style="font-size: 0.75rem; color: #e74c3c; margin-top: 5px; font-weight: bold; display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="player-mana-wrapper">
+                <div class="mana-icon"></div>
+                <div class="mana-num" id="mana-display-num">8</div>
+            </div>
+            
+            <div id="hand-container">
+                <button class="scroll-btn" id="scroll-left">&#9664;</button>
+                <div id="hand"></div>
+                <button class="scroll-btn" id="scroll-right">&#9654;</button>
+            </div>
+        </div>
+
+        <div class="center-panel">
+            <div id="enemy-buff-slot" class="slot buff-slot" data-side="ENEMY" data-allowed="buff"><span class="slot-text">BUFF</span></div>
+            <div id="player-buff-slot" class="slot buff-slot" data-side="PLAYER" data-allowed="buff"><span class="slot-text">BUFF</span></div>
+
+            <div id="turn-banner">PLAYER TURN 1</div>
+            <div class="battlefield">
+                <div class="core-container enemy-core" id="e-core-target">
+                    <div class="core-crystal"></div><div class="core-hp" id="enemy-core-hp">ENEMY CORE: 2000 | MANA: 8</div>
+                    <div class="horizontal-bar"><div class="hp-bar-trail" style="width: 100%"></div><div class="hp-bar-current" style="width: 100%"></div></div>
+                </div>
+                <div class="board">
+                    <div class="row">
+                        <div class="slot backline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">UNIT</span></div>
+                        <div class="slot backline ability-slot" data-side="ENEMY" data-allowed="ability"><span class="slot-text">ABILITY</span></div>
+                        <div class="slot backline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">UNIT</span></div>
+                    </div>
+                    <div class="row">
+                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                        <div class="slot frontline" data-side="ENEMY" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                    </div>
+                </div>
+                <div class="board" style="border-top: 1px solid #333; padding-top: 15px;">
+                    <div class="row">
+                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                        <div class="slot frontline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">FRONT</span></div>
+                    </div>
+                    <div class="row">
+                        <div class="slot backline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">UNIT</span></div>
+                        <div class="slot backline ability-slot" data-side="PLAYER" data-allowed="ability"><span class="slot-text">ABILITY</span></div>
+                        <div class="slot backline" data-side="PLAYER" data-allowed="unit"><span class="slot-text">UNIT</span></div>
+                    </div>
+                </div>
+                <div class="core-container player-core" id="p-core-target">
+                    <div class="core-crystal"></div><div class="core-hp" id="player-core-hp">PLAYER CORE: 2000</div>
+                    <div class="horizontal-bar"><div class="hp-bar-trail" style="width: 100%"></div><div class="hp-bar-current" style="width: 100%"></div></div>
+                </div>
+            </div>
+
+            <div class="deck-container" id="enemy-deck-area">
+                <div id="enemy-deck-stack" class="deck-stack"></div>
+                <div id="e-deck-count" class="deck-count">40</div>
+            </div>
+            <div class="deck-container" id="player-deck-area">
+                <button id="draw-cards-btn">DRAW TO 6</button>
+                <div id="player-deck-stack" class="deck-stack"></div>
+                <div id="p-deck-count" class="deck-count">40</div>
+            </div>
+        </div>
+
+        <div class="side-panel right-panel">
+            <button id="cancel-btn" class="btn-main">CANCEL PENDING</button>
+            <button id="exec-btn" class="btn-main">EXECUTE PENDING (0)</button>
+            <button id="end-turn-btn" class="btn-main">END TURN</button>
+            <div id="event-log"></div>
+        </div>
+    </div>
+
+    <script>
         // ============================================================================
         // ⚙️ GITHUB ASSET CONFIGURATION ⚙️
         // ============================================================================
@@ -559,7 +984,6 @@ Test 4.17 (reloaded)
             "Rolyn": "./assets/King%20Rolyn.png",
             "Althea": "./assets/Althea.png",
             "Jaden": "./assets/Jaden.png",
-            "Zeek": "./assets/Zeek.png", // ZEEK ADDED HERE
             "Skeleton Warrior": "./assets/Skeleton%20Warrior.png",
             "Cursed Crow": "./assets/Cursed Crow.png",
             "JadenLock": "./assets/JadenLock.png",
@@ -590,7 +1014,7 @@ Test 4.17 (reloaded)
             "Taunted": "./assets/Taunted.png",
             "Barrier": "./assets/Barrier.png",
             "Bleed": "./assets/Bleed.png",
-            "ShinobiMark": "./assets/ShinobiMark.png",
+            "ShinobiMark": "./assets/Bleed.png", // Temporarily using bleed icon if you don't have ShinobiMark.png yet, change this URL!
             "DrawSFX": "./assets/DrawSFX.mp3",
             "PlaceSFX": "./assets/PlaceSFX.mp3",
             "VillagerSuicideSFX": "./assets/VillagerSuicideSFX.mp3",
@@ -603,18 +1027,17 @@ Test 4.17 (reloaded)
             "ManaGain": "./assets/ManaGain.png",
             "Zombie": "./assets/Zombie.png",
             "Militia": "./assets/Militia.png",
-            "Beam": "./assets/Beam.mp3"
+            "Beam": "./assets/Beam.mp3",
+            "Zeek": "./assets/Zeek.png"
         };
         // ============================================================================
 
         let cardLibrary = [];
-        let pDeck = [];
-        let eDeck = [];
         let eHandData = [];
         let currentTurn = 'PLAYER', turnCount = 1;
         let pMana = 8, eMana = 8;
         let pCoreHP = 2000, eCoreHP = 2000;
-        let pArashiSouls = 0, eArashiSouls = 0; 
+        let pArashiSouls = 0, eArashiSouls = 0; // NEW GLOBAL RESOURCE
         let cardInstances = {};
         
         // Visual & Audio Assets
@@ -641,7 +1064,7 @@ Test 4.17 (reloaded)
         let tauntedImgUrl = '';
         let barrierImgUrl = '';
         let bleedImgUrl = '';
-        let shinobiMarkImgUrl = ''; 
+        let shinobiMarkImgUrl = ''; // NEW DEBUFF ICON
         let drawSfxUrl = '';
         let placeSfxUrl = '';
         let abilityActivatedUrl = '';
@@ -667,9 +1090,12 @@ Test 4.17 (reloaded)
         let targetCountReq = 1;
         let selectedTargets = [];
         let draggedCardId = null;
+        
+        let pDeck = [];
+        let eDeck = [];
 
         const log = document.getElementById('event-log');
-
+        // --- GITHUB ASSET INITIALIZER ---
         async function initializeGame() {
             document.getElementById('upload-box').style.display = 'none';
             document.getElementById('absorbing-text').style.display = 'block';
@@ -710,37 +1136,54 @@ Test 4.17 (reloaded)
                     if (cardData.iconType === 'bleed') bleedImgUrl = cardData.img;
                     if (cardData.iconType === 'shinobimark') shinobiMarkImgUrl = cardData.img;
                 } else if (cardData.isAudio || cardData.isMenuBG || cardData.isFX || cardData.isEmptySlot) {
-                    // Handled inside
+                    // Handled inside getCardTemplate side-effects
                 } else if (cardData.isPlayable) {
                     cardLibrary.push({...cardData}); 
                 }
                 
-                await new Promise(r => setTimeout(r, 40)); 
+                await new Promise(r => setTimeout(r, 60)); 
+            }
+            
+            if (cardLibrary.length === 0) {
+                alert("No playable cards found! Please verify your GITHUB links inside ASSET_LINKS.");
+                document.getElementById('upload-box').style.display = 'block';
+                document.getElementById('absorbing-text').style.display = 'none';
+                return;
             }
             
             setTimeout(startGame, 500); 
         }
 
-        // --- NEW STRUCTURED 40-CARD RNG DECK BUILDER ---
-        function generateDeck() {
+        // --- NEW 40-CARD DECK GENERATOR ---
+        function buildDeck() {
             let deck = [];
-            let cardCounts = {
-                "KIN-RYU": 1, "Rolyn": 1, 
-                "Jaden": 2, 
-                "Althea": 3, "Zeek": 3,
-                "Shadow Stalker": 3, "Skeleton Warrior": 3, "Cursed Crow": 3, "Lionel Guard Tower": 3, "Zombie": 3, "Militia": 3,
-                "One More Time": 4, "Mana Core": 4, "Last Stand": 4
-            };
+            let legendaries = cardLibrary.filter(c => c.name === "KIN-RYU" || c.name === "Rolyn");
+            let jadens = cardLibrary.filter(c => c.name === "Jaden");
+            let fiveStars = cardLibrary.filter(c => c.powerLevel === 5 && c.name !== "Jaden"); 
+            let fodders = cardLibrary.filter(c => c.powerLevel < 5 && c.type === 'unit');
+            let spells = cardLibrary.filter(c => c.type === 'ability' || c.isBuff);
 
-            for (const [cardName, count] of Object.entries(cardCounts)) {
-                let template = cardLibrary.find(c => c.name === cardName);
-                if (template) {
-                    for (let i = 0; i < count; i++) {
-                        deck.push(JSON.parse(JSON.stringify(template)));
-                    }
+            // 1 Copy: Legendaries
+            legendaries.forEach(c => deck.push(c)); 
+            // 2 Copies: Jaden
+            jadens.forEach(c => { deck.push(c); deck.push(c); }); 
+            // 3 Copies: 5-Stars (Althea, Zeek, Lionel)
+            fiveStars.forEach(c => { deck.push(c); deck.push(c); deck.push(c); }); 
+
+            // Fill remainder to 40
+            while(deck.length < 40) {
+                if (Math.random() > 0.4 && fodders.length > 0) {
+                    deck.push(fodders[Math.floor(Math.random() * fodders.length)]);
+                } else if (spells.length > 0) {
+                    deck.push(spells[Math.floor(Math.random() * spells.length)]);
+                } else if (fodders.length > 0) {
+                    deck.push(fodders[Math.floor(Math.random() * fodders.length)]);
                 }
             }
+            
+            deck = deck.slice(0, 40); // Strict 40 cap
 
+            // Strictly Shuffle
             for (let i = deck.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -752,8 +1195,10 @@ Test 4.17 (reloaded)
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('game-area').style.display = 'flex';
             
-            pDeck = generateDeck();
-            eDeck = generateDeck();
+            pDeck = buildDeck();
+            eDeck = buildDeck();
+            document.getElementById('p-deck-count').innerText = pDeck.length;
+            document.getElementById('e-deck-count').innerText = eDeck.length;
 
             addLog("BATTLE COMMENCED. No combat allowed on Turn 1.", "var(--gold)");
             updateUI(); 
@@ -765,6 +1210,9 @@ Test 4.17 (reloaded)
         function updateUI() {
             let manaDisp = document.getElementById('mana-display-num');
             if(manaDisp) manaDisp.innerText = pMana;
+
+            let soulsDisp = document.getElementById('arashi-souls-num');
+            if(soulsDisp) soulsDisp.innerText = pArashiSouls;
             
             document.getElementById('enemy-core-hp').innerText = `ENEMY CORE: ${Math.ceil(eCoreHP)} | MANA: ${eMana}`;
             document.getElementById('player-core-hp').innerText = `PLAYER CORE: ${Math.ceil(pCoreHP)}`;
@@ -876,6 +1324,9 @@ Test 4.17 (reloaded)
                 } else {
                     c.classList.remove('golden-glow');
                 }
+                
+                if (data.ambushTurns && data.ambushTurns >= turnCount && isDeployed) c.classList.add('ambush-stance');
+                else c.classList.remove('ambush-stance');
 
                 if(data.queued) c.classList.add('queued-status'); else c.classList.remove('queued-status');
                 if(data.exhausted) c.classList.add('exhausted'); else c.classList.remove('exhausted');
@@ -909,12 +1360,13 @@ Test 4.17 (reloaded)
             return audio;
         }
 
+        // --- ENEMY TARGET HELPER ---
         function getValidEnemyTargetIds(defendSide) {
             let attackSide = defendSide === 'PLAYER' ? 'ENEMY' : 'PLAYER';
-            let front = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${defendSide}"] .card`))
-                .map(c => c.id).filter(id => cardInstances[id].ambushTurns < turnCount || !cardInstances[id].ambushTurns);
-            let back = Array.from(document.querySelectorAll(`.slot.backline[data-side="${defendSide}"] .card`))
-                .map(c => c.id).filter(id => cardInstances[id].ambushTurns < turnCount || !cardInstances[id].ambushTurns);
+            
+            // Ambush Stance units are completely untargettable
+            let front = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${defendSide}"] .card`)).map(c => c.id).filter(id => !(cardInstances[id].ambushTurns > 0 && cardInstances[id].ambushTurns >= turnCount));
+            let back = Array.from(document.querySelectorAll(`.slot.backline[data-side="${defendSide}"] .card`)).map(c => c.id).filter(id => !(cardInstances[id].ambushTurns > 0 && cardInstances[id].ambushTurns >= turnCount));
             
             let hasCrow = Array.from(document.querySelectorAll(`.slot[data-side="${attackSide}"] .card`)).some(c => cardInstances[c.id] && cardInstances[c.id].name === "Cursed Crow" && cardInstances[c.id].hp > 0);
 
@@ -952,7 +1404,7 @@ Test 4.17 (reloaded)
                 numInspect.style.color = pct < 30 ? '#fff' : '#000';
             }
         }
-
+        
         // --- Template Engine ---
         function getCardTemplate(fileName, dataUrl) {
             let name = fileName.replace(/\.[^/.]+$/, ""); 
@@ -1011,15 +1463,46 @@ Test 4.17 (reloaded)
             let type = 'unit';
             if (cleanName.includes('ability') || cleanName.includes('skill') || cleanName.includes('spell') || cleanName.includes('magic') || cleanName.includes('mana core') || cleanName.includes('one more time') || cleanName.includes('last stand')) type = 'ability';
 
-            if(cleanName.includes('kin-ryu') || cleanName.includes('kin ryu')) {
+            // ZEEK: Captain of the Rangers
+            if (cleanName.includes('zeek')) {
+                return {
+                    isPlayable: true,
+                    type: 'unit',
+                    name: "Zeek",
+                    title: "Captain of the Rangers (Level 5)",
+                    powerLevel: 5,
+                    summonCost: 4,
+                    faction: "Westlands",
+                    race: "Human",
+                    hp: 800,
+                    maxHp: 800,
+                    atk: 300,
+                    img: dataUrl,
+                    marks: 0,
+                    queued: false,
+                    extraAction: false,
+                    blockActive: false,
+                    isRevealed: false,
+                    ambushTurns: 0,
+                    skills: [
+                        { name: "Bullseye", manaCost: 0, desc: "Shoots an arrow rolling 200-400 damage. (600-1000 in Ambush)" },
+                        { name: "Arrow Rain", manaCost: 3, desc: "Hits entire Enemy Frontline or Backline for 50-80 damage. (90-180 in Ambush)" },
+                        { name: "Ambush", manaCost: 5, desc: "Rolls 800-1500 damage. If target dies, enters Ambush Stance for 2 turns." }
+                    ],
+                    passives: [
+                        { name: "Ambush Stance", desc: "Becomes untargettable. Buffs Bullseye and Arrow Rain." }
+                    ]
+                };
+            }
+            else if(cleanName.includes('kin-ryu') || cleanName.includes('kin ryu')) {
                 return { 
                     isPlayable: true, 
                     type: 'unit', 
                     name: "KIN-RYU", 
                     title: "YAMI NO SHINOBI (Level 7)", 
                     powerLevel: 7, 
-                    summonCost: 8, 
-                    summonRequires: { type: 'arashiSouls', amount: 4 }, 
+                    summonCost: 8, // UPDATED MANA COST
+                    summonRequires: { type: 'arashiSouls', amount: 4 }, // NEW SUMMONING CONDITION
                     faction: "Arashi", 
                     race: "Human", 
                     hp: 1200, 
@@ -1036,38 +1519,8 @@ Test 4.17 (reloaded)
                         { name: "NI", manaCost: 2, desc: "Hits 2 targets for 300-400 damage each." }
                     ], 
                     passives: [
-                        { name: "SHADOW STANCE", desc: "Shinobi Marks (Max 3) grant Arashi units +6/12/18% DMG against the target." }, 
+                        { name: "SHADOW STANCE", desc: "Shinobi Marks (Max 3) grant Arashi Faction units +6/12/18% DMG against the target." }, 
                         { name: "SAN", desc: "Auto-chains shurikens upon killing a target afflicted with Shinobi Mark." }
-                    ] 
-                };
-            }
-            else if(cleanName.includes('zeek')) {
-                return { 
-                    isPlayable: true, 
-                    type: 'unit', 
-                    name: "Zeek", 
-                    title: "Captain of the Rangers of the Westlands", 
-                    powerLevel: 5, 
-                    summonCost: 4, 
-                    faction: "Westlands", 
-                    race: "Human", 
-                    hp: 800, 
-                    maxHp: 800, 
-                    atk: 250, 
-                    img: dataUrl, 
-                    marks: 0, 
-                    queued: false, 
-                    extraAction: false, 
-                    blockActive: false, 
-                    ambushTurns: 0,
-                    isRevealed: false,
-                    skills: [
-                        { name: "Bullseye", manaCost: 0, desc: "Shoots an arrow rolling from 200-400." }, 
-                        { name: "Arrow rain", manaCost: 3, desc: "Select a group of targets (Backline or Frontline) to rain multiple arrows (50-80 DMG)." },
-                        { name: "Ambush", manaCost: 5, desc: "Inflicts 800-1500 DMG. If target dies, turns on Ambush Stance for 2 turns." }
-                    ], 
-                    passives: [
-                        { name: "Ambush Stance", desc: "Untargettable for 2 turns. Bullseye buffs to 600-1000 DMG. Arrow rain buffs to 90-180 DMG." }
                     ] 
                 };
             }
@@ -1218,7 +1671,7 @@ Test 4.17 (reloaded)
                     type: 'unit', 
                     name: "Althea", 
                     title: "Guardian Deity (Level 5)", 
-                    powerLevel: 5, 
+                    powerLevel: 5, // UPDATED TO 5-STAR
                     summonCost: 4, 
                     faction: "Neutral", 
                     race: "Deity", 
@@ -1247,7 +1700,7 @@ Test 4.17 (reloaded)
                     name: "Jaden", 
                     title: "The Crown’s Enforcer", 
                     powerLevel: 6, 
-                    summonCost: 6, 
+                    summonCost: 6, // UPDATED TO 6 MANA
                     faction: "Leonia", 
                     race: "Human", 
                     hp: 1000, 
@@ -1396,7 +1849,7 @@ Test 4.17 (reloaded)
                     isRevealed: false,
                     skills: [], 
                     passives: [ 
-                        { name: "Last Stand", desc: "Deploy to Ability Slot. Activate next turn to move to Buff slot. Allies survive fatal damage at 1 HP for 2 turns." } 
+                        { name: "Last Stand", desc: "Click [ACTIVATE BUFF] next turn. All allied units survive fatal damage at 1 HP for 2 turns." } 
                     ] 
                 };
             }
@@ -1475,21 +1928,17 @@ Test 4.17 (reloaded)
 
         function drawAnimated(n, sideTarget) {
             const stack = document.getElementById(sideTarget === 'PLAYER' ? 'player-deck-stack' : 'enemy-deck-stack');
-            const countUI = document.getElementById(sideTarget === 'PLAYER' ? 'p-deck-count' : 'e-deck-count');
             let targetDeck = sideTarget === 'PLAYER' ? pDeck : eDeck;
+            let counterUI = document.getElementById(sideTarget === 'PLAYER' ? 'p-deck-count' : 'e-deck-count');
             
             for(let i=0; i<n; i++) {
+                if (targetDeck.length === 0) break; 
                 setTimeout(() => {
-                    // NEW RNG DECK MECHANIC: Checks if you ran out of cards
-                    if (targetDeck.length === 0) {
-                        if (i === 0) addLog(`${sideTarget === 'PLAYER' ? 'You have' : 'Enemy has'} no cards left in deck!`, "#e74c3c");
-                        return;
-                    }
+                    if (targetDeck.length === 0) return;
+                    const dataTemplate = targetDeck.pop();
+                    counterUI.innerText = targetDeck.length;
 
-                    // POPS directly from your structured 40-card RNG array
-                    const data = targetDeck.pop();
-                    countUI.innerText = `${targetDeck.length} Cards`;
-
+                    const data = JSON.parse(JSON.stringify(dataTemplate));
                     const cardId = 'card_' + Math.random().toString(36).substr(2, 9);
                     cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: sideTarget, turnPlaced: 0, tauntedBy: null, isRevealed: false };
 
@@ -1517,7 +1966,7 @@ Test 4.17 (reloaded)
                             flyingCard.remove();
                             if(sideTarget === 'PLAYER') {
                                 if(drawSfxUrl) playSound(drawSfxUrl);
-                                const realCard = createCardDOM(cardId, cardInstances[cardId]);
+                                const realCard = createCardDOM(cardId, data);
                                 realCard.classList.add('flip-reveal');
                                 document.getElementById('hand').appendChild(realCard);
                                 document.getElementById('hand').scrollBy({ left: 100, behavior: 'smooth' });
@@ -1536,7 +1985,7 @@ Test 4.17 (reloaded)
             }
         }
 
-        // --- NEW DRAG AND DROP LOGIC (WITH BUFF FIXES) ---
+        // --- NEW DRAG AND DROP LOGIC (WITH BUG FIXES) ---
         function createCardDOM(id, data) {
             const c = document.createElement('div');
             c.className = `card`; 
@@ -1572,13 +2021,13 @@ Test 4.17 (reloaded)
 
                 const isDeployed = c.parentElement.classList.contains('slot');
                 
-                // BUFF FIX: Completely block dragging for ALL deployed units (Buffs use a button now)
+                // COMPLETELY DELETE DRAG LOGIC FOR ANY DEPLOYED CARDS
                 if (isDeployed) {
                     return e.preventDefault();
                 }
 
-                // ARASHI SOULS FIX: Validate before picking up Kin-Ryu
-                if (!isDeployed && liveData.summonRequires && liveData.side === 'PLAYER') {
+                // Validate Arashi Souls before picking up Kin-Ryu
+                if (liveData.summonRequires && liveData.side === 'PLAYER') {
                     if (liveData.summonRequires.type === 'arashiSouls' && pArashiSouls < liveData.summonRequires.amount) {
                         addLog(`Cannot deploy ${liveData.name}. Requires ${liveData.summonRequires.amount} Arashi Souls.`, "#e74c3c");
                         showInspector(id, c);
@@ -1642,15 +2091,15 @@ Test 4.17 (reloaded)
                         if(targetInst.side !== currentTurn && c.parentElement.classList.contains('frontline')) validTarget = true;
                     } else if(pendingSkill.skillName === "Sniping Shot" || pendingSkill.skillName === "Lion's Roar") {
                         if(targetInst.side !== currentTurn) validTarget = true;
+                    } else if (pendingSkill.skillName === "Arrow Rain") {
+                        // Arrow Rain accepts any enemy unit; logic handles group targeting
+                        if (targetInst.side !== currentTurn && c.parentElement.classList.contains('slot')) validTarget = true;
                     } else {
                         if(targetInst.side !== currentTurn) {
                             let validIds = getValidEnemyTargetIds(targetInst.side);
                             if (validIds.includes(id)) validTarget = true;
                         }
                     }
-
-                    // ZEEK AMBUSH CHECK: Cannot target Zeek if in stealth
-                    if (targetInst.ambushTurns >= turnCount) validTarget = false;
                     
                     if (validTarget) {
                         handleTargetSelection(id);
@@ -1658,14 +2107,20 @@ Test 4.17 (reloaded)
                         if (targetInst.side === currentTurn && pendingSkill.skillName !== "Blessing of the Light" && pendingSkill.skillName !== "Double Action") {
                             addLog("Invalid allied target clicked! Action auto-cancelled.", "#e74c3c");
                             document.getElementById('cancel-btn').click();
-                        } else if (targetInst.ambushTurns >= turnCount) {
-                            addLog("Target is in Stealth and cannot be targeted!", "#3498db");
                         } else {
-                            addLog("Target protected or invalid. Inspecting instead.", "#e74c3c");
+                            addLog("Target protected, in ambush, or invalid. Inspecting instead.", "#e74c3c");
                             showInspector(id, c);
                         }
                     }
                 } else {
+                    const isDeployed = c.parentElement.classList.contains('slot');
+                    if (isDeployed && liveData.side === 'PLAYER' && liveData.isBuff && liveData.turnPlaced < turnCount && c.parentElement.classList.contains('ability-slot')) {
+                        const buffSlot = document.getElementById('player-buff-slot');
+                        if (!buffSlot.querySelector('.card')) {
+                            buffSlot.classList.add('target-buff-glow');
+                            setTimeout(() => buffSlot.classList.remove('target-buff-glow'), 2000);
+                        }
+                    }
                     showInspector(id, c);
                 }
             });
@@ -1689,6 +2144,10 @@ Test 4.17 (reloaded)
                 const cardEl = document.getElementById(cardId);
                 const liveData = cardInstances[cardId];
                 const isDeployed = cardEl.parentElement.classList.contains('slot');
+
+                if (slot.classList.contains('buff-slot')) {
+                    return addLog("Use the [ACTIVATE BUFF] button in the Inspector to move this card.", "red");
+                }
 
                 // Standard Placement
                 if(slot.dataset.side === 'PLAYER' && !slot.querySelector('.card') && !isDeployed) {
@@ -1726,27 +2185,6 @@ Test 4.17 (reloaded)
             };
         });
 
-        // BUFF FIX: New Button Function
-        window.activateBuff = function(id) {
-            if(isExecuting) return;
-            let data = cardInstances[id];
-            let cardEl = document.getElementById(id);
-            let buffSlot = document.getElementById(data.side === 'PLAYER' ? 'player-buff-slot' : 'enemy-buff-slot');
-            
-            if (buffSlot.querySelector('.card')) {
-                return addLog("Buff slot is already occupied!", "red");
-            }
-            
-            buffSlot.appendChild(cardEl);
-            data.buffTurnsRemaining = 2;
-            
-            if(buffActivatedUrl) playSound(buffActivatedUrl);
-            addLog(`<b>${data.name}</b> moved to Buff Slot and activated!`, "#f1c40f");
-            
-            updateUI();
-            showInspector(id, cardEl);
-        };
-
         function addLog(msg, color="white") {
             const p = document.createElement('div');
             p.style.color = color; 
@@ -1754,6 +2192,25 @@ Test 4.17 (reloaded)
             p.innerHTML = `> ${msg}`;
             log.appendChild(p); 
             log.scrollTop = log.scrollHeight;
+        }
+
+        // --- NEW BUFF ACTIVATOR ---
+        window.activateBuffCard = function(id) {
+            if(isExecuting) return;
+            const cardEl = document.getElementById(id);
+            const liveData = cardInstances[id];
+            const slot = document.getElementById(liveData.side === 'PLAYER' ? 'player-buff-slot' : 'enemy-buff-slot');
+            
+            if (slot.querySelector('.card')) return addLog("Buff slot is occupied!", "red");
+            
+            slot.appendChild(cardEl);
+            liveData.buffTurnsRemaining = 2;
+            
+            if(buffActivatedUrl) playSound(buffActivatedUrl);
+            addLog(`<b>${liveData.name}</b> moved to Buff Slot and activated!`, "#f1c40f");
+            
+            updateUI();
+            showInspector(id, cardEl);
         }
 
         // --- NEW SECTOR UI INSPECTOR LOGIC ---
@@ -1764,7 +2221,6 @@ Test 4.17 (reloaded)
             const statusUI = document.getElementById('inspect-status-box');
             const sumUI = document.getElementById('inspect-summon-val');
             const reqUI = document.getElementById('inspect-summon-req');
-            const infoUI = document.getElementById('inspect-summon-info');
             const artUI = document.getElementById('inspect-art-fixed');
             const hpTargetUI = document.getElementById('inspect-hp-target');
             const inspector = document.getElementById('card-inspector');
@@ -1776,7 +2232,6 @@ Test 4.17 (reloaded)
                 statusUI.innerHTML = `<div style="text-align:center; color:#666; font-style:italic; margin-top:20px;">No card selected.</div>`;
                 sumUI.innerText = "0 MANA";
                 reqUI.style.display = "none";
-                infoUI.style.display = "none";
                 artUI.style.display = "none"; 
                 hpTargetUI.innerHTML = "";
                 inspector.dataset.inspectedId = ""; 
@@ -1814,8 +2269,8 @@ Test 4.17 (reloaded)
             if (data.shield && data.shield > 0) {
                 statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${barrierImgUrl ? barrierImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>SHIELDED:</b> Absorbs up to ${data.shield} damage.</div></div>`;
             }
-            if (data.ambushTurns >= turnCount) {
-                statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${arrowImgUrl ? arrowImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>AMBUSH STANCE:</b> Untargettable. Skills are buffed.</div></div>`;
+            if (data.ambushTurns && data.ambushTurns >= turnCount) {
+                statusHtml += `<div class="status-item"><div class="status-desc" style="color: #3498db;"><b>AMBUSH STANCE:</b> Untargettable by enemies.</div></div>`;
             }
 
             if (statusHtml === `<div style="color:#e74c3c; font-weight:bold; font-size:0.85rem; margin-bottom:8px; padding-bottom:8px; border-bottom: 1px solid #333; text-align:center;">BASE ATK: ${data.atk || 0}</div>`) {
@@ -1837,15 +2292,15 @@ Test 4.17 (reloaded)
                 }
                 else {
                     const canAct = (data.turnPlaced < turnCount);
-                    
-                    // BUFF FIX: Click button to activate
+
                     if (data.isBuff && canAct && cardElement.parentElement.classList.contains('ability-slot')) {
-                        actionHtml += `<button class="skill-btn" style="border-color:#f1c40f" onclick="activateBuff('${id}')">
-                            <span class="skill-name" style="color:#f1c40f">[ACTIVATE BUFF]</span><span class="skill-desc">Move to Buff Slot to apply effect.</span>
-                        </button>`;
+                        actionHtml += `<button class="skill-btn" style="border-color:#f1c40f" onclick="activateBuffCard('${id}')">
+                                    <span class="skill-name" style="color:#f1c40f">[ACTIVATE BUFF]</span><span class="skill-desc">Move to Buff Slot instantly.</span>
+                                 </button>`;
                     }
-                    
+
                     let canAttackCoreUI = false;
+                    
                     if(turnCount > 1 && data.type === 'unit' && data.name !== "Lionel Guard Tower") {
                         let validEnemies = getValidEnemyTargetIds('ENEMY');
                         if(validEnemies.length === 0) canAttackCoreUI = true;
@@ -1888,17 +2343,14 @@ Test 4.17 (reloaded)
 
             if (data.summonRequires && data.summonRequires.type === 'arashiSouls') {
                 reqUI.style.display = 'block';
-                infoUI.style.display = 'block';
                 let currentSouls = data.side === 'PLAYER' ? pArashiSouls : eArashiSouls;
                 let met = currentSouls >= data.summonRequires.amount;
                 reqUI.style.color = met ? '#2ecc71' : '#e74c3c';
                 reqUI.innerText = `REQUIRES ${data.summonRequires.amount} ARASHI SOULS (HAVE: ${currentSouls})`;
             } else {
                 reqUI.style.display = 'none';
-                infoUI.style.display = 'none';
             }
         }
-
         // --- CANCEL PENDING ---
         document.getElementById('cancel-btn').addEventListener('click', () => {
             if(isExecuting) return;
@@ -1964,7 +2416,7 @@ Test 4.17 (reloaded)
             document.querySelectorAll('.target-line-glow').forEach(el => el.classList.remove('target-line-glow'));
         });
 
-            // --- BACKEND SYSTEM DETECTOR ---
+        // --- BACKEND SYSTEM DETECTOR ---
         async function systemDetector(trigger, payload) {
             let activeCardsOnBoard = Object.values(cardInstances).filter(c => {
                 let el = document.getElementById(c.id);
@@ -1988,6 +2440,7 @@ Test 4.17 (reloaded)
             
             if (trigger === "DAMAGE_CALC") {
                 let dmg = payload.baseDmg;
+                // NEW: Shinobi Mark grants Arashi Faction units 6% scaling per mark (Max 3 marks = 18%)
                 if (payload.actor.faction === "Arashi" && payload.targetInst && payload.targetInst.marks > 0) {
                     let activeMarks = Math.min(3, payload.targetInst.marks);
                     dmg = Math.floor(dmg * (1 + (0.06 * activeMarks)));
@@ -2042,6 +2495,7 @@ Test 4.17 (reloaded)
                     }
                 }
 
+                // NEW: Kin-Ryu Ichi Marks
                 if (payload.actor.name === "KIN-RYU" && payload.targetInst && payload.action.skillName !== "SAN" && !payload.targetDied) {
                      payload.targetInst.marks = Math.min(3, (payload.targetInst.marks || 0) + 2);
                      let tDOM = document.getElementById(payload.action.targetId);
@@ -2049,6 +2503,7 @@ Test 4.17 (reloaded)
                      showInspector(payload.action.targetId, tDOM); 
                 }
 
+                // NEW: Arashi Souls check (Destroyed Enemy)
                 if (payload.targetDied && payload.actor.faction === "Arashi") {
                     if (payload.actor.side === 'PLAYER') {
                         pArashiSouls++;
@@ -2080,12 +2535,6 @@ Test 4.17 (reloaded)
                 addLog(`Queued [${skillName}] on Enemy Core.`, "#aaa"); 
                 systemDetector("QUEUE", { action });
             } 
-            else if (skillName === "Arrow rain") {
-                let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'ENEMY_FRONT' };
-                pQueue.push(action); 
-                addLog(`Queued [${skillName}] on Enemy Frontline.`, "#aaa"); 
-                systemDetector("QUEUE", { action });
-            }
             else if (skillName === "Blessing of the Light") {
                 isTargeting = true; 
                 pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
@@ -2118,25 +2567,34 @@ Test 4.17 (reloaded)
                 targetCountReq = 1; 
                 addLog("Select an Enemy Frontline target...", "var(--gold)");
                 document.querySelectorAll('.slot.frontline[data-side="ENEMY"] .card').forEach(c => {
-                    if(cardInstances[c.id].ambushTurns < turnCount || !cardInstances[c.id].ambushTurns) c.classList.add('target-glow');
+                    if (!(cardInstances[c.id].ambushTurns > 0 && cardInstances[c.id].ambushTurns >= turnCount)) c.classList.add('target-glow');
                 });
             } 
-            else if (skillName === "Sniping Shot" || skillName === "Bullseye" || skillName === "Ambush") {
+            else if (skillName === "Sniping Shot") {
                 isTargeting = true; 
                 pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
                 targetCountReq = 1;
                 let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
                 addLog("Select ANY Enemy target...", "var(--gold)");
                 document.querySelectorAll(`.slot[data-side="${defSide}"] .card`).forEach(c => {
-                    if(cardInstances[c.id].ambushTurns < turnCount || !cardInstances[c.id].ambushTurns) c.classList.add('target-glow');
+                    if (!(cardInstances[c.id].ambushTurns > 0 && cardInstances[c.id].ambushTurns >= turnCount)) c.classList.add('target-glow');
+                });
+            }
+            else if (skillName === "Arrow Rain") {
+                isTargeting = true; 
+                pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
+                targetCountReq = "GROUP"; 
+                let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+                addLog("Select any enemy in the Frontline or Backline to hit that entire group...", "var(--gold)");
+                document.querySelectorAll(`.slot[data-side="${defSide}"] .card`).forEach(c => {
+                    if (!(cardInstances[c.id].ambushTurns > 0 && cardInstances[c.id].ambushTurns >= turnCount)) c.classList.add('target-glow');
                 });
             }
             else if (skillName === "Lion's Roar") {
                 isTargeting = true; 
                 pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
                 let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
-                let validIds = Array.from(document.querySelectorAll(`.slot[data-side="${defSide}"] .card`))
-                                    .map(c => c.id).filter(id => cardInstances[id].ambushTurns < turnCount || !cardInstances[id].ambushTurns);
+                let validIds = getValidEnemyTargetIds(defSide);
                 targetCountReq = Math.min(3, validIds.length);
                 selectedTargets = []; 
                 addLog(`Select up to ${targetCountReq} Enemy targets for Lion's Roar...`, "var(--gold)");
@@ -2182,7 +2640,7 @@ Test 4.17 (reloaded)
                 });
 
                 if (validIds.length === 0) {
-                    addLog("All enemies down or in stealth. Use 'ATTACK CORE' instead.", "#e74c3c");
+                    addLog("All enemies down or untargettable. Use 'ATTACK CORE' instead.", "#e74c3c");
                     isTargeting = false;
                     actor.queued = false;
                     pMana += cost; 
@@ -2224,6 +2682,25 @@ Test 4.17 (reloaded)
                 pendingSkill = null; 
                 updateUI(); 
                 showInspector('none', null); 
+                return;
+            }
+
+            if (targetCountReq === "GROUP") {
+                isTargeting = false;
+                document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'target-buff-glow'));
+                
+                let targetDOM = document.getElementById(targetId);
+                let groupRow = targetDOM.closest('.row');
+                let targets = Array.from(groupRow.querySelectorAll('.card'))
+                                   .map(c => c.id)
+                                   .filter(id => !(cardInstances[id].ambushTurns > 0 && cardInstances[id].ambushTurns >= turnCount));
+                
+                let action = { ...pendingSkill, targetId: targets };
+                pQueue.push(action);
+                addLog(`Queued [${pendingSkill.skillName}] on ${targets.length} grouped targets.`, "#aaa");
+                systemDetector("QUEUE", { action });
+                pendingSkill = null;
+                updateUI();
                 return;
             }
 
@@ -2435,7 +2912,7 @@ Test 4.17 (reloaded)
                 let el = document.getElementById(c.id); 
                 return el && el.parentElement && el.parentElement.classList.contains('slot');
             });
-            let enemies = activeCardsOnBoard.filter(c => c.side === defSide && c.hp > 0);
+            let enemies = activeCardsOnBoard.filter(c => c.side === defSide && c.hp > 0 && !(c.ambushTurns > 0 && c.ambushTurns >= turnCount));
             if (enemies.length === 0) return;
 
             let sanTxt = document.createElement('div'); 
@@ -2495,6 +2972,19 @@ Test 4.17 (reloaded)
             
             let isKinRyu = actor.name === "KIN-RYU"; 
             let isSlash = isKinRyu || actor.name.includes("Shadow") || actor.name === "Rolyn" || (actor.name === "Althea" && skillName === "ATTACK") || (actor.name === "Skeleton Warrior" && skillName === "SLASH") || (actor.name === "Zombie" && skillName === "Bite");
+
+            // PRE-ATTACK CALCULATION: Shadow Stalker 40% Shinobi Mark
+            if (actor.name === "Shadow Stalker" && targetInst && targetId !== 'CORE' && skillName !== "SAN" && skillName !== "Passive") {
+                if (Math.random() < 0.40) {
+                    targetInst.marks = Math.min(3, (targetInst.marks || 0) + 1);
+                    if (targetDOM) {
+                        showFloatingText(targetDOM, "Shinobi Mark", "#e74c3c", "1rem");
+                        showInspector(targetId, targetDOM);
+                    }
+                    addLog(`<b>Shadow Stalker</b> applied a Shinobi Mark before striking!`, "#e74c3c");
+                }
+            }
+
             let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
             let isLastStandActive = false;
@@ -2517,7 +3007,7 @@ Test 4.17 (reloaded)
                 addLog(`<b>${targetInst.name}</b> BLOCKED the attack!`, '#ccc');
             }
 
-            if(actorDOM && skillName !== "Passive" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && skillName !== "Lion's Roar" && skillName !== "Dauntless" && skillName !== "BLOCK" && skillName !== "Arrow rain" && skillName !== "Bullseye" && skillName !== "Ambush") {
+            if(actorDOM && skillName !== "Passive" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && actor.name !== "Zeek" && skillName !== "Lion's Roar" && skillName !== "Dauntless" && skillName !== "BLOCK") {
                 if (actor.name === "Rolyn" && (skillName === "Lion's Challenge" || skillName === "ATTACK")) {
                     if(rolynSfx1Url) playSound(rolynSfx1Url);
                 }
@@ -2540,7 +3030,7 @@ Test 4.17 (reloaded)
                 await new Promise(r => setTimeout(r, 250));
             }
 
-            if(actorDOM && actor.type === 'unit' && targetDOM && actor.name !== "Lionel Guard Tower" && actor.name !== "Jaden" && skillName !== "SAN" && !skillName.includes("Punishment") && skillName !== "Lion's Roar" && skillName !== "BLOCK" && skillName !== "Arrow rain" && skillName !== "Bullseye" && skillName !== "Ambush") {
+            if(actorDOM && actor.type === 'unit' && targetDOM && actor.name !== "Lionel Guard Tower" && actor.name !== "Jaden" && actor.name !== "Zeek" && skillName !== "SAN" && !skillName.includes("Punishment") && skillName !== "Lion's Roar" && skillName !== "BLOCK") {
                 
                 if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
                 actorDOM.style.zIndex = "9999";
@@ -2553,6 +3043,14 @@ Test 4.17 (reloaded)
                 actorDOM.style.transition = "transform 0.15s cubic-bezier(0.4, 0, 1, 1)"; 
                 actorDOM.style.transform = `translate(${dX * 0.5}px, ${dY * 0.5}px) scale(1.3)`;
                 await new Promise(r => setTimeout(r, 150));
+            }
+
+            if(actor.name === "Zeek" && skillName !== "Passive") {
+                if(actorDOM) {
+                    actorDOM.style.transition = "transform 0.4s ease";
+                    actorDOM.style.transform = "scale(1.2)";
+                }
+                await shootArrow(actorDOM, targetDOM);
             }
 
             if(targetDOM && skillName !== "SAN" && skillName !== "Lion's Roar" && skillName !== "BLOCK") {
@@ -2646,6 +3144,7 @@ Test 4.17 (reloaded)
                          addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
                          if(targetDOM) targetDOM.remove(); 
 
+                         // NEW: Arashi Souls check (Destroyed Ally)
                          if (targetInst.faction === "Arashi") {
                              if (targetInst.side === 'PLAYER') {
                                  pArashiSouls++;
@@ -2659,9 +3158,15 @@ Test 4.17 (reloaded)
                 }
             }
 
+            if (died && actor.name === "Zeek" && skillName === "Ambush") {
+                actor.ambushTurns = turnCount + 2;
+                if (actorDOM) actorDOM.classList.add('ambush-stance');
+                addLog(`<b>Zeek</b> retreats into the shadows (Ambush Stance)!`, "#3498db");
+            }
+
             await new Promise(r => setTimeout(r, 300)); 
             
-            if(actorDOM && skillName !== "SAN" && actor.name !== "Jaden" && skillName !== "Lion's Roar" && skillName !== "BLOCK" && skillName !== "Arrow rain" && skillName !== "Bullseye" && skillName !== "Ambush") {
+            if(actorDOM && skillName !== "SAN" && actor.name !== "Jaden" && skillName !== "Lion's Roar" && skillName !== "BLOCK") {
                 actorDOM.style.transition = "transform 0.3s ease-out"; 
                 actorDOM.style.transform = "scale(1) translate(0, 0)";
                 await new Promise(r => setTimeout(r, 300)); 
@@ -3018,19 +3523,7 @@ Test 4.17 (reloaded)
                 } else {
                     let dmg = actor.atk || 150; 
                     let secondDmg = 0; 
-
-                    // ZEEK DAMAGE CALCULATION
-                    if (actor.name === "Zeek") {
-                        let inAmbush = actor.ambushTurns >= turnCount;
-                        if (action.skillName === "Bullseye") {
-                            dmg = inAmbush ? Math.floor(Math.random() * 401) + 600 : Math.floor(Math.random() * 201) + 200;
-                        } else if (action.skillName === "Arrow rain") {
-                            dmg = inAmbush ? Math.floor(Math.random() * 91) + 90 : Math.floor(Math.random() * 31) + 50;
-                        } else if (action.skillName === "Ambush") {
-                            dmg = Math.floor(Math.random() * 701) + 800;
-                        }
-                    } 
-                    else if (actor.name === "KIN-RYU") {
+                    if (actor.name === "KIN-RYU") {
                         if (action.skillName === "ICHI") { 
                             dmg = Math.floor(Math.random() * (1100 - 300 + 1)) + 300; 
                             if (dmg < 500) { 
@@ -3040,6 +3533,15 @@ Test 4.17 (reloaded)
                         else if (action.skillName === "NI") { 
                             if(kinSfx1Url) playSound(kinSfx1Url);
                             dmg = Math.floor(Math.random() * 101) + 300; 
+                        } else dmg = actor.atk;
+                    } else if (actor.name === "Zeek") {
+                        let isAmbush = (actor.ambushTurns && actor.ambushTurns >= turnCount);
+                        if (action.skillName === "Bullseye") {
+                            dmg = isAmbush ? Math.floor(Math.random() * (1000 - 600 + 1)) + 600 : Math.floor(Math.random() * (400 - 200 + 1)) + 200;
+                        } else if (action.skillName === "Arrow Rain") {
+                            dmg = isAmbush ? Math.floor(Math.random() * (180 - 90 + 1)) + 90 : Math.floor(Math.random() * (80 - 50 + 1)) + 50;
+                        } else if (action.skillName === "Ambush") {
+                            dmg = Math.floor(Math.random() * (1500 - 800 + 1)) + 800;
                         } else dmg = actor.atk;
                     } else if (actor.name === "Rolyn") {
                         if (action.skillName === "Lion's Challenge") dmg = 250;
@@ -3056,28 +3558,16 @@ Test 4.17 (reloaded)
                         }
                     }
 
-                    let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
-
-                    // ZEEK ARROW RAIN TARGETING
-                    if (action.skillName === "Arrow rain") {
-                        let validIds = getValidEnemyTargetIds(defSide);
-                        action.targetId = validIds; 
-                        if (actorDOM) {
-                            actorDOM.style.transition = "transform 0.4s ease"; 
-                            actorDOM.style.transform = "translateY(-20px) scale(1.1)";
-                            await new Promise(r => setTimeout(r, 400)); 
-                        }
-                    }
-
                     let targetsToHit = Array.isArray(action.targetId) ? action.targetId : [action.targetId]; 
+                    let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+                    
                     let finalTargets = [];
-
                     for (let tId of targetsToHit) {
                         if (tId !== 'CORE' && action.skillName !== "ICHI_REROLL") {
                             let validIds = getValidEnemyTargetIds(defSide);
                             if (validIds.length > 0 && !validIds.includes(tId)) {
                                 let newTid = validIds[Math.floor(Math.random() * validIds.length)];
-                                addLog(`Target protected or hidden! Redirected to ${cardInstances[newTid].name}.`, "#3498db");
+                                addLog(`Target protected or untargettable! Redirected to ${cardInstances[newTid].name}.`, "#3498db");
                                 finalTargets.push(newTid);
                             } else if (validIds.length === 0) {
                                 addLog(`Defenses broken! Redirected to CORE.`, "#2ecc71");
@@ -3094,23 +3584,8 @@ Test 4.17 (reloaded)
                         if (tId !== 'CORE' && (!cardInstances[tId] || cardInstances[tId].hp <= 0)) continue;
                         let targetInst = cardInstances[tId]; 
                         let targetDOM = document.getElementById(tId);
-
-                        // ZEEK ANIMATION
-                        if (actor.name === "Zeek") {
-                            shootArrow(actorDOM, targetDOM);
-                            await new Promise(r => setTimeout(r, 150)); 
-                        }
-
-                        // NEW: SHADOW STALKER PRE-ATTACK PROC
-                        if (actor.name === "Shadow Stalker" && targetInst && action.skillName !== "Passive") {
-                            if (Math.random() < 0.40) {
-                                targetInst.marks = Math.min(3, (targetInst.marks || 0) + 1);
-                                if(targetDOM) {
-                                    setTimeout(() => showFloatingText(targetDOM, "Shinobi Mark", "#e74c3c", "1rem"), 100);
-                                }
-                                addLog(`<b>Shadow Stalker</b> applied Shinobi Mark before striking!`, "#e74c3c");
-                            }
-                        }
+                        
+                        let targetHadMarkBeforeHit = (targetInst && targetInst.marks > 0);
 
                         let targetDied = await applyDamage(actor, tId, dmg, action.skillName);
                         
@@ -3127,16 +3602,6 @@ Test 4.17 (reloaded)
                                 targetInst.bleedTurns = turnCount + 2; 
                                 setTimeout(() => showFloatingText(targetDOM, "BLEED", "#8e44ad", "1.5rem"), 400);
                                 showInspector(tId, targetDOM); 
-                            }
-                        }
-
-                        // ZEEK AMBUSH STANCE TRIGGER
-                        if (actor.name === "Zeek" && action.skillName === "Ambush" && targetDied) {
-                            actor.ambushTurns = turnCount + 2;
-                            addLog(`<b>Zeek</b> enters Ambush Stance! Untargettable for 2 turns.`, "#3498db");
-                            if(actorDOM) {
-                                showFloatingText(actorDOM, "AMBUSH STANCE", "#3498db", "1.5rem");
-                                actorDOM.classList.add('stealth-stance');
                             }
                         }
 
@@ -3166,21 +3631,15 @@ Test 4.17 (reloaded)
                             addLog(`<b>KIN-RYU</b> [ICHI Reroll]: Strikes again!`, '#e74c3c'); 
                             targetDied = await applyDamage(actor, tId, secondDmg, "ICHI_REROLL"); 
                         }
-
-                        // SAN CHAIN CONDITION
+                        
+                        // NEW: San Chain Conditional trigger - Only if marked
                         if (actor.name === "KIN-RYU" && targetDied && action.skillName !== "SAN") { 
-                            if (targetInst && targetInst.marks > 0) {
+                            if (targetHadMarkBeforeHit) {
                                 addLog(`<b>System</b> [SAN]: Marked target destroyed! Kin-Ryu chains attack!`, "var(--gold)"); 
                                 await triggerSanChain(actor, defSide); 
                             }
                         }
                         await systemDetector("ATTACK_END", { actor, targetInst, action, targetDied });
-                    }
-
-                    if (action.skillName === "Arrow rain" && actorDOM) {
-                        actorDOM.style.transform = "scale(1) translateY(0)"; 
-                        await new Promise(r => setTimeout(r, 300)); 
-                        actorDOM.style.transition = ""; 
                     }
                 }
                 
@@ -3449,6 +3908,20 @@ Test 4.17 (reloaded)
                                         action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: validSkills[Math.floor(Math.random() * validSkills.length)].name, cost: cost, targetId: pTargets[Math.floor(Math.random()*pTargets.length)].id }; 
                                     }
                                 }
+                                else if (data.name === "Zeek") {
+                                    if (pTargets.length > 0 && validSkills.length > 0) {
+                                        let chosenSkill = validSkills[Math.floor(Math.random() * validSkills.length)];
+                                        if (chosenSkill.name === "Arrow Rain") {
+                                            let targets = Array.from(document.querySelectorAll('.slot.frontline[data-side="PLAYER"] .card'))
+                                                                .map(c => c.id).filter(id => !(cardInstances[id].ambushTurns > 0 && cardInstances[id].ambushTurns >= turnCount));
+                                            if (targets.length === 0) targets = Array.from(document.querySelectorAll('.slot.backline[data-side="PLAYER"] .card'))
+                                                                                   .map(c => c.id).filter(id => !(cardInstances[id].ambushTurns > 0 && cardInstances[id].ambushTurns >= turnCount));
+                                            if (targets.length > 0) action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: "Arrow Rain", cost: chosenSkill.manaCost, targetId: targets };
+                                        } else {
+                                            action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: chosenSkill.name, cost: chosenSkill.manaCost, targetId: pTargets[Math.floor(Math.random()*pTargets.length)].id };
+                                        }
+                                    }
+                                }
                                 else if (data.name === "Rolyn") {
                                      let allPTargets = Array.from(document.querySelectorAll('.slot[data-side="PLAYER"] .card')).filter(c=>c);
                                      if (eMana >= 4 && allPTargets.length > 0) { 
@@ -3542,12 +4015,6 @@ Test 4.17 (reloaded)
                 let dDOM = document.getElementById(c.id);
                 if(dDOM) {
                     dDOM.classList.remove('buff-double-action');
-
-                    // AMBUSH CHECK: Restore opacity if stealth expires
-                    if(c.ambushTurns < turnCount) {
-                        dDOM.classList.remove('stealth-stance');
-                    }
-
                     showInspector(c.id, dDOM);
                 }
 
