@@ -1,4 +1,4 @@
-Test 5.17
+Test 5.17.1
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -490,6 +490,20 @@ Test 5.17
             // The .catch prevents the game from crashing if an audio file is missing
             audio.play().catch(e => console.warn("Audio playback prevented/failed:", e));
             return audio;
+        }
+
+        // ============================================================================
+        // 📝 EVENT LOG ENGINE
+        // ============================================================================
+        function addLog(msg, color = "#fff") {
+            const logEl = document.getElementById('event-log');
+            if(!logEl) return;
+            const entry = document.createElement('div');
+            entry.style.color = color;
+            entry.style.marginBottom = "6px";
+            entry.innerHTML = `> ${msg}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight; // Auto-scrolls to newest message
         }
 
         async function initializeGame() {
