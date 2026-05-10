@@ -1420,33 +1420,32 @@ Test 5.17.3
             sumUI.innerText = `${data.summonCost} MANA`;
             
             if (tutorialLock) {
-                // Use a tiny timeout to ensure the DOM has rendered the buttons before targeting them
+                // Nuclear override: Force the DOM to fully render, then aggressively unlock the exact target.
                 setTimeout(() => {
                     document.querySelectorAll('.tut-btn-target').forEach(btn => btn.classList.add('tut-disabled'));
                     
-                    if(tutorialStep === 5 && data.name === "Mana Core") {
-                        let btn = document.querySelectorAll('.tut-btn-target')[0];
-                        if (btn) btn.classList.remove('tut-disabled');
+                    let unlockBtn = null;
+                    if(tutorialStep === 5 && data.name === "Mana Core") unlockBtn = document.querySelectorAll('.tut-btn-target')[0];
+                    if(tutorialStep === 6 && data.name === "Leonian Squire") unlockBtn = document.querySelectorAll('.tut-btn-target')[0];
+                    if(tutorialStep === 14 && data.name === "Leonian Bannerman") unlockBtn = document.querySelectorAll('.tut-btn-target')[1];
+                    if(tutorialStep === 15 && (data.name === "Great Knight" || data.name === "Archer")) unlockBtn = document.querySelectorAll('.tut-btn-target')[0];
+                    
+                    if (unlockBtn) {
+                        unlockBtn.classList.remove('tut-disabled');
+                        unlockBtn.removeAttribute('disabled'); // Destroy any stray HTML disabled block signs
+                        unlockBtn.classList.add('tut-highlight-glow'); // Force the gold highlight
                     }
-                    if(tutorialStep === 6 && data.name === "Leonian Squire") {
-                        let btn = document.querySelectorAll('.tut-btn-target')[0];
-                        if (btn) btn.classList.remove('tut-disabled');
-                    }
-                    if(tutorialStep === 14 && data.name === "Leonian Bannerman") {
-                        let btn = document.querySelectorAll('.tut-btn-target')[1]; // Rally is 2nd skill
-                        if (btn) btn.classList.remove('tut-disabled');
-                    }
-                    if(tutorialStep === 15 && (data.name === "Great Knight" || data.name === "Archer")) {
-                        let btn = document.querySelectorAll('.tut-btn-target')[0];
-                        if (btn) btn.classList.remove('tut-disabled');
-                    }
-                    if(tutorialStep === 17) {
-                        document.querySelectorAll('.tut-btn-target').forEach(btn => btn.classList.remove('tut-disabled'));
-                    }
-                }, 50); // 50ms delay gives the browser time to render the inspector
-            }
-        }
 
+                    if(tutorialStep === 17) {
+                        document.querySelectorAll('.tut-btn-target').forEach(btn => {
+                            btn.classList.remove('tut-disabled');
+                            btn.removeAttribute('disabled');
+                            btn.classList.add('tut-highlight-glow');
+                        });
+                    }
+                }, 50);
+            }
+            
         document.getElementById('cancel-btn').addEventListener('click', () => {
             if(isExecuting) return;
             pQueue.forEach(a => { if(cardInstances[a.actorId]) cardInstances[a.actorId].queued = false; pMana += a.cost; });
