@@ -1420,15 +1420,31 @@ Test 5.17.1
             sumUI.innerText = `${data.summonCost} MANA`;
             
             if (tutorialLock) {
-                document.querySelectorAll('.tut-btn-target').forEach(btn => btn.classList.add('tut-disabled'));
-                // Selectively re-enable buttons during specific tutorial steps
-                if(tutorialStep === 5 && data.name === "Mana Core") document.querySelectorAll('.tut-btn-target')[0].classList.remove('tut-disabled');
-                if(tutorialStep === 6 && data.name === "Leonian Squire") document.querySelectorAll('.tut-btn-target')[0].classList.remove('tut-disabled');
-                if(tutorialStep === 14 && data.name === "Leonian Bannerman") document.querySelectorAll('.tut-btn-target')[1].classList.remove('tut-disabled'); // Rally is 2nd skill
-                if(tutorialStep === 15 && (data.name === "Great Knight" || data.name === "Archer")) document.querySelectorAll('.tut-btn-target')[0].classList.remove('tut-disabled');
-                if(tutorialStep === 17) document.querySelectorAll('.tut-btn-target').forEach(btn => btn.classList.remove('tut-disabled')); // Let them attack core
+                // Use a tiny timeout to ensure the DOM has rendered the buttons before targeting them
+                setTimeout(() => {
+                    document.querySelectorAll('.tut-btn-target').forEach(btn => btn.classList.add('tut-disabled'));
+                    
+                    if(tutorialStep === 5 && data.name === "Mana Core") {
+                        let btn = document.querySelectorAll('.tut-btn-target')[0];
+                        if (btn) btn.classList.remove('tut-disabled');
+                    }
+                    if(tutorialStep === 6 && data.name === "Leonian Squire") {
+                        let btn = document.querySelectorAll('.tut-btn-target')[0];
+                        if (btn) btn.classList.remove('tut-disabled');
+                    }
+                    if(tutorialStep === 14 && data.name === "Leonian Bannerman") {
+                        let btn = document.querySelectorAll('.tut-btn-target')[1]; // Rally is 2nd skill
+                        if (btn) btn.classList.remove('tut-disabled');
+                    }
+                    if(tutorialStep === 15 && (data.name === "Great Knight" || data.name === "Archer")) {
+                        let btn = document.querySelectorAll('.tut-btn-target')[0];
+                        if (btn) btn.classList.remove('tut-disabled');
+                    }
+                    if(tutorialStep === 17) {
+                        document.querySelectorAll('.tut-btn-target').forEach(btn => btn.classList.remove('tut-disabled'));
+                    }
+                }, 50); // 50ms delay gives the browser time to render the inspector
             }
-        }
 
         document.getElementById('cancel-btn').addEventListener('click', () => {
             if(isExecuting) return;
