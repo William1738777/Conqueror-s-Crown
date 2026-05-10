@@ -54,7 +54,7 @@ Test 5.17.3
         #tutorial-exit-btn:hover { background: #c0392b; transform: scale(1.05); }
 
         #tut-overlay-msg { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.95); border: 2px solid var(--gold); color: white; padding: 15px 30px; font-size: 1.1rem; border-radius: 8px; z-index: 9000; text-align: center; display: none; box-shadow: 0 0 30px rgba(212, 175, 55, 0.6); pointer-events: none; max-width: 600px; line-height: 1.4; }
-        .tut-highlight-glow { outline: 4px solid var(--gold) !important; box-shadow: 0 0 30px var(--gold) !important; animation: tutPulse 1s infinite alternate; position: relative; z-index: 8000 !important; }
+        .tut-highlight-glow { outline: 4px solid var(--gold) !important; box-shadow: 0 0 30px var(--gold) !important; animation: tutPulse 1s infinite alternate; position: relative; z-index: 8000 !important; cursor: pointer !important; pointer-events: auto !important; opacity: 1 !important; filter: none !important; }
         .tut-disabled { pointer-events: none !important; opacity: 0.3 !important; filter: grayscale(1); }
         @keyframes tutPulse { from { box-shadow: 0 0 10px var(--gold); } to { box-shadow: 0 0 40px var(--gold); } }
 
