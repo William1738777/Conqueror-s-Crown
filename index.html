@@ -1,4 +1,4 @@
-Test 5.16
+Test 5.17
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -475,6 +475,22 @@ Test 5.16
         let pQueue = []; let eQueue = []; let isTargeting = false; let pendingSkill = null; let isExecuting = false; let targetCountReq = 1; let selectedTargets = []; let draggedCardId = null; let pDeck = []; let eDeck = [];
 
         const log = document.getElementById('event-log');
+
+        // ============================================================================
+        // 🎵 AUDIO ENGINE
+        // ============================================================================
+        function playClickSound() {
+            if (clickSfxUrl) playSound(clickSfxUrl);
+        }
+
+        function playSound(url, overlap = true) {
+            if (!url || url === 'none') return null;
+            const audio = new Audio(url);
+            audio.volume = 0.6;
+            // The .catch prevents the game from crashing if an audio file is missing
+            audio.play().catch(e => console.warn("Audio playback prevented/failed:", e));
+            return audio;
+        }
 
         async function initializeGame() {
             document.getElementById('upload-box').style.display = 'none';
