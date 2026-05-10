@@ -748,6 +748,83 @@ Test 5.3
             }
             if(particles > 0) await new Promise(r => setTimeout(r, 650));
         }
+        // --- AUDIO UTILITIES ---
+        function playSound(url, loop = false) {
+            if(!url || url === 'none') return null;
+            let audio = new Audio(url);
+            audio.loop = loop;
+            audio.volume = 0.6;
+            audio.play().catch(e => console.log("Audio block:", e));
+            return audio;
+        }
+
+        function playClickSound() {
+            // Optional: globally play click sound when clicking non-interactive elements
+            // if(clickSfxUrl) playSound(clickSfxUrl);
+        }
+
+        // --- CORE UI UPDATER (in case this was also cut off) ---
+        function updateUI() {
+            document.getElementById('mana-display-num').innerText = pMana;
+            document.getElementById('enemy-core-hp').innerText = `BEN'S CORE: ${Math.ceil(eCoreHP)} | MANA: ${eMana}`;
+            document.getElementById('player-core-hp').innerText = `PLAYER CORE: ${Math.ceil(pCoreHP)}`;
+            
+            document.getElementById('hand').innerHTML = '';
+            document.querySelectorAll('.slot').forEach(s => {
+                if(!s.querySelector('.card') && !s.classList.contains('buff-slot')) {
+                    s.innerHTML = `<span class="slot-text">${s.dataset.allowed === 'unit' ? (s.classList.contains('frontline') ? 'FRONT' : 'UNIT') : 'ABILITY'}</span>`;
+                }
+            });
+
+            // Re-render hand
+            Object.values(cardInstances).forEach(data => {
+                if(data.side === 'PLAYER' && data.turnPlaced === 0) {
+                    document.getElementById('hand').appendChild(createCardDOM(data.id, data));
+                }
+            });
+
+            // Re-render board status
+            Object.values(cardInstances).forEach(data => {
+                if(data.turnPlaced > 0 && data.hp > 0) {
+                    let cDOM = document.getElementById(data.id);
+                    if(cDOM) {
+                        if(data.exhausted) cDOM.classList.add('exhausted'); else cDOM.classList.remove('exhausted');
+                        if(data.queued) cDOM.classList.add('queued-status'); else cDOM.classList.remove('queued-status');
+                        
+                        let hpNum = cDOM.querySelector('.card-hp-number');
+                        if(hpNum) hpNum.innerText = Math.ceil(data.hp);
+                        
+                        let trail = cDOM.querySelector('.card-hp-trail');
+                        let curr = cDOM.querySelector('.card-hp-current');
+                        let pct = Math.max(0, Math.min(100, (data.hp / data.maxHp) * 100));
+                        if(trail) trail.style.width = pct + '%';
+                        if(curr) curr.style.width = pct + '%';
+                        if(hpNum) { hpNum.style.background = pct < 30 ? '#e74c3c' : '#2ecc71'; hpNum.style.color = pct < 30 ? '#fff' : '#000'; }
+                    }
+                }
+            });
+
+            let execBtn = document.getElementById('exec-btn');
+            let pendingCount = pQueue.length + (pendingSkill ? 1 : 0);
+            execBtn.innerText = `EXECUTE PENDING (${pendingCount})`;
+            
+            if(pQueue.length > 0 || pendingSkill) {
+                document.getElementById('cancel-btn').style.display = 'block';
+                execBtn.style.background = '#2ecc71';
+                execBtn.disabled = false;
+            } else {
+                document.getElementById('cancel-btn').style.display = 'none';
+                execBtn.style.background = '#222';
+                execBtn.disabled = true;
+            }
+
+            if(tutorialLock) {
+                // Ensure buttons stay locked if the tutorial script dictates it
+                if(document.getElementById('exec-btn').classList.contains('tut-disabled')) {
+                    document.getElementById('exec-btn').disabled = true;
+                }
+            }
+        }
 
         // --- RPG & DIALOGUE SYSTEM ---
         const tutorialDialogues = [
