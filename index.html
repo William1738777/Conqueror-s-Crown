@@ -1,4 +1,4 @@
-Test 6.1
+Test 6.2
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -891,6 +891,13 @@ Test 6.1
             let enemyHand = ["Militia", "Archer"];
             enemyHand.forEach((name, idx) => {
                 const data = getCardTemplate(name, ASSET_LINKS[name]);
+                
+                // --- FIX: Lower the tutorial Archer's HP to 200 so it is guaranteed to die ---
+                if (name === "Archer") {
+                    data.hp = 200;
+                    data.maxHp = 200;
+                }
+                
                 const cardId = 'e_' + name.replace(/\s+/g, '') + '_' + idx;
                 cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: 'ENEMY', turnPlaced: 0, tauntedBy: null, isRevealed: false };
                 eHandData.push(cardId);
@@ -900,7 +907,7 @@ Test 6.1
             updateUI();
             progressTutorial();
         }
-
+        
         function setTutMessage(msg) {
             document.getElementById('tut-overlay-msg').innerHTML = msg;
         }
