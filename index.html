@@ -1,4 +1,4 @@
-Test 5.17.5
+Test 6.0
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -475,7 +475,6 @@ Test 5.17.5
         let pQueue = []; let eQueue = []; let isTargeting = false; let pendingSkill = null; let isExecuting = false; let targetCountReq = 1; let selectedTargets = []; let draggedCardId = null; let pDeck = []; let eDeck = [];
 
         const log = document.getElementById('event-log');
-
         // ============================================================================
         // 🎵 AUDIO ENGINE
         // ============================================================================
@@ -487,7 +486,6 @@ Test 5.17.5
             if (!url || url === 'none') return null;
             const audio = new Audio(url);
             audio.volume = 0.6;
-            // The .catch prevents the game from crashing if an audio file is missing
             audio.play().catch(e => console.warn("Audio playback prevented/failed:", e));
             return audio;
         }
@@ -503,7 +501,7 @@ Test 5.17.5
             entry.style.marginBottom = "6px";
             entry.innerHTML = `> ${msg}`;
             logEl.appendChild(entry);
-            logEl.scrollTop = logEl.scrollHeight; // Auto-scrolls to newest message
+            logEl.scrollTop = logEl.scrollHeight; 
         }
 
         async function initializeGame() {
@@ -554,201 +552,6 @@ Test 5.17.5
             setTimeout(showOverworldMap, 500); 
         }
 
-        function getCardTemplate(fileName, dataUrl) {
-            let name = fileName.replace(/\.[^/.]+$/, ""); let cleanName = name.toLowerCase();
-
-            // Backgrounds & UI Elements
-            if(cleanName.includes('worldmap')) { document.documentElement.style.setProperty('--worldmap-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
-            if(cleanName.includes('leoniabg')) { document.documentElement.style.setProperty('--leoniabg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
-            if(cleanName.includes('tavern') && cleanName.includes('bg')) { document.documentElement.style.setProperty('--tavernbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
-
-            if(cleanName.includes('empty slot')) { document.documentElement.style.setProperty('--empty-slot-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isEmptySlot: true, img: dataUrl }; }
-            if(cleanName.includes('empty ability')) { document.documentElement.style.setProperty('--empty-ability-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
-            if(cleanName.includes('empty buff')) { document.documentElement.style.setProperty('--empty-buff-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
-            if(cleanName.includes('mymana')) { document.documentElement.style.setProperty('--mymana-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
-            if(cleanName.includes('managain')) { document.documentElement.style.setProperty('--managain-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
-            if(cleanName.includes('cclogo')) { document.documentElement.style.setProperty('--cc-logo-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
-            
-            // Audio & FX
-            if(cleanName.includes('dragsound')) { dragSoundUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('dropsound')) { dropSoundUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('abilityactivated')) { abilityActivatedUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('buffactivated')) { buffActivatedUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('clicksfx')) { clickSfxUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('beam')) { beamAudioUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('drawsfx')) { drawSfxUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('placesfx')) { placeSfxUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('bodyshot')) { bodyShotAudioUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('arrowhit')) { arrowHitAudioUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('healsound') || cleanName.includes('heal.mp3')) { healAudioUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('bloodsound') || cleanName.includes('blood sound')) { bloodAudioUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('villagersuicidesfx')) { villagerSuicideSfxUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('shieldblockskel')) { shieldBlockAudioUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('kinsansound') || cleanName.includes('kin san sound')) { kinSanAudioUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('kinsfx1')) { kinSfx1Url = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('kinsfx2')) { kinSfx2Url = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('jadensfx1')) { jadenSfx1 = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('jadensfx2')) { jadenSfx2 = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('jadensfx3')) { jadenSfx3 = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('rolynsfx1')) { rolynSfx1Url = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('rolynsfx2')) { rolynSfx2Url = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('healsfxvoice2')) { healSfxVoice2Url = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('healsfxvoice') && !cleanName.includes('2')) { healSfxVoiceUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('shieldsfxvoice2')) { shieldSfxVoice2Url = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('shieldsfxvoice') && !cleanName.includes('2')) { shieldSfxVoiceUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('shieldsfx') && !cleanName.includes('voice')) { shieldSfxUrl = dataUrl; return { isAudio: true }; }
-            if(cleanName.includes('menumusic')) { menuMusicUrl = dataUrl; return { isAudio: true }; }
-
-            if(cleanName.includes('back_card') || cleanName.includes('back card') || cleanName.includes('crown back')) { return { isCardBack: true, img: dataUrl }; }
-            if(cleanName.includes('slash')) { return { isSlash: true, img: dataUrl }; }
-            if(cleanName.includes('healfx')) { return { isHealFx: true, img: dataUrl }; }
-            if(cleanName.includes('arrow_fx') || cleanName.includes('arrow fx')) { return { isArrow: true, img: dataUrl }; }
-            if(cleanName.includes('shurikenkin_fx') || cleanName.includes('shuriken')) { return { isShuriken: true, img: dataUrl }; }
-            if(cleanName.includes('mainmenubg')) { return { isMenuBG: true, img: dataUrl }; }
-            if(cleanName.includes('taunted')) { return { isIcon: true, iconType: 'taunted', img: dataUrl }; }
-            if(cleanName.includes('barrier')) { return { isIcon: true, iconType: 'barrier', img: dataUrl }; }
-            if(cleanName.includes('bleed') && !cleanName.includes('mark')) { return { isIcon: true, iconType: 'bleed', img: dataUrl }; }
-            if(cleanName.includes('shinobimark') || cleanName.includes('mark')) { return { isIcon: true, iconType: 'shinobimark', img: dataUrl }; }
-            if(cleanName.includes('atkicon')) { document.documentElement.style.setProperty('--atkicon-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isIcon: true, iconType: 'atkbuff', img: dataUrl }; }
-
-            let type = 'unit';
-            if (cleanName.includes('ability') || cleanName.includes('skill') || cleanName.includes('spell') || cleanName.includes('magic') || cleanName.includes('mana core') || cleanName.includes('one more time') || cleanName.includes('last stand')) type = 'ability';
-
-            // --- LEONIA ROSTER EXPANSION ---
-            if (cleanName.includes('squire')) {
-                return {
-                    isPlayable: true, type: 'unit', name: "Leonian Squire", title: "Trainee Attendant (Level 1)", powerLevel: 1, summonCost: 1, faction: "Leonia", race: "Human", hp: 450, maxHp: 450, atk: 100, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
-                    skills: [ { name: "SHORTSWORD STRIKE", manaCost: 0, desc: "Deals 80-120 physical damage to a frontline enemy." } ], 
-                    passives: [ { name: "TRAINED DODGES", desc: "This unit has a 40% chance to dodge any incoming attack." } ]
-                };
-            }
-            else if (cleanName.includes('great knight')) {
-                return {
-                    isPlayable: true, type: 'unit', name: "Great Knight", title: "Level 3", powerLevel: 3, summonCost: 3, summonRequires: { type: 'squiresFallen', amount: 1 }, faction: "Leonia", race: "Human", hp: 950, maxHp: 950, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
-                    skills: [ { name: "HEAVY STRIKE", manaCost: 0, desc: "Deals 150-250 physical damage to a frontline enemy." }, { name: "VALIANT GUARD", manaCost: 2, desc: "Enters a defensive stance for 1 turn, gaining a 250 HP shield and Taunting all enemies in the frontline." } ], 
-                    passives: [ { name: "HEAVY PLATE", desc: "Reduces all incoming physical damage by a flat 40 points, calculated before any shields are depleted." } ]
-                };
-            }
-            else if (cleanName.includes('bannerman')) {
-                return {
-                    isPlayable: true, type: 'unit', name: "Leonian Bannerman", title: "Level 3", powerLevel: 3, summonCost: 2, faction: "Leonia", race: "Human", hp: 650, maxHp: 650, atk: 50, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
-                    skills: [ { name: "BANNER STRIKE", manaCost: 1, desc: "Deals 50 damage to a single target enemy." }, { name: "RALLY", manaCost: 2, desc: "Grants all allied cards a 100-point shield and an 8% attack buff for 2 turns." } ], 
-                    passives: [ { name: "LEONIAN DEVOTION", desc: "Heals all allied cards for a random amount between 20-80 HP every turn this card is on the field." } ]
-                };
-            }
-            else if (cleanName.includes('archer')) {
-                return {
-                    isPlayable: true, type: 'unit', name: "Archer", title: "Level 1", powerLevel: 1, summonCost: 1, faction: "Leonia", race: "Human", hp: 500, maxHp: 500, atk: 120, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
-                    skills: [ { name: "VOLLEY", manaCost: 1, desc: "Inflicts damage to a single target rolling from 80-150." } ], 
-                    passives: [ { name: "FOCUS FIRE", desc: "If this unit attacks the same target as an allied unit in the same turn, it deals an additional 40 flat damage." } ]
-                };
-            }
-            // --- EXISTING CARDS ---
-            else if (cleanName.includes('zeek')) {
-                return {
-                    isPlayable: true, type: 'unit', name: "Zeek", title: "Captain of the Rangers (Level 5)", powerLevel: 5, summonCost: 4, faction: "Westlands", race: "Human", hp: 800, maxHp: 800, atk: 300, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
-                    skills: [
-                        { name: "Bullseye", manaCost: 0, desc: "Shoots an arrow rolling 200-400 damage. (600-1000 in Ambush)" },
-                        { name: "Arrow Rain", manaCost: 3, desc: "Hits entire Enemy Frontline or Backline for 50-80 damage. (90-180 in Ambush)" },
-                        { name: "Ambush", manaCost: 5, desc: "Rolls 800-1500 damage. If target dies, enters Ambush Stance for 2 turns." }
-                    ],
-                    passives: [ { name: "Ambush Stance", desc: "Becomes untargettable. Buffs Bullseye and Arrow Rain." } ]
-                };
-            }
-            else if(cleanName.includes('kin-ryu') || cleanName.includes('kin ryu')) {
-                return { 
-                    isPlayable: true, type: 'unit', name: "KIN-RYU", title: "YAMI NO SHINOBI (Level 7)", powerLevel: 7, summonCost: 8, summonRequires: { type: 'arashiSouls', amount: 4 }, faction: "Arashi", race: "Human", hp: 1200, maxHp: 1200, atk: 400, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
-                    skills: [ { name: "ICHI", manaCost: 1, desc: "Cuts target. 300-1100 DMG. If <500, rerolls." }, { name: "NI", manaCost: 2, desc: "Hits 2 targets for 300-400 damage each." } ], 
-                    passives: [ { name: "SHADOW STANCE", desc: "Shinobi Marks (Max 3) grant Arashi Faction units +6/12/18% DMG against the target." }, { name: "SAN", desc: "Auto-chains shurikens upon killing a target afflicted with Shinobi Mark." } ] 
-                };
-            }
-            else if(cleanName.includes('shadow stalker')) {
-                return { 
-                    isPlayable: true, type: 'unit', name: "Shadow Stalker", title: "Level 3", powerLevel: 3, summonCost: 3, faction: "Arashi", race: "Human", hp: 800, maxHp: 800, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
-                    skills: [ { name: "SHADOW STAR", manaCost: 0, desc: "Throws a Shuriken inflicting 150 damage." }, { name: "BLADE STRIKE", manaCost: 1, desc: "Lunges forward to inflict 225 damage." } ], 
-                    passives: [ { name: "SHADOW SYNC", desc: "Mimics other stalkers." }, { name: "ASSASSIN'S MARK", desc: "Attacks have a 40% chance to apply Shinobi Mark." } ] 
-                };
-            }
-            else if(cleanName.includes('skeleton warrior')) {
-                return { 
-                    isPlayable: true, type: 'unit', name: "Skeleton Warrior", title: "Wandering Swordsman", powerLevel: 1, summonCost: 1, faction: "Council of Darkness", race: "Undead", hp: 500, maxHp: 500, atk: 100, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
-                    skills: [ { name: "SLASH", manaCost: 0, desc: "Inflicts damage rolling from 50-150." }, { name: "BLOCK", manaCost: 0, desc: "Blocks the first attack cast on this unit during the enemy turn." } ], 
-                    passives: [ { name: "UNDEAD PRESENCE", desc: "Every time this unit is alive on the field, it generates 1 energy for the user." } ] 
-                };
-            }
-            else if(cleanName.includes('cursed crow')) {
-                return { 
-                    isPlayable: true, type: 'unit', name: "Cursed Crow", title: "Level 2", powerLevel: 2, summonCost: 2, faction: "Council of Darkness", race: "Undead", hp: 300, maxHp: 300, atk: 100, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, bleedStacks: 0, bleedTurns: 0, isRevealed: false, atkBuffTurns: 0,
-                    skills: [ { name: "Peck", manaCost: 0, desc: "Inflicts damage rolling from 1-100. (+1 Bleed Stack)" } ], 
-                    passives: [ { name: "Eye of the Crow", desc: "Exposes enemy backline units to attacks." } ] 
-                };
-            }
-            else if(cleanName.includes('lionel guard') || cleanName.includes('guard tower')) {
-                return { 
-                    isPlayable: true, type: 'unit', name: "Lionel Guard Tower", title: "Structure", powerLevel: 5, summonCost: 6, faction: "Leonia", race: "Structure", hp: 2000, maxHp: 2000, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
-                    skills: [], passives: [ { name: "Guard Tower", desc: "Retaliates on allied attack (200 DMG)." }, { name: "Attack Tower", desc: "Assists allied attacks (100 DMG)." }, { name: "Structure Info", desc: "Passive rely." } ] 
-                };
-            }
-            else if(cleanName.includes('rolyn')) {
-                return { 
-                    isPlayable: true, type: 'unit', name: "Rolyn", title: "King of Leonia", powerLevel: 7, summonCost: 8, faction: "Leonia", race: "Human", hp: 3000, maxHp: 3000, atk: 300, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
-                    skills: [ { name: "Lion's Challenge", manaCost: 2, desc: "Slash the target enemy card to taunt them for 1 turn. Deals 250 damage." }, { name: "Lion's Roar", manaCost: 4, desc: "Target up to 3 enemy units and taunt them for 2 turns." } ], 
-                    passives: [ { name: "Dauntless", desc: "Counterattack taunted units (300-500 DMG). Heals for 50% of damage dealt." } ] 
-                };
-            }
-            else if(cleanName.includes('althea')) {
-                return { 
-                    isPlayable: true, type: 'unit', name: "Althea", title: "Guardian Deity (Level 5)", powerLevel: 5, summonCost: 5, faction: "Neutral", race: "Deity", hp: 1000, maxHp: 1000, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, blessings: 0, isRevealed: false, atkBuffTurns: 0,
-                    skills: [ { name: "Blessing of the Light", manaCost: 1, desc: "Heal target ally for 150-300. Gains +1 Blessing." }, { name: "Shield of Hope", manaCost: 3, desc: "Shields frontline allies for 500 DMG (2 turns). +1 Blessing per ally." }, { name: "Punishment of the Blessed", manaCost: 0, desc: "Fires a beam in a line. 800-1800 DMG front, 500-1000 DMG back. Needs 7 Blessings.", requiresBlessings: 7 } ], 
-                    passives: [] 
-                };
-            }
-            else if(cleanName.includes('jaden')) {
-                return { 
-                    isPlayable: true, type: 'unit', name: "Jaden", title: "The Crown’s Enforcer", powerLevel: 6, summonCost: 6, faction: "Leonia", race: "Human", hp: 1000, maxHp: 1000, atk: 250, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, chamberedRounds: 0, isRevealed: false, atkBuffTurns: 0,
-                    skills: [ { name: "Sniping Shot", manaCost: 2, desc: "Deals 500-800 DMG. Bypasses frontlines. (+1 Chambered Round)" }, { name: "Double-Shot", manaCost: 2, desc: "Shoots twice (300-500 DMG per shot). (+2 Chambered Rounds)" }, { name: "Trigger Unbound", manaCost: 4, desc: "Consumes all Rounds. Flurry of 150-300 DMG per round. Excess DMG hits backline." } ], 
-                    passives: [ { name: "Extra Shot", desc: "60% chance for an extra shot (+1 Round) on skill 1 or 2." } ] 
-                };
-            }
-            else if(cleanName.includes('zombie')) {
-                return { 
-                    isPlayable: true, type: 'unit', name: "Zombie", title: "Level 2", powerLevel: 2, summonCost: 2, faction: "Council of Darkness", race: "Undead", hp: 700, maxHp: 700, atk: 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, bleedStacks: 0, bleedTurns: 0, isRevealed: false, atkBuffTurns: 0,
-                    skills: [ { name: "Bite", manaCost: 0, desc: "Inflicts damage rolling from 100-200. (+1 Bleed Stack)" } ], 
-                    passives: [ { name: "Vigor of the Damned", desc: "If survives with <=100 HP, fully restores HP and gains 1000 shield." } ] 
-                };
-            }
-            else if(cleanName.includes('militia') || cleanName.includes('milita')) {
-                return { 
-                    isPlayable: true, type: 'unit', name: "Militia", title: "Level 1", powerLevel: 1, summonCost: 1, faction: "Neutral", race: "Human", hp: 600, maxHp: 600, atk: 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
-                    skills: [ { name: "Uncoordinated attack", manaCost: 0, desc: "Attacks inflicting 100-200 damage roll." }, { name: "Suicidal attack", manaCost: 2, desc: "Rolls 1-700 DMG. User dies. Grants 4 mana if target dies." } ], passives: [] 
-                };
-            }
-            else if(cleanName.includes('one more time')) {
-                return { 
-                    isPlayable: true, type: 'ability', name: "One More Time", title: "Ability Card", powerLevel: 0, summonCost: 0, faction: "NA", race: "N/A", hp: 1, maxHp: 1, atk: 0, img: dataUrl, marks: 0, queued: false, isRevealed: false,
-                    skills: [ { name: "Double Action", manaCost: 0, desc: "Target allied unit can act twice this turn." } ], passives: [ { name: "Consumable", desc: "Destroyed after execution." } ] 
-                };
-            }
-            else if(cleanName.includes('mana core')) {
-                return { 
-                    isPlayable: true, type: 'ability', name: "Mana Core", title: "Ability Card", powerLevel: 0, summonCost: 0, faction: "NA", race: "N/A", hp: 1, maxHp: 1, atk: 0, img: dataUrl, marks: 0, queued: false, isRevealed: false,
-                    skills: [ { name: "Mana Initiation", manaCost: 0, desc: "Grants user +3 Mana when activated." } ], passives: [ { name: "Auto-Discard", desc: "Discards after use." } ] 
-                };
-            }
-            else if(cleanName.includes('last stand')) {
-                return { 
-                    isPlayable: true, type: 'ability', isBuff: true, name: "Last Stand", title: "Buff Card", powerLevel: 0, summonCost: 2, faction: "Neutral", race: "N/A", hp: 1, maxHp: 1, atk: 0, img: dataUrl, marks: 0, queued: false, buffTurnsRemaining: 0, isRevealed: false,
-                    skills: [], passives: [ { name: "Last Stand", desc: "Click [ACTIVATE BUFF] next turn. All allied units survive fatal damage at 1 HP for 2 turns." } ] 
-                };
-            }
-            else {
-                let defaultHp = type === 'ability' ? 1 : 500;
-                return { 
-                    isPlayable: true, type: type, name: name, title: type === 'ability' ? "Spell Card" : "Basic Unit", powerLevel: type==='ability'? 0 : 1, summonCost: 1, faction: "Unknown", race: "Unknown", hp: defaultHp, maxHp: defaultHp, atk: type==='ability'? 0 : 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
-                    skills: type === 'ability' ? [ { name: "CAST SPELL", manaCost: 1, desc: "Activate ability effect." } ] : [ { name: "ATTACK", manaCost: 1, desc: "Basic attack for 100 damage." } ], passives: [] 
-                };
-            }
-        }
         // ============================================================================
         // 🎴 DECK GENERATOR & INITIALIZATION
         // ============================================================================
@@ -827,9 +630,9 @@ Test 5.17.5
             const starters = ["Squire", "Archer", "Bannerman", "Great Knight", "Mana Core", "Militia"];
             for (let i=0; i<starters.length; i++) {
                 const data = getCardTemplate(starters[i], ASSET_LINKS[starters[i]]);
-                // isVisualOnly flag set to true (strips HP bar and disables dragging here)
                 const cardDOM = createCardDOM('tut_' + i, data, true); 
-                cardDOM.className = 'tut-card';
+                // BUG 1 FIX: Use classList.add instead of overwriting the .card base class
+                cardDOM.classList.add('tut-card'); 
                 cardDOM.style.animationDelay = `${i * 0.3}s`;
                 container.appendChild(cardDOM);
             }
@@ -858,7 +661,7 @@ Test 5.17.5
             tutorialStep = 1;
             pMana = 8;
             eMana = 8;
-            eCoreHP = 1; // 1 HP for Tutorial Target Practice
+            eCoreHP = 1; 
             document.getElementById('enemy-core-hp').innerText = `BEN'S CORE: 1 | MANA: 8`;
             
             let playerHand = ["Squire", "Archer", "Bannerman", "Mana Core", "Great Knight", "Militia"];
@@ -869,7 +672,6 @@ Test 5.17.5
                 document.getElementById('hand').appendChild(createCardDOM(cardId, cardInstances[cardId], false));
             });
 
-            // Ben's initial hand
             let enemyHand = ["Militia", "Archer"];
             enemyHand.forEach((name, idx) => {
                 const data = getCardTemplate(name, ASSET_LINKS[name]);
@@ -904,6 +706,10 @@ Test 5.17.5
                 if(el) {
                     el.classList.remove('tut-disabled');
                     el.classList.add('tut-highlight-glow');
+                    // BUG 2 FIX: If the element is inside a slot, unlock the slot too
+                    if(el.parentElement && el.parentElement.classList.contains('slot')) {
+                        el.parentElement.classList.remove('tut-disabled');
+                    }
                 }
             });
             
@@ -915,12 +721,10 @@ Test 5.17.5
             if (allowExec) { execBtn.classList.remove('tut-disabled'); execBtn.classList.add('tut-highlight-glow'); }
             else { execBtn.classList.add('tut-disabled'); execBtn.classList.remove('tut-highlight-glow'); }
             
-            // Never lock Cancel to prevent soft-locks
             document.getElementById('cancel-btn').classList.remove('tut-disabled');
             document.getElementById('draw-cards-btn').style.display = 'none'; 
         }
 
-        // 🧠 The Rigid Master Tutorial Script
         function progressTutorial() {
             if (!isTutorialMode) return;
             clearTutHighlights();
@@ -940,7 +744,6 @@ Test 5.17.5
                     break;
                 case 4:
                     setTutMessage("<b>BEN:</b> I summon a Militia and an Archer. I'll end my turn.");
-                    // Triggered dynamically in AI Turn
                     break;
                 case 5:
                     setTutMessage("<b>BEN:</b> Before we attack, remember the Frontline/Backline system. Frontline protects the Backline. You cannot hit my Archer until my Militia falls. Let's get more Mana. Click your <b>Mana Core</b> and select <b>[Mana Initiation]</b>.");
@@ -964,11 +767,10 @@ Test 5.17.5
                     break;
                 case 10:
                     setTutMessage("<b>BEN:</b> My turn. Desperate times! My Militia initiates a Suicidal Attack on your Squire!");
-                    // Triggered dynamically in AI Turn
                     break;
                 case 11:
                     setTutMessage("<b>BEN:</b> Since your Squire died, conditions have been met. You can now field the <b>Great Knight</b>. Deploy him to the Frontline.");
-                    if(cardInstances['p_GreatKnight']) cardInstances['p_GreatKnight'].summonRequires = null; // Bypass strictly for tutorial
+                    if(cardInstances['p_GreatKnight']) cardInstances['p_GreatKnight'].summonRequires = null; 
                     lockAllExcept(['p_GreatKnight', 'p-front-left', 'p-front-center', 'p-front-right']);
                     break;
                 case 12:
@@ -977,7 +779,6 @@ Test 5.17.5
                     break;
                 case 13:
                     setTutMessage("<b>BEN:</b> My Archer fires a volley at your Great Knight!");
-                    // Triggered dynamically in AI Turn
                     break;
                 case 14:
                     setTutMessage("<b>BEN:</b> The knight took damage. Let's use a support skill. Click your <b>Bannerman</b> and use <b>[RALLY]</b> to shield your team.");
@@ -994,7 +795,6 @@ Test 5.17.5
                 case 17:
                     setTutMessage("<b>BEN:</b> To win the game, you must destroy the <b>Core</b>. My Core currently has 1 HP. Select any unit, choose <b>[ATTACK CORE]</b>, and Execute it to claim victory!");
                     lockAllExcept(['p_Archer', 'p_GreatKnight', 'p_Bannerman', 'p_Militia'], false, true);
-                    // Unlocking execute to finish
                     document.getElementById('exec-btn').classList.remove('tut-disabled');
                     break;
             }
@@ -1126,7 +926,6 @@ Test 5.17.5
             c.className = `card`; 
             c.id = id; 
             
-            // Tutorial Check: Disable drag if visual only
             if (!isVisualOnly) c.draggable = true;
             
             let safeImgUrl = data.img.replace(/"/g, '&quot;').replace(/'/g, '%27');
@@ -1143,7 +942,6 @@ Test 5.17.5
             }
             html += `<div class="card-img-container" style="${bgImg}"></div>`;
             
-            // Do NOT render the HP Footer if the card is purely visual (Tavern scene)
             if((data.type === 'unit' || data.type === 'ability') && !isVisualOnly) {
                 if (data.type === 'unit') html += `<div class="card-level">${"★".repeat(data.powerLevel)}</div>`;
                 html += `<div class="card-hp-footer">
@@ -1154,7 +952,6 @@ Test 5.17.5
 
             c.innerHTML = html;
             
-            // Abort binding drag/drop/click events if visual only
             if (isVisualOnly) return c;
 
             c.addEventListener('dragstart', (e) => {
@@ -1301,7 +1098,6 @@ Test 5.17.5
                         updateUI(); 
                         showInspector(cardId, cardEl);
 
-                        // Tutorial progression checks
                         if(isTutorialMode) {
                             if(tutorialStep === 1 && cardId === 'p_Squire' && slot.id === 'p-front-center') { tutorialStep = 2; progressTutorial(); }
                             if(tutorialStep === 2 && cardId === 'p_ManaCore' && slot.id === 'p-ability') { tutorialStep = 3; progressTutorial(); }
@@ -1315,6 +1111,7 @@ Test 5.17.5
                 }
             };
         });
+        
         // ============================================================================
         // 🔍 INSPECTOR & TARGETING LOGIC
         // ============================================================================
@@ -1387,7 +1184,8 @@ Test 5.17.5
                     let canAttackCoreUI = false;
                     if(turnCount > 1 && data.type === 'unit' && data.name !== "Lionel Guard Tower") {
                         let validEnemies = getValidEnemyTargetIds('ENEMY');
-                        if(validEnemies.length === 0 || isTutorialMode) canAttackCoreUI = true;
+                        // BUG 3 FIX: Only unlock ATTACK CORE locally during step 17 to prevent array misalignment
+                        if(validEnemies.length === 0 || (isTutorialMode && tutorialStep >= 17)) canAttackCoreUI = true;
                     }
 
                     if(canAttackCoreUI) {
@@ -1400,7 +1198,6 @@ Test 5.17.5
                             let meetsCondition = true;
                             if(skill.requiresBlessings) meetsCondition = (data.blessings >= skill.requiresBlessings);
                             
-                            // 🐛 BUG FIX: Tutorial Mana Core Sickness Lock override
                             let skillCanAct = canAct;
                             if (isTutorialMode && data.name === "Mana Core" && tutorialStep === 5) skillCanAct = true; 
 
@@ -1420,7 +1217,6 @@ Test 5.17.5
             sumUI.innerText = `${data.summonCost} MANA`;
             
             if (tutorialLock) {
-                // Nuclear override: Force the DOM to fully render, then aggressively unlock the exact target.
                 setTimeout(() => {
                     document.querySelectorAll('.tut-btn-target').forEach(btn => btn.classList.add('tut-disabled'));
                     
@@ -1432,8 +1228,8 @@ Test 5.17.5
                     
                     if (unlockBtn) {
                         unlockBtn.classList.remove('tut-disabled');
-                        unlockBtn.removeAttribute('disabled'); // Destroy any stray HTML disabled block signs
-                        unlockBtn.classList.add('tut-highlight-glow'); // Force the gold highlight
+                        unlockBtn.removeAttribute('disabled'); 
+                        unlockBtn.classList.add('tut-highlight-glow'); 
                     }
 
                     if(tutorialStep === 17) {
@@ -1446,427 +1242,176 @@ Test 5.17.5
                 }, 50);
             }
         }
-        
-            
-        document.getElementById('cancel-btn').addEventListener('click', () => {
-            if(isExecuting) return;
-            pQueue.forEach(a => { if(cardInstances[a.actorId]) cardInstances[a.actorId].queued = false; pMana += a.cost; });
-            if(pendingSkill && cardInstances[pendingSkill.actorId]) { cardInstances[pendingSkill.actorId].queued = false; pMana += pendingSkill.cost; }
-            pQueue = []; isTargeting = false; pendingSkill = null; selectedTargets = [];
-            document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'target-buff-glow'));
-            addLog("All pending actions cancelled.", "#e74c3c"); updateUI(); showInspector('none', null); 
-        });
-
         // ============================================================================
-        // ⚙️ ACTION QUEUEING & SYSTEM DETECTOR
+        // ⚔️ COMBAT & QUEUE SYSTEM
         // ============================================================================
         function getValidEnemyTargetIds(defendSide) {
+            let attackSide = defendSide === 'PLAYER' ? 'ENEMY' : 'PLAYER';
             let front = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${defendSide}"] .card`)).map(c => c.id).filter(id => !(cardInstances[id].ambushTurns > 0 && cardInstances[id].ambushTurns >= turnCount));
             let back = Array.from(document.querySelectorAll(`.slot.backline[data-side="${defendSide}"] .card`)).map(c => c.id).filter(id => !(cardInstances[id].ambushTurns > 0 && cardInstances[id].ambushTurns >= turnCount));
+            let hasCrow = Array.from(document.querySelectorAll(`.slot[data-side="${attackSide}"] .card`)).some(c => cardInstances[c.id] && cardInstances[c.id].name === "Cursed Crow" && cardInstances[c.id].hp > 0);
+            if (hasCrow) return front.concat(back); 
             if (front.length > 0) return front;
-            if (back.length > 0) return back;
-            return [];
-        }
-
-        async function systemDetector(trigger, payload) {
-            let activeCardsOnBoard = Object.values(cardInstances).filter(c => {
-                let el = document.getElementById(c.id); return el && el.parentElement && el.parentElement.classList.contains('slot');
-            });
-            
-            if (trigger === "DAMAGE_CALC") {
-                let dmg = payload.baseDmg;
-                // Bannerman Atk Buff Check
-                if (payload.actor.atkBuffTurns && payload.actor.atkBuffTurns >= turnCount) dmg = Math.floor(dmg * 1.08);
-                // Great Knight Passive Damage Reduction
-                if (payload.targetInst && payload.targetInst.name === "Great Knight" && payload.skillName !== "Bite" && payload.skillName !== "Peck" && payload.skillName !== "SAN") {
-                    dmg = Math.max(1, dmg - 40);
-                }
-                return dmg;
-            }
+            return back;
         }
 
         window.queueAction = function(actorId, skillName, cost, isCore) {
             if(currentTurn !== 'PLAYER' || isExecuting) return;
             const actor = cardInstances[actorId];
+            if(actor.turnPlaced === turnCount && !(isTutorialMode && actor.name === "Mana Core")) return addLog("Card has Summoning Sickness!", "red");
+            if(pMana < cost && !isTutorialMode) return addLog("Not enough Mana!", "red");
             
-            // 🐛 BUG FIX: Ignore sickness specifically for Mana Core tutorial step
-            if(actor.turnPlaced === turnCount && !(isTutorialMode && actor.name === "Mana Core" && tutorialStep === 5)) {
-                return addLog("Card has Summoning Sickness!", "red");
-            }
-            if(turnCount === 1 && !isTutorialMode) return addLog("No combat allowed on Turn 1!", "red");
-            if(actor.exhausted || actor.queued) return addLog("Card has already acted this turn!", "red");
-            
-            if(pMana < cost && (!isTutorialMode || skillName !== "Mana Initiation")) return addLog("Not enough Mana!", "red");
-            if (!isTutorialMode || pMana >= cost) pMana -= cost;
-            
+            pMana -= cost;
             actor.queued = true;
 
             if(isCore) {
-                let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'CORE' };
-                pQueue.push(action); addLog(`Queued [${skillName}] on Enemy Core.`, "#aaa"); 
+                pQueue.push({ actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'CORE' });
+                addLog(`Queued [${skillName}] on Enemy Core.`, "#aaa"); 
             } 
-            else if (skillName === "RALLY" || skillName === "Mana Initiation" || skillName === "BLOCK" || actor.type === 'ability') {
-                let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
-                pQueue.push(action); addLog(`Queued [${skillName}].`, "#aaa"); 
-                
-                if (isTutorialMode && tutorialStep === 5 && skillName === "Mana Initiation") { tutorialStep = 6; progressTutorial(); }
-                if (isTutorialMode && tutorialStep === 14 && skillName === "RALLY") { tutorialStep = 15; progressTutorial(); }
+            else if (skillName === "Mana Initiation" || skillName === "BLOCK" || actor.type === 'ability') {
+                pQueue.push({ actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' });
+                addLog(`Queued [${skillName}].`, "#aaa"); 
+                if(isTutorialMode && tutorialStep === 5) { tutorialStep = 6; progressTutorial(); }
             } 
             else {
-                isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
+                isTargeting = true; 
+                pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
                 let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
                 let validIds = getValidEnemyTargetIds(defSide);
-                
-                targetCountReq = 1; addLog("Select an Enemy target...", "var(--gold)");
-                validIds.forEach(tId => { let cEl = document.getElementById(tId); if(cEl) cEl.classList.add('target-glow'); });
-
-                // Unlock valid enemies for clicking in tutorial
-                if(tutorialLock) {
-                    validIds.forEach(id => { let el = document.getElementById(id); if(el) el.classList.remove('tut-disabled'); });
-                }
-
-                if (validIds.length === 0) {
-                    addLog("All enemies down! Use 'ATTACK CORE' instead.", "#e74c3c");
-                    isTargeting = false; actor.queued = false; pMana += cost; pendingSkill = null;
-                }
+                validIds.forEach(tId => document.getElementById(tId).classList.add('target-glow'));
+                addLog("Select a target...", "var(--gold)");
             }
-            updateUI(); showInspector(actorId, document.getElementById(actorId));
+            updateUI(); 
         };
 
         function handleTargetSelection(targetId) {
             isTargeting = false; 
-            document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'target-buff-glow'));
-            
-            let action = { ...pendingSkill, targetId }; 
-            pQueue.push(action);
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-heal-glow'));
+            pQueue.push({ ...pendingSkill, targetId });
             addLog(`Queued [${pendingSkill.skillName}] on ${cardInstances[targetId].name}.`, "#aaa");
             pendingSkill = null; updateUI();
-            
-            // Tutorial Checks (if we queued all required attacks)
-            if(isTutorialMode && tutorialStep === 15) {
-                let pQActors = pQueue.map(a => cardInstances[a.actorId].name);
-                if(pQActors.includes("Archer") && pQActors.includes("Great Knight")) {
-                    tutorialStep = 16; progressTutorial();
-                }
-            }
         }
 
-        // ============================================================================
-        // ⚔️ EXECUTION & VISUAL FX
-        // ============================================================================
-        function showFloatingText(targetDOM, text, color="#ff4d4d", fontSize="2rem") {
-            if(!targetDOM) return;
-            const rect = targetDOM.getBoundingClientRect(); const el = document.createElement('div'); el.className = 'floating-text';
-            el.style.color = color; el.style.fontSize = fontSize; el.innerText = text;
-            let xOffset = text.length > 5 ? text.length * 4 : 10;
-            el.style.left = (rect.left + rect.width / 2 - xOffset) + 'px'; el.style.top = (rect.top + rect.height / 2 - 20) + 'px';
-            document.body.appendChild(el); setTimeout(() => el.remove(), 1200);
-        }
-
-        function triggerSlash(targetDOM, muteBodyShot = false) {
-            if(!targetDOM) return; if(!muteBodyShot && bodyShotAudioUrl) playSound(bodyShotAudioUrl);
-            const slash = document.createElement('div'); slash.className = 'slash-fx'; targetDOM.appendChild(slash); setTimeout(() => slash.remove(), 600);
-        }
-
-        function syncVisualHP(targetDOM, currentHP, maxHP) {
-            if(!targetDOM) return;
-            let pct = Math.max(0, Math.min(100, (currentHP / maxHP) * 100));
-            let hTrail = targetDOM.querySelector('.horizontal-bar .hp-bar-trail') || targetDOM.querySelector('.card-hp-trail');
-            let hCurr = targetDOM.querySelector('.horizontal-bar .hp-bar-current') || targetDOM.querySelector('.card-hp-current');
-            if (hTrail) hTrail.style.width = pct + '%'; if (hCurr) hCurr.style.width = pct + '%';
-            let numCard = targetDOM.querySelector('.card-hp-number');
-            if (numCard) { numCard.innerText = Math.ceil(currentHP); numCard.style.background = pct < 30 ? '#e74c3c' : '#2ecc71'; numCard.style.color = pct < 30 ? '#fff' : '#000'; }
-        }
-
-        async function applyDamage(actor, targetId, baseDmg, skillName) {
+        async function applyDamage(actor, targetId, dmg, skillName) {
             let targetDOM = targetId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(targetId);
-            let targetInst = cardInstances[targetId]; let actorDOM = document.getElementById(actor.id);
-            let actorSlotDOM = (actorDOM && actorDOM.parentElement && actorDOM.parentElement.classList.contains('slot')) ? actorDOM.parentElement : null;
-            let isSlash = ["SHORTSWORD STRIKE", "HEAVY STRIKE", "BANNER STRIKE", "ATTACK"].includes(skillName);
-
-            let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
-
-            if(actorDOM && skillName !== "Passive" && skillName !== "RALLY" && skillName !== "BLOCK") {
-                if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
-                actorDOM.style.zIndex = "9999"; 
-                const aRect = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
-                const dX = (tRect.left + tRect.width/2) - (aRect.left + aRect.width/2); const dY = (tRect.top + tRect.height/2) - (aRect.top + aRect.height/2);
-                actorDOM.style.transition = "transform 0.15s cubic-bezier(0.4, 0, 1, 1)"; 
-                actorDOM.style.transform = `translate(${dX * 0.5}px, ${dY * 0.5}px) scale(1.3)`;
-                await new Promise(r => setTimeout(r, 150));
-            }
-
-            if(targetDOM && skillName !== "RALLY" && skillName !== "BLOCK") {
-                if(isSlash && dmg > 0) { triggerSlash(targetDOM, false); } 
-                if (dmg > 0) { targetDOM.classList.remove("shake-anim"); void targetDOM.offsetWidth; targetDOM.classList.add("shake-anim"); }
-            }
+            let targetInst = cardInstances[targetId]; 
             
-            let died = false;
+            if(targetDOM) {
+                targetDOM.classList.add('shake-anim');
+                triggerSlash(targetDOM);
+                showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
+                setTimeout(() => targetDOM.classList.remove('shake-anim'), 400);
+            }
+
             if(targetId === 'CORE') {
-                if (dmg > 0) {
-                    showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
-                    if(actor.side === 'PLAYER') { eCoreHP = Math.max(0, eCoreHP - dmg); syncVisualHP(targetDOM, eCoreHP, 2000); if(eCoreHP<=0) died=true; } 
-                    else { pCoreHP = Math.max(0, pCoreHP - dmg); syncVisualHP(targetDOM, pCoreHP, 2000); if(pCoreHP<=0) died=true; }
-                }
-            } else if (targetInst) {
-                if(targetInst.shield && targetInst.shield > 0 && targetInst.shieldTurns >= turnCount && dmg > 0) {
-                     if(dmg <= targetInst.shield) {
-                          targetInst.shield -= dmg; showFloatingText(targetDOM, `ABSORBED`, "#3498db", "1.5rem"); dmg = 0;
-                     } else {
-                          let absorbed = targetInst.shield; dmg -= targetInst.shield; targetInst.shield = 0;
-                          showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem");
-                     }
-                } else if(dmg > 0) { showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem"); }
-
-                if(dmg > 0) {
-                     targetInst.hp -= dmg; syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
-                     addLog(`<b>${actor.name}</b> hits ${targetInst.name} for ${dmg} DMG!`, '#ff4d4d');
-
-                     if(targetInst.hp <= 0) { 
-                         died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
-                         if(targetDOM) targetDOM.remove(); 
-                         if(targetInst.name === "Leonian Squire") {
-                             if(targetInst.side === 'PLAYER') { pSquiresFallen++; addLog(`<b>System</b>: Allied Squire fell! (+1 Fallen Squire)`, "#2ecc71"); }
-                             else eSquiresFallen++;
-                         }
-                     } 
+                if(actor.side === 'PLAYER') { eCoreHP -= dmg; syncVisualHP(targetDOM, eCoreHP, 2000); }
+                else { pCoreHP -= dmg; syncVisualHP(targetDOM, pCoreHP, 2000); }
+            } else {
+                targetInst.hp -= dmg;
+                syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
+                if(targetInst.hp <= 0) {
+                    if(targetInst.name === "Leonian Squire") { if(targetInst.side==='PLAYER') pSquiresFallen++; else eSquiresFallen++; }
+                    targetDOM.remove();
+                    delete cardInstances[targetId];
                 }
             }
-
-            await new Promise(r => setTimeout(r, 300)); 
-            
-            if(actorDOM && skillName !== "RALLY" && skillName !== "BLOCK") {
-                actorDOM.style.transition = "transform 0.3s ease-out"; actorDOM.style.transform = "scale(1) translate(0, 0)";
-                await new Promise(r => setTimeout(r, 300)); actorDOM.style.zIndex = ""; actorDOM.style.transition = ""; 
-            }
-            if(actorSlotDOM) actorSlotDOM.classList.remove('attacking-slot');
-            
-            return died;
+            addLog(`<b>${actor.name}</b> deals ${dmg} DMG!`, "#ff4d4d");
+            await new Promise(r => setTimeout(r, 600));
         }
 
-        async function processQueue(sideProcessing, queueArr) {
-            isExecuting = true; document.body.classList.add('in-combat-mode'); 
-            
-            let q = [...queueArr];
-            if(sideProcessing === 'PLAYER') pQueue = []; 
-            updateUI();
-
-            for(let i=0; i<q.length; i++) {
-                let action = q[i];
-                const actor = cardInstances[action.actorId]; const actorDOM = document.getElementById(action.actorId);
-                
+        async function processQueue(side, queueArr) {
+            isExecuting = true;
+            for(let action of queueArr) {
+                const actor = cardInstances[action.actorId];
                 if(!actor || actor.hp <= 0) continue;
-                actor.queued = false; actor.exhausted = true; updateUI(); 
-
-                if (action.skillName === "Mana Initiation") {
-                    if(actorDOM) { actorDOM.style.transform = "scale(1.5)"; actorDOM.style.zIndex = "1000"; await new Promise(r => setTimeout(r, 600)); showFloatingText(actorDOM, "+3", "var(--mana-color)", "2.5rem"); await new Promise(r => setTimeout(r, 400)); actorDOM.style.transform = "scale(1)"; }
-                    if(sideProcessing === 'PLAYER') { pMana += 3; addLog(`<b>${actor.name}</b> grants +3 Mana!`, "var(--mana-color)"); } 
-                } 
-                else if (action.skillName === "RALLY") {
-                    let slots = Array.from(document.querySelectorAll(`.slot[data-side="${sideProcessing}"]`));
-                    let validTargets = slots.map(s => s.querySelector('.card')).filter(c => c && cardInstances[c.id]);
-                    if (validTargets.length > 0) {
-                        if (shieldSfxUrl) playSound(shieldSfxUrl);
-                        validTargets.forEach(cEl => {
-                              cardInstances[cEl.id].shield = 100;
-                              cardInstances[cEl.id].shieldTurns = turnCount + 1;
-                              cardInstances[cEl.id].atkBuffTurns = turnCount + 1;
-                              showFloatingText(cEl, "RALLY BUFFS", "#f1c40f", "1.2rem");
-                        });
-                        addLog(`<b>${actor.name}</b> buffed ${validTargets.length} allies!`, "#f1c40f");
-                        await new Promise(r => setTimeout(r, 600));
-                        updateUI();
-                    }
-                } 
-                else {
-                    let dmg = actor.atk || 100; 
-                    if (action.skillName === "SHORTSWORD STRIKE") dmg = Math.floor(Math.random() * (120 - 80 + 1)) + 80;
-                    if (action.skillName === "HEAVY STRIKE") dmg = Math.floor(Math.random() * (250 - 150 + 1)) + 150;
-                    if (action.skillName === "BANNER STRIKE") dmg = 50;
-                    if (action.skillName === "VOLLEY") dmg = Math.floor(Math.random() * (150 - 80 + 1)) + 80;
-                    if (action.skillName === "Suicidal attack") {
-                        if (villagerSuicideSfxUrl) playSound(villagerSuicideSfxUrl); await new Promise(r => setTimeout(r, 100)); dmg = 650;
-                    }
-
-                    // Focus Fire Passive Check
-                    if (actor.name === "Archer" && action.targetId !== 'CORE') {
-                        if (globalTargetedThisTurn.includes(action.targetId)) {
-                            dmg += 40; addLog(`<b>Archer</b> Focus Fire activated! (+40 DMG)`, "#e67e22");
-                        }
-                    }
-
-                    if (action.targetId !== 'CORE') globalTargetedThisTurn.push(action.targetId);
-
-                    let targetDied = await applyDamage(actor, action.targetId, dmg, action.skillName);
-                    
-                    if (action.skillName === "Suicidal attack") {
-                        actor.hp = 0; if (actorDOM) actorDOM.remove();
-                        if (targetDied) {
-                            if (actor.side === 'PLAYER') { pMana += 4; addLog(`<b>Militia</b> sacrificed to destroy target! Grants +4 Mana!`, "var(--mana-color)"); } 
-                            else { eMana += 4; addLog(`Enemy <b>Militia</b> sacrificed to destroy target! Grants +4 Mana!`, "var(--mana-color)"); }
-                        }
-                    }
-                }
                 
-                if(actor.type === 'ability' || actor.isBuff) { actor.hp = 0; if(actorDOM) actorDOM.remove(); }
-                updateUI(); await new Promise(r => setTimeout(r, 400)); 
+                actor.queued = false; actor.exhausted = true;
+                if(action.skillName === "Mana Initiation") { pMana += 3; addLog("Mana +3", "var(--mana-color)"); }
+                else if(action.skillName === "RALLY") {
+                    let allies = Object.values(cardInstances).filter(c => c.side === side && c.type === 'unit');
+                    allies.forEach(a => { a.shield = 300; a.shieldTurns = turnCount + 1; });
+                    addLog("Allies shielded!", "#3498db");
+                }
+                else {
+                    let dmg = action.skillName === "SHORTSWORD STRIKE" ? 300 : 200;
+                    await applyDamage(actor, action.targetId, dmg, action.skillName);
+                }
+                updateUI();
             }
-            
-            isExecuting = false; document.body.classList.remove('in-combat-mode'); updateUI();
-            
+            if(side === 'PLAYER') pQueue = []; else eQueue = [];
+            isExecuting = false;
             if(isTutorialMode && tutorialStep === 7) { tutorialStep = 8; progressTutorial(); }
             if(isTutorialMode && tutorialStep === 16) { tutorialStep = 17; progressTutorial(); }
-            if(eCoreHP <= 0) alert("VICTORY! Enemy Core Destroyed! You survived the tutorial."); 
-            if(pCoreHP <= 0) alert("DEFEAT! Your Core was Destroyed!");
+            if(eCoreHP <= 0) { alert("TUTORIAL COMPLETE!"); location.reload(); }
         }
 
-        document.getElementById('exec-btn').addEventListener('click', () => { 
-            if(pQueue.length > 0 && !isExecuting) processQueue('PLAYER', pQueue); 
-        });
-
-        // ============================================================================
-        // 🤖 AI ENGINE & END TURN LOGIC
-        // ============================================================================
-        async function aiDragAndDrop(cardId, data, targetSlotDOM) {
-            const stack = document.getElementById('enemy-deck-stack'); const sRect = stack.getBoundingClientRect(); const tRect = targetSlotDOM.getBoundingClientRect();
-            const ghost = document.createElement('div'); ghost.className = 'ai-dragging-card'; ghost.style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
-            ghost.style.left = sRect.left + 'px'; ghost.style.top = sRect.top + 'px'; document.body.appendChild(ghost);
-            if(dragSoundUrl) playSound(dragSoundUrl);
-
-            targetSlotDOM.classList.add('valid-drop-zone');
-            await new Promise(r => setTimeout(r, 50));
-            ghost.style.left = (tRect.left) + 'px'; ghost.style.top = (tRect.top) + 'px'; ghost.style.transform = "scale(1.1) rotate(-5deg)";
-            
-            await new Promise(r => setTimeout(r, 600)); 
-            ghost.remove(); targetSlotDOM.classList.remove('valid-drop-zone');
-            
-            targetSlotDOM.appendChild(createCardDOM(cardId, data, false));
-            if(dropSoundUrl) playSound(dropSoundUrl);
-        }
+        document.getElementById('exec-btn').addEventListener('click', () => { if(pQueue.length > 0) processQueue('PLAYER', pQueue); });
 
         document.getElementById('end-turn-btn').addEventListener('click', async () => {
-            if (isExecuting) return; 
+            if(isExecuting) return;
+            if(isTutorialMode && tutorialStep === 3) { tutorialStep = 4; progressTutorial(); setTimeout(aiTutorialTurn, 1000); return; }
+            if(isTutorialMode && tutorialStep === 9) { tutorialStep = 10; progressTutorial(); setTimeout(aiTutorialTurn, 1000); return; }
+            if(isTutorialMode && tutorialStep === 12) { tutorialStep = 13; progressTutorial(); setTimeout(aiTutorialTurn, 1000); return; }
             
-            // Player End Turn Processing
-            Object.values(cardInstances).forEach(c => {
-                if(c.side === 'ENEMY') { c.exhausted = false; c.queued = false; }
-            });
-            
-            if(pQueue.length > 0) await processQueue('PLAYER', pQueue);
-
-            isExecuting = true; updateUI(); 
-            currentTurn = 'ENEMY'; document.getElementById('turn-banner').innerText = "OPPONENT TURN"; document.getElementById('turn-banner').style.borderColor = "#e74c3c";
-            addLog(`--- ENEMY TURN ${turnCount} ---`, "#e74c3c"); 
-            
-            if(isTutorialMode && tutorialStep === 3) { tutorialStep = 4; progressTutorial(); }
-            if(isTutorialMode && tutorialStep === 9) { tutorialStep = 10; progressTutorial(); }
-            if(isTutorialMode && tutorialStep === 12) { tutorialStep = 13; progressTutorial(); }
-
+            currentTurn = 'ENEMY'; updateUI();
+            addLog("Enemy Turn...");
             setTimeout(aiTurn, 1000);
         });
 
-        async function aiTurn() {
-            // --- SCRIPTED TUTORIAL BEHAVIORS ---
-            if (isTutorialMode && tutorialStep === 4) {
-                // Ben Turn 1: Summons Militia and Archer
-                let mId = eHandData.find(id => cardInstances[id].name === "Militia");
-                let aId = eHandData.find(id => cardInstances[id].name === "Archer");
-                let fSlot = document.getElementById('e-front-center');
-                let bSlot = document.getElementById('e-back-center') || document.getElementById('e-back-left');
-                
-                if(mId) { eHandData.splice(eHandData.indexOf(mId), 1); cardInstances[mId].turnPlaced = turnCount; await aiDragAndDrop(mId, cardInstances[mId], fSlot); addLog(`ENEMY summoned Militia`, "#e74c3c"); updateUI(); await new Promise(r=>setTimeout(r, 500)); }
-                if(aId) { eHandData.splice(eHandData.indexOf(aId), 1); cardInstances[aId].turnPlaced = turnCount; await aiDragAndDrop(aId, cardInstances[aId], bSlot); addLog(`ENEMY summoned Archer`, "#e74c3c"); updateUI(); await new Promise(r=>setTimeout(r, 500)); }
-            } 
-            else if (isTutorialMode && tutorialStep === 10) {
-                // Ben Turn 2: Militia Suicidal Attacks Squire
-                let mId = Object.keys(cardInstances).find(id => cardInstances[id].name === "Militia" && cardInstances[id].side === 'ENEMY');
-                let targetId = Object.keys(cardInstances).find(id => cardInstances[id].name === "Leonian Squire" && cardInstances[id].side === 'PLAYER');
-                if (mId && targetId) {
-                    eQueue.push({ actorId: mId, actorName: "Militia", side: 'ENEMY', skillName: "Suicidal attack", cost: 2, targetId: targetId });
-                }
+        async function aiTutorialTurn() {
+            if(tutorialStep === 4) {
+                await aiDragAndDrop('e_Militia_0', cardInstances['e_Militia_0'], document.getElementById('e-front-center'));
+                await aiDragAndDrop('e_Archer_1', cardInstances['e_Archer_1'], document.getElementById('e-back-right'));
+                tutorialStep = 5; progressTutorial();
+            } else if(tutorialStep === 10) {
+                await processQueue('ENEMY', [{ actorId: 'e_Militia_0', targetId: 'p_Squire', skillName: "Suicidal attack" }]);
+                tutorialStep = 11; progressTutorial();
+            } else if(tutorialStep === 13) {
+                await processQueue('ENEMY', [{ actorId: 'e_Archer_1', targetId: 'p_GreatKnight', skillName: "Volley" }]);
+                tutorialStep = 14; progressTutorial();
             }
-            else if (isTutorialMode && tutorialStep === 13) {
-                // Ben Turn 3: Archer attacks Great Knight
-                let aId = Object.keys(cardInstances).find(id => cardInstances[id].name === "Archer" && cardInstances[id].side === 'ENEMY');
-                let targetId = Object.keys(cardInstances).find(id => cardInstances[id].name === "Great Knight" && cardInstances[id].side === 'PLAYER');
-                if (aId && targetId) {
-                    eQueue.push({ actorId: aId, actorName: "Archer", side: 'ENEMY', skillName: "VOLLEY", cost: 1, targetId: targetId });
-                }
-            } 
-            else if (!isTutorialMode) {
-                // Standard Random AI (Only executes if outside tutorial)
-                let summonable = eHandData.filter(id => cardInstances[id].summonCost <= eMana); 
-                for(let id of summonable) {
-                    let data = cardInstances[id];
-                    if(data.type === 'unit') {
-                        let slots = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"][data-allowed="unit"]')); 
-                        let empty = slots.filter(s => !s.querySelector('.card'));
-                        if(empty.length > 0 && eMana >= data.summonCost) {
-                            let targetSlot = empty.find(s => s.classList.contains('frontline')) || empty[0]; 
-                            eMana -= data.summonCost; data.turnPlaced = turnCount; 
-                            eHandData.splice(eHandData.indexOf(id), 1);
-                            await aiDragAndDrop(id, data, targetSlot); addLog(`ENEMY summoned ${data.name}`, "#e74c3c"); 
-                            updateUI(); await new Promise(r => setTimeout(r, 500));
-                        }
-                    }
-                }
-                
-                if(turnCount > 1) {
-                    let activeEnemyUnits = Array.from(document.querySelectorAll('.slot[data-side="ENEMY"] .card')).map(c => cardInstances[c.id]).filter(d => d.turnPlaced < turnCount && !d.exhausted && !d.isBuff);
-                    for(let data of activeEnemyUnits) {
-                        if (data.queued) continue; 
-                        let pTargetIds = getValidEnemyTargetIds('PLAYER');
-                        let cost = (data.skills.length > 0) ? data.skills[0].manaCost : 0;
-                        if (eMana >= cost && pTargetIds.length > 0) {
-                            let tId = pTargetIds[Math.floor(Math.random()*pTargetIds.length)];
-                            let skill = (data.skills.length > 0) ? data.skills[0].name : "ATTACK";
-                            let action = { actorId: data.id, actorName: data.name, side: 'ENEMY', skillName: skill, cost: cost, targetId: tId };
-                            eMana -= cost; data.queued = true; eQueue.push(action);
-                        }
-                    }
-                }
-            }
-
-            if(eQueue.length > 0) await processQueue('ENEMY', eQueue);
-
-            await new Promise(r => setTimeout(r, 600));
-            
-            // --- NEW TURN INITIALIZATION ---
-            turnCount++; currentTurn = 'PLAYER'; isExecuting = false; globalTargetedThisTurn = [];
-            document.getElementById('turn-banner').innerText = `PLAYER TURN ${turnCount}`; document.getElementById('turn-banner').style.borderColor = "var(--gold)";
-            
-            Object.values(cardInstances).forEach(c => { 
-                let dDOM = document.getElementById(c.id);
-                if(c.side === 'PLAYER') { c.exhausted = false; c.queued = false; }
-                
-                // 🐛 BUG FIX: Bannerman Leonian Devotion Passive Processing
-                if (c.name === "Leonian Bannerman" && c.hp > 0 && dDOM && dDOM.parentElement && dDOM.parentElement.classList.contains('slot')) {
-                    let allies = Array.from(document.querySelectorAll(`.slot[data-side="${c.side}"] .card`)).map(el => cardInstances[el.id]);
-                    allies.forEach(ally => {
-                        if (ally.hp < ally.maxHp) {
-                            let healAmt = Math.floor(Math.random() * (80 - 20 + 1)) + 20;
-                            ally.hp = Math.min(ally.maxHp, ally.hp + healAmt);
-                            let allyDOM = document.getElementById(ally.id);
-                            syncVisualHP(allyDOM, ally.hp, ally.maxHp);
-                            showFloatingText(allyDOM, `+${healAmt}`, "#2ecc71", "1.5rem");
-                        }
-                    });
-                    if (healAudioUrl) playSound(healAudioUrl);
-                    addLog(`<b>Bannerman</b>'s Devotion heals the board!`, "#2ecc71");
-                }
-            }); 
-            
-            let manaGain = (turnCount <= 10 ? 2 : turnCount <= 20 ? 3 : turnCount <= 30 ? 4 : 5); 
-            pMana += manaGain; eMana += manaGain;
-
-            addLog(`--- TURN ${turnCount} START ---`, "var(--gold)"); updateUI(); 
-            
-            if(isTutorialMode && tutorialStep === 4) { tutorialStep = 5; progressTutorial(); }
-            if(isTutorialMode && tutorialStep === 10) { tutorialStep = 11; progressTutorial(); }
-            if(isTutorialMode && tutorialStep === 13) { tutorialStep = 14; progressTutorial(); }
-
-            if (!isTutorialMode) { const drawBtn = document.getElementById('draw-cards-btn'); drawBtn.style.display = "block"; drawBtn.innerText = "DRAW TO 6"; }
+            currentTurn = 'PLAYER'; turnCount++; updateUI();
         }
+
+        // --- Visual Helpers ---
+        function syncVisualHP(dom, hp, max) {
+            if(!dom) return;
+            let pct = Math.max(0, (hp/max)*100);
+            let bar = dom.querySelector('.card-hp-current') || dom.querySelector('.hp-bar-current');
+            if(bar) bar.style.width = pct + '%';
+            let num = dom.querySelector('.card-hp-number');
+            if(num) num.innerText = Math.ceil(hp);
+        }
+
+        function triggerSlash(target) {
+            const fx = document.createElement('div'); fx.className = 'slash-fx';
+            target.appendChild(fx); setTimeout(() => fx.remove(), 600);
+        }
+
+        function showFloatingText(target, text, color, size) {
+            const rect = target.getBoundingClientRect();
+            const el = document.createElement('div'); el.className = 'floating-text';
+            el.style.color = color; el.style.fontSize = size; el.innerText = text;
+            el.style.left = (rect.left + rect.width/2) + 'px'; el.style.top = rect.top + 'px';
+            document.body.appendChild(el); setTimeout(() => el.remove(), 1200);
+        }
+
+        async function aiDragAndDrop(id, data, slot) {
+            slot.appendChild(createCardDOM(id, data, false));
+            data.turnPlaced = turnCount; updateUI();
+            await new Promise(r => setTimeout(r, 500));
+        }
+
+        function getCardTemplate(name, url) {
+            const base = { img: url, powerLevel: 1, summonCost: 1, hp: 500, maxHp: 500, atk: 200, type: 'unit', skills: [] };
+            if(name === "Squire") return { ...base, name: "Leonian Squire", skills: [{name: "SHORTSWORD STRIKE", manaCost: 0, desc: "300 DMG"}] };
+            if(name === "Mana Core") return { ...base, name: "Mana Core", type: 'ability', summonCost: 0, skills: [{name: "Mana Initiation", manaCost: 0, desc: "+3 Mana"}] };
+            if(name === "Bannerman") return { ...base, name: "Leonian Bannerman", skills: [{name: "BANNER STRIKE", manaCost: 0, desc: "200 DMG"}, {name: "RALLY", manaCost: 2, desc: "Shield Allies"}] };
+            if(name === "Great Knight") return { ...base, name: "Great Knight", hp: 1200, maxHp: 1200, summonCost: 4, summonRequires: {type:'squiresFallen', amount:1} };
+            return base;
+        }
+
+        async function aiTurn() { addLog("AI ending turn."); currentTurn = 'PLAYER'; turnCount++; updateUI(); }
     </script>
 </body>
 </html>
