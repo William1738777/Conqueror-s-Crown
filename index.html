@@ -1247,8 +1247,6 @@ Test 6.0
                     
                     if (validTarget) {
                         handleTargetSelection(id);
-                        if(isTutorialMode && tutorialStep === 6 && pendingSkill && pendingSkill.skillName === "SHORTSWORD STRIKE") { tutorialStep = 7; progressTutorial(); }
-                        if(isTutorialMode && tutorialStep === 15) { tutorialStep = 16; progressTutorial(); }
                     } else {
                         if (targetInst.side === currentTurn && pendingSkill.skillName !== "Blessing of the Light" && pendingSkill.skillName !== "Double Action") {
                             addLog("Invalid allied target clicked! Action auto-cancelled.", "#e74c3c");
@@ -1399,8 +1397,6 @@ Test 6.0
                     let canAttackCoreUI = false;
                     if(turnCount > 1 && data.type === 'unit' && data.name !== "Lionel Guard Tower") {
                         let validEnemies = getValidEnemyTargetIds('ENEMY');
-                        // Core is ONLY targetable if there are no valid front/backline enemies left, 
-                        // OR if we are explicitly on Step 17 of the tutorial.
                         if(validEnemies.length === 0 || (isTutorialMode && tutorialStep === 17)) canAttackCoreUI = true;
                     }
 
@@ -1435,14 +1431,12 @@ Test 6.0
             
             // --- TUTORIAL HIGHLIGHT BUG FIX HERE ---
             if (tutorialLock) {
-                // Nuclear override: Force the DOM to fully render, then aggressively unlock the exact target.
                 setTimeout(() => {
                     document.querySelectorAll('.tut-btn-target').forEach(btn => btn.classList.add('tut-disabled'));
                     
                     let unlockBtn = null;
                     let btns = Array.from(document.querySelectorAll('.tut-btn-target'));
                     
-                    // Search for the exact button by its skill text instead of guessing its index position
                     if(tutorialStep === 5 && data.name === "Mana Core") unlockBtn = btns.find(b => b.innerText.includes("Mana Initiation"));
                     if(tutorialStep === 6 && data.name === "Leonian Squire") unlockBtn = btns.find(b => b.innerText.includes("SHORTSWORD STRIKE"));
                     if(tutorialStep === 14 && data.name === "Leonian Bannerman") unlockBtn = btns.find(b => b.innerText.includes("RALLY"));
@@ -1543,7 +1537,13 @@ Test 6.0
 
                 // Unlock valid enemies for clicking in tutorial
                 if(tutorialLock) {
-                    validIds.forEach(id => { let el = document.getElementById(id); if(el) el.classList.remove('tut-disabled'); });
+                    validIds.forEach(id => {
+                        let el = document.getElementById(id);
+                        if(el) {
+                            el.classList.remove('tut-disabled');
+                            el.classList.add('tut-highlight-glow'); // Keep it highly visible during targeting!
+                        }
+                    });
                 }
 
                 if (validIds.length === 0) {
@@ -1561,15 +1561,20 @@ Test 6.0
             let action = { ...pendingSkill, targetId }; 
             pQueue.push(action);
             addLog(`Queued [${pendingSkill.skillName}] on ${cardInstances[targetId].name}.`, "#aaa");
-            pendingSkill = null; updateUI();
             
-            // Tutorial Checks (if we queued all required attacks)
+            // --- TUTORIAL PROGRESSION BUG FIX ---
+            if(isTutorialMode && tutorialStep === 6 && pendingSkill.skillName === "SHORTSWORD STRIKE") {
+                tutorialStep = 7; progressTutorial();
+            }
             if(isTutorialMode && tutorialStep === 15) {
                 let pQActors = pQueue.map(a => cardInstances[a.actorId].name);
                 if(pQActors.includes("Archer") && pQActors.includes("Great Knight")) {
                     tutorialStep = 16; progressTutorial();
                 }
             }
+
+            pendingSkill = null; // Memory wiped safely AFTER the check!
+            updateUI();
         }
 
         // ============================================================================
