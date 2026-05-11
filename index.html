@@ -1,4 +1,4 @@
-Test 6.0
+Test 6.1
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -838,10 +838,17 @@ Test 6.0
                 
                 // Visual flag set to true (strips HP bar and disables dragging here, forces background display)
                 const cardDOM = createCardDOM('tut_' + i, data, true); 
-                cardDOM.className = 'tut-card';
+                
+                // --- FIX: Add the class instead of overwriting, so it keeps the .card sizing CSS ---
+                cardDOM.classList.add('tut-card');
                 cardDOM.style.animationDelay = `${i * 0.3}s`;
-                // Explicitly set the background image here to override any missing CSS issues during presentation
-                cardDOM.querySelector('.card-img-container').style.backgroundImage = `url('${data.img.replace(/"/g, '&quot;').replace(/'/g, '%27')}')`;
+                
+                // --- FIX: Explicitly set the background image here to ensure it displays during presentation ---
+                let imgContainer = cardDOM.querySelector('.card-img-container');
+                if(imgContainer) {
+                    imgContainer.style.backgroundImage = `url('${data.img.replace(/"/g, '&quot;').replace(/'/g, '%27')}')`;
+                }
+                
                 container.appendChild(cardDOM);
             }
             document.body.appendChild(container);
