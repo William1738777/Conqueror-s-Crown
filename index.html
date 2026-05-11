@@ -55,8 +55,8 @@ Test 6.2
 
         #tut-overlay-msg { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.95); border: 2px solid var(--gold); color: white; padding: 15px 30px; font-size: 1.1rem; border-radius: 8px; z-index: 9000; text-align: center; display: none; box-shadow: 0 0 30px rgba(212, 175, 55, 0.6); pointer-events: none; max-width: 600px; line-height: 1.4; }
         .tut-highlight-glow { outline: 4px solid var(--gold) !important; box-shadow: 0 0 30px var(--gold) !important; animation: tutPulse 1s infinite alternate; position: relative; z-index: 8000 !important; cursor: pointer !important; pointer-events: auto !important; opacity: 1 !important; filter: none !important; }
-        /* Slightly lighter disable state so the deck/hand is still visible */
-        .tut-disabled { pointer-events: none !important; opacity: 0.4 !important; filter: grayscale(1); }
+        /* Softer disable state so cards retain color and visibility */
+        .tut-disabled { pointer-events: none !important; opacity: 0.7 !important; filter: grayscale(0.3) brightness(0.7); }
         @keyframes tutPulse { from { box-shadow: 0 0 10px var(--gold); } to { box-shadow: 0 0 40px var(--gold); } }
 
         /* --- Game Header & Grids --- */
@@ -1407,7 +1407,6 @@ Test 6.2
                         actionHtml += `<button class="skill-btn tut-btn-target" style="border-color:#f1c40f" onclick="activateBuffCard('${id}')"><span class="skill-name" style="color:#f1c40f">[ACTIVATE BUFF]</span><span class="skill-desc">Move to Buff Slot instantly.</span></button>`;
                     }
 
-                    // --- CORE TARGETING BUG FIX HERE ---
                     let canAttackCoreUI = false;
                     if(turnCount > 1 && data.type === 'unit' && data.name !== "Lionel Guard Tower") {
                         let validEnemies = getValidEnemyTargetIds('ENEMY');
@@ -1424,7 +1423,6 @@ Test 6.2
                             let meetsCondition = true;
                             if(skill.requiresBlessings) meetsCondition = (data.blessings >= skill.requiresBlessings);
                             
-                            // 🐛 BUG FIX: Tutorial Mana Core Sickness Lock override
                             let skillCanAct = canAct;
                             if (isTutorialMode && data.name === "Mana Core" && tutorialStep === 5) skillCanAct = true; 
 
@@ -1443,7 +1441,6 @@ Test 6.2
 
             sumUI.innerText = `${data.summonCost} MANA`;
             
-            // --- TUTORIAL HIGHLIGHT BUG FIX HERE ---
             if (tutorialLock) {
                 setTimeout(() => {
                     document.querySelectorAll('.tut-btn-target').forEach(btn => btn.classList.add('tut-disabled'));
@@ -1587,7 +1584,7 @@ Test 6.2
                 }
             }
 
-            pendingSkill = null; // Memory wiped safely AFTER the check!
+            pendingSkill = null; 
             updateUI();
         }
 
@@ -1696,6 +1693,17 @@ Test 6.2
                 const actor = cardInstances[action.actorId]; const actorDOM = document.getElementById(action.actorId);
                 
                 if(!actor || actor.hp <= 0) continue;
+                
+                // --- FIX: Stop unit from attacking a dead body if Great Knight already killed it! ---
+                if (action.targetId !== 'CORE' && action.targetId !== 'SELF') {
+                    let tInst = cardInstances[action.targetId];
+                    if (!tInst || tInst.hp <= 0) {
+                        addLog(`<b>${actor.name}</b>'s target is already dead! Energy saved.`, "#888");
+                        actor.exhausted = true; updateUI(); await new Promise(r => setTimeout(r, 400));
+                        continue; 
+                    }
+                }
+
                 actor.queued = false; actor.exhausted = true; updateUI(); 
 
                 if (action.skillName === "Mana Initiation") {
