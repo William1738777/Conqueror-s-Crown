@@ -1,4 +1,4 @@
-Test 6.6
+aa
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,32 +23,25 @@ Test 6.6
         #absorbing-text { display: none; color: var(--gold); font-size: 1.5rem; margin-top: 20px; animation: pulse 1s infinite alternate; text-shadow: 0 0 10px #000; }
         @keyframes pulse { from { opacity: 0.6; transform: scale(0.98); } to { opacity: 1; transform: scale(1.02); } }
         
-        /* --- RPG World & Overworld Screens --- */
+        /* --- RPG World & Overworld Screens (Bypassed) --- */
         .rpg-screen { position: absolute; inset: 0; display: none; background-size: cover; background-position: center; z-index: 400; background-color: #111; }
         #world-map-screen { background-image: var(--worldmap-url); }
         #map-darkness { position: absolute; inset: 0; background: rgba(0,0,0,0.85); pointer-events: none; z-index: 1; }
         .map-hotspot { position: absolute; z-index: 2; border: 2px solid var(--gold); border-radius: 50%; background: rgba(255,255,255,0.15); box-shadow: 0 0 30px var(--gold), inset 0 0 15px var(--gold); cursor: pointer; display: flex; justify-content: center; align-items: center; color: white; font-family: 'Cinzel'; font-weight: bold; text-shadow: 1px 1px 5px #000; animation: pulse 2s infinite; transform: translate(-50%, -50%); transition: 0.3s; }
-        .map-hotspot:hover { background: rgba(255,255,255,0.3); transform: translate(-50%, -50%) scale(1.05); }
         
         #leonia-screen { background-image: var(--leoniabg-url); }
         .locations-ui { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); border: 2px solid var(--gold); padding: 15px; border-radius: 8px; width: 250px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .locations-ui h2 { color: var(--gold); margin-top: 0; text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px; font-size: 1.2rem; }
         .loc-btn { display: block; width: 100%; padding: 10px; margin-bottom: 8px; background: #222; color: white; border: 1px solid #444; cursor: pointer; text-align: left; font-family: 'Cinzel'; transition: 0.2s; border-radius: 4px; }
-        .loc-btn:hover:not(:disabled) { background: var(--gold); color: black; font-weight: bold; transform: scale(1.02); }
-        .loc-btn:disabled { color: #555; cursor: not-allowed; opacity: 0.7; }
-        .loc-btn.unlocked { color: #fff; border-color: var(--hp-color); box-shadow: 0 0 10px rgba(46, 204, 113, 0.2); }
         
         #tavern-screen { background-image: var(--tavernbg-url); }
         #rpg-dialogue-box { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 800px; background: white; border: 4px solid var(--gold); border-radius: 8px; padding: 20px; color: black; font-family: 'Georgia', serif; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 450; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.1s; }
-        #rpg-dialogue-box:active { transform: translateX(-50%) scale(0.98); }
         #dialogue-speaker { font-weight: bold; font-family: 'Cinzel'; font-size: 1.2rem; color: #b71c1c; margin-bottom: 10px; text-transform: uppercase; }
         #dialogue-text { font-size: 1.1rem; line-height: 1.5; min-height: 50px; }
         
         .tutorial-card-presentation { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); display: flex; gap: 15px; z-index: 500; }
         .tut-card { opacity: 0; transform: translateY(50px) rotateY(180deg); animation: swoopIn 0.6s forwards ease-out; }
         @keyframes swoopIn { to { opacity: 1; transform: translateY(0) rotateY(0deg); } }
-        .card-swipe-anim { position: fixed; top: 110%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 196px; background-size: cover; z-index: 501; border-radius: 6px; box-shadow: 0 0 20px rgba(0,0,0,0.8); animation: swipeUpFlip 1s forwards ease-in-out; }
-        @keyframes swipeUpFlip { 0% { top: 110%; transform: translate(-50%, -50%) rotateY(180deg); } 50% { top: 40%; transform: translate(-50%, -50%) rotateY(180deg); } 100% { top: 40%; transform: translate(-50%, -50%) rotateY(0deg); opacity: 0; } }
         
         #tutorial-exit-btn { position: absolute; top: 60px; right: 20px; z-index: 100; background: #e74c3c; color: white; border: 2px solid white; padding: 10px 20px; font-weight: bold; cursor: pointer; display: none; border-radius: 8px; box-shadow: 0 0 15px #e74c3c; font-family: 'Cinzel'; transition: 0.2s; }
         #tutorial-exit-btn:hover { background: #c0392b; transform: scale(1.05); }
@@ -237,32 +230,9 @@ Test 6.6
         <div id="absorbing-text">Loading Assets...</div>
     </div>
 
-    <div id="world-map-screen" class="rpg-screen">
-        <div id="map-darkness"></div>
-        <div class="map-hotspot" style="top: 45%; left: 50%; width: 160px; height: 100px;" onclick="enterLeonia()">
-            Kingdom of Leonia
-        </div>
-    </div>
-
-    <div id="leonia-screen" class="rpg-screen">
-        <div class="locations-ui">
-            <h2>Locations</h2>
-            <button class="loc-btn unlocked" onclick="enterTavern()">Tavern</button>
-            <button class="loc-btn" disabled>Training Grounds (Locked)</button>
-            <button class="loc-btn" disabled>Barracks (Locked)</button>
-            <button class="loc-btn" disabled>Shops Alley (Locked)</button>
-            <button class="loc-btn" disabled>Arena (Locked)</button>
-            <button class="loc-btn" disabled>The Castle (Locked)</button>
-        </div>
-    </div>
-
-    <div id="tavern-screen" class="rpg-screen">
-        <div id="rpg-dialogue-box" onclick="advanceDialogue()">
-            <div id="dialogue-speaker">Tavern Keeper Ben</div>
-            <div id="dialogue-text">...</div>
-            <div style="font-size: 0.75rem; color: #aaa; text-align: right; margin-top: 15px; font-style: italic;">(Click to continue)</div>
-        </div>
-    </div>
+    <div id="world-map-screen" class="rpg-screen"></div>
+    <div id="leonia-screen" class="rpg-screen"></div>
+    <div id="tavern-screen" class="rpg-screen"></div>
 
     <button id="tutorial-exit-btn" onclick="location.reload()">EXIT GAME (TESTING)</button>
 
@@ -487,7 +457,6 @@ Test 6.6
             if (!url || url === 'none') return null;
             const audio = new Audio(url);
             audio.volume = 0.6;
-            // The .catch prevents the game from crashing if an audio file is missing
             audio.play().catch(e => console.warn("Audio playback prevented/failed:", e));
             return audio;
         }
@@ -503,9 +472,10 @@ Test 6.6
             entry.style.marginBottom = "6px";
             entry.innerHTML = `> ${msg}`;
             logEl.appendChild(entry);
-            logEl.scrollTop = logEl.scrollHeight; // Auto-scrolls to newest message
+            logEl.scrollTop = logEl.scrollHeight; 
         }
 
+        // 🚀 BYPASS FIX APPLIED HERE
         async function initializeGame() {
             document.getElementById('upload-box').style.display = 'none';
             document.getElementById('absorbing-text').style.display = 'block';
@@ -521,7 +491,6 @@ Test 6.6
                 let key = keys[i];
                 let fileUrl = ASSET_LINKS[key];
                 
-                document.getElementById('absorbing-text').innerText = `Loading Asset ${i + 1} of ${keys.length}...`;
                 const cardData = getCardTemplate(key, fileUrl);
                 
                 if (cardData.isCardBack) {
@@ -539,11 +508,10 @@ Test 6.6
                     if (cardData.iconType === 'shinobimark') shinobiMarkImgUrl = cardData.img;
                     if (cardData.iconType === 'atkbuff') atkIconUrl = cardData.img;
                 } else if (cardData.isAudio || cardData.isMapBG || cardData.isFX || cardData.isEmptySlot) {
-                    // Handled inside side-effects
                 } else if (cardData.isPlayable) {
                     cardLibrary.push({...cardData}); 
                 }
-                await new Promise(r => setTimeout(r, 60)); 
+                // REMOVED 60ms DELAY SO IT LOADS INSTANTLY
             }
             if (cardLibrary.length === 0) {
                 alert("No playable cards found! Please verify your GITHUB links inside ASSET_LINKS.");
@@ -551,7 +519,9 @@ Test 6.6
                 return;
             }
             
-            setTimeout(showOverworldMap, 500); 
+            // JUMP STRAIGHT INTO THE DUEL INSTEAD OF THE RPG MAP
+            document.getElementById('start-screen').style.display = 'none';
+            startTutorialDuel(); 
         }
 
         function getCardTemplate(fileName, dataUrl) {
@@ -749,7 +719,8 @@ Test 6.6
                 };
             }
         }
-        // ============================================================================
+                                                                                                                                    
+                                                                                                                                    // ============================================================================
         // 🎴 DECK GENERATOR & INITIALIZATION
         // ============================================================================
         function buildDeck() {
@@ -1870,3 +1841,6 @@ Test 6.6
     </script>
 </body>
 </html>
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
