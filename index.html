@@ -1,4 +1,4 @@
-Test 6.3
+Test 6.4
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -892,10 +892,10 @@ Test 6.3
             enemyHand.forEach((name, idx) => {
                 const data = getCardTemplate(name, ASSET_LINKS[name]);
                 
-                // --- FIX: Lower the tutorial Archer's HP to 200 so it is guaranteed to die ---
+                // --- SCRIPTED FIX: Nerf to 150 HP so Great Knight one-shots it ---
                 if (name === "Archer") {
-                    data.hp = 200;
-                    data.maxHp = 200;
+                    data.hp = 150;
+                    data.maxHp = 150;
                 }
                 
                 const cardId = 'e_' + name.replace(/\s+/g, '') + '_' + idx;
@@ -1009,17 +1009,20 @@ Test 6.3
                     lockAllExcept(['p_Bannerman']);
                     break;
                 case 15:
-                    setTutMessage("<b>BEN:</b> Now have your <b>Archer</b> and your <b>Great Knight</b> attack my Archer.");
-                    lockAllExcept(['p_Archer', 'p_GreatKnight', 'e_Archer_1']);
+                    setTutMessage("<b>BEN:</b> Now have your <b>Great Knight</b> attack my Archer with <b>[HEAVY STRIKE]</b>.");
+                    lockAllExcept(['p_GreatKnight', 'e_Archer_1']);
                     break;
                 case 16:
-                    setTutMessage("<b>BEN:</b> Execute the queue!");
+                    setTutMessage("<b>BEN:</b> Execute the queue to let the Knight strike!");
                     lockAllExcept([], false, true);
                     break;
                 case 17:
-                    setTutMessage("<b>BEN:</b> To win the game, you must destroy the <b>Core</b>. My Core currently has 1 HP. Select any unit, choose <b>[ATTACK CORE]</b>, and Execute it to claim victory!");
-                    // Explicitly unlocking the e-core-target so it glows and allows clicks
-                    lockAllExcept(['p_Archer', 'p_GreatKnight', 'p_Bannerman', 'p_Militia', 'e-core-target'], false, true);
+                    setTutMessage("<b>BEN:</b> My frontline is broken! Now, click your <b>Archer</b> and choose <b>[ATTACK CORE]</b>!");
+                    lockAllExcept(['p_Archer', 'e-core-target']);
+                    break;
+                case 18:
+                    setTutMessage("<b>BEN:</b> Execute the queue one last time to claim victory!");
+                    lockAllExcept([], false, true);
                     document.getElementById('exec-btn').classList.remove('tut-disabled');
                     break;
             }
@@ -1451,8 +1454,9 @@ Test 6.3
                     if(tutorialStep === 5 && data.name === "Mana Core") unlockBtn = btns.find(b => b.innerText.includes("Mana Initiation"));
                     if(tutorialStep === 6 && data.name === "Leonian Squire") unlockBtn = btns.find(b => b.innerText.includes("SHORTSWORD STRIKE"));
                     if(tutorialStep === 14 && data.name === "Leonian Bannerman") unlockBtn = btns.find(b => b.innerText.includes("RALLY"));
+                    
+                    // --- SCRIPTED FIX: Only Great Knight unlocks in 15 ---
                     if(tutorialStep === 15 && data.name === "Great Knight") unlockBtn = btns.find(b => b.innerText.includes("HEAVY STRIKE"));
-                    if(tutorialStep === 15 && data.name === "Archer") unlockBtn = btns.find(b => b.innerText.includes("VOLLEY"));
                     
                     if (unlockBtn) {
                         unlockBtn.classList.remove('tut-disabled');
@@ -1460,7 +1464,8 @@ Test 6.3
                         unlockBtn.classList.add('tut-highlight-glow'); 
                     }
 
-                    if(tutorialStep === 17) {
+                    // --- SCRIPTED FIX: Only Archer unlocks Core Attack in 17 ---
+                    if(tutorialStep === 17 && data.name === "Archer") {
                         btns.forEach(btn => {
                             if (btn.innerText.includes("ATTACK CORE")) {
                                 btn.classList.remove('tut-disabled');
@@ -1528,9 +1533,14 @@ Test 6.3
             actor.queued = true;
 
             if(isCore) {
-                let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'CORE' };
-                pQueue.push(action); addLog(`Queued [${skillName}] on Enemy Core.`, "#aaa"); 
-            } 
+    let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'CORE' };
+    pQueue.push(action); addLog(`Queued [${skillName}] on Enemy Core.`, "#aaa"); 
+    
+    // --- SCRIPTED FIX: Progress to Step 18 after queuing core attack ---
+    if (isTutorialMode && tutorialStep === 17) {
+        tutorialStep = 18; progressTutorial();
+    }
+}
             else if (skillName === "RALLY" || skillName === "Mana Initiation" || skillName === "BLOCK" || actor.type === 'ability') {
                 let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
                 pQueue.push(action); addLog(`Queued [${skillName}].`, "#aaa"); 
@@ -1578,11 +1588,11 @@ Test 6.3
                 tutorialStep = 7; progressTutorial();
             }
             if(isTutorialMode && tutorialStep === 15) {
-                let pQActors = pQueue.map(a => cardInstances[a.actorId].name);
-                if(pQActors.includes("Archer") && pQActors.includes("Great Knight")) {
-                    tutorialStep = 16; progressTutorial();
-                }
+            let pQActors = pQueue.map(a => cardInstances[a.actorId].name);
+            if(pQActors.includes("Great Knight")) {
+                tutorialStep = 16; progressTutorial();
             }
+        }
 
             pendingSkill = null; 
             updateUI();
@@ -1763,7 +1773,10 @@ Test 6.3
             isExecuting = false; document.body.classList.remove('in-combat-mode'); updateUI();
             
             if(isTutorialMode && tutorialStep === 7) { tutorialStep = 8; progressTutorial(); }
+            
+            // --- SCRIPTED FIX: Progress to Step 17 after Knight kills Archer ---
             if(isTutorialMode && tutorialStep === 16) { tutorialStep = 17; progressTutorial(); }
+            
             if(eCoreHP <= 0) { alert("VICTORY! Enemy Core Destroyed! You survived the tutorial."); location.reload(); } 
             if(pCoreHP <= 0) { alert("DEFEAT! Your Core was Destroyed!"); location.reload(); }
         }
