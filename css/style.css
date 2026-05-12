@@ -17,12 +17,12 @@ body { margin: 0; font-family: 'Cinzel', 'Georgia', serif; background-color: var
 
 /* --- RPG World & Overworld Screens --- */
 .rpg-screen { position: absolute; inset: 0; display: none; background-size: cover; background-position: center; z-index: 400; background-color: #111; }
-#world-map-screen { background-image: var(--worldmap-url); }
+#world-map-screen { background-image: url('../assets/WorldMap.png'); }
 #map-darkness { position: absolute; inset: 0; background: rgba(0,0,0,0.85); pointer-events: none; z-index: 1; }
 .map-hotspot { position: absolute; z-index: 2; border: 2px solid var(--gold); border-radius: 50%; background: rgba(255,255,255,0.15); box-shadow: 0 0 30px var(--gold), inset 0 0 15px var(--gold); cursor: pointer; display: flex; justify-content: center; align-items: center; color: white; font-family: 'Cinzel'; font-weight: bold; text-shadow: 1px 1px 5px #000; animation: pulse 2s infinite; transform: translate(-50%, -50%); transition: 0.3s; }
 .map-hotspot:hover { background: rgba(255,255,255,0.3); transform: translate(-50%, -50%) scale(1.05); }
 
-#leonia-screen { background-image: var(--leoniabg-url); }
+#leonia-screen { background-image: url('../assets/LeoniaBG.png'); }
 .locations-ui { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); border: 2px solid var(--gold); padding: 15px; border-radius: 8px; width: 250px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
 .locations-ui h2 { color: var(--gold); margin-top: 0; text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px; font-size: 1.2rem; }
 .loc-btn { display: block; width: 100%; padding: 10px; margin-bottom: 8px; background: #222; color: white; border: 1px solid #444; cursor: pointer; text-align: left; font-family: 'Cinzel'; transition: 0.2s; border-radius: 4px; }
@@ -30,7 +30,7 @@ body { margin: 0; font-family: 'Cinzel', 'Georgia', serif; background-color: var
 .loc-btn:disabled { color: #555; cursor: not-allowed; opacity: 0.7; }
 .loc-btn.unlocked { color: #fff; border-color: var(--hp-color); box-shadow: 0 0 10px rgba(46, 204, 113, 0.2); }
 
-#tavern-screen { background-image: var(--tavernbg-url); }
+#tavern-screen { background-image: url('../assets/Tavern.png'); }
 #rpg-dialogue-box { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 80%; max-width: 800px; background: white; border: 4px solid var(--gold); border-radius: 8px; padding: 20px; color: black; font-family: 'Georgia', serif; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 450; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.1s; }
 #rpg-dialogue-box:active { transform: translateX(-50%) scale(0.98); }
 #dialogue-speaker { font-weight: bold; font-family: 'Cinzel'; font-size: 1.2rem; color: #b71c1c; margin-bottom: 10px; text-transform: uppercase; }
