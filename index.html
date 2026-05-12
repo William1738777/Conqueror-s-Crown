@@ -1,4 +1,4 @@
-Test 6.4
+Test 6.5 (complete tutorial)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1613,6 +1613,41 @@ Test 6.4
         function triggerSlash(targetDOM, muteBodyShot = false) {
             if(!targetDOM) return; if(!muteBodyShot && bodyShotAudioUrl) playSound(bodyShotAudioUrl);
             const slash = document.createElement('div'); slash.className = 'slash-fx'; targetDOM.appendChild(slash); setTimeout(() => slash.remove(), 600);
+        }
+
+        // --- NEW PROJECTILE ANIMATION FUNCTION ---
+        function shootProjectile(actorDOM, targetDOM, isArrow = true) {
+            if (!actorDOM || !targetDOM) return;
+            const aRect = actorDOM.getBoundingClientRect();
+            const tRect = targetDOM.getBoundingClientRect();
+
+            const startX = aRect.left + aRect.width / 2;
+            const startY = aRect.top + aRect.height / 2;
+            const endX = tRect.left + tRect.width / 2;
+            const endY = tRect.top + tRect.height / 2;
+
+            const projectile = document.createElement('div');
+            projectile.className = isArrow ? 'arrow-fx' : 'shuriken-fx';
+            projectile.style.left = startX + 'px';
+            projectile.style.top = startY + 'px';
+
+            // Calculate rotation angle so the arrow points precisely at the target
+            const angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
+            projectile.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+
+            document.body.appendChild(projectile);
+
+            // Animate after a tiny delay so CSS transition picks it up
+            setTimeout(() => {
+                projectile.style.left = endX + 'px';
+                projectile.style.top = endY + 'px';
+            }, 10);
+
+            // Cleanup & SFX when it hits
+            setTimeout(() => {
+                projectile.remove();
+                if (isArrow && arrowHitAudioUrl) playSound(arrowHitAudioUrl);
+            }, 300);
         }
 
         function syncVisualHP(targetDOM, currentHP, maxHP) {
