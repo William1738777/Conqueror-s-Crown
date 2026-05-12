@@ -1664,18 +1664,32 @@ Test 6.5 (complete tutorial)
             let targetDOM = targetId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(targetId);
             let targetInst = cardInstances[targetId]; let actorDOM = document.getElementById(actor.id);
             let actorSlotDOM = (actorDOM && actorDOM.parentElement && actorDOM.parentElement.classList.contains('slot')) ? actorDOM.parentElement : null;
+            
             let isSlash = ["SHORTSWORD STRIKE", "HEAVY STRIKE", "BANNER STRIKE", "ATTACK"].includes(skillName);
+            // --- NEW: Define Ranged Skills so they don't lunge ---
+            let isRanged = ["VOLLEY", "Bullseye", "Arrow Rain", "Sniping Shot", "Double-Shot", "SHADOW STAR"].includes(skillName); 
 
             let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
             if(actorDOM && skillName !== "Passive" && skillName !== "RALLY" && skillName !== "BLOCK") {
-                if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
-                actorDOM.style.zIndex = "9999"; 
-                const aRect = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
-                const dX = (tRect.left + tRect.width/2) - (aRect.left + aRect.width/2); const dY = (tRect.top + tRect.height/2) - (aRect.top + aRect.height/2);
-                actorDOM.style.transition = "transform 0.15s cubic-bezier(0.4, 0, 1, 1)"; 
-                actorDOM.style.transform = `translate(${dX * 0.5}px, ${dY * 0.5}px) scale(1.3)`;
-                await new Promise(r => setTimeout(r, 150));
+                if (!isRanged) {
+                    // MELEE LUNGE
+                    if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
+                    actorDOM.style.zIndex = "9999"; 
+                    const aRect = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
+                    const dX = (tRect.left + tRect.width/2) - (aRect.left + aRect.width/2); const dY = (tRect.top + tRect.height/2) - (aRect.top + aRect.height/2);
+                    actorDOM.style.transition = "transform 0.15s cubic-bezier(0.4, 0, 1, 1)"; 
+                    actorDOM.style.transform = `translate(${dX * 0.5}px, ${dY * 0.5}px) scale(1.3)`;
+                    await new Promise(r => setTimeout(r, 150));
+                } else {
+                    // RANGED ATTACK (Draw back bow, shoot projectile)
+                    if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
+                    actorDOM.style.zIndex = "9999"; 
+                    actorDOM.style.transition = "transform 0.1s ease-out";
+                    actorDOM.style.transform = `scale(1.1)`;
+                    shootProjectile(actorDOM, targetDOM, true);
+                    await new Promise(r => setTimeout(r, 300)); // Wait for the arrow to travel!
+                }
             }
 
             if(targetDOM && skillName !== "RALLY" && skillName !== "BLOCK") {
