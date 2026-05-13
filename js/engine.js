@@ -950,8 +950,18 @@ async function processQueue(sideProcessing, queueArr) {
     if(isTutorialMode && tutorialStep === 7) { tutorialStep = 8; progressTutorial(); }
     if(isTutorialMode && tutorialStep === 16) { tutorialStep = 17; progressTutorial(); }
     
-    if(eCoreHP <= 0) { alert("VICTORY! Enemy Core Destroyed!"); location.reload(); } 
-    if(pCoreHP <= 0) { alert("DEFEAT! Your Core was Destroyed!"); location.reload(); }
+    if(eCoreHP <= 0) { 
+        if (isTutorialMode) {
+            // The tutorial script handles the win state, so do nothing here!
+        } else {
+            alert("VICTORY! Enemy Core Destroyed!"); 
+            location.reload(); // Later, we'll change this to return to the map!
+        }
+    } 
+    if(pCoreHP <= 0) { 
+        alert("DEFEAT! Your Core was Destroyed!"); 
+        location.reload(); 
+    }
 }
 
 document.getElementById('exec-btn').addEventListener('click', () => { 
