@@ -381,6 +381,8 @@ function startStrangerDuel() {
     document.getElementById('game-area').style.display = 'flex';
     
     isTutorialMode = false; // Normal Rules
+    tutorialLock = false;   //
+    
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; pCoreHP = 2000; eCoreHP = 2000;
     pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0;
