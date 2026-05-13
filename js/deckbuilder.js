@@ -17,6 +17,19 @@ function openInventory() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('inventory-screen').style.display = 'flex';
     
+    // --- FEATURE: Inject Bag Inspector UI if it doesn't exist ---
+    if (!document.getElementById('inv-inspector')) {
+        const sidebar = document.getElementById('inv-sidebar');
+        const exitBtn = sidebar.querySelector('.db-btn');
+        const inspectorHtml = `
+        <div id="inv-inspector" style="display: none; background: rgba(0,0,0,0.8); border: 1px solid var(--gold); padding: 15px; border-radius: 8px; margin-top: 15px; margin-bottom: 15px; overflow-y: auto; flex-grow: 1; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);">
+            <div id="inv-ins-name" style="color: var(--gold); font-weight: bold; text-align: center; font-family: 'Cinzel'; font-size: 1.1rem; border-bottom: 1px solid #444; padding-bottom: 5px;">Select Card</div>
+            <div style="text-align: center;"><img id="inv-ins-art" style="width: 70%; margin-top: 10px; border: 1px solid #444; border-radius: 4px; display: none;"></div>
+            <div id="inv-ins-desc" style="font-size: 0.75rem; color: #ccc; margin-top: 10px; line-height: 1.4;"></div>
+        </div>`;
+        exitBtn.insertAdjacentHTML('beforebegin', inspectorHtml);
+    }
+    
     if (playerCollection.length === 0 && battleDeckConfig.l4.cards[0] === null) {
         setupStartersAndCollection();
     }
