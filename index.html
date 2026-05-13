@@ -1,4 +1,4 @@
-Version 7.3 Freedom
+Version 7.4 (Freedom)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,7 +38,7 @@ Version 7.3 Freedom
             <h2>Locations</h2>
             <button class="loc-btn unlocked" onclick="enterTavern()">Tavern</button>
             <button class="loc-btn" disabled>Training Grounds (Locked)</button>
-            <button class="loc-btn unlocked" style="border-color: #3498db;" onclick="openInventory()">Barracks (Deck Assembly)</button>
+            <button class="loc-btn" disabled>Barracks (Locked)</button>
             <button class="loc-btn" disabled>Shops Alley (Locked)</button>
             <button class="loc-btn" disabled>Arena (Locked)</button>
             <button class="loc-btn" disabled>The Castle (Locked)</button>
@@ -92,8 +92,9 @@ Version 7.3 Freedom
 
     <div id="game-header">
         <span>CONQUEROR'S CROWN</span>
-        <button id="inventory-btn" style="display:none;" onclick="openInventory()">INVENTORY</button>
     </div>
+    
+    <button id="inventory-btn" style="display:none;" onclick="openInventory()" title="Open Bag"></button>
     
     <div id="tut-overlay-msg">Tutorial instructions here...</div>
 
