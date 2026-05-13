@@ -900,6 +900,64 @@ async function processQueue(sideProcessing, queueArr) {
                 addLog(`<b>${actor.name}</b> buffed ${validTargets.length} allies!`, "#f1c40f");
                 await new Promise(r => setTimeout(r, 600)); updateUI();
             }
+        }
+        else if (action.skillName === "VALIANT GUARD") {
+            // 1. Apply Shield to self
+            actor.shield = 250;
+            actor.shieldTurns = turnCount + 1;
+            
+            // 2. Find and Taunt enemy frontline
+            let enemySide = sideProcessing === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+            let frontlineEnemies = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${enemySide}"] .card`)).map(c => cardInstances[c.id]);
+            
+            frontlineEnemies.forEach(eTarget => {
+                if(eTarget && eTarget.hp > 0) eTarget.tauntedBy = actor.id;
+            });
+            
+            if (shieldSfxUrl) playSound(shieldSfxUrl); 
+            showFloatingText(actorDOM, "VALIANT GUARD", "#3498db", "1.2rem");
+            addLog(`<b>${actor.name}</b> shielded up and Taunted the frontline!`, "#3498db");
+            
+            await new Promise(r => setTimeout(r, 600)); 
+            updateUI();
+        }
+        else if (action.skillName === "Trigger Unbound") {
+            let rounds = actor.chamberedRounds || 0;
+            if (rounds > 0) {
+                addLog(`<b>Jaden</b> unleashes ${rounds} chambered rounds!`, "#e74c3c");
+                actor.chamberedRounds = 0;
+                
+                let enemySide = sideProcessing === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+                let validTargets = getValidEnemyTargetIds(enemySide);
+                
+                for (let r = 0; r < rounds; r++) {
+                    if (validTargets.length === 0) break;
+                    let randomTargetId = validTargets[Math.floor(Math.random() * validTargets.length)];
+                    let shotDmg = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
+                    
+                    await applyDamage(actor, randomTargetId, shotDmg, "Trigger Unbound");
+                    validTargets = getValidEnemyTargetIds(enemySide);
+                }
+            } else {
+                addLog(`<b>Jaden</b> tried to Trigger Unbound, but his chamber was empty!`, "#888");
+            }
+        }
+        // Damaging Skills
+        else {
+        else if (action.skillName === "RALLY") {
+            let slots = Array.from(document.querySelectorAll(`.slot[data-side="${sideProcessing}"]`));
+            let validTargets = slots.map(s => s.querySelector('.card')).filter(c => c && cardInstances[c.id]);
+            if (validTargets.length > 0) {
+                if (shieldSfxUrl) playSound(shieldSfxUrl);
+                validTargets.forEach(cEl => {
+                      cardInstances[cEl.id].shield = 100;
+                      cardInstances[cEl.id].shieldTurns = turnCount + 1;
+                      cardInstances[cEl.id].atkBuffTurns = turnCount + 1;
+                      showFloatingText(cEl, "RALLY BUFFS", "#f1c40f", "1.2rem");
+                });
+                addLog(`<b>${actor.name}</b> buffed ${validTargets.length} allies!`, "#f1c40f");
+                await new Promise(r => setTimeout(r, 600)); updateUI();
+            }
         } 
         // Damaging Skills
         else {
