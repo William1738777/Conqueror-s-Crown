@@ -211,13 +211,6 @@ function progressTutorial() {
         case 18:
             setTutMessage("<b>BEN:</b> Execute the queue one last time to claim victory!");
             lockAllExcept([], false, true);
-            
-            document.getElementById('exec-btn').onclick = async () => {
-                await processQueue('PLAYER', pQueue);
-                if (eCoreHP <= 0) {
-                    triggerLicenseQuest();
-                }
-            };
             break;
     }
 }
