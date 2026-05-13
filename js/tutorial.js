@@ -233,9 +233,6 @@ function triggerLicenseQuest() {
     // Unlock Inventory Bag
     document.getElementById('inventory-btn').style.display = 'block';
 
-    // NEW FIX: Unlock the Tavern Menu!
-    document.getElementById('tavern-menu').style.display = 'flex';
-
     const questDialogue = [
         "BEN: Looks like you can handle yourself pretty well. I can see you'll fit right in.",
         "BEN: Stick around, let me know if you need anything.",
@@ -265,7 +262,9 @@ function triggerLicenseQuest() {
                 document.getElementById('dialogue-speaker').style.color = "#b71c1c";
             }
         } else {
+            // Dialogue is over! Hide the box and show the menu.
             document.getElementById('rpg-dialogue-box').style.display = 'none';
+            document.getElementById('tavern-menu').style.display = 'flex';
         }
     };
 }
