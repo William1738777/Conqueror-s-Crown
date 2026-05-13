@@ -692,7 +692,7 @@ window.queueAction = function(actorId, skillName, cost, isCore) {
         pQueue.push(action); addLog(`Queued [${skillName}] on Enemy Core.`, "#aaa"); 
         if (isTutorialMode && tutorialStep === 17) { tutorialStep = 18; progressTutorial(); }
     }
-    else if (skillName === "RALLY" || skillName === "Mana Initiation" || skillName === "BLOCK" || actor.type === 'ability' || skillName === "Trigger Unbound") {
+    else if (skillName === "RALLY" || skillName === "VALIANT GUARD" || skillName === "Lion's Roar" || skillName === "Mana Initiation" || skillName === "BLOCK" || actor.type === 'ability' || skillName === "Trigger Unbound") {
         let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
         pQueue.push(action); addLog(`Queued [${skillName}].`, "#aaa"); 
         
@@ -944,23 +944,6 @@ async function processQueue(sideProcessing, queueArr) {
         }
         // Damaging Skills
         else {
-        else if (action.skillName === "RALLY") {
-            let slots = Array.from(document.querySelectorAll(`.slot[data-side="${sideProcessing}"]`));
-            let validTargets = slots.map(s => s.querySelector('.card')).filter(c => c && cardInstances[c.id]);
-            if (validTargets.length > 0) {
-                if (shieldSfxUrl) playSound(shieldSfxUrl);
-                validTargets.forEach(cEl => {
-                      cardInstances[cEl.id].shield = 100;
-                      cardInstances[cEl.id].shieldTurns = turnCount + 1;
-                      cardInstances[cEl.id].atkBuffTurns = turnCount + 1;
-                      showFloatingText(cEl, "RALLY BUFFS", "#f1c40f", "1.2rem");
-                });
-                addLog(`<b>${actor.name}</b> buffed ${validTargets.length} allies!`, "#f1c40f");
-                await new Promise(r => setTimeout(r, 600)); updateUI();
-            }
-        } 
-        // Damaging Skills
-        else {
             let dmg = actor.atk || 100; 
             if (action.skillName === "SHORTSWORD STRIKE") dmg = Math.floor(Math.random() * (120 - 80 + 1)) + 80;
             if (action.skillName === "HEAVY STRIKE") dmg = Math.floor(Math.random() * (250 - 150 + 1)) + 150;
@@ -968,7 +951,16 @@ async function processQueue(sideProcessing, queueArr) {
             if (action.skillName === "VOLLEY") dmg = Math.floor(Math.random() * (150 - 80 + 1)) + 80;
             if (action.skillName === "ICHI") { dmg = Math.floor(Math.random() * (1100 - 300 + 1)) + 300; if(dmg < 500) dmg = Math.floor(Math.random() * (1100 - 300 + 1)) + 300; }
             if (action.skillName === "Bullseye") dmg = Math.floor(Math.random() * (400 - 200 + 1)) + 200;
-            if (action.skillName === "Sniping Shot") { dmg = Math.floor(Math.random() * (800 - 500 + 1)) + 500; actor.chamberedRounds = (actor.chamberedRounds || 0) + 1; }
+            if (action.skillName === "Sniping Shot") { 
+                dmg = Math.floor(Math.random() * (800 - 500 + 1)) + 500; 
+                actor.chamberedRounds = (actor.chamberedRounds || 0) + 1; 
+                if (Math.random() < 0.6) { actor.chamberedRounds++; addLog(`<b>Jaden</b>'s Extra Shot passive triggered!`, "#f1c40f"); }
+            }
+            if (action.skillName === "Double-Shot") {
+                dmg = (Math.floor(Math.random() * (500 - 300 + 1)) + 300) * 2; 
+                actor.chamberedRounds = (actor.chamberedRounds || 0) + 2;
+                if (Math.random() < 0.6) { actor.chamberedRounds++; addLog(`<b>Jaden</b>'s Extra Shot passive triggered!`, "#f1c40f"); }
+            }
             if (action.skillName === "Suicidal attack") { if (villagerSuicideSfxUrl) playSound(villagerSuicideSfxUrl); await new Promise(r => setTimeout(r, 100)); dmg = 650; }
 
             // Focus Fire Passive
