@@ -156,6 +156,15 @@ function progressTutorial() {
             break;
         case 4:
             setTutMessage("<b>BEN:</b> I summon a Militia and an Archer. I'll end my turn.");
+            let mDOM = createCardDOM('e_Militia_0', cardInstances['e_Militia_0'], false);
+            let aDOM = createCardDOM('e_Archer_1', cardInstances['e_Archer_1'], false);
+            document.getElementById('e-front-center').appendChild(mDOM);
+            document.getElementById('e-back-right').appendChild(aDOM);
+            
+            setTimeout(() => {
+                tutorialStep = 5;
+                progressTutorial();
+            }, 3000);
             break;
         case 5:
             setTutMessage("<b>BEN:</b> Before we attack, remember the Frontline/Backline system. Frontline protects the Backline. You cannot hit my Archer until my Militia falls. Let's get more Mana. Click your <b>Mana Core</b> and select <b>[Mana Initiation]</b>.");
@@ -179,6 +188,19 @@ function progressTutorial() {
             break;
         case 10:
             setTutMessage("<b>BEN:</b> My turn. Desperate times! My Militia initiates a Suicidal Attack on your Squire!");
+            setTimeout(() => {
+                let sDOM = document.getElementById('p_Squire');
+                let milDOM = document.getElementById('e_Militia_0');
+                if (sDOM) sDOM.classList.add('dead');
+                if (milDOM) milDOM.classList.add('dead');
+                
+                cardInstances['p_Squire'].hp = 0;
+                cardInstances['e_Militia_0'].hp = 0;
+                pSquiresFallen++; 
+                
+                tutorialStep = 11;
+                progressTutorial();
+            }, 3500);
             break;
         case 11:
             setTutMessage("<b>BEN:</b> Since your Squire died, conditions have been met. You can now field the <b>Great Knight</b>. Deploy him to the Frontline.");
@@ -191,6 +213,19 @@ function progressTutorial() {
             break;
         case 13:
             setTutMessage("<b>BEN:</b> My Archer fires a volley at your Great Knight!");
+            setTimeout(() => {
+                let gkDOM = document.getElementById('p_GreatKnight');
+                if (gkDOM) {
+                    gkDOM.classList.add('damage-flash');
+                    setTimeout(() => gkDOM.classList.remove('damage-flash'), 300);
+                    cardInstances['p_GreatKnight'].hp -= 80;
+                    if (typeof syncVisualHP === 'function') {
+                        syncVisualHP(gkDOM, cardInstances['p_GreatKnight'].hp, cardInstances['p_GreatKnight'].maxHp);
+                    }
+                }
+                tutorialStep = 14;
+                progressTutorial();
+            }, 3500);
             break;
         case 14:
             setTutMessage("<b>BEN:</b> The knight took damage. Let's use a support skill. Click your <b>Bannerman</b> and use <b>[RALLY]</b> to shield your team.");
@@ -218,7 +253,7 @@ function progressTutorial() {
 // --- ADVENTURER'S LICENSE LORE HANDOFF ---
 function triggerLicenseQuest() {
     isTutorialMode = false;
-    tutorialLock = false; // <--- FIX APPLIED HERE: Board Unlocked
+    tutorialLock = false; 
     
     document.getElementById('game-area').style.display = 'none';
     document.getElementById('tavern-screen').style.display = 'block';
@@ -381,7 +416,7 @@ function startStrangerDuel() {
     document.getElementById('game-area').style.display = 'flex';
     
     isTutorialMode = false; // Normal Rules!
-    tutorialLock = false;   // <--- FIX APPLIED HERE: Board Unlocked
+    tutorialLock = false;   
     
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; pCoreHP = 2000; eCoreHP = 2000;
