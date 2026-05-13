@@ -379,7 +379,7 @@ function presentOMTCard() {
     // Attempt to load One More Time
     let link = ASSET_LINKS["One More Time"] || "";
     const data = getCardTemplate("One More Time", link); 
-    const cardDOM = createCardDOM('omt_reward', data, true);
+    const cardDOM = createCardDOM('omt_reward', data, false);
     
     cardDOM.style.transform = "scale(1.5)";
     cardDOM.style.marginBottom = "45px";
