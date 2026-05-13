@@ -46,10 +46,13 @@ function setupStartersAndCollection() {
     battleDeckConfig.l4.cards[0] = {...cardLibrary.find(c => c.name === "Great Knight"), dbId: generateUID()};
     battleDeckConfig.ability.cards[0] = {...cardLibrary.find(c => c.name === "Mana Core"), dbId: generateUID()};
 
-    // Populate the rest of the collection for testing (3 of everything else)
-    cardLibrary.forEach(c => {
-        if (c.name !== "Great Knight" && c.name !== "Mana Core") {
-            for(let i=0; i<3; i++) playerCollection.push({...c, dbId: generateUID()});
+    // Give the player ONLY the actual starter cards (not the whole game library)
+    const starterNames = ["Leonian Squire", "Archer", "Leonian Bannerman", "Militia"];
+    starterNames.forEach(name => {
+        let template = cardLibrary.find(c => c.name === name);
+        if(template) {
+            // Give them 3 copies of each starter
+            for(let i=0; i<3; i++) playerCollection.push({...template, dbId: generateUID()});
         }
     });
 }
@@ -108,6 +111,31 @@ function createDBCardDOM(card, location, tierKey, index) {
     });
     
     el.addEventListener('dragend', () => { draggingCardData = null; });
+    
+    // --- FEATURE: Click to inspect in Bag ---
+    el.addEventListener('click', () => {
+        const ins = document.getElementById('inv-inspector');
+        if (ins) {
+            ins.style.display = 'flex';
+            ins.style.flexDirection = 'column';
+            document.getElementById('inv-ins-name').innerText = card.name;
+            document.getElementById('inv-ins-art').src = card.img.replace(/"/g, '');
+            document.getElementById('inv-ins-art').style.display = 'inline-block';
+            
+            let descHtml = `<div style="color:#e74c3c; font-weight:bold; margin-bottom:5px; text-align:center;">BASE ATK: ${card.atk || 0} | HP: ${card.maxHp || 1}</div>`;
+            if(card.skills && card.skills.length > 0) {
+                card.skills.forEach(s => descHtml += `<div style="margin-top:5px; background:rgba(255,255,255,0.05); padding:5px; border-radius:4px;"><span style="color:var(--gold); font-weight:bold;">[${s.name}]</span> <span style="color:var(--mana-color); float:right;">${s.manaCost} MP</span><br>${s.desc}</div>`);
+            } else if (card.type === 'unit') {
+                descHtml += `<div style="margin-top:5px; background:rgba(255,255,255,0.05); padding:5px; border-radius:4px;"><span style="color:var(--gold); font-weight:bold;">[ATTACK]</span> <span style="color:var(--mana-color); float:right;">1 MP</span><br>Basic attack for ${card.atk || 100} damage.</div>`;
+            }
+            if(card.passives) {
+                card.passives.forEach(p => descHtml += `<div style="margin-top:5px; border-left: 2px solid #e67e22; padding-left: 5px;"><span style="color:#e67e22; font-weight:bold;">[${p.name}]</span><br>${p.desc}</div>`);
+            }
+            
+            document.getElementById('inv-ins-desc').innerHTML = descHtml;
+        }
+    });
+    
     return el;
 }
 
