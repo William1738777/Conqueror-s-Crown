@@ -230,5 +230,59 @@ function progressTutorial() {
             lockAllExcept([], false, true);
             document.getElementById('exec-btn').classList.remove('tut-disabled');
             break;
-    }
+    // Replace case 18 in your tutorial.js
+case 18:
+    setTutMessage("<b>BEN:</b> Execute the queue one last time to claim victory!");
+    lockAllExcept([], false, true);
+    
+    // Override standard execute to trigger the lore handoff
+    document.getElementById('exec-btn').onclick = async () => {
+        await processQueue('PLAYER', pQueue);
+        if (eCoreHP <= 0) {
+            triggerLicenseQuest();
+        }
+    };
+    break;
+
+// Add this function anywhere in tutorial.js
+function triggerLicenseQuest() {
+    isTutorialMode = false;
+    document.getElementById('game-area').style.display = 'none';
+    document.getElementById('tavern-screen').style.display = 'block';
+    
+    // Unlock Inventory
+    document.getElementById('inventory-btn').style.display = 'block';
+
+    const questDialogue = [
+        "BEN: Looks like you can handle yourself pretty well. I can see you'll fit right in.",
+        "BEN: Stick around, let me know if you need anything.",
+        "PLAYER: Actually, Ben... I need a place to stay, and I'm short on gold. Got any cheap rooms?",
+        "BEN: Ha! Well, you're in the right place. You don't need gold, but I have to abide by the kingdom's laws.",
+        "BEN: I'll be needing to see your Adventurer's License. If you don't have one, it's easy enough.",
+        "BEN: Just assemble a solid, legal deck of 40 cards and head to Leonia's Main Office to get licensed.",
+        "BEN: You can build your collection by buying from Shops, winning table wagers, or exploring the world.",
+        "BEN: Click the [INVENTORY] button at the top to manage your Battle Deck. Let me know when you're licensed.",
+        "PLAYER: Got it. Thanks, Ben!"
+    ];
+
+    dialogueIndex = 0;
+    
+    document.getElementById('rpg-dialogue-box').style.display = 'flex';
+    document.getElementById('dialogue-text').innerText = questDialogue[0];
+    
+    document.getElementById('rpg-dialogue-box').onclick = () => {
+        dialogueIndex++;
+        if (dialogueIndex < questDialogue.length) {
+            document.getElementById('dialogue-text').innerText = questDialogue[dialogueIndex];
+            if(questDialogue[dialogueIndex].startsWith("PLAYER:")) {
+                document.getElementById('dialogue-speaker').innerText = "You";
+                document.getElementById('dialogue-speaker').style.color = "#3498db";
+            } else {
+                document.getElementById('dialogue-speaker').innerText = "Tavern Keeper Ben";
+                document.getElementById('dialogue-speaker').style.color = "#b71c1c";
+            }
+        } else {
+            document.getElementById('rpg-dialogue-box').style.display = 'none';
+        }
+    };
 }
