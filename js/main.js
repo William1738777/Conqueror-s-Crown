@@ -121,8 +121,11 @@ function enterTavern() {
     document.getElementById('leonia-screen').style.display = 'none';
     document.getElementById('tavern-screen').style.display = 'block';
     
-    // This connects to the tutorial.js file we will make next!
-    if (typeof startDialogueSequence === "function") {
+    // If tutorial is at step 0, play the opening sequence
+    if (tutorialStep === 0 && typeof startDialogueSequence === "function") {
         startDialogueSequence();
+    } else {
+        // Otherwise, skip the tutorial and just show the standard Tavern menu
+        document.getElementById('tavern-menu').style.display = 'flex';
     }
 }
