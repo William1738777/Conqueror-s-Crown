@@ -159,5 +159,47 @@
             <div id="event-log"></div>
         </div>
     </div>
+
+    <div id="game-header">
+    <span>CONQUEROR'S CROWN</span>
+    <button id="inventory-btn" style="display:none;" onclick="openInventory()">INVENTORY</button>
+</div>
+
+<div id="inventory-screen" class="rpg-screen">
+    <div id="inv-container">
+        <div id="inv-sidebar">
+            <div id="player-profile">
+                <div id="player-name">ADVENTURER</div>
+                <div id="player-gold">GOLD: 500</div>
+            </div>
+            <div id="license-section">
+                <div class="inv-label" style="color:var(--gold); font-weight:bold; margin-bottom:10px;">KINGDOM LICENSES</div>
+                <div id="license-list">
+                    <div class="license-slot blank">LEONIA: [NO LICENSE]</div>
+                    <div class="license-slot blank">ARASHI: [NO LICENSE]</div>
+                </div>
+            </div>
+            <nav id="inv-tabs">
+                <button class="tab-btn active">CARDS</button>
+                <button class="tab-btn" disabled>ITEMS</button>
+            </nav>
+            <button class="db-btn" style="margin-top: auto;" onclick="closeInventory()">EXIT INVENTORY</button>
+        </div>
+
+        <div id="inv-main-content">
+            <div id="battle-deck-panel">
+                <h3 class="db-title">BATTLE DECK (40 CARDS)</h3>
+                <div id="battle-deck-tiers">
+                    </div>
+            </div>
+
+            <div id="collection-panel">
+                <h3 class="db-title">YOUR COLLECTION</h3>
+                <div id="collection-grid" ondrop="dropToCollection(event)" ondragover="allowDrop(event)">
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
