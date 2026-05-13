@@ -862,6 +862,7 @@ async function processQueue(sideProcessing, queueArr) {
     
     let q = [...queueArr];
     if(sideProcessing === 'PLAYER') pQueue = []; 
+    if(sideProcessing === 'ENEMY') eQueue = []; 
     updateUI();
 
     for(let i=0; i<q.length; i++) {
