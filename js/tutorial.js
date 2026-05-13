@@ -381,7 +381,10 @@ function startStrangerDuel() {
     document.getElementById('game-area').style.display = 'flex';
     
     isTutorialMode = false; // Normal Rules
-    tutorialLock = false;   //
+    tutorialLock = false;
+
+    // NEW FIX: Clear the inspector!
+    if (typeof showInspector === 'function') showInspector('none');
     
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; pCoreHP = 2000; eCoreHP = 2000;
