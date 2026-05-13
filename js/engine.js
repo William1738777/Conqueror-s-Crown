@@ -2,6 +2,9 @@
 // ⚔️ ENGINE.JS - CORE COMBAT & AI LOGIC
 // ============================================================================
 
+let pDeck = [];
+let eDeck = [];
+
 // --- 🎴 DECK GENERATOR & INITIALIZATION ---
 function buildDeck() {
     let deck = [];
