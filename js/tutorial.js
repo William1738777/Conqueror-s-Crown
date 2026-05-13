@@ -218,18 +218,17 @@ function progressTutorial() {
 // --- ADVENTURER'S LICENSE LORE HANDOFF ---
 function triggerLicenseQuest() {
     isTutorialMode = false;
-    tutorialLock = false; // <--- FIX APPLIED HERE: Board Unlocked
-    
     document.getElementById('game-area').style.display = 'none';
     document.getElementById('tavern-screen').style.display = 'block';
     
-    // Clear Tutorial Overlays & Artifacts
+    // --- BUG FIX: Clear Tutorial Overlay & Combat Visual Artifacts ---
     document.getElementById('tut-overlay-msg').style.display = 'none';
     document.querySelectorAll('.target-glow, .target-line-glow, .target-heal-glow, .tut-highlight-glow, .tut-disabled').forEach(el => {
         el.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'tut-highlight-glow', 'tut-disabled');
     });
     document.querySelectorAll('.arrow-fx, .shuriken-fx, .slash-fx, .floating-text').forEach(el => el.remove());
     isTargeting = false;
+    // ----------------------------------------------------------------
     
     // Unlock Inventory Bag
     document.getElementById('inventory-btn').style.display = 'block';
@@ -264,15 +263,6 @@ function triggerLicenseQuest() {
             }
         } else {
             document.getElementById('rpg-dialogue-box').style.display = 'none';
-            
-            // --- NEW: Unlock Training Grounds & Reveal Menu ---
-            document.getElementById('tavern-menu').style.display = 'flex';
-            const tgBtn = document.getElementById('loc-tg-btn');
-            if (tgBtn) {
-                tgBtn.disabled = false;
-                tgBtn.innerText = "Training Grounds";
-                tgBtn.classList.add('unlocked');
-            }
         }
     };
 }
@@ -314,7 +304,7 @@ function startStrangersEvent() {
     box.style.display = 'flex';
     document.getElementById('tg-speaker').innerText = "You";
     document.getElementById('tg-speaker').style.color = "#3498db";
-    document.getElementById('tg-text').innerText = "Hey there. I'm looking to see how to get some cards... I need to get my Adventurer's license. You have any tips?";
+    document.getElementById('tg-text').innerText = "Hey there. I'm looking to see how to get some cards.. I need to get my Adventurer's license. You have any tips?";
 }
 
 function advanceTgDialogue() {
@@ -380,9 +370,7 @@ function startStrangerDuel() {
     document.getElementById('tg-screen').style.display = 'none';
     document.getElementById('game-area').style.display = 'flex';
     
-    isTutorialMode = false; // Normal Rules!
-    tutorialLock = false;   // <--- FIX APPLIED HERE: Board Unlocked
-    
+    isTutorialMode = false; // Normal Rules
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; pCoreHP = 2000; eCoreHP = 2000;
     pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0;
