@@ -221,6 +221,15 @@ function triggerLicenseQuest() {
     document.getElementById('game-area').style.display = 'none';
     document.getElementById('tavern-screen').style.display = 'block';
     
+    // --- BUG FIX: Clear Tutorial Overlay & Combat Visual Artifacts ---
+    document.getElementById('tut-overlay-msg').style.display = 'none';
+    document.querySelectorAll('.target-glow, .target-line-glow, .target-heal-glow, .tut-highlight-glow, .tut-disabled').forEach(el => {
+        el.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'tut-highlight-glow', 'tut-disabled');
+    });
+    document.querySelectorAll('.arrow-fx, .shuriken-fx, .slash-fx, .floating-text').forEach(el => el.remove());
+    isTargeting = false;
+    // ----------------------------------------------------------------
+    
     // Unlock Inventory Bag
     document.getElementById('inventory-btn').style.display = 'block';
 
