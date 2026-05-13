@@ -1,4 +1,4 @@
-Version 7.8
+Version 7.7 (Freedom)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,15 +34,14 @@ Version 7.8
     </div>
 
     <div id="leonia-screen" class="rpg-screen">
-        <div class="locations-ui">
-            <div style="font-family: 'Cinzel'; font-size: 1.5rem; color: var(--gold); margin-bottom: 15px; text-align: center;">Locations</div>
+        <<button class="loc-btn" id="loc-tg-btn" onclick="enterTrainingGrounds()" disabled>Training Grounds (Locked)</button>>
+            <h2>Locations</h2>
             <button class="loc-btn unlocked" onclick="enterTavern()">Tavern</button>
-            <button class="loc-btn" id="loc-tg-btn" onclick="enterTrainingGrounds()" disabled>Training Grounds (Locked)</button>
+            <button class="loc-btn" disabled>Training Grounds (Locked)</button>
             <button class="loc-btn" disabled>Barracks (Locked)</button>
             <button class="loc-btn" disabled>Shops Alley (Locked)</button>
             <button class="loc-btn" disabled>Arena (Locked)</button>
             <button class="loc-btn" disabled>The Castle (Locked)</button>
-            <button class="loc-btn" disabled>Main Office (Locked)</button>
         </div>
     </div>
 
@@ -73,7 +72,7 @@ Version 7.8
         </div>
 
         <div id="omt-presentation" style="display:none; position:absolute; top:45%; left:50%; transform:translate(-50%,-50%); text-align:center;">
-        </div>
+            </div>
     </div>
     
     <div id="inventory-screen" class="rpg-screen">
