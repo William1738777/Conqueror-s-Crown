@@ -266,3 +266,153 @@ function triggerLicenseQuest() {
         }
     };
 }
+
+// ============================================================================
+// 🗺️ LOCATIONS & STRANGER DUEL EVENT
+// ============================================================================
+
+function talkToBen() {
+    document.getElementById('rpg-dialogue-box').style.display = 'flex';
+    document.getElementById('dialogue-speaker').innerText = "Tavern Keeper Ben";
+    document.getElementById('dialogue-speaker').style.color = "#b71c1c";
+    document.getElementById('dialogue-text').innerText = "Let me know when you get the License. Go check out the Training Grounds if you need to test your deck.";
+    document.getElementById('rpg-dialogue-box').onclick = () => { document.getElementById('rpg-dialogue-box').style.display = 'none'; };
+}
+
+function backToLeonia() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('leonia-screen').style.display = 'block';
+}
+
+function enterTrainingGrounds() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    const tg = document.getElementById('tg-screen');
+    tg.style.display = 'block';
+    tg.style.backgroundImage = "url('./assets/TG1.png')";
+    document.getElementById('tg-menu').style.display = 'flex';
+}
+
+// --- STRANGERS EVENT LOGIC ---
+let tgStep = 0;
+
+function startStrangersEvent() {
+    document.getElementById('tg-menu').style.display = 'none';
+    document.getElementById('tg-screen').style.backgroundImage = "url('./assets/TG2.png')";
+    
+    tgStep = 1;
+    const box = document.getElementById('tg-dialogue-box');
+    box.style.display = 'flex';
+    document.getElementById('tg-speaker').innerText = "You";
+    document.getElementById('tg-speaker').style.color = "#3498db";
+    document.getElementById('tg-text').innerText = "Hey there. I'm looking to see how to get some cards.. I need to get my Adventurer's license. You have any tips?";
+}
+
+function advanceTgDialogue() {
+    if (tgStep === 1) {
+        tgStep = 2;
+        document.getElementById('tg-screen').style.backgroundImage = "url('./assets/TG3.png')";
+        document.getElementById('tg-speaker').innerText = "Friendly Girl";
+        document.getElementById('tg-speaker').style.color = "#2ecc71";
+        document.getElementById('tg-text').innerText = "Oh, a newcomer! Getting a license isn't easy, but you'll need all the help you can get. Here, I have a spare spell that saved my life a few times. Take it!";
+    } else if (tgStep === 2) {
+        document.getElementById('tg-dialogue-box').style.display = 'none';
+        presentOMTCard();
+    } else if (tgStep === 3) {
+        tgStep = 4;
+        document.getElementById('tg-screen').style.backgroundImage = "url('./assets/TG5.png')";
+        document.getElementById('tg-speaker').innerText = "Arrogant Guy";
+        document.getElementById('tg-text').innerText = "Enough talk. Let me show you what a real duel looks like. Try not to cry when I crush your core!";
+    } else if (tgStep === 4) {
+        document.getElementById('tg-dialogue-box').style.display = 'none';
+        startStrangerDuel();
+    }
+}
+
+function presentOMTCard() {
+    const container = document.getElementById('omt-presentation');
+    container.innerHTML = '';
+    
+    // Attempt to load One More Time
+    let link = ASSET_LINKS["One More Time"] || "";
+    const data = getCardTemplate("One More Time", link); 
+    const cardDOM = createCardDOM('omt_reward', data, true);
+    
+    cardDOM.style.transform = "scale(1.5)";
+    cardDOM.style.marginBottom = "45px";
+    
+    container.appendChild(cardDOM);
+    container.innerHTML += `<button class="menu-btn" style="background:var(--hp-color); color:black; width:100%; text-align:center;" onclick="acceptOMT()">Accept Card</button>`;
+    container.style.display = 'block';
+}
+
+function acceptOMT() {
+    document.getElementById('omt-presentation').style.display = 'none';
+    
+    // Dynamically inject card into collection
+    let link = ASSET_LINKS["One More Time"] || "";
+    let omtData = getCardTemplate("One More Time", link);
+    if(typeof playerCollection !== 'undefined') {
+        playerCollection.push({...omtData, dbId: generateUID()});
+    }
+    
+    // Trigger Jax sequence
+    tgStep = 3;
+    document.getElementById('tg-screen').style.backgroundImage = "url('./assets/TG4.png')";
+    const box = document.getElementById('tg-dialogue-box');
+    box.style.display = 'flex';
+    document.getElementById('tg-speaker').innerText = "Arrogant Guy";
+    document.getElementById('tg-speaker').style.color = "#e74c3c";
+    document.getElementById('tg-text').innerText = "Pfft, giving away spells to rookies? You're too soft. Kid won't last a minute out here.";
+}
+
+// --- DUEL INITIALIZATION ---
+function startStrangerDuel() {
+    document.getElementById('tg-screen').style.display = 'none';
+    document.getElementById('game-area').style.display = 'flex';
+    
+    isTutorialMode = false; // Normal Rules
+    turnCount = 1; currentTurn = 'PLAYER';
+    pMana = 8; eMana = 8; pCoreHP = 2000; eCoreHP = 2000;
+    pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0;
+    
+    // Clear previously frozen tutorial elements
+    document.getElementById('hand').innerHTML = ''; 
+    document.querySelectorAll('.slot .card').forEach(c => c.remove());
+    
+    // Pull Player Deck based heavily on their specific Inventory setup
+    pDeck = [];
+    if(typeof battleDeckConfig !== 'undefined') {
+        Object.values(battleDeckConfig).forEach(tier => {
+            tier.cards.forEach(card => {
+                if(card) {
+                   let template = cardLibrary.find(c => c.name === card.name);
+                   if (template) pDeck.push(JSON.parse(JSON.stringify(template)));
+                }
+            });
+        });
+    }
+    // Fallback logic incase player brought an empty deck
+    if(pDeck.length === 0) pDeck = buildDeck(); 
+    for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
+    
+    // Pull Enemy Deck (Jax's Custom Smack-Talk Deck)
+    eDeck = [];
+    const jaxDeckNames = ["Zombie", "Zombie", "Zombie", "Skeleton Warrior", "Skeleton Warrior", "Skeleton Warrior", "Leonian Squire", "Leonian Squire", "Leonian Squire", "Jaden"];
+    jaxDeckNames.forEach(name => {
+        let template = cardLibrary.find(c => c.name === name);
+        if(template) eDeck.push(JSON.parse(JSON.stringify(template)));
+    });
+    for(let i = eDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [eDeck[i], eDeck[j]] = [eDeck[j], eDeck[i]]; }
+    
+    // Update visuals
+    document.getElementById('p-deck-count').innerText = pDeck.length;
+    document.getElementById('e-deck-count').innerText = eDeck.length;
+    document.getElementById('event-log').innerHTML = '';
+    
+    addLog("BATTLE COMMENCED. No combat allowed on Turn 1.", "var(--gold)");
+    updateUI(); 
+    
+    const drawBtn = document.getElementById('draw-cards-btn');
+    drawBtn.style.display = "block";
+    drawBtn.innerText = "DRAW HAND";
+}
