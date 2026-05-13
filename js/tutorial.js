@@ -221,7 +221,7 @@ function progressTutorial() {
             setTutMessage("<b>BEN:</b> Execute the queue to let the Knight strike!");
             lockAllExcept([], false, true);
             break;
-        case 17:
+       case 17:
             setTutMessage("<b>BEN:</b> My frontline is broken! Now, click your <b>Archer</b> and choose <b>[ATTACK CORE]</b>!");
             lockAllExcept(['p_Archer', 'e-core-target']);
             break;
@@ -237,8 +237,8 @@ function progressTutorial() {
                 }
             };
             break;
-    } // <-- This closes the switch statement
-} // <-- This closes the progressTutorial function
+    }
+}
 
 // --- ADVENTURER'S LICENSE LORE HANDOFF ---
 function triggerLicenseQuest() {
