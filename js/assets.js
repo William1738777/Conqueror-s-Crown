@@ -151,7 +151,7 @@ function getCardTemplate(fileName, dataUrl) {
     }
     else if (cleanName.includes('great knight')) {
         return {
-            isPlayable: true, type: 'unit', name: "Great Knight", title: "Level 3", powerLevel: 3, summonCost: 3, summonRequires: { type: 'squiresFallen', amount: 1 }, faction: "Leonia", race: "Human", hp: 950, maxHp: 950, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
+            isPlayable: true, type: 'unit', name: "Great Knight", title: "Level 4", powerLevel: 4, summonCost: 3, summonRequires: { type: 'squiresFallen', amount: 1 }, faction: "Leonia", race: "Human", hp: 950, maxHp: 950, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
             skills: [ { name: "HEAVY STRIKE", manaCost: 0, desc: "Deals 150-250 physical damage to a frontline enemy." }, { name: "VALIANT GUARD", manaCost: 2, desc: "Enters a defensive stance for 1 turn, gaining a 250 HP shield and Taunting all enemies in the frontline." } ], 
             passives: [ { name: "HEAVY PLATE", desc: "Reduces all incoming physical damage by a flat 40 points, calculated before any shields are depleted." } ]
         };
