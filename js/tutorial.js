@@ -36,9 +36,6 @@ async function presentStarterCards() {
         if (key === "Great Knight") key = "Great Knight";
 
         const data = getCardTemplate(key, ASSET_LINKS[key]);
-        
-        // Visual flag set to true (strips HP bar and disables dragging here)
-        // createCardDOM will be defined in engine.js!
         const cardDOM = createCardDOM('tut_' + i, data, true); 
         
         cardDOM.classList.add('tut-card');
@@ -76,7 +73,7 @@ function startTutorialDuel() {
     tutorialStep = 1;
     pMana = 8;
     eMana = 8;
-    eCoreHP = 1; // 1 HP for Tutorial Target Practice
+    eCoreHP = 1; 
     document.getElementById('enemy-core-hp').innerText = `BEN'S CORE: 1 | MANA: 8`;
     
     let playerHand = ["Squire", "Archer", "Bannerman", "Mana Core", "Great Knight", "Militia"];
@@ -87,25 +84,16 @@ function startTutorialDuel() {
         document.getElementById('hand').appendChild(createCardDOM(cardId, cardInstances[cardId], false));
     });
 
-    // Ben's initial hand
     let enemyHand = ["Militia", "Archer"];
     enemyHand.forEach((name, idx) => {
         const data = getCardTemplate(name, ASSET_LINKS[name]);
-        
-        // Nerf to 150 HP so Great Knight one-shots it
-        if (name === "Archer") {
-            data.hp = 150;
-            data.maxHp = 150;
-        }
-        
+        if (name === "Archer") { data.hp = 150; data.maxHp = 150; }
         const cardId = 'e_' + name.replace(/\s+/g, '') + '_' + idx;
         cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: 'ENEMY', turnPlaced: 0, tauntedBy: null, isRevealed: false };
         eHandData.push(cardId);
     });
 
     document.getElementById('tut-overlay-msg').style.display = 'block';
-    
-    // Safety check: ensure engine.js has loaded updateUI
     if (typeof updateUI === "function") updateUI();
     progressTutorial();
 }
@@ -142,7 +130,6 @@ function lockAllExcept(allowedIds, allowEndTurn = false, allowExec = false) {
     if (allowExec) { execBtn.classList.remove('tut-disabled'); execBtn.classList.add('tut-highlight-glow'); }
     else { execBtn.classList.add('tut-disabled'); execBtn.classList.remove('tut-highlight-glow'); }
     
-    // Never lock Cancel to prevent soft-locks
     let cancelBtn = document.getElementById('cancel-btn');
     if (cancelBtn) cancelBtn.classList.remove('tut-disabled');
     
@@ -150,7 +137,6 @@ function lockAllExcept(allowedIds, allowEndTurn = false, allowExec = false) {
     if(drawBtn) drawBtn.style.display = 'none'; 
 }
 
-// 🧠 The Rigid Master Tutorial Script
 function progressTutorial() {
     if (!isTutorialMode) return;
     clearTutHighlights();
@@ -170,7 +156,6 @@ function progressTutorial() {
             break;
         case 4:
             setTutMessage("<b>BEN:</b> I summon a Militia and an Archer. I'll end my turn.");
-            // Triggered dynamically in AI Turn
             break;
         case 5:
             setTutMessage("<b>BEN:</b> Before we attack, remember the Frontline/Backline system. Frontline protects the Backline. You cannot hit my Archer until my Militia falls. Let's get more Mana. Click your <b>Mana Core</b> and select <b>[Mana Initiation]</b>.");
@@ -194,11 +179,10 @@ function progressTutorial() {
             break;
         case 10:
             setTutMessage("<b>BEN:</b> My turn. Desperate times! My Militia initiates a Suicidal Attack on your Squire!");
-            // Triggered dynamically in AI Turn
             break;
         case 11:
             setTutMessage("<b>BEN:</b> Since your Squire died, conditions have been met. You can now field the <b>Great Knight</b>. Deploy him to the Frontline.");
-            if(cardInstances['p_GreatKnight']) cardInstances['p_GreatKnight'].summonRequires = null; // Bypass strictly for tutorial
+            if(cardInstances['p_GreatKnight']) cardInstances['p_GreatKnight'].summonRequires = null; 
             lockAllExcept(['p_GreatKnight', 'p-front-left', 'p-front-center', 'p-front-right']);
             break;
         case 12:
@@ -207,7 +191,6 @@ function progressTutorial() {
             break;
         case 13:
             setTutMessage("<b>BEN:</b> My Archer fires a volley at your Great Knight!");
-            // Triggered dynamically in AI Turn
             break;
         case 14:
             setTutMessage("<b>BEN:</b> The knight took damage. Let's use a support skill. Click your <b>Bannerman</b> and use <b>[RALLY]</b> to shield your team.");
@@ -221,7 +204,7 @@ function progressTutorial() {
             setTutMessage("<b>BEN:</b> Execute the queue to let the Knight strike!");
             lockAllExcept([], false, true);
             break;
-       case 17:
+        case 17:
             setTutMessage("<b>BEN:</b> My frontline is broken! Now, click your <b>Archer</b> and choose <b>[ATTACK CORE]</b>!");
             lockAllExcept(['p_Archer', 'e-core-target']);
             break;
@@ -229,7 +212,6 @@ function progressTutorial() {
             setTutMessage("<b>BEN:</b> Execute the queue one last time to claim victory!");
             lockAllExcept([], false, true);
             
-            // Override standard execute to trigger the lore handoff
             document.getElementById('exec-btn').onclick = async () => {
                 await processQueue('PLAYER', pQueue);
                 if (eCoreHP <= 0) {
@@ -246,7 +228,6 @@ function triggerLicenseQuest() {
     document.getElementById('game-area').style.display = 'none';
     document.getElementById('tavern-screen').style.display = 'block';
     
-    // Unlock Inventory
     document.getElementById('inventory-btn').style.display = 'block';
 
     const questDialogue = [
