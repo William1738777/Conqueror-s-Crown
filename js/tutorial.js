@@ -32,19 +32,13 @@ async function presentStarterCards() {
     const starters = ["Squire", "Archer", "Bannerman", "Great Knight", "Mana Core", "Militia"];
     for (let i=0; i<starters.length; i++) {
         let key = starters[i];
-        if (key === "Mana Core") key = "Mana Core";
-        if (key === "Great Knight") key = "Great Knight";
 
         const data = getCardTemplate(key, ASSET_LINKS[key]);
-        const cardDOM = createCardDOM('tut_' + i, data, true); 
+        // FIX: Set isHidden to FALSE so the cards actually render face-up with their artwork!
+        const cardDOM = createCardDOM('tut_' + i, data, false); 
         
         cardDOM.classList.add('tut-card');
         cardDOM.style.animationDelay = `${i * 0.3}s`;
-        
-        let imgContainer = cardDOM.querySelector('.card-img-container');
-        if(imgContainer) {
-            imgContainer.style.backgroundImage = `url('${data.img.replace(/"/g, '&quot;').replace(/'/g, '%27')}')`;
-        }
         
         container.appendChild(cardDOM);
     }
@@ -161,6 +155,7 @@ function progressTutorial() {
             document.getElementById('e-front-center').appendChild(mDOM);
             document.getElementById('e-back-right').appendChild(aDOM);
             
+            lockAllExcept([]); // Safely lock the board while Ben acts
             setTimeout(() => {
                 tutorialStep = 5;
                 progressTutorial();
@@ -188,6 +183,8 @@ function progressTutorial() {
             break;
         case 10:
             setTutMessage("<b>BEN:</b> My turn. Desperate times! My Militia initiates a Suicidal Attack on your Squire!");
+            
+            lockAllExcept([]); // Safely lock the board while Ben acts
             setTimeout(() => {
                 let sDOM = document.getElementById('p_Squire');
                 let milDOM = document.getElementById('e_Militia_0');
@@ -213,6 +210,8 @@ function progressTutorial() {
             break;
         case 13:
             setTutMessage("<b>BEN:</b> My Archer fires a volley at your Great Knight!");
+            
+            lockAllExcept([]); // Safely lock the board while Ben acts
             setTimeout(() => {
                 let gkDOM = document.getElementById('p_GreatKnight');
                 if (gkDOM) {
