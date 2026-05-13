@@ -228,6 +228,7 @@ function triggerLicenseQuest() {
     document.getElementById('game-area').style.display = 'none';
     document.getElementById('tavern-screen').style.display = 'block';
     
+    // Unlock Inventory Bag
     document.getElementById('inventory-btn').style.display = 'block';
 
     const questDialogue = [
@@ -238,7 +239,7 @@ function triggerLicenseQuest() {
         "BEN: I'll be needing to see your Adventurer's License. If you don't have one, it's easy enough.",
         "BEN: Just assemble a solid, legal deck of 40 cards and head to Leonia's Main Office to get licensed.",
         "BEN: You can build your collection by buying from Shops, winning table wagers, or exploring the world.",
-        "BEN: Click the [INVENTORY] button at the top to manage your Battle Deck. Let me know when you're licensed.",
+        "BEN: Click the Bag icon at the top right to manage your Battle Deck. Let me know when you're licensed.",
         "PLAYER: Got it. Thanks, Ben!"
     ];
 
