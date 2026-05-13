@@ -131,6 +131,8 @@ function getCardTemplate(fileName, dataUrl) {
     if(cleanName.includes('healfx')) { return { isHealFx: true, img: dataUrl }; }
     if(cleanName.includes('arrow_fx') || cleanName.includes('arrow fx')) { return { isArrow: true, img: dataUrl }; }
     if(cleanName.includes('shurikenkin_fx') || cleanName.includes('shuriken')) { return { isShuriken: true, img: dataUrl }; }
+    if(cleanName.includes('jadenlock')) { jadenLockUrl = dataUrl; return { isFX: true }; }
+    if(cleanName.includes('jadenbullet')) { jadenBulletUrl = dataUrl; return { isFX: true }; }
     if(cleanName.includes('mainmenubg')) { return { isMenuBG: true, img: dataUrl }; }
     if(cleanName.includes('taunted')) { return { isIcon: true, iconType: 'taunted', img: dataUrl }; }
     if(cleanName.includes('barrier')) { return { isIcon: true, iconType: 'barrier', img: dataUrl }; }
