@@ -25,20 +25,35 @@ function buildDeck() {
 
 // --- 🖥️ UI & RENDER ---
 function updateUI() {
-    document.getElementById('player-mana').innerText = pMana;
-    document.getElementById('enemy-mana').innerText = eMana;
-    
-    document.getElementById('player-core-hp').innerText = `PLAYER CORE: ${pCoreHP}`;
-    let pCorePct = Math.max(0, (pCoreHP / 2000) * 100);
-    document.querySelector('.player-core .hp-bar-current').style.width = `${pCorePct}%`;
-    
-    if(!isTutorialMode) {
-        document.getElementById('enemy-core-hp').innerText = `ENEMY CORE: ${eCoreHP}`;
-        let eCorePct = Math.max(0, (eCoreHP / 2000) * 100);
-        document.querySelector('.enemy-core .hp-bar-current').style.width = `${eCorePct}%`;
+    let pManaEl = document.getElementById('mana-display-num');
+    if (pManaEl) pManaEl.innerText = pMana;
+
+    let pCoreEl = document.getElementById('player-core-hp');
+    if (pCoreEl) pCoreEl.innerText = `PLAYER CORE: ${pCoreHP}`;
+
+    let pCoreBar = document.querySelector('.player-core .hp-bar-current');
+    if (pCoreBar) {
+        let pCorePct = Math.max(0, (pCoreHP / 2000) * 100);
+        pCoreBar.style.width = `${pCorePct}%`;
     }
 
-    document.getElementById('exec-btn').innerText = `EXECUTE PENDING (${pQueue.length})`;
+    let eCoreEl = document.getElementById('enemy-core-hp');
+    if (eCoreEl) {
+        if (!isTutorialMode) {
+            eCoreEl.innerText = `ENEMY CORE: ${eCoreHP}`;
+        } else {
+            eCoreEl.innerText = `BEN'S CORE: 1 | MANA: 8`; 
+        }
+    }
+
+    let eCoreBar = document.querySelector('.enemy-core .hp-bar-current');
+    if (eCoreBar && !isTutorialMode) {
+        let eCorePct = Math.max(0, (eCoreHP / 2000) * 100);
+        eCoreBar.style.width = `${eCorePct}%`;
+    }
+
+    let execBtn = document.getElementById('exec-btn');
+    if (execBtn) execBtn.innerText = `EXECUTE PENDING (${pQueue.length})`;
 
     document.querySelectorAll('.card').forEach(el => {
         let id = el.id;
@@ -57,15 +72,23 @@ function updateUI() {
     });
 
     if (currentTurn === 'PLAYER') {
-        document.getElementById('end-turn-btn').style.display = 'block';
-        document.getElementById('exec-btn').style.display = 'block';
-        document.getElementById('cancel-btn').style.display = 'block';
-        if (!isTutorialMode) document.getElementById('draw-cards-btn').style.display = document.getElementById('hand').children.length < 6 ? 'block' : 'none';
+        let endBtn = document.getElementById('end-turn-btn');
+        let cancelBtn = document.getElementById('cancel-btn');
+        let drawBtn = document.getElementById('draw-cards-btn');
+        
+        if(endBtn) endBtn.style.display = 'block';
+        if(execBtn) execBtn.style.display = 'block';
+        if(cancelBtn) cancelBtn.style.display = 'block';
+        if (drawBtn && !isTutorialMode) drawBtn.style.display = document.getElementById('hand').children.length < 6 ? 'block' : 'none';
     } else {
-        document.getElementById('end-turn-btn').style.display = 'none';
-        document.getElementById('exec-btn').style.display = 'none';
-        document.getElementById('cancel-btn').style.display = 'none';
-        if (!isTutorialMode) document.getElementById('draw-cards-btn').style.display = 'none';
+        let endBtn = document.getElementById('end-turn-btn');
+        let cancelBtn = document.getElementById('cancel-btn');
+        let drawBtn = document.getElementById('draw-cards-btn');
+        
+        if(endBtn) endBtn.style.display = 'none';
+        if(execBtn) execBtn.style.display = 'none';
+        if(cancelBtn) cancelBtn.style.display = 'none';
+        if (drawBtn && !isTutorialMode) drawBtn.style.display = 'none';
     }
 }
 
@@ -121,18 +144,66 @@ function createCardDOM(id, data, isHidden) {
     el.addEventListener('dragstart', handleDragStart);
     el.addEventListener('dragend', handleDragEnd);
     el.addEventListener('click', handleCardClick);
-    el.addEventListener('contextmenu', (e) => { e.preventDefault(); handleRightClick(id); });
 
     return el;
 }
 
+// --- FULLY REBUILT CARD INSPECTOR ---
 function handleRightClick(id) {
-    if(tutorialLock && !document.getElementById(id).classList.contains('tut-highlight-glow')) return;
     let card = cardInstances[id];
-    if(card && card.side === 'PLAYER' && document.getElementById(id).parentElement.id === 'hand') {
-        const cost = card.type === 'unit' ? card.summonCost : (card.skills && card.skills.length > 0 ? card.skills[0].manaCost : card.summonCost);
-        addLog(`Inspecting: <b>${card.name}</b> (Cost: ${cost} MP)`, "#aaa");
+    if (!card) return;
+
+    document.getElementById('inspect-name').innerText = card.name;
+    document.getElementById('inspect-sub').innerText = card.title || (card.type === 'unit' ? 'Unit' : 'Spell');
+    
+    let artEl = document.getElementById('inspect-art-fixed');
+    if (card.img) {
+        artEl.src = card.img.replace(/"/g, '').replace(/'/g, '');
+        artEl.style.display = 'block';
+        artEl.style.width = '100%';
+        artEl.style.border = '1px solid #444';
+        artEl.style.borderRadius = '4px';
     }
+
+    let statsHtml = '';
+    if (card.type === 'unit') {
+        statsHtml = `<div style="color:#e74c3c; font-weight:bold; text-align:center; padding-bottom:5px; border-bottom:1px solid #333;">ATK: ${card.atk || 0} &nbsp;|&nbsp; HP: ${card.hp}/${card.maxHp}</div>`;
+    } else {
+        statsHtml = `<div style="color:var(--mana-color); font-weight:bold; text-align:center; padding-bottom:5px; border-bottom:1px solid #333;">SPELL CARD</div>`;
+    }
+
+    if (card.passives && card.passives.length > 0) {
+        card.passives.forEach(p => {
+            statsHtml += `<div style="margin-top:10px; border-left: 2px solid #e67e22; padding-left: 5px; text-align: left; font-size: 0.8rem;">
+                <span style="color:#e67e22; font-weight:bold;">[${p.name}]</span><br>
+                <span style="color:#ccc;">${p.desc}</span>
+            </div>`;
+        });
+    }
+    document.getElementById('inspect-status-box').innerHTML = statsHtml;
+
+    let skillsHtml = '';
+    if (card.skills && card.skills.length > 0) {
+        card.skills.forEach(s => {
+            skillsHtml += `<div style="margin-bottom:8px; background:rgba(255,255,255,0.05); padding:5px; border-radius:4px; font-size: 0.8rem; text-align: left;">
+                <span style="color:var(--gold); font-weight:bold;">[${s.name}]</span> 
+                <span style="color:var(--mana-color); float:right;">${s.manaCost} MP</span><br>
+                <div style="color:#ccc; margin-top:4px;">${s.desc}</div>
+            </div>`;
+        });
+    } else if (card.type === 'unit') {
+         skillsHtml = `<div style="margin-bottom:8px; background:rgba(255,255,255,0.05); padding:5px; border-radius:4px; font-size: 0.8rem; text-align: left;">
+                <span style="color:var(--gold); font-weight:bold;">[ATTACK]</span> 
+                <span style="color:var(--mana-color); float:right;">0 MP</span><br>
+                <div style="color:#ccc; margin-top:4px;">Basic attack.</div>
+            </div>`;
+    } else {
+        skillsHtml = `<div class="empty-inspector">No actions available.</div>`;
+    }
+    document.getElementById('inspect-skills-sector').innerHTML = skillsHtml;
+
+    let cost = card.type === 'unit' ? card.summonCost : (card.skills && card.skills.length > 0 ? card.skills[0].manaCost : 0);
+    document.getElementById('inspect-summon-val').innerText = cost + ' MANA';
 }
 
 // --- 🖱️ DRAG & DROP ---
@@ -198,15 +269,12 @@ function dropToSlot(e) {
 document.querySelectorAll('.slot').forEach(s => { s.addEventListener('dragover', allowDrop); s.addEventListener('drop', dropToSlot); });
 
 // --- 🎯 COMBAT / TARGETING ---
-let isTargeting = false;
-let pendingAction = null; 
-let pQueue = [];
-let eQueue = [];
-let isExecuting = false;
-
 function handleCardClick(e) {
     let id = e.currentTarget.id;
     if(tutorialLock && !document.getElementById(id).classList.contains('tut-highlight-glow')) return;
+    
+    // Unify clicks: Left clicking a card inspects it immediately!
+    handleRightClick(id); 
     
     let card = cardInstances[id];
     let parentId = e.currentTarget.parentElement.id;
@@ -223,15 +291,28 @@ function handleCardClick(e) {
         if (card.skills && card.skills.length > 0) {
             let menu = document.createElement('div');
             menu.className = 'action-menu';
+            
+            // Absolutely positioned so it pops up at the cursor
+            menu.style.position = 'absolute';
+            menu.style.zIndex = '9999';
             menu.style.left = e.pageX + 'px';
             menu.style.top = e.pageY + 'px';
+            menu.style.backgroundColor = 'rgba(15, 15, 15, 0.95)';
+            menu.style.border = '2px solid var(--gold, #f1c40f)';
+            menu.style.padding = '10px';
+            menu.style.borderRadius = '6px';
+            menu.style.display = 'flex';
+            menu.style.flexDirection = 'column';
+            menu.style.gap = '8px';
 
             card.skills.forEach((skill) => {
                 let btn = document.createElement('button');
                 btn.innerHTML = `[${skill.name}] <span style="color:var(--mana-color)">${skill.manaCost} MP</span>`;
                 btn.onclick = () => {
                     document.body.removeChild(menu);
-                    if(tutorialLock && skill.name !== "HEAVY STRIKE" && skill.name !== "Mana Initiation" && skill.name !== "ATTACK CORE" && skill.name !== "RALLY" && skill.name !== "SHORTSWORD STRIKE") {
+                    
+                    let allowedSkills = ["HEAVY STRIKE", "Mana Initiation", "ATTACK", "VOLLEY", "RALLY", "SHORTSWORD STRIKE"];
+                    if(tutorialLock && !allowedSkills.includes(skill.name)) {
                         addLog("You cannot use this skill right now.", "red"); return;
                     }
                     if (pMana < skill.manaCost) { addLog("Not enough Mana.", "red"); return; }
@@ -250,9 +331,6 @@ function handleCardClick(e) {
                         addLog(`Queued <b>RALLY</b>.`, "var(--gold)");
                         if(isTutorialMode && tutorialStep === 14) { tutorialStep = 15; progressTutorial(); }
                         updateUI();
-                    } else if (skill.name === "ATTACK CORE") {
-                        startTargeting(id, skill.name, skill.manaCost);
-                        finalizeTargeting('e-core-target'); 
                     } else {
                         startTargeting(id, skill.name, skill.manaCost);
                     }
@@ -307,7 +385,6 @@ function finalizeTargeting(targetId) {
         addLog("Attack the highlighted target.", "red"); return;
     }
 
-    // Frontline protection check
     if (targetId.startsWith('e_') && cardInstances[targetId]) {
         let tCard = cardInstances[targetId];
         let pId = document.getElementById(targetId).parentElement.id;
@@ -347,7 +424,7 @@ async function processQueue(side, queueObj) {
 
     for (let act of q) {
         let source = cardInstances[act.sourceId];
-        let target = act.targetId.includes('core') ? null : cardInstances[act.targetId];
+        let target = act.targetId && act.targetId.includes('core') ? null : cardInstances[act.targetId];
         let sDOM = document.getElementById(act.sourceId);
         let tDOM = document.getElementById(act.targetId);
 
@@ -484,17 +561,12 @@ document.getElementById('cancel-btn').addEventListener('click', () => {
 document.getElementById('end-turn-btn').addEventListener('click', async () => {
     if (currentTurn !== 'PLAYER' || isExecuting) return;
 
-    // --- TUTORIAL OVERRIDES (Ben's Script) ---
     if (isTutorialMode) {
         if (tutorialStep === 3) { tutorialStep = 4; progressTutorial(); return; }
         if (tutorialStep === 9) { tutorialStep = 10; progressTutorial(); return; }
         if (tutorialStep === 12) { tutorialStep = 13; progressTutorial(); return; }
         return; 
     }
-
-    // ==========================================
-    // 🧠 REAL ENEMY AI LOGIC (From VersionFight)
-    // ==========================================
     
     currentTurn = 'ENEMY';
     document.getElementById('draw-cards-btn').style.display = "none";
@@ -502,8 +574,6 @@ document.getElementById('end-turn-btn').addEventListener('click', async () => {
     
     updateUI();
     addLog("Jax is making his move...", "#e74c3c");
-
-    // Give Jax a second to "think"
     await new Promise(r => setTimeout(r, 1200));
 
     // --- 1. DRAW PHASE ---
@@ -521,45 +591,33 @@ document.getElementById('end-turn-btn').addEventListener('click', async () => {
     let handCopy = [...eHandData];
     for (let cardId of handCopy) {
         let card = cardInstances[cardId];
-        
-        // Does he have the mana and requirements?
         let cost = card.type === 'unit' ? card.summonCost : (card.skills && card.skills.length > 0 ? card.skills[0].manaCost : 0);
+        
         if (cost <= eMana) {
-            if (card.summonRequires) {
-                if (card.summonRequires.type === 'squiresFallen' && eSquiresFallen < card.summonRequires.amount) continue;
-            }
+            if (card.summonRequires && card.summonRequires.type === 'squiresFallen' && eSquiresFallen < card.summonRequires.amount) continue;
 
-            let placed = false;
+            let placedSlotId = null;
             if (card.type === 'unit') {
-                // AI Prefers Frontline
                 let frontSlots = ['e-front-left', 'e-front-center', 'e-front-right'];
                 let emptyFront = frontSlots.find(id => document.getElementById(id).children.length === 1);
-                if (emptyFront) {
-                    document.getElementById(emptyFront).appendChild(createCardDOM(cardId, card, false));
-                    placed = true;
-                } else {
-                    // Fallback to Backline
+                if (emptyFront) placedSlotId = emptyFront;
+                else {
                     let backSlots = ['e-back-left', 'e-back-right'];
                     let emptyBack = backSlots.find(id => document.getElementById(id).children.length === 1);
-                    if (emptyBack) {
-                        document.getElementById(emptyBack).appendChild(createCardDOM(cardId, card, false));
-                        placed = true;
-                    }
+                    if (emptyBack) placedSlotId = emptyBack;
                 }
             } else if (card.type === 'ability' || card.isBuff) {
                 let slotType = card.isBuff ? 'e-buff' : 'e-ability';
-                if (document.getElementById(slotType).children.length === 1) {
-                    document.getElementById(slotType).appendChild(createCardDOM(cardId, card, false));
-                    placed = true;
-                }
+                if (document.getElementById(slotType).children.length === 1) placedSlotId = slotType;
             }
 
-            // Deduct Mana & Remove from hand
-            if (placed) {
+            if (placedSlotId) {
                 eMana -= cost;
                 eHandData = eHandData.filter(id => id !== cardId);
-                if(typeof playSound === 'function' && typeof dropSoundUrl !== 'undefined') playSound(dropSoundUrl);
-                await new Promise(r => setTimeout(r, 400));
+                
+                // Trigger the NEW Animation Engine!
+                await animateAIPlacement(cardId, card, placedSlotId);
+                await new Promise(r => setTimeout(r, 200));
             }
         }
     }
@@ -568,14 +626,12 @@ document.getElementById('end-turn-btn').addEventListener('click', async () => {
     // --- 3. QUEUEING ATTACKS ---
     let boardCards = Object.values(cardInstances).filter(c => c.side === 'ENEMY' && c.hp > 0 && !eHandData.includes(c.id));
     for (let card of boardCards) {
-        if (card.turnPlaced === turnCount && card.type === 'unit') continue; // Summon Sickness
+        if (card.turnPlaced === turnCount && card.type === 'unit') continue;
         if (card.exhausted || card.queued) continue;
 
-        // Find targets
         let pFront = Object.values(cardInstances).filter(c => c.side === 'PLAYER' && c.hp > 0 && ['p-front-left', 'p-front-center', 'p-front-right'].includes(document.getElementById(c.id)?.parentElement?.id));
         let pBack = Object.values(cardInstances).filter(c => c.side === 'PLAYER' && c.hp > 0 && ['p-back-left', 'p-back-right'].includes(document.getElementById(c.id)?.parentElement?.id));
         
-        // AI Logic: Hit Taunts first, then Frontline, then Backline, then Core
         let tauntTarget = pFront.find(c => c.skills?.some(s => s.name === "VALIANT GUARD" && c.blockActive));
         let targetId = null;
         let actionName = (card.skills && card.skills.length > 0 && card.skills[0].manaCost <= eMana) ? card.skills[0].name : "ATTACK";
@@ -608,18 +664,14 @@ document.getElementById('end-turn-btn').addEventListener('click', async () => {
         addLog("Jax ends his turn without attacking.", "#aaa");
         await new Promise(r => setTimeout(r, 1000));
         
-        // Turn Return Logic
         turnCount++;
         currentTurn = 'PLAYER';
         
-        // Trigger Turn Regeneration
         let manaGain = (turnCount <= 10 ? 2 : turnCount <= 20 ? 3 : turnCount <= 30 ? 4 : 5); 
         pMana += manaGain + pSkeletonMana; 
         eMana += manaGain + eSkeletonMana;
         
-        Object.values(cardInstances).forEach(c => {
-            c.queued = false; c.extraAction = false; c.blockActive = false; c.exhausted = false;
-        });
+        Object.values(cardInstances).forEach(c => { c.queued = false; c.extraAction = false; c.blockActive = false; c.exhausted = false; });
 
         addLog(`--- TURN ${turnCount} START ---`, "var(--gold)"); 
         updateUI();
@@ -627,6 +679,7 @@ document.getElementById('end-turn-btn').addEventListener('click', async () => {
     }
 });
 
+// --- HELPER FUNCTIONS ---
 function generateUID() { return Math.random().toString(36).substr(2, 9); }
 function addLog(msg, color="white") {
     let log = document.getElementById('event-log');
@@ -660,4 +713,39 @@ function createProjectile(sDOM, tDOM, imgUrl, className) {
     
     document.body.appendChild(proj);
     setTimeout(() => proj.remove(), 600);
+}
+
+// ✨ NEW: AI Visual Drag-and-Drop Animation!
+async function animateAIPlacement(cardId, cardData, targetSlotId) {
+    return new Promise(resolve => {
+        let startDOM = document.getElementById('enemy-deck-stack') || document.body;
+        let startRect = startDOM.getBoundingClientRect();
+        let targetDOM = document.getElementById(targetSlotId);
+        if (!targetDOM) { resolve(); return; }
+        let targetRect = targetDOM.getBoundingClientRect();
+
+        let flying = createCardDOM(cardId + '_fly', cardData, false); 
+        flying.style.position = 'fixed';
+        flying.style.left = (startRect.left || window.innerWidth / 2) + 'px';
+        flying.style.top = (startRect.top || -100) + 'px';
+        flying.style.transition = 'all 0.5s ease-out';
+        flying.style.zIndex = '9999';
+        flying.style.pointerEvents = 'none';
+        document.body.appendChild(flying);
+
+        // Force browser to register starting position before moving
+        void flying.offsetWidth;
+
+        // Fly the card to the slot
+        flying.style.left = targetRect.left + 'px';
+        flying.style.top = targetRect.top + 'px';
+        flying.style.transform = 'scale(1.05)';
+
+        setTimeout(() => {
+            flying.remove();
+            targetDOM.appendChild(createCardDOM(cardId, cardData, false));
+            if (typeof playSound === 'function' && typeof dropSoundUrl !== 'undefined') playSound(dropSoundUrl);
+            resolve();
+        }, 500);
+    });
 }
