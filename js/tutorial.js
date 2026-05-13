@@ -152,25 +152,20 @@ function progressTutorial() {
             setTutMessage("<b>BEN:</b> I summon a Militia and an Archer. I'll end my turn.");
             lockAllExcept([]); // Safely lock the board while Ben acts
             
-            // Ben plays his first card (Militia) after 1 second
-            setTimeout(() => {
-                let mDOM = createCardDOM('e_Militia_0', cardInstances['e_Militia_0'], false);
-                document.getElementById('e-front-center').appendChild(mDOM);
-                if (typeof playSound === 'function' && typeof dropSoundUrl !== 'undefined') playSound(dropSoundUrl);
-            }, 1000);
-
-            // Ben plays his second card (Archer) after 2 seconds
-            setTimeout(() => {
-                let aDOM = createCardDOM('e_Archer_1', cardInstances['e_Archer_1'], false);
-                document.getElementById('e-back-right').appendChild(aDOM);
-                if (typeof playSound === 'function' && typeof dropSoundUrl !== 'undefined') playSound(dropSoundUrl);
-            }, 2000);
-            
-            // Ben ends his turn and passes it back to you after 3.5 seconds
-            setTimeout(() => {
-                tutorialStep = 5;
-                progressTutorial();
-            }, 3500);
+            setTimeout(async () => {
+                // Ben uses the new drag animation for his first card
+                await animateAIPlacement('e_Militia_0', cardInstances['e_Militia_0'], 'e-front-center');
+                
+                // Ben uses the new drag animation for his second card
+                await animateAIPlacement('e_Archer_1', cardInstances['e_Archer_1'], 'e-back-right');
+                
+                // Ben passes the turn
+                setTimeout(() => {
+                    tutorialStep = 5;
+                    progressTutorial();
+                }, 1000);
+                
+            }, 500);
             break;
         case 5:
             setTutMessage("<b>BEN:</b> Before we attack, remember the Frontline/Backline system. Frontline protects the Backline. You cannot hit my Archer until my Militia falls. Let's get more Mana. Click your <b>Mana Core</b> and select <b>[Mana Initiation]</b>.");
