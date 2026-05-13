@@ -228,23 +228,19 @@ function progressTutorial() {
         case 18:
             setTutMessage("<b>BEN:</b> Execute the queue one last time to claim victory!");
             lockAllExcept([], false, true);
-            document.getElementById('exec-btn').classList.remove('tut-disabled');
+            
+            // Override standard execute to trigger the lore handoff
+            document.getElementById('exec-btn').onclick = async () => {
+                await processQueue('PLAYER', pQueue);
+                if (eCoreHP <= 0) {
+                    triggerLicenseQuest();
+                }
+            };
             break;
-    // Replace case 18 in your tutorial.js
-case 18:
-    setTutMessage("<b>BEN:</b> Execute the queue one last time to claim victory!");
-    lockAllExcept([], false, true);
-    
-    // Override standard execute to trigger the lore handoff
-    document.getElementById('exec-btn').onclick = async () => {
-        await processQueue('PLAYER', pQueue);
-        if (eCoreHP <= 0) {
-            triggerLicenseQuest();
-        }
-    };
-    break;
+    } // <-- This closes the switch statement
+} // <-- This closes the progressTutorial function
 
-// Add this function anywhere in tutorial.js
+// --- ADVENTURER'S LICENSE LORE HANDOFF ---
 function triggerLicenseQuest() {
     isTutorialMode = false;
     document.getElementById('game-area').style.display = 'none';
