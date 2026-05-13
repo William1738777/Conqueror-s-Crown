@@ -955,8 +955,12 @@ async function processQueue(sideProcessing, queueArr) {
         if (!isTutorialMode) {
             alert("VICTORY! Enemy Core Destroyed!"); 
             location.reload(); 
+        } else {
+            if (typeof triggerLicenseQuest === 'function') {
+                triggerLicenseQuest();
+            }
         }
-    } 
+    }
     if(pCoreHP <= 0) { 
         if (!isTutorialMode) {
             alert("DEFEAT! Your Core was Destroyed!"); 
