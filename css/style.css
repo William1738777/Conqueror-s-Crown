@@ -214,3 +214,40 @@ body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !import
 .lux-beam-container { position: fixed; bottom: -100px; width: 120px; height: 200vh; pointer-events: none; z-index: 9999; display: flex; justify-content: center; transform-origin: bottom center; opacity: 0; }
 .lux-beam-core { width: 30%; height: 100%; background: #fff; box-shadow: 0 0 20px #fff, 0 0 40px #f1c40f, 0 0 80px #3498db; filter: blur(2px); }
 .lux-beam-outer { position: absolute; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.5), rgba(241, 196, 15, 0.8), rgba(255,255,255,1), rgba(241, 196, 15, 0.8), rgba(52, 152, 219, 0.5), transparent); filter: blur(8px); mix-blend-mode: screen; }
+
+/* --- INVENTORY & DECKBUILDER --- */
+#inventory-btn { background: #3498db; color: white; border: 1px solid #fff; padding: 5px 15px; font-family: 'Cinzel'; cursor: pointer; border-radius: 4px; transition: 0.2s; }
+#inventory-btn:hover { background: #2980b9; transform: scale(1.05); }
+
+#inv-container { display: flex; width: 100vw; height: calc(100vh - 50px); background: rgba(13, 13, 18, 0.98); }
+
+/* Sidebar */
+#inv-sidebar { width: 300px; background: #0a0a0f; border-right: 2px solid #333; padding: 25px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; flex-shrink: 0; }
+#player-name { font-size: 1.6rem; color: var(--gold); font-family: 'Cinzel'; }
+#player-gold { font-size: 1.1rem; color: #2ecc71; font-family: monospace; }
+.license-slot { padding: 12px; background: #1a1a24; border: 1px dashed #444; font-size: 0.8rem; margin-top: 8px; color: #666; letter-spacing: 1px; }
+.tab-btn { background: #222; color: white; border: 1px solid #444; padding: 12px; width: 100%; cursor: pointer; font-family: 'Cinzel'; transition: 0.2s; margin-bottom: 5px; }
+.tab-btn.active { background: var(--gold); color: black; border-color: white; font-weight: bold; }
+
+/* Main Workspace */
+#inv-main-content { flex-grow: 1; display: flex; padding: 20px; gap: 20px; overflow: hidden; }
+#battle-deck-panel, #collection-panel { flex: 1; display: flex; flex-direction: column; background: rgba(255,255,255,0.02); border-radius: 8px; padding: 15px; border: 1px solid #333; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+#battle-deck-panel { flex: 1.2; }
+
+/* Tiers & Slots */
+#battle-deck-tiers { display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 10px; flex-grow: 1; }
+#battle-deck-tiers::-webkit-scrollbar { width: 6px; }
+#battle-deck-tiers::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+.tier-group { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 6px; border: 1px solid #222; }
+.tier-label { width: 100%; font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 4px; }
+
+.deck-slot { width: 70px; height: 98px; border: 1px dashed #555; border-radius: 4px; display: flex; align-items: center; justify-content: center; position: relative; background: rgba(0,0,0,0.6); transition: 0.2s; }
+.deck-slot.valid-hover { border-color: var(--gold); box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.4); }
+.deck-slot.invalid-hover { border-color: #e74c3c; box-shadow: inset 0 0 15px rgba(231, 76, 60, 0.4); }
+
+/* Mini Cards for UI */
+#collection-grid { display: flex; flex-wrap: wrap; gap: 10px; overflow-y: auto; align-content: flex-start; flex-grow: 1; padding: 10px; }
+.db-card { width: 70px; height: 98px; border-radius: 4px; border: 1px solid #666; background-size: 100% 100%; cursor: grab; position: absolute; top: -1px; left: -1px; transition: 0.1s; }
+.db-card:hover { transform: translateY(-3px); border-color: var(--gold); z-index: 10; box-shadow: 0 5px 10px rgba(0,0,0,0.8); }
+#collection-grid .db-card { position: relative; top: 0; left: 0; }
