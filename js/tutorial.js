@@ -211,7 +211,6 @@ function progressTutorial() {
         case 18:
             setTutMessage("<b>BEN:</b> Execute the queue one last time to claim victory!");
             lockAllExcept([], false, true);
-            // Notice: Removed the broken .onclick override here to fix the freezing!
             break;
     }
 }
@@ -219,6 +218,8 @@ function progressTutorial() {
 // --- ADVENTURER'S LICENSE LORE HANDOFF ---
 function triggerLicenseQuest() {
     isTutorialMode = false;
+    tutorialLock = false; // <--- FIX APPLIED HERE: Board Unlocked
+    
     document.getElementById('game-area').style.display = 'none';
     document.getElementById('tavern-screen').style.display = 'block';
     
@@ -380,6 +381,8 @@ function startStrangerDuel() {
     document.getElementById('game-area').style.display = 'flex';
     
     isTutorialMode = false; // Normal Rules!
+    tutorialLock = false;   // <--- FIX APPLIED HERE: Board Unlocked
+    
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; pCoreHP = 2000; eCoreHP = 2000;
     pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0;
