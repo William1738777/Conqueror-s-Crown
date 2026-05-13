@@ -46,11 +46,33 @@ Version 7.7 (Freedom)
     </div>
 
     <div id="tavern-screen" class="rpg-screen">
-        <div id="rpg-dialogue-box" onclick="advanceDialogue()">
+        <div id="tavern-menu" class="top-left-menu" style="display:none;">
+            <button class="menu-btn" onclick="talkToBen()">Talk to Ben</button>
+            <button class="menu-btn" disabled>My Room (Locked)</button>
+            <button class="menu-btn" onclick="backToLeonia()">Go back to Town</button>
+        </div>
+
+        <div id="rpg-dialogue-box" class="dialogue-box-style" onclick="advanceDialogue()">
             <div id="dialogue-speaker">Tavern Keeper Ben</div>
             <div id="dialogue-text">...</div>
             <div style="font-size: 0.75rem; color: #aaa; text-align: right; margin-top: 15px; font-style: italic;">(Click to continue)</div>
         </div>
+    </div>
+
+    <div id="tg-screen" class="rpg-screen">
+        <div id="tg-menu" class="top-left-menu">
+            <button class="menu-btn" id="talk-strangers-btn" onclick="startStrangersEvent()">Talk to the Strangers</button>
+            <button class="menu-btn" onclick="backToLeonia()">Go Back to Town</button>
+        </div>
+
+        <div id="tg-dialogue-box" class="dialogue-box-style" style="display:none;" onclick="advanceTgDialogue()">
+            <div id="tg-speaker">...</div>
+            <div id="tg-text">...</div>
+            <div style="font-size: 0.75rem; color: #aaa; text-align: right; margin-top: 15px; font-style: italic;">(Click to continue)</div>
+        </div>
+
+        <div id="omt-presentation" style="display:none; position:absolute; top:45%; left:50%; transform:translate(-50%,-50%); text-align:center;">
+            </div>
     </div>
     
     <div id="inventory-screen" class="rpg-screen">
