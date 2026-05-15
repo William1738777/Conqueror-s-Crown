@@ -903,47 +903,131 @@ async function processQueue(sideProcessing, queueArr) {
             }
         }
         else if (action.skillName === "VALIANT GUARD") {
-            // 1. Apply Shield to self
+            // 1. Apply Shield & Heal
             actor.shield = 250;
             actor.shieldTurns = turnCount + 1;
-            
+            actor.hp = Math.min(actor.maxHp, actor.hp + 100); 
+            if(actorDOM) syncVisualHP(actorDOM, actor.hp, actor.maxHp);
+
             // 2. Find and Taunt enemy frontline
             let enemySide = sideProcessing === 'PLAYER' ? 'ENEMY' : 'PLAYER';
             let frontlineEnemies = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${enemySide}"] .card`)).map(c => cardInstances[c.id]);
             
             frontlineEnemies.forEach(eTarget => {
-                if(eTarget && eTarget.hp > 0) eTarget.tauntedBy = actor.id;
+                if(eTarget && eTarget.hp > 0) {
+                    eTarget.tauntedBy = actor.id;
+                    eTarget.tauntedTurn = turnCount + (sideProcessing === 'ENEMY' ? 2 : 1);
+                    let tDOM = document.getElementById(eTarget.id);
+                    if (tDOM) {
+                        tDOM.classList.add('taunted-status');
+                        showFloatingText(tDOM, "TAUNTED", "#f39c12", "1.5rem");
+                    }
+                }
             });
             
             if (shieldSfxUrl) playSound(shieldSfxUrl); 
             showFloatingText(actorDOM, "VALIANT GUARD", "#3498db", "1.2rem");
-            addLog(`<b>${actor.name}</b> shielded up and Taunted the frontline!`, "#3498db");
+            addLog(`<b>${actor.name}</b> healed 100 HP, shielded up and Taunted the frontline!`, "#3498db");
             
             await new Promise(r => setTimeout(r, 600)); 
             updateUI();
         }
-        else if (action.skillName === "Trigger Unbound") {
-            let rounds = actor.chamberedRounds || 0;
-            if (rounds > 0) {
-                addLog(`<b>Jaden</b> unleashes ${rounds} chambered rounds!`, "#e74c3c");
-                actor.chamberedRounds = 0;
-                
-                let enemySide = sideProcessing === 'PLAYER' ? 'ENEMY' : 'PLAYER';
-                let validTargets = getValidEnemyTargetIds(enemySide);
-                
-                for (let r = 0; r < rounds; r++) {
-                    if (validTargets.length === 0) break;
-                    let randomTargetId = validTargets[Math.floor(Math.random() * validTargets.length)];
-                    let shotDmg = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
-                    
-                    await applyDamage(actor, randomTargetId, shotDmg, "Trigger Unbound");
-                    validTargets = getValidEnemyTargetIds(enemySide);
+        else if (actor.name === "Jaden" && ["Sniping Shot", "Double-Shot", "Trigger Unbound"].includes(action.skillName)) {
+            let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+            let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
+            
+            if(actorDOM) {
+                actorDOM.style.transition = "transform 0.4s ease"; 
+                actorDOM.style.transform = "scale(1.2)";
+                await new Promise(r => setTimeout(r, 400)); 
+            }
+            
+            if (action.skillName === "Trigger Unbound") {
+                let rounds = actor.chamberedRounds || 0;
+                if (rounds === 0) {
+                    addLog(`<b>Jaden</b> has no Chambered Rounds!`, "red");
+                } else {
+                    let currentTargetId = tId;
+                    for(let i=0; i<rounds; i++) {
+                        let cTInst = cardInstances[currentTargetId];
+                        
+                        if (currentTargetId !== 'CORE' && (!cTInst || cTInst.hp <= 0)) {
+                            let valids = getValidEnemyTargetIds(defSide);
+                            currentTargetId = valids.length > 0 ? valids[0] : 'CORE';
+                        }
+                        
+                        let tDOM = currentTargetId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(currentTargetId);
+                        
+                        let lock = showJadenLock(tDOM);
+                        shootBullet(actorDOM, tDOM);
+                        playSound(jadenSfx1);
+                        if(lock) setTimeout(() => lock.remove(), 200);
+                        
+                        let dmg = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
+                        await applyDamage(actor, currentTargetId, dmg, action.skillName);
+                        
+                        if (i < rounds - 1) await new Promise(r=>setTimeout(r, 25));
+                    }
+                    actor.chamberedRounds = 0;
                 }
             } else {
-                addLog(`<b>Jaden</b> tried to Trigger Unbound, but his chamber was empty!`, "#888");
+                let shots = action.skillName === "Double-Shot" ? 2 : 1;
+                let dmgMin = action.skillName === "Double-Shot" ? 300 : 500;
+                let dmgMax = action.skillName === "Double-Shot" ? 500 : 800;
+                let sfx = action.skillName === "Double-Shot" ? jadenSfx2 : jadenSfx1;
+                let roundGain = action.skillName === "Double-Shot" ? 2 : 1;
+                
+                let currentTargetId = tId;
+                for(let i=0; i<shots; i++) {
+                    let cTInst = cardInstances[currentTargetId];
+                    if (currentTargetId !== 'CORE' && (!cTInst || cTInst.hp <= 0)) {
+                        let valids = getValidEnemyTargetIds(defSide);
+                        currentTargetId = valids.length > 0 ? valids[0] : 'CORE';
+                    }
+                    
+                    let tDOM = currentTargetId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(currentTargetId);
+                    let lock = showJadenLock(tDOM);
+                    shootBullet(actorDOM, tDOM);
+                    
+                    if (action.skillName !== "Double-Shot" || i === 0) {
+                        playSound(sfx);
+                    }
+                    
+                    if(lock) setTimeout(() => lock.remove(), 200);
+                    
+                    let dmg = Math.floor(Math.random() * (dmgMax - dmgMin + 1)) + dmgMin;
+                    await applyDamage(actor, currentTargetId, dmg, action.skillName);
+                    if (i < shots - 1) await new Promise(r=>setTimeout(r, 50));
+                }
+                actor.chamberedRounds = (actor.chamberedRounds || 0) + roundGain;
+                
+                if (Math.random() < 0.6) {
+                    addLog(`<b>Jaden</b> [Passive]: Extra Shot!`, "var(--gold)");
+                    await new Promise(r=>setTimeout(r, 300));
+                    
+                    let cTInst = cardInstances[currentTargetId];
+                    if (currentTargetId !== 'CORE' && (!cTInst || cTInst.hp <= 0)) {
+                        let valids = getValidEnemyTargetIds(defSide);
+                        currentTargetId = valids.length > 0 ? valids[0] : 'CORE';
+                    }
+                    
+                    let tDOM = currentTargetId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(currentTargetId);
+                    let lock2 = showJadenLock(tDOM);
+                    shootBullet(actorDOM, tDOM);
+                    playSound(jadenSfx3);
+                    if(lock2) setTimeout(() => lock2.remove(), 200);
+                    let dmg2 = Math.floor(Math.random() * (dmgMax - dmgMin + 1)) + dmgMin;
+                    await applyDamage(actor, currentTargetId, dmg2, "Extra Shot");
+                    actor.chamberedRounds++;
+                }
+            }
+            if(actorDOM) { 
+                actorDOM.style.transform = "scale(1)"; 
+                await new Promise(r => setTimeout(r, 300)); 
+                actorDOM.style.transition = ""; 
             }
         }
-        // Damaging Skills
+        // Damaging Skills (Standard fallback)
         else {
             let dmg = actor.atk || 100; 
             if (action.skillName === "SHORTSWORD STRIKE") dmg = Math.floor(Math.random() * (120 - 80 + 1)) + 80;
@@ -952,17 +1036,13 @@ async function processQueue(sideProcessing, queueArr) {
             if (action.skillName === "VOLLEY") dmg = Math.floor(Math.random() * (150 - 80 + 1)) + 80;
             if (action.skillName === "ICHI") { dmg = Math.floor(Math.random() * (1100 - 300 + 1)) + 300; if(dmg < 500) dmg = Math.floor(Math.random() * (1100 - 300 + 1)) + 300; }
             if (action.skillName === "Bullseye") dmg = Math.floor(Math.random() * (400 - 200 + 1)) + 200;
-            if (action.skillName === "Sniping Shot") { 
-                dmg = Math.floor(Math.random() * (800 - 500 + 1)) + 500; 
-                actor.chamberedRounds = (actor.chamberedRounds || 0) + 1; 
-                if (Math.random() < 0.6) { actor.chamberedRounds++; addLog(`<b>Jaden</b>'s Extra Shot passive triggered!`, "#f1c40f"); }
+            if (action.skillName === "Suicidal attack") { 
+                if (villagerSuicideSfxUrl) playSound(villagerSuicideSfxUrl); 
+                await new Promise(r => setTimeout(r, 100)); 
+                // Force 650 damage during the tutorial to guarantee the Squire dies.
+                // Otherwise, use the standard 1-700 random roll for normal fights (like Jax).
+                dmg = isTutorialMode ? 650 : Math.floor(Math.random() * (700 - 1 + 1)) + 1; 
             }
-            if (action.skillName === "Double-Shot") {
-                dmg = (Math.floor(Math.random() * (500 - 300 + 1)) + 300) * 2; 
-                actor.chamberedRounds = (actor.chamberedRounds || 0) + 2;
-                if (Math.random() < 0.6) { actor.chamberedRounds++; addLog(`<b>Jaden</b>'s Extra Shot passive triggered!`, "#f1c40f"); }
-            }
-            if (action.skillName === "Suicidal attack") { if (villagerSuicideSfxUrl) playSound(villagerSuicideSfxUrl); await new Promise(r => setTimeout(r, 100)); dmg = 650; }
 
             // Focus Fire Passive
             if (actor.name === "Archer" && action.targetId !== 'CORE') {
@@ -987,7 +1067,6 @@ async function processQueue(sideProcessing, queueArr) {
                 if (tInst && tInst.marks > 0) {
                     if (kinSanAudioUrl) playSound(kinSanAudioUrl);
                     addLog(`<b>KIN-RYU</b> passive [SAN] triggered!`, "#e74c3c");
-                    // Implement SAN chaining here later!
                 }
             }
         }
@@ -1001,7 +1080,6 @@ async function processQueue(sideProcessing, queueArr) {
     if(isTutorialMode && tutorialStep === 7) { tutorialStep = 8; progressTutorial(); }
     if(isTutorialMode && tutorialStep === 16) { tutorialStep = 17; progressTutorial(); }
     
-    // --- THIS IS THE FIX ---
     if(eCoreHP <= 0) { 
         if (!isTutorialMode) {
             alert("VICTORY! Enemy Core Destroyed!"); 
@@ -1159,4 +1237,86 @@ async function aiTurn() {
     if(isTutorialMode && tutorialStep === 13) { tutorialStep = 14; progressTutorial(); }
 
     if (!isTutorialMode) { const drawBtn = document.getElementById('draw-cards-btn'); drawBtn.style.display = "block"; drawBtn.innerText = "DRAW TO 6"; }
+}
+
+// --- MISSING CANCEL EVENT LISTENER ---
+document.getElementById('cancel-btn').addEventListener('click', () => {
+    if(isExecuting) return;
+
+    pQueue.forEach(a => {
+        if(cardInstances[a.actorId]) cardInstances[a.actorId].queued = false;
+        pMana += a.cost;
+    });
+
+    if(pendingSkill && cardInstances[pendingSkill.actorId]) {
+        cardInstances[pendingSkill.actorId].queued = false;
+        pMana += pendingSkill.cost;
+    }
+
+    let omtRefundCount = 0;
+    Object.values(cardInstances).forEach(c => {
+        if (c.extraAction && c.side === 'PLAYER') {
+            c.extraAction = false;
+            let dDOM = document.getElementById(c.id);
+            if(dDOM) dDOM.classList.remove('buff-double-action');
+            omtRefundCount++;
+        }
+        if (c.hp === 0 && c.side === 'PLAYER' && c.name === "One More Time") {
+            delete cardInstances[c.id];
+        }
+    });
+
+    for(let i=0; i<omtRefundCount; i++) {
+        const omtData = getCardTemplate("One More Time", ASSET_LINKS["One More Time"]);
+        const cardId = 'card_' + Math.random().toString(36).substr(2, 9);
+        cardInstances[cardId] = { ...omtData, id: cardId, exhausted: false, queued: false, side: 'PLAYER', turnPlaced: turnCount, tauntedBy: null, isRevealed: false };
+        document.getElementById('hand').appendChild(createCardDOM(cardId, cardInstances[cardId], false));
+    }
+
+    if(omtRefundCount > 0) addLog(`${omtRefundCount}x One More Time cancelled & refunded to hand.`, "#9b59b6");
+
+    pQueue = [];
+    isTargeting = false;
+    pendingSkill = null;
+    selectedTargets = [];
+
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'target-buff-glow'));
+    addLog("All pending actions cancelled.", "#e74c3c");
+    updateUI();
+    showInspector('none', null);
+});
+
+// --- MISSING JADEN ANIMATION FUNCTIONS ---
+function showJadenLock(targetDOM) {
+    if(!targetDOM || !jadenLockUrl) return null;
+    const lock = document.createElement('div');
+    lock.style.cssText = `position:absolute; top:50%; left:50%; width:100px; height:100px; transform:translate(-50%, -50%); background-image:url('${jadenLockUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; background-position:center; pointer-events:none; z-index:9999;`;
+    targetDOM.appendChild(lock);
+    return lock;
+}
+
+async function shootBullet(sourceDOM, targetDOM) {
+    if(!sourceDOM || !targetDOM || !jadenBulletUrl) return;
+    const sEl = sourceDOM.parentElement.classList.contains('slot') ? sourceDOM.parentElement : sourceDOM;
+    const tEl = targetDOM.parentElement.classList.contains('slot') ? targetDOM.parentElement : targetDOM;
+
+    const sRect = sEl.getBoundingClientRect();
+    const tRect = tEl.getBoundingClientRect();
+    const bullet = document.createElement('div');
+
+    const startX = sRect.left + sRect.width/2;
+    const startY = sRect.top + sRect.height/2;
+    const endX = tRect.left + tRect.width/2;
+    const endY = tRect.top + tRect.height/2;
+    const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+
+    bullet.style.cssText = `position:fixed; width:40px; height:20px; background-image:url('${jadenBulletUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:9999; pointer-events:none; left:${startX}px; top:${startY}px; transform:translate(-50%, -50%) rotate(${angle}deg); transition:all 0.15s linear;`;
+    document.body.appendChild(bullet);
+
+    void bullet.offsetWidth;
+    bullet.style.left = endX + 'px';
+    bullet.style.top = endY + 'px';
+
+    await new Promise(r => setTimeout(r, 150));
+    bullet.remove();
 }
