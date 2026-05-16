@@ -24,6 +24,9 @@ const ASSET_LINKS = {
     "TG3": "./assets/TG3.png",
     "TG4": "./assets/TG4.png",
     "TG5": "./assets/TG5.png",
+    "TG6": "./assets/TG6.png",
+    "TG7": "./assets/TG7.png",
+    "TG8": "./assets/TG8.png",
 
     // -- Audio & SFX --
     "DragSound": "./assets/DragSound.mp3",
