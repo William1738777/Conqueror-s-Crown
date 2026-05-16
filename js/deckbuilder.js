@@ -13,18 +13,22 @@ let battleDeckConfig = {
     l6:      { limit: 4,  label: "Level 6+ Legends (4)", validator: (c) => c.type === 'unit' && c.powerLevel >= 6, cards: new Array(4).fill(null) }
 };
 
-// 1. Add a new variable at the top of the file to remember the last screen
+// Remember the last screen the player was on before opening the bag
 let previousScreenId = 'tavern-screen'; // Fallback
 
 function openInventory() {
+    // 1. Sync the gold display first
+    const goldEl = document.getElementById('player-gold');
+    if (goldEl && typeof playerGold !== 'undefined') goldEl.innerText = `GOLD: ${playerGold}`;
+
     // 2. Find which screen is currently visible BEFORE hiding everything
     document.querySelectorAll('.rpg-screen').forEach(s => {
-        // Check if it's currently displayed, and make sure it's not the inventory itself
         if (s.style.display === 'block' && s.id !== 'inventory-screen') {
             previousScreenId = s.id;
         }
     });
 
+    // 3. Hide all screens and show the inventory
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('inventory-screen').style.display = 'flex';
     
@@ -41,17 +45,20 @@ function openInventory() {
         exitBtn.insertAdjacentHTML('beforebegin', inspectorHtml);
     }
     
+    // 4. Setup starters if bag is totally empty
     if (playerCollection.length === 0 && battleDeckConfig.l4.cards[0] === null) {
         setupStartersAndCollection();
     }
+    
+    // 5. Render the UI
     renderInventory();
 }
 
 function closeInventory() {
-    // 3. Hide the inventory
+    // 1. Hide the inventory
     document.getElementById('inventory-screen').style.display = 'none';
     
-    // 4. Show the screen the player was previously on!
+    // 2. Show the screen the player was previously on!
     const prevScreen = document.getElementById(previousScreenId);
     if (prevScreen) {
         prevScreen.style.display = 'block';
@@ -60,6 +67,7 @@ function closeInventory() {
         document.getElementById('tavern-screen').style.display = 'block';
     }
 }
+
 function setupStartersAndCollection() {
     // Populate required starter slots based on the tutorial lore
     battleDeckConfig.l4.cards[0] = {...cardLibrary.find(c => c.name === "Great Knight"), dbId: generateUID()};
@@ -203,3 +211,161 @@ function dropToCollection(e) {
 }
 
 function generateUID() { return 'db_' + Math.random().toString(36).substr(2, 9); }
+
+
+// ============================================================================
+// 💰 SHOP & GACHA SYSTEM
+// ============================================================================
+
+function updateGoldUI() {
+    const goldEl = document.getElementById('shop-gold-display');
+    if(goldEl && typeof playerGold !== 'undefined') goldEl.innerText = `${playerGold}G`;
+}
+
+// --- STANDARD BUY MENU ---
+function openBuyMenu() {
+    const container = document.getElementById('shop-ui-container');
+    container.style.display = 'block';
+    
+    // Build the shop UI frame
+    container.innerHTML = `
+        <h2 style="color:var(--gold); text-align:center; font-family:'Cinzel'; margin-top:0;">
+            GLADINE'S WARES - <span id="shop-gold-display" style="color:#f1c40f;">${playerGold}G</span>
+        </h2>
+        <button onclick="document.getElementById('shop-ui-container').style.display='none'" style="position:absolute; right:20px; top:20px; background:#e74c3c; color:white; border:none; padding:10px 15px; cursor:pointer; font-weight:bold; border-radius:4px;">EXIT SHOP</button>
+        <div id="shop-items" style="display:flex; flex-wrap:wrap; gap:25px; justify-content:center; margin-top:30px;"></div>
+    `;
+
+    const items = document.getElementById('shop-items');
+    
+    // Define standard items to sell (You can add more here!)
+    const shopStock = [
+        { name: "Squire", cost: 50 },
+        { name: "Militia", cost: 50 },
+        { name: "Archer", cost: 100 },
+        { name: "Bannerman", cost: 150 },
+        { name: "Mana Core", cost: 200 }
+    ];
+
+    shopStock.forEach(stock => {
+        let template = cardLibrary.find(c => c.name.includes(stock.name));
+        if(!template) return; // Skip if asset isn't loaded
+        
+        let itemDiv = document.createElement('div');
+        itemDiv.style.cssText = "text-align:center; background:#1a1a1a; padding:15px; border:1px solid #333; border-radius:8px; box-shadow: 0 4px 8px rgba(0,0,0,0.5);";
+        
+        // Use your existing createCardDOM to render the visual
+        let visualCard = createCardDOM('shop_item_' + stock.name, template, true);
+        visualCard.style.position = 'relative';
+        
+        itemDiv.appendChild(visualCard);
+        itemDiv.innerHTML += `
+            <div style="margin-top:15px; color:var(--gold); font-size:1.2rem; font-weight:bold;">${stock.cost} G</div>
+            <button class="menu-btn" style="width:100%; padding:8px; margin-top:10px; font-size:0.9rem;" onclick="buyCard('${template.name}', ${stock.cost})">PURCHASE</button>
+        `;
+        
+        items.appendChild(itemDiv);
+    });
+}
+
+function buyCard(cardName, cost) {
+    if(typeof playerGold !== 'undefined' && playerGold >= cost) {
+        playerGold -= cost;
+        let template = cardLibrary.find(c => c.name === cardName);
+        if(template) {
+            // Add to bag
+            playerCollection.push({...template, dbId: generateUID()});
+            
+            // Audio & UI updates
+            if(typeof playClickSound === 'function') playClickSound();
+            updateGoldUI();
+            
+            // Notification
+            if (typeof addLog === 'function') addLog(`Bought ${cardName} for ${cost}G!`, "#2ecc71");
+            alert(`Successfully purchased ${cardName}! Check your bag.`);
+        }
+    } else {
+        alert("You don't have enough gold for this!");
+    }
+}
+
+// --- GACHA SUMMON SYSTEM ---
+function openSummonMenu() {
+    const summonCost = 100;
+    if (typeof playerGold === 'undefined' || playerGold < summonCost) {
+        alert(`You need ${summonCost} Gold to summon a card!`);
+        return;
+    }
+
+    if(!confirm(`Offer ${summonCost} Gold to the Core to summon a random card?`)) return;
+
+    // Deduct Gold
+    playerGold -= summonCost;
+    if(typeof playClickSound === 'function') playClickSound();
+
+    // 1. Calculate Pull Rarity
+    let pull;
+    let roll = Math.random();
+    
+    if (roll < 0.05) {
+        // 5% Chance: Level 6+ Legends (Kin-Ryu, Rolyn, Jaden)
+        let legends = cardLibrary.filter(c => c.powerLevel >= 6);
+        pull = legends[Math.floor(Math.random() * legends.length)];
+    } else if (roll < 0.25) {
+        // 20% Chance: Level 5 Elites or Spells
+        let epics = cardLibrary.filter(c => c.powerLevel === 5 || c.type === 'ability');
+        pull = epics[Math.floor(Math.random() * epics.length)];
+    } else {
+        // 75% Chance: Standard Units (Level 1-4)
+        let commons = cardLibrary.filter(c => c.powerLevel < 5 && c.type === 'unit');
+        pull = commons[Math.floor(Math.random() * commons.length)];
+    }
+
+    // Failsafe if filters fail
+    if (!pull) pull = cardLibrary[Math.floor(Math.random() * cardLibrary.length)];
+
+    // 2. Add to Collection
+    playerCollection.push({...pull, dbId: generateUID()});
+
+    // 3. Play Reveal Animation
+    showSummonAnimation(pull);
+}
+
+function showSummonAnimation(cardData) {
+    const container = document.createElement('div');
+    container.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(255,255,255,1); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; transition:background 1.5s ease-out;";
+    document.body.appendChild(container);
+
+    // Flashbang sound effect
+    if(typeof playSound === 'function' && typeof beamAudioUrl !== 'undefined') playSound(beamAudioUrl);
+
+    // Fade into the reveal
+    setTimeout(() => {
+        container.style.background = "radial-gradient(circle, #333 0%, #000 100%)";
+        
+        let title = document.createElement('h1');
+        title.innerText = "A GUARDIAN ANSWERS THE CALL...";
+        title.style.color = "var(--gold)";
+        title.style.fontFamily = "'Cinzel', serif";
+        title.style.textShadow = "0 0 15px #f1c40f";
+        title.style.letterSpacing = "2px";
+        
+        let cardDOM = createCardDOM('summoned_card', cardData, true);
+        cardDOM.style.transform = "scale(2.5)";
+        cardDOM.style.margin = "80px 0";
+        cardDOM.style.boxShadow = "0 0 30px var(--gold)";
+        
+        let btn = document.createElement('button');
+        btn.className = "btn-main";
+        btn.innerText = "ACCEPT CARD";
+        btn.style.padding = "15px 30px";
+        btn.onclick = () => container.remove();
+
+        container.appendChild(title);
+        container.appendChild(cardDOM);
+        container.appendChild(btn);
+        
+        // Chime for reveal
+        if(typeof playSound === 'function' && typeof buffActivatedUrl !== 'undefined') playSound(buffActivatedUrl);
+    }, 800);
+}
