@@ -221,19 +221,16 @@ function triggerLicenseQuest() {
     document.getElementById('game-area').style.display = 'none';
     document.getElementById('tavern-screen').style.display = 'block';
     
-    // --- BUG FIX: Clear Tutorial Overlay & Combat Visual Artifacts ---
     document.getElementById('tut-overlay-msg').style.display = 'none';
     document.querySelectorAll('.target-glow, .target-line-glow, .target-heal-glow, .tut-highlight-glow, .tut-disabled').forEach(el => {
         el.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'tut-highlight-glow', 'tut-disabled');
     });
     document.querySelectorAll('.arrow-fx, .shuriken-fx, .slash-fx, .floating-text').forEach(el => el.remove());
     isTargeting = false;
-    // ----------------------------------------------------------------
     
     // Unlock Inventory Bag
     document.getElementById('inventory-btn').style.display = 'block';
 
-    // NEW FIX: Unlock the Training Grounds in Leonia!
     const tgBtn = document.getElementById('loc-tg-btn');
     if (tgBtn) {
         tgBtn.disabled = false;
@@ -389,16 +386,6 @@ function acceptOMT() {
     document.getElementById('tg-speaker').style.color = "#e74c3c";
     document.getElementById('tg-text').innerText = "Pfft, giving away spells to rookies? You're too soft. Kid won't last a minute out here.";
 }
-    
-    // Trigger Jax sequence
-    tgStep = 3;
-    document.getElementById('tg-screen').style.backgroundImage = "url('./assets/TG4.png')";
-    const box = document.getElementById('tg-dialogue-box');
-    box.style.display = 'flex';
-    document.getElementById('tg-speaker').innerText = "Arrogant Guy";
-    document.getElementById('tg-speaker').style.color = "#e74c3c";
-    document.getElementById('tg-text').innerText = "Pfft, giving away spells to rookies? You're too soft. Kid won't last a minute out here.";
-}
 
 // --- DUEL INITIALIZATION ---
 function startStrangerDuel() {
@@ -408,7 +395,7 @@ function startStrangerDuel() {
     isTutorialMode = false; // Normal Rules
     tutorialLock = false;
 
-    // NEW FIX: Clear the inspector!
+    // Clear the inspector!
     if (typeof showInspector === 'function') showInspector('none');
     
     turnCount = 1; currentTurn = 'PLAYER';
