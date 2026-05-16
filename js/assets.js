@@ -243,7 +243,7 @@ function getCardTemplate(fileName, dataUrl) {
         return { 
             isPlayable: true, type: 'unit', name: "Zombie", title: "Level 2", powerLevel: 2, summonCost: 2, faction: "Council of Darkness", race: "Undead", hp: 700, maxHp: 700, atk: 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, bleedStacks: 0, bleedTurns: 0, isRevealed: false, atkBuffTurns: 0,
             skills: [ { name: "Bite", manaCost: 0, desc: "Inflicts damage rolling from 100-200. (+1 Bleed Stack)" } ], 
-            passives: [ { name: "Vigor of the Damned", desc: "If survives with <=100 HP, fully restores HP and gains 1000 shield." } ] 
+            passives: [ { name: "Vigor of the Damned", desc: "If survives with <=100 HP, heals 20% of Max HP and gains 100 shield." } ] 
         };
     }
     else if(cleanName.includes('militia') || cleanName.includes('milita')) {
