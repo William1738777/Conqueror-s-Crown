@@ -32,6 +32,7 @@ function buildDeck() {
 function startGame() {
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('game-area').style.display = 'flex';
+    document.getElementById('inventory-btn').style.display = 'none';
     pDeck = buildDeck();
     eDeck = buildDeck();
     document.getElementById('p-deck-count').innerText = pDeck.length;
