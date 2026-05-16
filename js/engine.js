@@ -1158,9 +1158,12 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
              addLog(`<b>${actor.name}</b> hits ${targetInst.name} for ${dmg} DMG!`, '#ff4d4d');
 
              if(targetInst.name === "Zombie" && targetInst.hp > 0 && targetInst.hp <= 100) {
-                 targetInst.hp = targetInst.maxHp; syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
-                 targetInst.shield = 1000; targetInst.shieldTurns = turnCount + 99;
-                 addLog(`<b>Zombie</b>'s Vigor of the Damned triggered! Restored to full HP and gained 1000 Shield!`, '#2ecc71');
+                 let healAmt = Math.floor(targetInst.maxHp * 0.20);
+                 targetInst.hp = Math.min(targetInst.maxHp, targetInst.hp + healAmt);
+                 syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
+                 targetInst.shield = 100;
+                 targetInst.shieldTurns = turnCount + 99;
+                 addLog(`<b>Zombie</b>'s Vigor of the Damned triggered! Healed for ${healAmt} HP and gained 100 Shield!`, '#2ecc71');
                  if(targetDOM) { showFloatingText(targetDOM, "VIGOR OF THE DAMNED", "#2ecc71", "1.5rem"); targetDOM.classList.add('shimmer-fx'); setTimeout(() => targetDOM.classList.remove('shimmer-fx'), 1000); }
              }
 
@@ -1813,8 +1816,11 @@ async function aiTurn() {
             addLog(`<b>${c.name}</b> takes ${bleedDmg} Bleed damage!`, '#8e44ad');
 
             if(c.name === "Zombie" && c.hp > 0 && c.hp <= 100) {
-                 c.hp = c.maxHp; c.shield = 1000; c.shieldTurns = turnCount + 99;
-                 addLog(`<b>Zombie</b>'s Vigor of the Damned triggered from Bleed! Restored to full HP and gained 1000 Shield!`, '#2ecc71');
+                 let healAmt = Math.floor(c.maxHp * 0.20);
+                 c.hp = Math.min(c.maxHp, c.hp + healAmt);
+                 c.shield = 100;
+                 c.shieldTurns = turnCount + 99;
+                 addLog(`<b>Zombie</b>'s Vigor of the Damned triggered from Bleed! Healed for ${healAmt} HP and gained 100 Shield!`, '#2ecc71');
                  if(cDOM) { showFloatingText(cDOM, "VIGOR OF THE DAMNED", "#2ecc71", "1.5rem"); cDOM.classList.add('shimmer-fx'); setTimeout(() => cDOM.classList.remove('shimmer-fx'), 1000); syncVisualHP(cDOM, c.hp, c.maxHp); }
             }
             if(c.hp <= 0) { addLog(`${c.name} succumbed to Bleed!`, '#aaa'); if(cDOM) cDOM.remove(); }
