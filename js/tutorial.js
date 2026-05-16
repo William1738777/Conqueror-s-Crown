@@ -391,6 +391,8 @@ function acceptOMT() {
 function startStrangerDuel() {
     document.getElementById('tg-screen').style.display = 'none';
     document.getElementById('game-area').style.display = 'flex';
+
+    document.getElementById('inventory-btn').style.display = 'none';
     
     isTutorialMode = false; // Normal Rules
     tutorialLock = false;
