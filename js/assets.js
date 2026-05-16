@@ -17,6 +17,8 @@ const ASSET_LINKS = {
     "LeoniaBG": "./assets/LeoniaBG.png",
     "TavernBG": "./assets/Tavern.png",
     "AtkIcon": "./assets/AtkIcon.png",
+    "AlleyShopBG": "./assets/Alley Shop.png",
+    "GladineShopBG": "./assets/Gladine Shop.png",
 
     // Training Grounds Dialog //
     "TG1": "./assets/TG1.png",
