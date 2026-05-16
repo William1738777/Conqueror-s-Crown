@@ -338,13 +338,13 @@ document.querySelectorAll('.slot').forEach(slot => {
                 showInspector(cardId, cardEl);
 
                 // Tutorial progression checks
-                        if(isTutorialMode) {
-                            if(tutorialStep === 1 && cardId === 'p_Squire' && slot.classList.contains('frontline')) { tutorialStep = 2; progressTutorial(); }
-                            if(tutorialStep === 2 && cardId === 'p_ManaCore' && slot.dataset.allowed === 'ability') { tutorialStep = 3; progressTutorial(); }
-                            if(tutorialStep === 8 && cardId === 'p_Bannerman' && slot.classList.contains('backline')) { tutorialStep = 9; progressTutorial(); }
-                            if(tutorialStep === 11 && cardId === 'p_GreatKnight' && slot.classList.contains('frontline')) { tutorialStep = 12; progressTutorial(); }
-                            if(tutorialStep === 12 && cardId === 'p_Archer' && slot.classList.contains('backline')) { tutorialStep = 13; progressTutorial(); }
-                        }
+                if(isTutorialMode) {
+                    if(tutorialStep === 1 && cardId === 'p_Squire' && slot.id === 'p-front-center') { tutorialStep = 2; progressTutorial(); }
+                    if(tutorialStep === 2 && cardId === 'p_ManaCore' && slot.id === 'p-ability') { tutorialStep = 3; progressTutorial(); }
+                    if(tutorialStep === 8 && cardId === 'p_Bannerman') { tutorialStep = 9; progressTutorial(); }
+                    if(tutorialStep === 11 && cardId === 'p_GreatKnight') { tutorialStep = 12; progressTutorial(); }
+                    if(tutorialStep === 12 && cardId === 'p_Archer') { tutorialStep = 13; progressTutorial(); }
+                }
             } else {
                 addLog(`Not enough Mana!`, "red");
             }
