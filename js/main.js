@@ -18,89 +18,81 @@ let tutorialStep = 0;
 let tutorialLock = false; 
 
 // --- AUDIO & ASSET GLOBALS ---
-let deckBackImg = ''; let arrowImgUrl = ''; let shurikenImgUrl = ''; let kinSanAudioUrl = ''; let kinSfx1Url = ''; let kinSfx2Url = ''; let bloodAudioUrl = ''; let bodyShotAudioUrl = ''; let arrowHitAudioUrl = ''; let healAudioUrl = ''; let menuMusicUrl = ''; let menuAudioEl = null; let jadenLockUrl = ''; let jadenBulletUrl = ''; let jadenSfx1 = ''; let jadenSfx2 = ''; let jadenSfx3 = ''; let rolynSfx1Url = ''; let rolynSfx2Url = ''; let shieldBlockAudioUrl = ''; let tauntedImgUrl = ''; let barrierImgUrl = ''; let bleedImgUrl = ''; let shinobiMarkImgUrl = ''; let atkIconUrl = ''; let drawSfxUrl = ''; let placeSfxUrl = ''; let abilityActivatedUrl = ''; let buffActivatedUrl = ''; let dragSoundUrl = ''; let dropSoundUrl = ''; let clickSfxUrl = ''; let dragAudioEl = null; let villagerSuicideSfxUrl = ''; let healSfxVoiceUrl = ''; let healSfxVoice2Url = ''; let shieldSfxVoiceUrl = ''; let shieldSfxVoice2Url = ''; let shieldSfxUrl = ''; let beamAudioUrl = '';
+let deckBackImg = ''; let arrowImgUrl = ''; let shurikenImgUrl = ''; let kinSanAudioUrl = ''; let kinSfx1Url = ''; let kinSfx2Url = ''; let bloodAudioUrl = ''; let bodyShotAudioUrl = ''; let arrowHitAudioUrl = ''; let healAudioUrl = ''; let menuMusicUrl = ''; let menuAudioEl = null; let jadenLockUrl = ''; let jadenBulletUrl = ''; let jadenSfx1 = ''; let jadenSfx2 = ''; let jadenSfx3 = ''; let rolynSfx1Url = ''; let rolynSfx2Url = ''; let shieldBlockAudioUrl = ''; let tauntedImgUrl = ''; let barrierImgUrl = ''; let bleedImgUrl = ''; let shinobiMarkImgUrl = ''; let atkIconUrl = ''; let abilityActivatedUrl = ''; let buffActivatedUrl = ''; let drawSfxUrl = ''; let placeSfxUrl = ''; let dragSoundUrl = ''; let dropSoundUrl = ''; let clickSfxUrl = ''; let villagerSuicideSfxUrl = ''; let beamAudioUrl = ''; let healSfxVoiceUrl = ''; let healSfxVoice2Url = ''; let shieldSfxVoiceUrl = ''; let shieldSfxVoice2Url = ''; let shieldSfxUrl = '';
 
-// --- COMBAT QUEUE GLOBALS ---
-let pQueue = []; let eQueue = []; let isTargeting = false; let pendingSkill = null; let isExecuting = false; let targetCountReq = 1; let selectedTargets = []; let draggedCardId = null; let pDeck = []; let eDeck = [];
-
-const log = document.getElementById('event-log');
-
-// ============================================================================
-// 🎵 AUDIO ENGINE
-// ============================================================================
-function playClickSound() {
-    if (clickSfxUrl) playSound(clickSfxUrl);
-}
-
-function playSound(url, overlap = true) {
-    if (!url || url === 'none') return null;
-    const audio = new Audio(url);
-    audio.volume = 0.6;
-    audio.play().catch(e => console.warn("Audio playback prevented/failed:", e));
-    return audio;
-}
+// --- GAME ENGINE GLOBALS ---
+let pQueue = [], eQueue = [];
+let isExecuting = false;
+let pDeck = [], eDeck = [];
+let draggedCardId = null;
+let isTargeting = false;
+let pendingSkill = null;
+let targetCountReq = 1;
+let selectedTargets = [];
+let dragAudioEl = null;
 
 // ============================================================================
-// 📝 EVENT LOG ENGINE
-// ============================================================================
-function addLog(msg, color = "#fff") {
-    const logEl = document.getElementById('event-log');
-    if(!logEl) return;
-    const entry = document.createElement('div');
-    entry.style.color = color;
-    entry.style.marginBottom = "6px";
-    entry.innerHTML = `> ${msg}`;
-    logEl.appendChild(entry);
-    logEl.scrollTop = logEl.scrollHeight;
-}
-
-// ============================================================================
-// 🚀 GAME INITIALIZATION
+// ⚙️ INITIALIZATION & ASSET PRELOADING
 // ============================================================================
 async function initializeGame() {
     document.getElementById('upload-box').style.display = 'none';
-    document.getElementById('absorbing-text').style.display = 'block';
+    const loadText = document.getElementById('absorbing-text');
+    loadText.style.display = 'block';
+    
+    // 1. Force the browser to actually download & cache all files first
+    let assetEntries = Object.entries(ASSET_LINKS);
+    let totalAssets = assetEntries.length;
+    let loadedAssets = 0;
 
-    if(menuMusicUrl && !menuAudioEl) {
-        menuAudioEl = new Audio(menuMusicUrl);
-        menuAudioEl.loop = true; menuAudioEl.volume = 0.4;
-        menuAudioEl.play().catch(e=>{});
+    const loadPromises = assetEntries.map(([name, url]) => {
+        return new Promise((resolve) => {
+            let cleanUrl = url.replace(/"/g, '').replace(/'/g, '%27');
+            let isAudio = cleanUrl.endsWith('.mp3');
+
+            if (isAudio) {
+                let audio = new Audio();
+                audio.oncanplaythrough = () => { loadedAssets++; updateProgress(); resolve(); };
+                audio.onerror = () => { loadedAssets++; updateProgress(); resolve(); }; 
+                audio.src = cleanUrl;
+                audio.load();
+            } else {
+                let img = new Image();
+                img.onload = () => { loadedAssets++; updateProgress(); resolve(); };
+                img.onerror = () => { loadedAssets++; updateProgress(); resolve(); };
+                img.src = cleanUrl;
+            }
+        });
+    });
+
+    function updateProgress() {
+        let pct = Math.floor((loadedAssets / totalAssets) * 100);
+        loadText.innerText = `Downloading Assets... ${pct}%`;
     }
 
-    let keys = Object.keys(ASSET_LINKS);
-    for(let i=0; i<keys.length; i++) {
-        let key = keys[i];
-        let fileUrl = ASSET_LINKS[key];
-        
-        document.getElementById('absorbing-text').innerText = `Loading Asset ${i + 1} of ${keys.length}...`;
-        const cardData = getCardTemplate(key, fileUrl);
-        
-        if (cardData.isCardBack) {
-            deckBackImg = cardData.img;
-            document.getElementById('player-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
-            document.getElementById('enemy-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
-        } else if (cardData.isSlash) { document.documentElement.style.setProperty('--slash-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
-        } else if (cardData.isHealFx) { document.documentElement.style.setProperty('--healfx-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
-        } else if (cardData.isArrow) { arrowImgUrl = cardData.img; document.documentElement.style.setProperty('--arrow-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
-        } else if (cardData.isShuriken) { shurikenImgUrl = cardData.img; document.documentElement.style.setProperty('--shuriken-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
-        } else if (cardData.isIcon) {
-            if (cardData.iconType === 'taunted') tauntedImgUrl = cardData.img;
-            if (cardData.iconType === 'barrier') barrierImgUrl = cardData.img;
-            if (cardData.iconType === 'bleed') bleedImgUrl = cardData.img;
-            if (cardData.iconType === 'shinobimark') shinobiMarkImgUrl = cardData.img;
-            if (cardData.iconType === 'atkbuff') atkIconUrl = cardData.img;
-        } else if (cardData.isAudio || cardData.isMapBG || cardData.isFX || cardData.isEmptySlot) {
-            // Handled inside assets file
+    updateProgress(); // Show 0% immediately
+    await Promise.all(loadPromises); // Wait for every single file to finish downloading
+
+    // 2. Now parse the card templates for the logic engine
+    loadText.innerText = "Structuring Decks...";
+    cardLibrary = []; // Reset just in case
+    
+    for (const [name, url] of assetEntries) {
+        let cardData = getCardTemplate(name, url);
+        // Skip background/FX templates from going into the playable deck arrays
+        if (cardData.isAudio || cardData.isMapBG || cardData.isFX || cardData.isEmptySlot || cardData.isIcon || cardData.isSlash || cardData.isHealFx || cardData.isArrow || cardData.isShuriken || cardData.isMenuBG || cardData.isCardBack) {
+            continue; 
         } else if (cardData.isPlayable) {
             cardLibrary.push({...cardData}); 
         }
-        await new Promise(r => setTimeout(r, 60)); 
     }
+    
     if (cardLibrary.length === 0) {
         alert("No playable cards found! Check your asset links.");
         return;
     }
     
+    // 3. Transition to the game
+    loadText.innerText = "Done!";
     setTimeout(showOverworldMap, 500); 
 }
 
@@ -129,3 +121,67 @@ function enterTavern() {
         document.getElementById('tavern-menu').style.display = 'flex';
     }
 }
+
+// ============================================================================
+// 🔊 AUDIO CONTROLLERS
+// ============================================================================
+function playSound(url, wait = false) {
+    if(!url || url === '' || url === 'none') return null;
+    let audio = new Audio(url.replace(/"/g, '').replace(/'/g, '%27'));
+    audio.play().catch(e => console.log("Audio play prevented:", e));
+    return audio;
+}
+
+function playMenuMusic() {
+    if(menuAudioEl) return; 
+    if(!menuMusicUrl || menuMusicUrl === '' || menuMusicUrl === 'none') return;
+    
+    menuAudioEl = new Audio(menuMusicUrl.replace(/"/g, '').replace(/'/g, '%27'));
+    menuAudioEl.loop = true;
+    menuAudioEl.volume = 0.5; 
+    menuAudioEl.play().catch(e => console.log("Music play prevented:", e));
+}
+
+function playClickSound() {
+    if(!clickSfxUrl || clickSfxUrl === '' || clickSfxUrl === 'none') return;
+    let audio = new Audio(clickSfxUrl.replace(/"/g, '').replace(/'/g, '%27'));
+    audio.volume = 0.7;
+    audio.play().catch(e => console.log("Click sound prevented:", e));
+}
+
+// ============================================================================
+// 🖱️ MAP DRAG LOGIC (Overworld)
+// ============================================================================
+const mapContainer = document.getElementById('world-map-screen');
+let isDraggingMap = false;
+let startX, startY, scrollLeft, scrollTop;
+
+mapContainer.addEventListener('mousedown', (e) => {
+    isDraggingMap = true;
+    mapContainer.classList.add('grabbing');
+    startX = e.pageX - mapContainer.offsetLeft;
+    startY = e.pageY - mapContainer.offsetTop;
+    scrollLeft = mapContainer.scrollLeft;
+    scrollTop = mapContainer.scrollTop;
+});
+
+mapContainer.addEventListener('mouseleave', () => {
+    isDraggingMap = false;
+    mapContainer.classList.remove('grabbing');
+});
+
+mapContainer.addEventListener('mouseup', () => {
+    isDraggingMap = false;
+    mapContainer.classList.remove('grabbing');
+});
+
+mapContainer.addEventListener('mousemove', (e) => {
+    if (!isDraggingMap) return;
+    e.preventDefault();
+    const x = e.pageX - mapContainer.offsetLeft;
+    const y = e.pageY - mapContainer.offsetTop;
+    const walkX = (x - startX) * 2; 
+    const walkY = (y - startY) * 2;
+    mapContainer.scrollLeft = scrollLeft - walkX;
+    mapContainer.scrollTop = scrollTop - walkY;
+});
