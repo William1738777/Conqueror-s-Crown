@@ -1,4 +1,4 @@
-Version 7.8 (Freedom)
+Version 7.9 (Freedom)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -75,6 +75,30 @@ Version 7.8 (Freedom)
             </div>
     </div>
     
+    <div id="shops-alley-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
+        <div class="top-left-menu">
+            <button class="menu-btn unlocked" onclick="enterCardShop()">Card Shop</button>
+            <button class="menu-btn" disabled>Shady Seller (Locked)</button>
+            <button class="menu-btn" disabled>Card Synthesis Center (Locked)</button>
+            <button class="menu-btn" disabled>Crafting Center (Locked)</button>
+            <button class="menu-btn" onclick="backToLeonia()">Go back to Town</button>
+        </div>
+    </div>
+
+    <div id="card-shop-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
+        <div id="card-shop-menu" class="top-left-menu" style="display:none;">
+            <button class="menu-btn unlocked">Buy</button>
+            <button class="menu-btn unlocked">Card Summon</button>
+            <button class="menu-btn" onclick="backToShopsAlley()">Go back to Shops Alley</button>
+        </div>
+        
+        <div id="shop-dialogue-box" class="dialogue-box-style" style="display:none;" onclick="advanceShopDialogue()">
+            <div id="shop-speaker">...</div>
+            <div id="shop-text">...</div>
+            <div style="font-size: 0.75rem; color: #aaa; text-align: right; margin-top: 15px; font-style: italic;">(Click to continue)</div>
+        </div>
+    </div>
+
     <div id="inventory-screen" class="rpg-screen">
         <div id="inv-container">
             <div id="inv-sidebar">
