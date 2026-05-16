@@ -11,6 +11,7 @@ let pSquiresFallen = 0, eSquiresFallen = 0;
 let pSkeletonMana = 0, eSkeletonMana = 0; // Added from VersionFight
 let cardInstances = {};
 let globalTargetedThisTurn = [];
+let playerGold = 500;
 
 // --- TUTORIAL STATE ---
 let isTutorialMode = false;
