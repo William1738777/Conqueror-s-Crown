@@ -18,6 +18,13 @@ const ASSET_LINKS = {
     "TavernBG": "./assets/Tavern.png",
     "AtkIcon": "./assets/AtkIcon.png",
 
+    // Training Grounds Dialog //
+    "TG1": "./assets/TG1.png",
+    "TG2": "./assets/TG2.png",
+    "TG3": "./assets/TG3.png",
+    "TG4": "./assets/TG4.png",
+    "TG5": "./assets/TG5.png",
+
     // -- Audio & SFX --
     "DragSound": "./assets/DragSound.mp3",
     "DropSound": "./assets/DropSound.mp3",
