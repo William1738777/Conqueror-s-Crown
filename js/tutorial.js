@@ -358,12 +358,37 @@ function presentOMTCard() {
 function acceptOMT() {
     document.getElementById('omt-presentation').style.display = 'none';
     
-    // Dynamically inject card into collection
+    // Create the new card instance
     let link = ASSET_LINKS["One More Time"] || "";
     let omtData = getCardTemplate("One More Time", link);
-    if(typeof playerCollection !== 'undefined') {
-        playerCollection.push({...omtData, dbId: generateUID()});
+    let newCard = {...omtData, dbId: generateUID()};
+    
+    // Automatically equip it to the Battle Deck if there is space
+    let placedInDeck = false;
+    if(typeof battleDeckConfig !== 'undefined' && battleDeckConfig.ability) {
+        for(let i = 0; i < battleDeckConfig.ability.limit; i++) {
+            if(battleDeckConfig.ability.cards[i] === null) {
+                battleDeckConfig.ability.cards[i] = newCard;
+                placedInDeck = true;
+                break;
+            }
+        }
     }
+    
+    // Fallback just in case the deck is completely full
+    if(!placedInDeck && typeof playerCollection !== 'undefined') {
+        playerCollection.push(newCard);
+    }
+    
+    // Trigger Jax sequence
+    tgStep = 3;
+    document.getElementById('tg-screen').style.backgroundImage = "url('./assets/TG4.png')";
+    const box = document.getElementById('tg-dialogue-box');
+    box.style.display = 'flex';
+    document.getElementById('tg-speaker').innerText = "Arrogant Guy";
+    document.getElementById('tg-speaker').style.color = "#e74c3c";
+    document.getElementById('tg-text').innerText = "Pfft, giving away spells to rookies? You're too soft. Kid won't last a minute out here.";
+}
     
     // Trigger Jax sequence
     tgStep = 3;
