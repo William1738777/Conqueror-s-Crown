@@ -1575,7 +1575,14 @@ async function processQueue(sideProcessing, queueArr) {
     if(isTutorialMode && tutorialStep === 16) { tutorialStep = 17; progressTutorial(); }
     
     if(eCoreHP <= 0) { 
-        if (!isTutorialMode) { alert("VICTORY! Enemy Core Destroyed!"); location.reload(); } 
+        if (!isTutorialMode) { 
+            alert("VICTORY! Enemy Core Destroyed!"); 
+            if (typeof triggerJaxPostDuel === 'function' && typeof tgStep !== 'undefined' && tgStep >= 4) {
+                triggerJaxPostDuel();
+            } else {
+                location.reload(); 
+            }
+        } 
         else { if (typeof triggerLicenseQuest === 'function') triggerLicenseQuest(); }
     }
     if(pCoreHP <= 0) { 
