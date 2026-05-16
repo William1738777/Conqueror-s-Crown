@@ -453,6 +453,7 @@ let postDuelStep = 0;
 
 function triggerJaxPostDuel() {
     document.getElementById('game-area').style.display = 'none';
+    document.getElementById('inventory-btn').style.display = 'block';
     const tgScreen = document.getElementById('tg-screen');
     tgScreen.style.display = 'block';
 
