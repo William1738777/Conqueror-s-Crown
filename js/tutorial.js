@@ -443,3 +443,147 @@ function startStrangerDuel() {
     drawBtn.style.display = "block";
     drawBtn.innerText = "DRAW HAND";
 }
+
+// ============================================================================
+// 🏆 POST-DUEL EVENT (JAX DEFEATED)
+// ============================================================================
+let postDuelStep = 0;
+
+function triggerJaxPostDuel() {
+    document.getElementById('game-area').style.display = 'none';
+    const tgScreen = document.getElementById('tg-screen');
+    tgScreen.style.display = 'block';
+
+    // Clean up any stray UI from the duel
+    document.getElementById('omt-presentation').style.display = 'none';
+    document.getElementById('tg-menu').style.display = 'none';
+
+    postDuelStep = 0;
+    advancePostDuelDialogue();
+}
+
+function advancePostDuelDialogue() {
+    const box = document.getElementById('tg-dialogue-box');
+    box.style.display = 'flex';
+    const speaker = document.getElementById('tg-speaker');
+    const text = document.getElementById('tg-text');
+    const tgScreen = document.getElementById('tg-screen');
+
+    if (postDuelStep === 0) {
+        tgScreen.style.backgroundImage = "url('./assets/TG6.png')";
+        speaker.innerText = "";
+        text.innerText = "(Jax appeared to run to escape the embarrassment.)";
+    } else if (postDuelStep === 1) {
+        tgScreen.style.backgroundImage = "url('./assets/TG7.png')";
+        speaker.innerText = "";
+        text.innerText = "(His friend shortly followed after.)";
+    } else if (postDuelStep === 2) {
+        tgScreen.style.backgroundImage = "url('./assets/TG8.png')";
+        speaker.innerText = "Friendly Girl";
+        speaker.style.color = "#2ecc71";
+        text.innerText = "You really showed them their place! Hilarious.";
+    } else if (postDuelStep === 3) {
+        text.innerText = "It's tradition that the loser loses one of the cards to the winner. Here, choose one of these cards that he dropped. I'll find him later and return the other ones.";
+    } else if (postDuelStep === 4) {
+        // Hide dialog box and trigger the card selection UI
+        box.style.display = 'none';
+        showPostDuelCardChoice();
+        return; // Pause the dialogue sequence until a card is picked
+    } else if (postDuelStep === 5) {
+        speaker.innerText = "Friendly Girl";
+        speaker.style.color = "#2ecc71";
+        text.innerText = "Good choice!";
+    } else if (postDuelStep === 6) {
+        text.innerText = "By the way, I own a shop on the alley. I sell different types of starter cards that you might be interested in, feel free to visit when you have time!";
+    } else if (postDuelStep === 7) {
+        speaker.innerText = "You";
+        speaker.style.color = "#3498db";
+        text.innerText = "Will do, thanks!";
+    } else if (postDuelStep === 8) {
+        // End of sequence, return to Leonia
+        box.style.display = 'none';
+        unlockShopsAlley();
+        return;
+    }
+
+    postDuelStep++;
+    // Re-bind the click event to ensure it advances this specific dialogue tree
+    box.onclick = advancePostDuelDialogue;
+}
+
+function showPostDuelCardChoice() {
+    const container = document.getElementById('omt-presentation');
+    container.innerHTML = ''; // Clear out the old 'One More Time' UI
+
+    const choices = [
+        { name: "Zombie", key: "Zombie" },
+        { name: "Skeleton Warrior", key: "Skeleton Warrior" },
+        { name: "Leonian Squire", key: "Squire" } // Maps to the correct asset key
+    ];
+
+    const flexBox = document.createElement('div');
+    flexBox.style.display = 'flex';
+    flexBox.style.gap = '25px';
+    flexBox.style.justifyContent = 'center';
+    flexBox.style.marginTop = '20px';
+
+    choices.forEach(choice => {
+        const link = ASSET_LINKS[choice.key] || "";
+        const data = getCardTemplate(choice.key, link);
+        // createCardDOM with 'true' at the end makes it purely visual (no dragging)
+        const cardDOM = createCardDOM('reward_' + choice.key.replace(/\s/g, ''), data, true);
+
+        // Add hover effects for interactivity
+        cardDOM.style.transform = "scale(1.2)";
+        cardDOM.style.cursor = "pointer";
+        cardDOM.style.transition = "transform 0.2s ease";
+
+        cardDOM.onmouseover = () => cardDOM.style.transform = "scale(1.3)";
+        cardDOM.onmouseout = () => cardDOM.style.transform = "scale(1.2)";
+
+        cardDOM.onclick = () => acceptPostDuelCard(choice.name, data);
+
+        flexBox.appendChild(cardDOM);
+    });
+
+    const title = document.createElement('h2');
+    title.innerText = "CHOOSE YOUR REWARD";
+    title.style.color = "var(--gold)";
+    title.style.textShadow = "2px 2px 4px #000";
+    title.style.marginBottom = "30px";
+
+    container.appendChild(title);
+    container.appendChild(flexBox);
+    container.style.display = 'block';
+}
+
+function acceptPostDuelCard(cardName, data) {
+    document.getElementById('omt-presentation').style.display = 'none';
+    
+    // Add the selected card to the player's bag
+    let newCard = {...data, dbId: generateUID()};
+    if (typeof playerCollection !== 'undefined') {
+        playerCollection.push(newCard);
+        if (typeof addLog === 'function') addLog(`Added ${cardName} to your collection!`, "#f1c40f");
+    }
+
+    // Advance to the next line of dialogue ("Good choice!")
+    postDuelStep = 5;
+    advancePostDuelDialogue();
+}
+
+function unlockShopsAlley() {
+    // Hide all screens and show the town map
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('leonia-screen').style.display = 'block';
+
+    // Find the Shops Alley button, remove the 'disabled' attribute, and update its text
+    const buttons = document.querySelectorAll('#leonia-screen .loc-btn');
+    buttons.forEach(btn => {
+        if (btn.innerText.includes("Shops Alley")) {
+            btn.disabled = false;
+            btn.classList.add('unlocked');
+            btn.innerText = "Shops Alley";
+        }
+    });
+}
