@@ -13,7 +13,18 @@ let battleDeckConfig = {
     l6:      { limit: 4,  label: "Level 6+ Legends (4)", validator: (c) => c.type === 'unit' && c.powerLevel >= 6, cards: new Array(4).fill(null) }
 };
 
+// 1. Add a new variable at the top of the file to remember the last screen
+let previousScreenId = 'tavern-screen'; // Fallback
+
 function openInventory() {
+    // 2. Find which screen is currently visible BEFORE hiding everything
+    document.querySelectorAll('.rpg-screen').forEach(s => {
+        // Check if it's currently displayed, and make sure it's not the inventory itself
+        if (s.style.display === 'block' && s.id !== 'inventory-screen') {
+            previousScreenId = s.id;
+        }
+    });
+
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('inventory-screen').style.display = 'flex';
     
@@ -37,10 +48,18 @@ function openInventory() {
 }
 
 function closeInventory() {
+    // 3. Hide the inventory
     document.getElementById('inventory-screen').style.display = 'none';
-    document.getElementById('tavern-screen').style.display = 'block';
+    
+    // 4. Show the screen the player was previously on!
+    const prevScreen = document.getElementById(previousScreenId);
+    if (prevScreen) {
+        prevScreen.style.display = 'block';
+    } else {
+        // Safe fallback just in case
+        document.getElementById('tavern-screen').style.display = 'block';
+    }
 }
-
 function setupStartersAndCollection() {
     // Populate required starter slots based on the tutorial lore
     battleDeckConfig.l4.cards[0] = {...cardLibrary.find(c => c.name === "Great Knight"), dbId: generateUID()};
