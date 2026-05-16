@@ -1317,15 +1317,27 @@ async function processQueue(sideProcessing, queueArr) {
             }
         }
         else if (action.skillName === "VALIANT GUARD") {
+            // --- NEW HEAL LOGIC ---
+            let healAmt = 200;
+            actor.hp = Math.min(actor.maxHp, actor.hp + healAmt);
+            if(actorDOM) syncVisualHP(actorDOM, actor.hp, actor.maxHp);
+            if(actorDOM) actorDOM.classList.add('shimmer-fx');
+            // ----------------------
+
             actor.shield = 250; actor.shieldTurns = turnCount + 1;
             let enemySide = sideProcessing === 'PLAYER' ? 'ENEMY' : 'PLAYER';
             let frontlineEnemies = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${enemySide}"] .card`)).map(c => cardInstances[c.id]);
             frontlineEnemies.forEach(eTarget => { if(eTarget && eTarget.hp > 0) eTarget.tauntedBy = actor.id; });
             
             if (shieldSfxUrl) playSound(shieldSfxUrl); 
-            showFloatingText(actorDOM, "VALIANT GUARD", "#3498db", "1.2rem");
-            addLog(`<b>${actor.name}</b> shielded up and Taunted the frontline!`, "#3498db");
-            await new Promise(r => setTimeout(r, 600)); updateUI();
+            if (healAudioUrl) playSound(healAudioUrl); // Plays the heal sound too!
+            
+            showFloatingText(actorDOM, `+${healAmt} HP / GUARD`, "#3498db", "1.2rem");
+            addLog(`<b>${actor.name}</b> healed for ${healAmt}, shielded up, and Taunted the frontline!`, "#3498db");
+            
+            await new Promise(r => setTimeout(r, 800)); 
+            if(actorDOM) actorDOM.classList.remove('shimmer-fx');
+            updateUI();
         }
         else if (action.skillName === "Double Action") {
             let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
