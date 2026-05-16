@@ -137,50 +137,6 @@ function lockAllExcept(allowedIds, allowEndTurn = false, allowExec = false) {
     if(drawBtn) drawBtn.style.display = 'none'; 
 }
 
-function lockAllExcept(allowedIds, allowEndTurn = false, allowExec = false, dynamicSelectors = []) {
-    tutorialLock = true;
-    document.querySelectorAll('.card, .slot, .btn-main').forEach(el => {
-        el.classList.add('tut-disabled');
-    });
-    
-    // 1. Highlight specific IDs (like specific cards)
-    allowedIds.forEach(id => {
-        let el = document.getElementById(id);
-        if(el) {
-            el.classList.remove('tut-disabled');
-            el.classList.add('tut-highlight-glow');
-        }
-    });
-
-    // 2. NEW: Dynamically highlight slots even if their HTML IDs are missing/wrong
-    if (dynamicSelectors && dynamicSelectors.length > 0) {
-        dynamicSelectors.forEach(sel => {
-            document.querySelectorAll(sel).forEach(el => {
-                el.classList.remove('tut-disabled');
-                el.classList.add('tut-highlight-glow');
-            });
-        });
-    }
-    
-    let endBtn = document.getElementById('end-turn-btn');
-    if (endBtn) {
-        if (allowEndTurn) { endBtn.classList.remove('tut-disabled'); endBtn.classList.add('tut-highlight-glow'); }
-        else { endBtn.classList.add('tut-disabled'); endBtn.classList.remove('tut-highlight-glow'); }
-    }
-    
-    let execBtn = document.getElementById('exec-btn');
-    if (execBtn) {
-        if (allowExec) { execBtn.classList.remove('tut-disabled'); execBtn.classList.add('tut-highlight-glow'); }
-        else { execBtn.classList.add('tut-disabled'); execBtn.classList.remove('tut-highlight-glow'); }
-    }
-    
-    let cancelBtn = document.getElementById('cancel-btn');
-    if (cancelBtn) cancelBtn.classList.remove('tut-disabled');
-    
-    let drawBtn = document.getElementById('draw-cards-btn');
-    if(drawBtn) drawBtn.style.display = 'none'; 
-}
-
 function progressTutorial() {
     if (!isTutorialMode) return;
     clearTutHighlights();
@@ -188,11 +144,11 @@ function progressTutorial() {
     switch(tutorialStep) {
         case 1:
             setTutMessage("<b>BEN:</b> Welcome to the board. First, let's establish a presence. Drag your <b>Squire</b> to the <b>Frontline Center</b>.");
-            lockAllExcept(['p_Squire'], false, false, ['.slot.frontline[data-side="PLAYER"]']);
+            lockAllExcept(['p_Squire', 'p-front-center']);
             break;
         case 2:
             setTutMessage("<b>BEN:</b> Now drag your <b>Mana Core</b> to the purple <b>Ability Slot</b> in the backline.");
-            lockAllExcept(['p_ManaCore'], false, false, ['.slot[data-allowed="ability"][data-side="PLAYER"]']);
+            lockAllExcept(['p_ManaCore', 'p-ability']);
             break;
         case 3:
             setTutMessage("<b>BEN:</b> Notice how your cards are grayed out? That's <b>Summoning Sickness</b>. Units cannot act on the turn they are placed. Spells, however, can. End your turn to pass priority to me.");
@@ -215,7 +171,7 @@ function progressTutorial() {
             break;
         case 8:
             setTutMessage("<b>BEN:</b> The execute system allows for chain reactions and combos. Now, deploy your <b>Bannerman</b> to the backline.");
-            lockAllExcept(['p_Bannerman'], false, false, ['.slot.backline[data-side="PLAYER"]']);
+            lockAllExcept(['p_Bannerman', 'p-back-left', 'p-back-right']);
             break;
         case 9:
             setTutMessage("<b>BEN:</b> Excellent. Let's end your turn.");
@@ -227,11 +183,11 @@ function progressTutorial() {
         case 11:
             setTutMessage("<b>BEN:</b> Since your Squire died, conditions have been met. You can now field the <b>Great Knight</b>. Deploy him to the Frontline.");
             if(cardInstances['p_GreatKnight']) cardInstances['p_GreatKnight'].summonRequires = null; 
-            lockAllExcept(['p_GreatKnight'], false, false, ['.slot.frontline[data-side="PLAYER"]']);
+            lockAllExcept(['p_GreatKnight', 'p-front-left', 'p-front-center', 'p-front-right']);
             break;
         case 12:
             setTutMessage("<b>BEN:</b> Well done. Also deploy your <b>Archer</b> to the backline. Then end your turn.");
-            lockAllExcept(['p_Archer'], false, false, ['.slot.backline[data-side="PLAYER"]']);
+            lockAllExcept(['p_Archer', 'p-back-left', 'p-back-right'], true, false);
             break;
         case 13:
             setTutMessage("<b>BEN:</b> My Archer fires a volley at your Great Knight!");
