@@ -87,8 +87,8 @@ Version 7.9 (Freedom)
 
     <div id="card-shop-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
         <div id="card-shop-menu" class="top-left-menu" style="display:none;">
-            <button class="menu-btn unlocked">Buy</button>
-            <button class="menu-btn unlocked">Card Summon</button>
+            <button class="menu-btn unlocked" onclick="openBuyMenu()">Buy Cards</button>
+            <button class="menu-btn unlocked" onclick="openSummonMenu()">Card Summon (100G)</button>
             <button class="menu-btn" onclick="backToShopsAlley()">Go back to Shops Alley</button>
         </div>
         
@@ -97,6 +97,8 @@ Version 7.9 (Freedom)
             <div id="shop-text">...</div>
             <div style="font-size: 0.75rem; color: #aaa; text-align: right; margin-top: 15px; font-style: italic;">(Click to continue)</div>
         </div>
+
+        <div id="shop-ui-container" style="display:none; position:absolute; top:10%; left:10%; right:10%; bottom:10%; background:rgba(0,0,0,0.95); border:2px solid var(--gold); border-radius:8px; z-index:100; overflow-y:auto; padding:20px;"></div>
     </div>
 
     <div id="inventory-screen" class="rpg-screen">
