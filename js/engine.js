@@ -1096,6 +1096,29 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
 
     let targetHadMarkBeforeHit = (targetInst && targetInst.marks > 0);
 
+    // --- SQUIRE 40% DODGE LOGIC ---
+    if (!isTutorialMode && targetInst && targetInst.name === "Leonian Squire" && skillName !== "Passive" && skillName !== "SAN" && skillName !== "Lion's Roar" && skillName !== "BLOCK") {
+        if (Math.random() < 0.40) { // 40% Dodge Chance
+            if (targetDOM) {
+                showFloatingText(targetDOM, "DODGE!", "#f1c40f", "2rem");
+                // Quick dodge animation
+                targetDOM.style.transition = "transform 0.1s ease";
+                targetDOM.style.transform = "translateX(20px)";
+                setTimeout(() => targetDOM.style.transform = "translateX(0)", 150);
+            }
+            addLog(`<b>${actor.name}</b> missed! The Leonian Squire dodged the attack!`, "#f1c40f");
+            
+            // Clean up the attacking animation and abort the damage!
+            if(actorDOM && skillName !== "RALLY" && skillName !== "BLOCK" && skillName !== "SAN" && actor.name !== "Jaden" && skillName !== "Lion's Roar") {
+                setTimeout(() => { actorDOM.style.transition = "transform 0.3s ease-out"; actorDOM.style.transform = "scale(1) translate(0, 0)"; actorDOM.style.zIndex = ""; }, 300);
+            }
+            if(actorSlotDOM) actorSlotDOM.classList.remove('attacking-slot');
+            
+            return false; // Returns 'false' meaning the target did not die, entirely skipping the damage math
+        }
+    }
+    // ------------------------------
+
     let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
     if(actorDOM && skillName !== "Passive" && skillName !== "RALLY" && skillName !== "BLOCK" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && actor.name !== "Zeek" && skillName !== "Lion's Roar" && skillName !== "Dauntless") {
