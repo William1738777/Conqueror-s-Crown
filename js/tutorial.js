@@ -587,3 +587,115 @@ function unlockShopsAlley() {
         }
     });
 }
+
+// ============================================================================
+// 🏪 SHOPS ALLEY & GLADINE LORE EVENT
+// ============================================================================
+
+// Overwrite previous unlock function to correctly bind the click event
+function unlockShopsAlley() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('leonia-screen').style.display = 'block';
+
+    const buttons = document.querySelectorAll('#leonia-screen .loc-btn');
+    buttons.forEach(btn => {
+        if (btn.innerText.includes("Shops Alley")) {
+            btn.disabled = false;
+            btn.classList.add('unlocked');
+            btn.innerText = "Shops Alley";
+            btn.onclick = enterShopsAlley; // Bind navigation
+        }
+    });
+}
+
+function enterShopsAlley() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    const alleyScreen = document.getElementById('shops-alley-screen');
+    alleyScreen.style.display = 'block';
+    // Use the dynamic CSS variable assigned during asset loading
+    alleyScreen.style.backgroundImage = "var(--alleyshopbg-url)";
+}
+
+function backToShopsAlley() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('shops-alley-screen').style.display = 'block';
+}
+
+let shopDialogueStep = 0;
+let hasSeenShopLore = false;
+
+const shopDialogue = [
+    { s: "Gladine", c: "#2ecc71", t: "The name's Gladine by the way, thank you so much for coming!" },
+    { s: "You", c: "#3498db", t: "Nice to meet you, Gladine, my name's ADVENTURER." }, // You can swap ADVENTURER with a dynamic player name later
+    { s: "Gladine", c: "#2ecc71", t: "Pleasure's all mine." },
+    { s: "You", c: "#3498db", t: "I've been curious, why did the guy ran from me, like I was going to hurt him?" },
+    { s: "Gladine", c: "#2ecc71", t: "Well you did broke his Core Crystals, defense so, yea you could have." },
+    { s: "You", c: "#3498db", t: "I'm not following..?" },
+    { s: "Gladine", c: "#2ecc71", t: "Have you been living under a rock, you're acting like you don't know the stories of old." },
+    { s: "You", c: "#3498db", t: "..." },
+    { s: "Gladine", c: "#2ecc71", t: "okay fine, I don't know where you've been all this years, but the story goes, Long before the empires of today drew their borders, the world was consumed by the Great Cataclysm. It was an age of ash and ruin, where humans, elves, demons, and feral beasts waged a war so absolute it threatened to unmake creation itself." },
+    { s: "Gladine", c: "#2ecc71", t: "The skies wept fire, the oceans boiled, and the earth groaned under the weight of ceaseless slaughter. Chaos reigned, and the realm stood upon the very precipice of annihilation." },
+    { s: "Gladine", c: "#2ecc71", t: "It was in our darkest hour that She descended—Syvia, the Creator Goddess." },
+    { s: "Gladine", c: "#2ecc71", t: "Sorrowful at the devastation wrought by Her children, Syvia unleashed a magic of profound, overwhelming peace. A wave of radiant light scoured the world, stripping away all magics of mass destruction and silencing the weapons of war. With a single, divine edict, the era of unchecked bloodshed was brought to an abrupt end." },
+    { s: "Gladine", c: "#2ecc71", t: "To ensure the realm would never again face such ruin, the Goddess enacted the Heavenly Restriction, reshaping the very laws of conflict. The great and terrible monsters that ravaged the lands were sealed away into mystic slates and The spirits of the noble heroes who perished in the Cataclysm were preserved and tethered to this realm. They were reborn as eternal Guardians they can be summoned at will through these cards." },
+    { s: "Gladine", c: "#2ecc71", t: "But Syvia’s greatest gift was the Crystal Core. The Goddess' voice echoed throughout the land 'Let no mortal hand strike another in the fields of war. Let the soul bear the shield, and the Guardians bear the sword.'" },
+    { s: "Gladine", c: "#2ecc71", t: "The Goddess bound these radiant stones to the souls of the living, giving rise to the Summoners. As long as a Summoner’s Crystal Core remains whole, they are blessed with absolute invulnerability—immune to all earthly harm, disease, and weaponry. No mortal blade or arrow can pierce this divine aegis." },
+    { s: "Gladine", c: "#2ecc71", t: "Under the Covenant of Syvia, a Crystal Core can only be shattered by the might of a summoned Guardian. Thus, the apocalyptic wars of old were replaced by the honorable, tactical duels of today. It is a world still shaped by conflict, yes, but bound by heavenly law—ensuring that while our ambitions clash on the table, the world itself shall never again burn." },
+    { s: "Gladine", c: "#2ecc71", t: "So that's pretty much the story. Nowadays, wars are fought by generals above a table top to fight for territories." },
+    { s: "Gladine", c: "#2ecc71", t: "There are also those dark summoners. They have been trying to manipulate and experiment on Crystal Cores, that had turned it corrupted. These Corrupted Cores roam the land and should not be taken lightly." },
+    { s: "Gladine", c: "#2ecc71", t: "Despite the Godess' heavenly restriction, they are and they will be able to physically hurt and kill you as the power they use is also derieved from the same one's the Godess' used, only corrupted." },
+    { s: "Gladine", c: "#2ecc71", t: "But enough of that, the Captain should explain it more to you later." },
+    { s: "You", c: "#3498db", t: "The Captain?" },
+    { s: "Gladine", c: "#2ecc71", t: "Well you mentioned you needed your adventurer's license, my brother the captain is the one to help! He'll discuss it further with you at the barracks." },
+    { s: "Gladine", c: "#2ecc71", t: "Do check my Shop if you have time!" },
+    { s: "You", c: "#3498db", t: "Got it, thanks Gladine!" }
+];
+
+function enterCardShop() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    const shopScreen = document.getElementById('card-shop-screen');
+    shopScreen.style.display = 'block';
+    shopScreen.style.backgroundImage = "var(--gladineshopbg-url)";
+    
+    if(!hasSeenShopLore) {
+        shopDialogueStep = 0;
+        document.getElementById('card-shop-menu').style.display = 'none';
+        const box = document.getElementById('shop-dialogue-box');
+        box.style.display = 'flex';
+        renderShopDialogue();
+    } else {
+        document.getElementById('card-shop-menu').style.display = 'flex';
+    }
+}
+
+function renderShopDialogue() {
+    const line = shopDialogue[shopDialogueStep];
+    const speaker = document.getElementById('shop-speaker');
+    speaker.innerText = line.s;
+    speaker.style.color = line.c;
+    document.getElementById('shop-text').innerText = line.t;
+}
+
+function advanceShopDialogue() {
+    shopDialogueStep++;
+    if (shopDialogueStep < shopDialogue.length) {
+        renderShopDialogue();
+    } else {
+        hasSeenShopLore = true;
+        document.getElementById('shop-dialogue-box').style.display = 'none';
+        document.getElementById('card-shop-menu').style.display = 'flex';
+        unlockBarracks();
+    }
+}
+
+function unlockBarracks() {
+    const buttons = document.querySelectorAll('#leonia-screen .loc-btn');
+    buttons.forEach(btn => {
+        if (btn.innerText.includes("Barracks")) {
+            btn.disabled = false;
+            btn.classList.add('unlocked');
+            btn.innerText = "Barracks";
+            // Optional: You can bind this to an enterBarracks function later!
+        }
+    });
+}
