@@ -424,7 +424,7 @@ function startStrangerDuel() {
     
     // Pull Enemy Deck (Jax's Custom Smack-Talk Deck)
     eDeck = [];
-    const jaxDeckNames = ["Zombie", "Zombie", "Zombie", "Skeleton Warrior", "Skeleton Warrior", "Skeleton Warrior", "Leonian Squire", "Leonian Squire", "Leonian Squire", "Jaden"];
+    const jaxDeckNames = ["Skeleton Warrior", "Skeleton Warrior", "Skeleton Warrior", "Zombie", "Leonian Squire", "Leonian Squire", "Jaden"];
     jaxDeckNames.forEach(name => {
         let template = cardLibrary.find(c => c.name === name);
         if(template) eDeck.push(JSON.parse(JSON.stringify(template)));
