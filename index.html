@@ -1,4 +1,4 @@
-Freedom 8.6
+Version 7.9 (Freedom)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,7 +36,6 @@ Freedom 8.6
     <div id="leonia-screen" class="rpg-screen">
         <div class="locations-ui">
             <h2>Locations</h2>
-            <button id="loc-gate-btn" class="loc-btn" disabled>Gate (Locked)</button>
             <button class="loc-btn unlocked" onclick="enterTavern()">Tavern</button>
             <button class="loc-btn" id="loc-tg-btn" onclick="enterTrainingGrounds()" disabled>Training Grounds (Locked)</button>
             <button class="loc-btn" disabled>Barracks (Locked)</button>
@@ -269,70 +268,6 @@ Freedom 8.6
             <button id="exec-btn" class="btn-main">EXECUTE PENDING (0)</button>
             <button id="end-turn-btn" class="btn-main">END TURN</button>
             <div id="event-log"></div>
-        </div>
-    </div>
-
-    <div id="garrison-board-screen" class="rpg-screen" style="display:none; background: rgba(0,0,0,0.95); z-index: 460;">
-        <button class="menu-btn" style="position: absolute; top: 20px; left: 20px; z-index: 10;" onclick="document.getElementById('garrison-board-screen').style.display='none'; document.getElementById('barracks-menu').style.display='flex';">Back to Barracks</button>
-        
-        <div class="quest-board-container">
-            <div class="quest-list">
-                <h2 style="color: var(--gold); border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 0; text-align: center;">BOUNTIES</h2>
-                <button class="menu-btn unlocked" style="width: 100%; margin-bottom: 10px;" onclick="selectQuest('wisp')">Wisp Hunt (1,000G)</button>
-                <button class="menu-btn" disabled style="width: 100%; margin-bottom: 10px; font-size: 0.8rem;">Rogue Camp (Locked)</button>
-            </div>
-            <div class="quest-details">
-                <h2 id="quest-title" style="color: var(--gold); margin-top: 0;">Select a Quest</h2>
-                <p id="quest-desc" style="color: #ccc; line-height: 1.6; font-family: 'Georgia', serif; font-size: 1.1rem;">Review the board for available contracts.</p>
-                <button id="accept-quest-btn" class="btn-main" style="position: absolute; bottom: 20px; right: 20px; width: auto; padding: 10px 30px; display: none;" onclick="acceptWispQuest()">ACCEPT QUEST</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="gate-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
-        <div class="top-left-menu">
-            <button class="menu-btn" disabled>The Northern Watch (Locked)</button>
-            <button class="menu-btn unlocked" onclick="enterEasternPass()">The Eastern Pass</button>
-            <button class="menu-btn" disabled>The Westlands Frontier (Locked)</button>
-            <button class="menu-btn" onclick="backToLeonia()">Back to Town</button>
-        </div>
-    </div>
-
-    <div id="eastern-pass-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
-        <div class="top-left-menu">
-            <button class="menu-btn unlocked" onclick="enterMountainPass()">Eastern Mountain Pass Watch</button>
-            <button class="menu-btn" disabled>Eastern River Watch (Locked)</button>
-            <button class="menu-btn" disabled>Eastern Forest Watch (Locked)</button>
-            <button class="menu-btn" onclick="backToGate()">Back to Gate</button>
-        </div>
-    </div>
-
-    <div id="mountain-pass-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
-        <div class="top-left-menu">
-            <button class="menu-btn" onclick="document.getElementById('mountain-pass-screen').style.display='none'; document.getElementById('eastern-pass-screen').style.display='block';">Back</button>
-        </div>
-        <button class="btn-main" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; font-size: 1.2rem; padding: 15px; background: #3498db; color: white; border: 2px solid white; box-shadow: 0 0 20px #3498db;" onclick="startPatrol()">START PATROL</button>
-    </div>
-
-    <div id="patrol-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center; background-color: #111;">
-        <button id="retreat-patrol-btn" class="menu-btn" style="position: absolute; top: 20px; left: 20px; z-index: 500; background: #e74c3c; color: white;" onclick="retreatFromPatrol()">Return to Leonia</button>
-        
-        <div class="patrol-ui-container">
-            <div class="patrol-flag start-flag"></div>
-            <div class="patrol-track">
-                <div id="patrol-player-token" class="patrol-token">
-                    <div class="patrol-trail"></div>
-                </div>
-            </div>
-            <div class="patrol-flag end-flag"></div>
-        </div>
-
-        <div id="encounter-popup" style="display:none; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 600;">
-            <h1 style="color: #3498db; font-family: 'Cinzel'; text-shadow: 0 0 30px #3498db; font-size: 4rem; margin-bottom: 40px; letter-spacing: 5px; animation: pulse 1s infinite alternate;">WISP ENCOUNTERED!</h1>
-            <div style="display: flex; gap: 20px; justify-content: center;">
-                <button class="btn-main" style="background: #e74c3c; color: white; width: 200px; font-size: 1.2rem; padding: 15px; border: 2px solid white; box-shadow: 0 0 15px #e74c3c;" onclick="startWispCombat()">FIGHT</button>
-                <button class="btn-main" style="background: #555; color: white; width: 200px; font-size: 1.2rem; padding: 15px; border: 1px solid #aaa;" onclick="escapeEncounter()">ESCAPE</button>
-            </div>
         </div>
     </div>
 
