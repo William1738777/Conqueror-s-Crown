@@ -1926,3 +1926,59 @@ async function aiTurn() {
 
     if (!isTutorialMode) { const drawBtn = document.getElementById('draw-cards-btn'); drawBtn.style.display = "block"; drawBtn.innerText = "DRAW TO 6"; }
 }
+
+// ============================================================================
+// 🛠️ DEV CONSOLE & CHEAT CODES
+// ============================================================================
+
+document.addEventListener('keydown', (e) => {
+    const devConsole = document.getElementById('dev-console');
+    const devInput = document.getElementById('dev-input');
+    
+    if (!devConsole || !devInput) return;
+
+    // 1. OPEN CONSOLE: Press '/' (Only if not already typing somewhere else)
+    if (e.key === '/' && devConsole.style.display === 'none' && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault(); // Stop the '/' from scrolling the page or doing weird things
+        devConsole.style.display = 'flex';
+        devInput.value = '/'; // Pre-fill the slash for you
+        
+        // Slight delay ensures the focus works properly
+        setTimeout(() => devInput.focus(), 10);
+    } 
+    // 2. CLOSE CONSOLE: Press 'Escape'
+    else if (e.key === 'Escape' && devConsole.style.display === 'flex') {
+        devConsole.style.display = 'none';
+        devInput.blur();
+    }
+    // 3. EXECUTE COMMAND: Press 'Enter'
+    else if (e.key === 'Enter' && document.activeElement === devInput) {
+        const command = devInput.value.trim().toLowerCase();
+        
+        // --- COMMAND LIST ---
+        if (command === '/kill core') {
+            eCoreHP = 0; // Drop Enemy Core to 0
+            
+            if (typeof updateUI === 'function') updateUI();
+            if (typeof addLog === 'function') addLog("⚠️ DEV COMMAND: Enemy Core Annihilated!", "#0f0");
+            
+            // NOTE: If your game doesn't instantly end when HP hits 0, you might need 
+            // to press 'Execute' or 'End Turn' to force the game to check the win condition.
+            // If you have a specific win function (like checkWinCondition()), call it right here!
+        }
+        else if (command === '/add gold') {
+            if (typeof playerGold !== 'undefined') {
+                playerGold += 1000;
+                if (typeof updateGoldUI === 'function') updateGoldUI();
+                if (typeof addLog === 'function') addLog("⚠️ DEV COMMAND: +1000 Gold", "#0f0");
+            }
+        }
+        else {
+            if (typeof addLog === 'function') addLog(`⚠️ Unknown Command: ${command}`, "#e74c3c");
+        }
+        
+        // Hide the console after executing
+        devConsole.style.display = 'none';
+        devInput.blur();
+    }
+});
