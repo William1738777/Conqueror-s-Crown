@@ -12,6 +12,8 @@ const tavernDialogue = [
 
 function startDialogueSequence() {
     dialogueIndex = 0;
+    const textBox = document.getElementById('rpg-dialogue-box');
+    if (textBox) textBox.style.display = 'flex';
     document.getElementById('dialogue-text').innerText = tavernDialogue[dialogueIndex];
 }
 
@@ -226,7 +228,7 @@ function triggerLicenseQuest() {
         el.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'tut-highlight-glow', 'tut-disabled');
     });
     document.querySelectorAll('.arrow-fx, .shuriken-fx, .slash-fx, .floating-text').forEach(el => el.remove());
-    isTargeting = false;
+    if (typeof isTargeting !== 'undefined') isTargeting = false;
     
     // Unlock Inventory Bag
     document.getElementById('inventory-btn').style.display = 'block';
@@ -267,7 +269,6 @@ function triggerLicenseQuest() {
                 document.getElementById('dialogue-speaker').style.color = "#b71c1c";
             }
         } else {
-            // Dialogue is over! Hide the box and show the menu.
             document.getElementById('rpg-dialogue-box').style.display = 'none';
             document.getElementById('tavern-menu').style.display = 'flex';
         }
@@ -424,7 +425,14 @@ function startStrangerDuel() {
         });
     }
     if(pDeck.length === 0) pDeck = buildDeck(); 
-    for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
+    
+    // Safely shuffle deck
+    for (let i = pDeck.length - 1; i > 0; i--) { 
+        const j = Math.floor(Math.random() * (i + 1)); 
+        let temp = pDeck[i];
+        pDeck[i] = pDeck[j];
+        pDeck[j] = temp;
+    }
     
     eDeck = [];
     const jaxDeckNames = ["Skeleton Warrior", "Skeleton Warrior", "Skeleton Warrior", "Zombie", "Leonian Squire", "Leonian Squire", "Jaden"];
@@ -432,18 +440,26 @@ function startStrangerDuel() {
         let template = cardLibrary.find(c => c.name === name);
         if(template) eDeck.push(JSON.parse(JSON.stringify(template)));
     });
-    for(let i = eDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [eDeck[i], eDeck[j]] = [eDeck[j], eDeck[i]]; }
+    
+    for (let i = eDeck.length - 1; i > 0; i--) { 
+        const j = Math.floor(Math.random() * (i + 1)); 
+        let temp = eDeck[i];
+        eDeck[i] = eDeck[j];
+        eDeck[j] = temp;
+    }
     
     document.getElementById('p-deck-count').innerText = pDeck.length;
     document.getElementById('e-deck-count').innerText = eDeck.length;
     document.getElementById('event-log').innerHTML = '';
     
-    addLog("BATTLE COMMENCED. No combat allowed on Turn 1.", "var(--gold)");
-    if(typeof updateUI === "function") updateUI(); 
+    if (typeof addLog === 'function') addLog("BATTLE COMMENCED. No combat allowed on Turn 1.", "var(--gold)");
+    if (typeof updateUI === "function") updateUI(); 
     
     const drawBtn = document.getElementById('draw-cards-btn');
-    drawBtn.style.display = "block";
-    drawBtn.innerText = "DRAW HAND";
+    if (drawBtn) {
+        drawBtn.style.display = "block";
+        drawBtn.innerText = "DRAW HAND";
+    }
 }
 
 // ============================================================================
@@ -932,7 +948,14 @@ function startWispCombat() {
         });
     }
     if(pDeck.length === 0) pDeck = buildDeck(); 
-    for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
+    
+    // Safely shuffle deck
+    for (let i = pDeck.length - 1; i > 0; i--) { 
+        const j = Math.floor(Math.random() * (i + 1)); 
+        let temp = pDeck[i];
+        pDeck[i] = pDeck[j];
+        pDeck[j] = temp;
+    }
     
     eDeck = [];
     const wispDeckNames = ["Minor Wisp", "Minor Wisp", "Minor Wisp", "Minor Wisp", "Minor Wisp"];
@@ -945,10 +968,12 @@ function startWispCombat() {
     document.getElementById('e-deck-count').innerText = eDeck.length;
     document.getElementById('event-log').innerHTML = '';
     
-    addLog("AMBUSHED BY A WISP! No combat allowed on Turn 1.", "#3498db");
-    if(typeof updateUI === "function") updateUI(); 
+    if (typeof addLog === 'function') addLog("AMBUSHED BY A WISP! No combat allowed on Turn 1.", "#3498db");
+    if (typeof updateUI === "function") updateUI(); 
     
     const drawBtn = document.getElementById('draw-cards-btn');
-    drawBtn.style.display = "block";
-    drawBtn.innerText = "DRAW HAND";
+    if (drawBtn) {
+        drawBtn.style.display = "block";
+        drawBtn.innerText = "DRAW HAND";
+    }
 }
