@@ -105,6 +105,8 @@ function getCardTemplate(fileName, dataUrl) {
     if(cleanName.includes('tavern') && cleanName.includes('bg')) { document.documentElement.style.setProperty('--tavernbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('alley shop') || cleanName.includes('alleyshopbg')) { document.documentElement.style.setProperty('--alleyshopbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('gladine shop') || cleanName.includes('gladineshopbg')) { document.documentElement.style.setProperty('--gladineshopbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
+    if(cleanName.includes('bk1')) { document.documentElement.style.setProperty('--bk1-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
+    if(cleanName.includes('bk3')) { document.documentElement.style.setProperty('--bk3-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.match(/tg[1-9]/)) { return { isMapBG: true, img: dataUrl }; }
     
     if(cleanName.includes('empty slot')) { document.documentElement.style.setProperty('--empty-slot-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isEmptySlot: true, img: dataUrl }; }
