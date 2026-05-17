@@ -922,29 +922,175 @@ function enterEasternMountainPass() {
     empScreen.style.backgroundImage = "url('./assets/Eastern Mountain Pass Watch.png')";
 }
 
+// ============================================================================
+// 🚶‍♂️ PATROL ENGINE & ENCOUNTER SYSTEM
+// ============================================================================
+
+let patrolProgress = 0; // Tracks percentage across the bar (0 to 100)
+let encounterChance = 5; // Starts at 5%
+let patrolMovementTimer = null;
+let encounterRollTimer = null;
+let encounterIncreaseTimer = null;
+let isReturning = false;
+let isPaused = false;
+
 function startPatrol() {
     if (typeof playClickSound === 'function') playClickSound();
     
-    // Hide all screens and show the new Patrol Screen
+    // 1. Setup UI
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     const patrolScreen = document.getElementById('patrol-screen');
     patrolScreen.style.display = 'block';
-    
-    // Set the background to match where we are patrolling
     patrolScreen.style.backgroundImage = "url('./assets/Eastern Mountain Pass Watch.png')";
     
-    // TODO: Trigger the actual movement and logic loop here!
+    // 2. Reset Patrol Variables
+    patrolProgress = 0;
+    encounterChance = 5;
+    isReturning = false;
+    isPaused = false;
+    
+    document.getElementById('player-patrol-marker').style.left = '0%';
+    document.getElementById('encounter-overlay').style.display = 'none';
+    document.getElementById('return-leonia-btn').disabled = false;
+    document.getElementById('return-leonia-btn').innerText = "Return to Leonia";
+
+    // 3. Kick off the loops!
+    startPatrolLoops();
 }
 
-// Temporary placeholders so the buttons don't throw errors
-function returnToLeonia() {
-    console.log("Returning to Leonia clicked...");
+function startPatrolLoops() {
+    const marker = document.getElementById('player-patrol-marker');
+    
+    // --- 1. MOVEMENT LOOP (Runs every 200ms for smooth tracking) ---
+    clearInterval(patrolMovementTimer);
+    patrolMovementTimer = setInterval(() => {
+        if (isPaused) return; // Halt movement if an encounter pops up
+
+        if (isReturning) {
+            // Move backwards towards the start
+            patrolProgress -= 1; 
+            if (patrolProgress <= 0) {
+                patrolProgress = 0;
+                stopPatrolLoops();
+                // Successfully reached the beginning - transport to town!
+                document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+                document.getElementById('leonia-screen').style.display = 'block';
+            }
+        } else {
+            // Move forward
+            patrolProgress += 0.5; 
+            if (patrolProgress >= 100) {
+                patrolProgress = 0; // Loop back to the start if they reach the end without returning
+            }
+        }
+        
+        // Apply position and spawn a trail particle
+        if (marker) {
+            marker.style.left = patrolProgress + '%';
+            spawnTrailParticle();
+        }
+    }, 200);
+
+    // --- 2. ENCOUNTER ROLL LOOP (Rolls the dice every 2 seconds) ---
+    clearInterval(encounterRollTimer);
+    encounterRollTimer = setInterval(() => {
+        if (isPaused || isReturning) return; // Don't encounter while returning or already in one
+        
+        let roll = Math.random() * 100; // Roll 0 to 100
+        if (roll <= encounterChance) {
+            triggerEncounter();
+        }
+    }, 2000);
+
+    // --- 3. ESCALATION LOOP (Increases chance by 5% every 10 seconds) ---
+    clearInterval(encounterIncreaseTimer);
+    encounterIncreaseTimer = setInterval(() => {
+        if (isPaused || isReturning) return;
+        
+        encounterChance += 5;
+        if (encounterChance > 100) encounterChance = 100; // Cap at 100%
+        console.log(`Encounter chance increased to: ${encounterChance}%`);
+    }, 10000);
 }
 
-function startWispDuel() {
-    console.log("Fight clicked! Starting duel...");
+function stopPatrolLoops() {
+    clearInterval(patrolMovementTimer);
+    clearInterval(encounterRollTimer);
+    clearInterval(encounterIncreaseTimer);
+}
+
+function spawnTrailParticle() {
+    const trackLine = document.getElementById('player-patrol-marker').parentElement;
+    
+    const particle = document.createElement('div');
+    // CSS to make it look like a fading echo of our character
+    particle.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: ${patrolProgress}%;
+        width: 16px;
+        height: 16px;
+        background: #3498db;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.5;
+        transition: opacity 1s linear, transform 1s linear;
+        pointer-events: none;
+        z-index: 9;
+    `;
+    trackLine.appendChild(particle);
+    
+    // Wait a tiny bit, then trigger the fade and shrink animation
+    setTimeout(() => {
+        particle.style.opacity = '0';
+        particle.style.transform = 'translate(-50%, -50%) scale(0.2)';
+    }, 50);
+    
+    // Clean up DOM after animation finishes
+    setTimeout(() => {
+        particle.remove();
+    }, 1050);
+}
+
+// --- ENCOUNTER ACTIONS ---
+
+function triggerEncounter() {
+    isPaused = true; // Freezes the movement and timers
+    document.getElementById('encounter-overlay').style.display = 'flex';
+    
+    // Play a dramatic alert sound if available
+    if (typeof playSound === 'function' && typeof beamAudioUrl !== 'undefined') {
+        playSound(beamAudioUrl); 
+    }
 }
 
 function escapeEncounter() {
-    console.log("Escape clicked! Resuming patrol...");
+    if (typeof playClickSound === 'function') playClickSound();
+    document.getElementById('encounter-overlay').style.display = 'none';
+    
+    // Reset encounter chance to 5% so they don't immediately get hit again
+    encounterChance = 5; 
+    isPaused = false; // Unfreeze movement
+}
+
+function returnToLeonia() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Change state to return mode
+    isReturning = true;
+    isPaused = false; 
+    
+    // Update button text and disable it to prevent spamming
+    const btn = document.getElementById('return-leonia-btn');
+    btn.disabled = true;
+    btn.innerText = "Heading back...";
+}
+
+function startWispDuel() {
+    if (typeof playClickSound === 'function') playClickSound();
+    document.getElementById('encounter-overlay').style.display = 'none';
+    stopPatrolLoops();
+    
+    // Placeholder! The next step is building the actual Wisp deck and combat integration.
+    alert("Duel starting! (Wisp Combat Engine coming next!)");
 }
