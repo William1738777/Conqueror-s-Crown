@@ -13,9 +13,6 @@ const ASSET_LINKS = {
     "Back_Card": "./assets/Conqueror%27s%20Crown%20Back_Card.png",
     
     // -- RPG Backgrounds & Icons --
-    "Gate": "./assets/Gate.png",
-    "Eastern Mountain Pass Watch": "./assets/Eastern Mountain Pass Watch.png",
-    "Minor Wisp": "./assets/Minor Wisp.png",
     "WorldMap": "./assets/WorldMap.png",
     "LeoniaBG": "./assets/LeoniaBG.png",
     "TavernBG": "./assets/Tavern.png",
@@ -105,8 +102,6 @@ function getCardTemplate(fileName, dataUrl) {
     // Backgrounds & UI Elements
     if(cleanName.includes('worldmap')) { document.documentElement.style.setProperty('--worldmap-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('leoniabg')) { document.documentElement.style.setProperty('--leoniabg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
-    if(cleanName.includes('gate')) { document.documentElement.style.setProperty('--gate-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
-    if(cleanName.includes('eastern mountain pass watch')) { document.documentElement.style.setProperty('--mountainpass-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('tavern') && cleanName.includes('bg')) { document.documentElement.style.setProperty('--tavernbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('alley shop') || cleanName.includes('alleyshopbg')) { document.documentElement.style.setProperty('--alleyshopbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('gladine shop') || cleanName.includes('gladineshopbg')) { document.documentElement.style.setProperty('--gladineshopbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
@@ -269,13 +264,6 @@ function getCardTemplate(fileName, dataUrl) {
             isPlayable: true, type: 'unit', name: "Zombie", title: "Level 2", powerLevel: 2, summonCost: 2, faction: "Council of Darkness", race: "Undead", hp: 700, maxHp: 700, atk: 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, bleedStacks: 0, bleedTurns: 0, isRevealed: false, atkBuffTurns: 0,
             skills: [ { name: "Bite", manaCost: 0, desc: "Inflicts damage rolling from 100-200. (+1 Bleed Stack)" } ], 
             passives: [ { name: "Vigor of the Damned", desc: "If survives with <=100 HP, heals 20% of Max HP and gains 100 shield." } ] 
-        };
-    }
-    else if(cleanName.includes('minor wisp')) {
-        return { 
-            isPlayable: true, type: 'unit', name: "Minor Wisp", title: "Forest Trickster", powerLevel: 1, summonCost: 1, faction: "Wild", race: "Spirit", hp: 300, maxHp: 300, atk: 80, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
-            skills: [ { name: "Spark", manaCost: 0, desc: "Shoots a tiny spark for 50-100 damage." }, { name: "Fog Trap", manaCost: 2, desc: "Traps the target, reducing their damage by 50% next turn." } ], 
-            passives: [ { name: "Ethereal", desc: "Has a flat 20% chance to dodge any attack." } ] 
         };
     }
     else if(cleanName.includes('militia') || cleanName.includes('milita')) {
