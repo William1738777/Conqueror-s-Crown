@@ -271,6 +271,13 @@ function getCardTemplate(fileName, dataUrl) {
             passives: [ { name: "Vigor of the Damned", desc: "If survives with <=100 HP, heals 20% of Max HP and gains 100 shield." } ] 
         };
     }
+    else if(cleanName.includes('minor wisp')) {
+        return { 
+            isPlayable: true, type: 'unit', name: "Minor Wisp", title: "Forest Trickster", powerLevel: 1, summonCost: 1, faction: "Wild", race: "Spirit", hp: 300, maxHp: 300, atk: 80, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
+            skills: [ { name: "Spark", manaCost: 0, desc: "Shoots a tiny spark for 50-100 damage." }, { name: "Fog Trap", manaCost: 2, desc: "Traps the target, reducing their damage by 50% next turn." } ], 
+            passives: [ { name: "Ethereal", desc: "Has a flat 20% chance to dodge any attack." } ] 
+        };
+    }
     else if(cleanName.includes('militia') || cleanName.includes('milita')) {
         return { 
             isPlayable: true, type: 'unit', name: "Militia", title: "Level 1", powerLevel: 1, summonCost: 1, faction: "Neutral", race: "Human", hp: 600, maxHp: 600, atk: 150, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
