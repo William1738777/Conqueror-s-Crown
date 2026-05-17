@@ -115,6 +115,7 @@ Version 7.9 (Freedom)
             <button class="menu-btn unlocked" onclick="talkToThorne()">Talk to the Man</button>
             <button class="menu-btn" id="garrison-board-btn" disabled>Garrison Board Quest (Locked)</button>
             <button class="menu-btn" onclick="backToBarracksGate()">Go back to Barracks Gates</button>
+            <button class="menu-btn" id="garrison-board-btn" onclick="openGarrisonBoard()" disabled>Garrison Board Quest (Locked)</button>
         </div>
         
         <div id="barracks-dialogue-box" class="dialogue-box-style" style="display:none;" onclick="advanceThorneDialogue()">
@@ -276,6 +277,50 @@ Version 7.9 (Freedom)
         <span style="color: #0f0; font-weight: bold; font-size: 1.1rem;">DEV ></span>
         <input type="text" id="dev-input" style="background: transparent; border: none; color: #0f0; font-family: monospace; font-size: 1.1rem; outline: none; width: 300px;" autocomplete="off" spellcheck="false" />
     </div>
+
+    <div id="garrison-board-ui" style="display:none; position:absolute; top:10%; left:10%; right:10%; bottom:10%; background:rgba(0,0,0,0.95); border:2px solid var(--gold); border-radius:8px; z-index:100;">
+    <div style="display: flex; height: 100%;">
+        <div style="width: 35%; border-right: 1px solid var(--gold); padding: 20px; overflow-y: auto; background: rgba(255,255,255,0.05);">
+            <h2 style="color:var(--gold); margin-top:0; font-family:'Cinzel'; border-bottom: 1px solid #444; padding-bottom: 10px;">Quests</h2>
+            <button class="menu-btn unlocked" onclick="viewQuest('wisp_hunt')" style="width:100%; text-align:left; margin-bottom: 10px;">[F-Rank] Wisp Hunt</button>
+        </div>
+        
+        <div style="width: 65%; padding: 30px; position:relative;">
+            <button onclick="closeGarrisonBoard()" style="position:absolute; right:20px; top:20px; background:#e74c3c; color:white; border:none; padding:8px 15px; cursor:pointer; font-weight:bold; border-radius:4px;">EXIT BOARD</button>
+            <div id="quest-details-pane">
+                <h3 style="color:#888; text-align:center; margin-top:25%; font-style: italic;">Select a quest from the board to view details.</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="gate-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
+    <div class="top-left-menu">
+        <button class="menu-btn" disabled>The Northern Watch (Locked)</button>
+        <button class="menu-btn unlocked" onclick="enterEasternPass()">The Eastern Pass</button>
+        <button class="menu-btn" disabled>The Westlands Frontier (Locked)</button>
+        <button class="menu-btn" onclick="backToLeonia()">Back to Town</button>
+    </div>
+</div>
+
+<div id="eastern-pass-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
+    <div class="top-left-menu">
+        <button class="menu-btn unlocked" onclick="enterEasternMountainPass()">Eastern Mountain Pass Watch</button>
+        <button class="menu-btn" disabled>Eastern River Watch (Locked)</button>
+        <button class="menu-btn" disabled>Eastern Forest Watch (Locked)</button>
+        <button class="menu-btn" onclick="backToGate()">Go Back</button>
+    </div>
+</div>
+
+<div id="eastern-mountain-pass-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
+    <div class="top-left-menu">
+        <button class="menu-btn" onclick="backToEasternPass()">Go Back</button>
+    </div>
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); text-align:center;">
+        <button class="btn-main" style="font-size: 1.5rem; padding: 20px 40px; box-shadow: 0 0 20px var(--hp-color); border: 2px solid var(--hp-color);" onclick="startPatrol()">START PATROL</button>
+        <div style="color:#aaa; margin-top: 15px; font-style: italic; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 4px;">Search the area for hostiles...</div>
+    </div>
+</div>
 
 </body>
 </html>
