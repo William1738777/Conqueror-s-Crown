@@ -588,17 +588,14 @@ function acceptPostDuelCard(cardName, data) {
 }
 
 function unlockShopsAlley() {
-    // Hide all screens and show the town map
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    document.getElementById('leonia-screen').style.display = 'block';
-
-    // Find the Shops Alley button, remove the 'disabled' attribute, and update its text
+    // Only unlock the button, do NOT force the screen to change here
     const buttons = document.querySelectorAll('#leonia-screen .loc-btn');
     buttons.forEach(btn => {
         if (btn.innerText.includes("Shops Alley")) {
             btn.disabled = false;
             btn.classList.add('unlocked');
             btn.innerText = "Shops Alley";
+            btn.onclick = enterShopsAlley; // Bind navigation
         }
     });
 }
