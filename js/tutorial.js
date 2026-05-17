@@ -12,8 +12,6 @@ const tavernDialogue = [
 
 function startDialogueSequence() {
     dialogueIndex = 0;
-    const textBox = document.getElementById('rpg-dialogue-box');
-    if (textBox) textBox.style.display = 'flex';
     document.getElementById('dialogue-text').innerText = tavernDialogue[dialogueIndex];
 }
 
@@ -228,7 +226,7 @@ function triggerLicenseQuest() {
         el.classList.remove('target-glow', 'target-line-glow', 'target-heal-glow', 'tut-highlight-glow', 'tut-disabled');
     });
     document.querySelectorAll('.arrow-fx, .shuriken-fx, .slash-fx, .floating-text').forEach(el => el.remove());
-    if (typeof isTargeting !== 'undefined') isTargeting = false;
+    isTargeting = false;
     
     // Unlock Inventory Bag
     document.getElementById('inventory-btn').style.display = 'block';
@@ -269,6 +267,7 @@ function triggerLicenseQuest() {
                 document.getElementById('dialogue-speaker').style.color = "#b71c1c";
             }
         } else {
+            // Dialogue is over! Hide the box and show the menu.
             document.getElementById('rpg-dialogue-box').style.display = 'none';
             document.getElementById('tavern-menu').style.display = 'flex';
         }
@@ -292,23 +291,11 @@ function backToLeonia() {
     document.getElementById('leonia-screen').style.display = 'block';
 }
 
-let isJaxDefeated = false;
-
 function enterTrainingGrounds() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     const tg = document.getElementById('tg-screen');
     tg.style.display = 'block';
-    
-    if (isJaxDefeated) {
-        tg.style.backgroundImage = "url('./assets/TG9.png')";
-        const talkBtn = document.getElementById('talk-strangers-btn');
-        if (talkBtn) talkBtn.style.display = 'none';
-    } else {
-        tg.style.backgroundImage = "url('./assets/TG1.png')";
-        const talkBtn = document.getElementById('talk-strangers-btn');
-        if (talkBtn) talkBtn.style.display = 'block'; 
-    }
-    
+    tg.style.backgroundImage = "url('./assets/TG1.png')";
     document.getElementById('tg-menu').style.display = 'flex';
 }
 
@@ -352,6 +339,7 @@ function presentOMTCard() {
     const container = document.getElementById('omt-presentation');
     container.innerHTML = '';
     
+    // Attempt to load One More Time
     let link = ASSET_LINKS["One More Time"] || "";
     const data = getCardTemplate("One More Time", link); 
     const cardDOM = createCardDOM('omt_reward', data, true);
@@ -367,10 +355,12 @@ function presentOMTCard() {
 function acceptOMT() {
     document.getElementById('omt-presentation').style.display = 'none';
     
+    // Create the new card instance
     let link = ASSET_LINKS["One More Time"] || "";
     let omtData = getCardTemplate("One More Time", link);
     let newCard = {...omtData, dbId: generateUID()};
     
+    // Automatically equip it to the Battle Deck if there is space
     let placedInDeck = false;
     if(typeof battleDeckConfig !== 'undefined' && battleDeckConfig.ability) {
         for(let i = 0; i < battleDeckConfig.ability.limit; i++) {
@@ -382,10 +372,12 @@ function acceptOMT() {
         }
     }
     
+    // Fallback just in case the deck is completely full
     if(!placedInDeck && typeof playerCollection !== 'undefined') {
         playerCollection.push(newCard);
     }
     
+    // Trigger Jax sequence
     tgStep = 3;
     document.getElementById('tg-screen').style.backgroundImage = "url('./assets/TG4.png')";
     const box = document.getElementById('tg-dialogue-box');
@@ -399,20 +391,24 @@ function acceptOMT() {
 function startStrangerDuel() {
     document.getElementById('tg-screen').style.display = 'none';
     document.getElementById('game-area').style.display = 'flex';
+
     document.getElementById('inventory-btn').style.display = 'none';
     
-    isTutorialMode = false; 
+    isTutorialMode = false; // Normal Rules
     tutorialLock = false;
 
+    // Clear the inspector!
     if (typeof showInspector === 'function') showInspector('none');
     
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; pCoreHP = 2000; eCoreHP = 2000;
     pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0;
     
+    // Clear previously frozen tutorial elements
     document.getElementById('hand').innerHTML = ''; 
     document.querySelectorAll('.slot .card').forEach(c => c.remove());
     
+    // Pull Player Deck based heavily on their specific Inventory setup
     pDeck = [];
     if(typeof battleDeckConfig !== 'undefined') {
         Object.values(battleDeckConfig).forEach(tier => {
@@ -424,42 +420,30 @@ function startStrangerDuel() {
             });
         });
     }
+    // Fallback logic incase player brought an empty deck
     if(pDeck.length === 0) pDeck = buildDeck(); 
+    for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
     
-    // Safely shuffle deck
-    for (let i = pDeck.length - 1; i > 0; i--) { 
-        const j = Math.floor(Math.random() * (i + 1)); 
-        let temp = pDeck[i];
-        pDeck[i] = pDeck[j];
-        pDeck[j] = temp;
-    }
-    
+    // Pull Enemy Deck (Jax's Custom Smack-Talk Deck)
     eDeck = [];
     const jaxDeckNames = ["Skeleton Warrior", "Skeleton Warrior", "Skeleton Warrior", "Zombie", "Leonian Squire", "Leonian Squire", "Jaden"];
     jaxDeckNames.forEach(name => {
         let template = cardLibrary.find(c => c.name === name);
         if(template) eDeck.push(JSON.parse(JSON.stringify(template)));
     });
+    for(let i = eDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [eDeck[i], eDeck[j]] = [eDeck[j], eDeck[i]]; }
     
-    for (let i = eDeck.length - 1; i > 0; i--) { 
-        const j = Math.floor(Math.random() * (i + 1)); 
-        let temp = eDeck[i];
-        eDeck[i] = eDeck[j];
-        eDeck[j] = temp;
-    }
-    
+    // Update visuals
     document.getElementById('p-deck-count').innerText = pDeck.length;
     document.getElementById('e-deck-count').innerText = eDeck.length;
     document.getElementById('event-log').innerHTML = '';
     
-    if (typeof addLog === 'function') addLog("BATTLE COMMENCED. No combat allowed on Turn 1.", "var(--gold)");
-    if (typeof updateUI === "function") updateUI(); 
+    addLog("BATTLE COMMENCED. No combat allowed on Turn 1.", "var(--gold)");
+    updateUI(); 
     
     const drawBtn = document.getElementById('draw-cards-btn');
-    if (drawBtn) {
-        drawBtn.style.display = "block";
-        drawBtn.innerText = "DRAW HAND";
-    }
+    drawBtn.style.display = "block";
+    drawBtn.innerText = "DRAW HAND";
 }
 
 // ============================================================================
@@ -473,6 +457,7 @@ function triggerJaxPostDuel() {
     const tgScreen = document.getElementById('tg-screen');
     tgScreen.style.display = 'block';
 
+    // Clean up any stray UI from the duel
     document.getElementById('omt-presentation').style.display = 'none';
     document.getElementById('tg-menu').style.display = 'none';
 
@@ -503,9 +488,10 @@ function advancePostDuelDialogue() {
     } else if (postDuelStep === 3) {
         text.innerText = "It's tradition that the loser loses one of the cards to the winner. Here, choose one of these cards that he dropped. I'll find him later and return the other ones.";
     } else if (postDuelStep === 4) {
+        // Hide dialog box and trigger the card selection UI
         box.style.display = 'none';
         showPostDuelCardChoice();
-        return; 
+        return; // Pause the dialogue sequence until a card is picked
     } else if (postDuelStep === 5) {
         speaker.innerText = "Friendly Girl";
         speaker.style.color = "#2ecc71";
@@ -516,14 +502,19 @@ function advancePostDuelDialogue() {
         speaker.innerText = "You";
         speaker.style.color = "#3498db";
         text.innerText = "Will do, thanks!";
+    // ... (Keep previous steps 0 through 7 exactly the same) ...
+    } else if (postDuelStep === 7) {
+        speaker.innerText = "You";
+        speaker.style.color = "#3498db";
+        text.innerText = "Will do, thanks!";
     } else if (postDuelStep === 8) {
-        isJaxDefeated = true; 
-        
+        // End of sequence: hide dialog, change to TG9, show menu with ONLY the exit button
         box.style.display = 'none';
         tgScreen.style.backgroundImage = "url('./assets/TG9.png')";
         
         document.getElementById('tg-menu').style.display = 'flex';
         
+        // Hide the "Talk to the Strangers" button so they can only leave
         const talkBtn = document.getElementById('talk-strangers-btn');
         if (talkBtn) talkBtn.style.display = 'none';
         
@@ -532,17 +523,17 @@ function advancePostDuelDialogue() {
     }
 
     postDuelStep++;
+    // Re-bind the click event to ensure it advances this specific dialogue tree
     box.onclick = advancePostDuelDialogue;
 }
-
 function showPostDuelCardChoice() {
     const container = document.getElementById('omt-presentation');
-    container.innerHTML = ''; 
+    container.innerHTML = ''; // Clear out the old 'One More Time' UI
 
     const choices = [
         { name: "Zombie", key: "Zombie" },
         { name: "Skeleton Warrior", key: "Skeleton Warrior" },
-        { name: "Leonian Squire", key: "Squire" } 
+        { name: "Leonian Squire", key: "Squire" } // Maps to the correct asset key
     ];
 
     const flexBox = document.createElement('div');
@@ -554,14 +545,17 @@ function showPostDuelCardChoice() {
     choices.forEach(choice => {
         const link = ASSET_LINKS[choice.key] || "";
         const data = getCardTemplate(choice.key, link);
+        // createCardDOM with 'true' at the end makes it purely visual (no dragging)
         const cardDOM = createCardDOM('reward_' + choice.key.replace(/\s/g, ''), data, true);
 
+        // Add hover effects for interactivity
         cardDOM.style.transform = "scale(1.2)";
         cardDOM.style.cursor = "pointer";
         cardDOM.style.transition = "transform 0.2s ease";
 
         cardDOM.onmouseover = () => cardDOM.style.transform = "scale(1.3)";
         cardDOM.onmouseout = () => cardDOM.style.transform = "scale(1.2)";
+
         cardDOM.onclick = () => acceptPostDuelCard(choice.name, data);
 
         flexBox.appendChild(cardDOM);
@@ -581,16 +575,36 @@ function showPostDuelCardChoice() {
 function acceptPostDuelCard(cardName, data) {
     document.getElementById('omt-presentation').style.display = 'none';
     
+    // Add the selected card to the player's bag
     let newCard = {...data, dbId: generateUID()};
     if (typeof playerCollection !== 'undefined') {
         playerCollection.push(newCard);
         if (typeof addLog === 'function') addLog(`Added ${cardName} to your collection!`, "#f1c40f");
     }
 
+    // Advance to the next line of dialogue ("Good choice!")
     postDuelStep = 5;
     advancePostDuelDialogue();
 }
 
+function unlockShopsAlley() {
+    // Only unlock the button, do NOT force the screen to change here
+    const buttons = document.querySelectorAll('#leonia-screen .loc-btn');
+    buttons.forEach(btn => {
+        if (btn.innerText.includes("Shops Alley")) {
+            btn.disabled = false;
+            btn.classList.add('unlocked');
+            btn.innerText = "Shops Alley";
+            btn.onclick = enterShopsAlley; // Bind navigation
+        }
+    });
+}
+
+// ============================================================================
+// 🏪 SHOPS ALLEY & GLADINE LORE EVENT
+// ============================================================================
+
+// Overwrite previous unlock function to correctly bind the click event
 function unlockShopsAlley() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('leonia-screen').style.display = 'block';
@@ -601,19 +615,16 @@ function unlockShopsAlley() {
             btn.disabled = false;
             btn.classList.add('unlocked');
             btn.innerText = "Shops Alley";
-            btn.onclick = enterShopsAlley; 
+            btn.onclick = enterShopsAlley; // Bind navigation
         }
     });
 }
-
-// ============================================================================
-// 🏪 SHOPS ALLEY & GLADINE LORE EVENT
-// ============================================================================
 
 function enterShopsAlley() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     const alleyScreen = document.getElementById('shops-alley-screen');
     alleyScreen.style.display = 'block';
+    // Use the dynamic CSS variable assigned during asset loading
     alleyScreen.style.backgroundImage = "var(--alleyshopbg-url)";
 }
 
@@ -627,7 +638,7 @@ let hasSeenShopLore = false;
 
 const shopDialogue = [
     { s: "Gladine", c: "#2ecc71", t: "The name's Gladine by the way, thank you so much for coming!" },
-    { s: "You", c: "#3498db", t: "Nice to meet you, Gladine, my name's ADVENTURER." },
+    { s: "You", c: "#3498db", t: "Nice to meet you, Gladine, my name's ADVENTURER." }, // You can swap ADVENTURER with a dynamic player name later
     { s: "Gladine", c: "#2ecc71", t: "Pleasure's all mine." },
     { s: "You", c: "#3498db", t: "I've been curious, why did the guy ran from me, like I was going to hurt him?" },
     { s: "Gladine", c: "#2ecc71", t: "Well you did broke his Core Crystals, defense so, yea you could have." },
@@ -693,6 +704,7 @@ function advanceShopDialogue() {
 // 🛡️ BARRACKS & CAPTAIN THORNE LORE EVENT
 // ============================================================================
 
+// Overwrite the placeholder unlock function so it navigates correctly
 function unlockBarracks() {
     const buttons = document.querySelectorAll('#leonia-screen .loc-btn');
     buttons.forEach(btn => {
@@ -700,7 +712,7 @@ function unlockBarracks() {
             btn.disabled = false;
             btn.classList.add('unlocked');
             btn.innerText = "Barracks";
-            btn.onclick = enterBarracks; 
+            btn.onclick = enterBarracks; // Bind navigation
         }
     });
 }
@@ -757,16 +769,18 @@ function talkToThorne() {
         document.getElementById('barracks-dialogue-box').style.display = 'flex';
         renderThorneDialogue();
     } else {
+        // Repeated chatter if the player talks to him again
         document.getElementById('barracks-menu').style.display = 'none';
         document.getElementById('barracks-dialogue-box').style.display = 'flex';
         document.getElementById('barracks-speaker').innerText = "Captain Thorne";
         document.getElementById('barracks-speaker').style.color = "#e74c3c";
         document.getElementById('barracks-text').innerText = "Check the Garrison Quest Board if you're looking for work. Keep your guard up.";
         
+        // Temporarily change the click behavior to just close the box
         document.getElementById('barracks-dialogue-box').onclick = () => {
             document.getElementById('barracks-dialogue-box').style.display = 'none';
             document.getElementById('barracks-menu').style.display = 'flex';
-            document.getElementById('barracks-dialogue-box').onclick = advanceThorneDialogue; 
+            document.getElementById('barracks-dialogue-box').onclick = advanceThorneDialogue; // Restore original
         };
     }
 }
@@ -788,192 +802,12 @@ function advanceThorneDialogue() {
         document.getElementById('barracks-dialogue-box').style.display = 'none';
         document.getElementById('barracks-menu').style.display = 'flex';
         
+        // Dialogue is over, unlock the Garrison Board Quest!
         const boardBtn = document.getElementById('garrison-board-btn');
         if(boardBtn) {
             boardBtn.disabled = false;
             boardBtn.classList.add('unlocked');
             boardBtn.innerText = "Garrison Board Quest";
-            boardBtn.onclick = openQuestBoard; 
         }
-    }
-}
-
-function openQuestBoard() {
-    document.getElementById('barracks-menu').style.display = 'none';
-    document.getElementById('garrison-board-screen').style.display = 'block';
-}
-
-// ============================================================================
-// 🌲 BORDER PATROL & ENCOUNTER SYSTEM
-// ============================================================================
-
-let activeQuest = null;
-let patrolProgress = 0;
-let encounterChance = 5;
-let patrolInterval;
-let patrolSeconds = 0;
-
-function selectQuest(questId) {
-    if (questId === 'wisp') {
-        document.getElementById('quest-title').innerText = "Wisp Hunt (1,000G)";
-        document.getElementById('quest-desc').innerText = "Target: 3 Minor Wisps.\nLocation: The Eastern Pass.\n\nClient Notes: The fog has been unusually thick lately, and travelers are reporting trap spells being triggered near the mountain pass. Clear them out before someone gets hurt.";
-        document.getElementById('accept-quest-btn').style.display = 'block';
-    }
-}
-
-function acceptWispQuest() {
-    activeQuest = 'wisp';
-    alert("Quest Accepted! The Gate is now unlocked.");
-    
-    const gateBtn = document.getElementById('loc-gate-btn');
-    if (gateBtn) {
-        gateBtn.disabled = false;
-        gateBtn.classList.add('unlocked');
-        gateBtn.innerText = "Gate";
-        gateBtn.onclick = enterGate;
-    }
-    
-    document.getElementById('garrison-board-screen').style.display = 'none';
-    document.getElementById('barracks-menu').style.display = 'flex';
-}
-
-function enterGate() {
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    document.getElementById('gate-screen').style.display = 'block';
-    document.getElementById('gate-screen').style.backgroundImage = "var(--gate-url)";
-}
-
-function enterEasternPass() {
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    document.getElementById('eastern-pass-screen').style.display = 'block';
-    document.getElementById('eastern-pass-screen').style.backgroundImage = "var(--mountainpass-url)";
-}
-
-function enterMountainPass() {
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    document.getElementById('mountain-pass-screen').style.display = 'block';
-    document.getElementById('mountain-pass-screen').style.backgroundImage = "var(--mountainpass-url)";
-}
-
-function backToGate() {
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    document.getElementById('gate-screen').style.display = 'block';
-}
-
-function startPatrol() {
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    document.getElementById('patrol-screen').style.display = 'block';
-    document.getElementById('patrol-screen').style.backgroundImage = "var(--mountainpass-url)";
-    
-    patrolProgress = 0;
-    patrolSeconds = 0;
-    encounterChance = 5; 
-    document.getElementById('patrol-player-token').style.left = '0%';
-    document.getElementById('encounter-popup').style.display = 'none';
-    document.getElementById('retreat-patrol-btn').style.display = 'block';
-    
-    patrolInterval = setInterval(patrolTick, 1000);
-}
-
-function patrolTick() {
-    patrolSeconds++;
-    
-    patrolProgress = (patrolSeconds / 60) * 100;
-    document.getElementById('patrol-player-token').style.left = `${patrolProgress}%`;
-
-    if (patrolProgress >= 100) {
-        clearInterval(patrolInterval);
-        alert("Patrol Complete! No more threats found. Returning to Leonia.");
-        backToLeonia();
-        return;
-    }
-
-    if (patrolSeconds % 10 === 0) {
-        let roll = Math.random() * 100;
-        if (roll <= encounterChance) {
-            triggerEncounter();
-        } else {
-            encounterChance += 5; 
-        }
-    }
-}
-
-function triggerEncounter() {
-    clearInterval(patrolInterval); 
-    document.getElementById('encounter-popup').style.display = 'block';
-    document.getElementById('retreat-patrol-btn').style.display = 'none'; 
-}
-
-function escapeEncounter() {
-    document.getElementById('encounter-popup').style.display = 'none';
-    document.getElementById('retreat-patrol-btn').style.display = 'block';
-    patrolInterval = setInterval(patrolTick, 1000);
-}
-
-function retreatFromPatrol() {
-    clearInterval(patrolInterval);
-    document.getElementById('patrol-player-token').style.transition = "left 2s ease-in-out";
-    document.getElementById('patrol-player-token').style.left = "0%";
-    
-    setTimeout(() => {
-        document.getElementById('patrol-player-token').style.transition = "none"; 
-        backToLeonia();
-    }, 2000);
-}
-
-function startWispCombat() {
-    document.getElementById('patrol-screen').style.display = 'none';
-    document.getElementById('game-area').style.display = 'flex';
-    document.getElementById('inventory-btn').style.display = 'none';
-    
-    isTutorialMode = false;
-    if (typeof showInspector === 'function') showInspector('none');
-    
-    turnCount = 1; currentTurn = 'PLAYER';
-    pMana = 8; eMana = 8; pCoreHP = 2000; eCoreHP = 500; 
-    pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = [];
-    
-    document.getElementById('hand').innerHTML = ''; 
-    document.querySelectorAll('.slot .card').forEach(c => c.remove());
-    
-    pDeck = [];
-    if(typeof battleDeckConfig !== 'undefined') {
-        Object.values(battleDeckConfig).forEach(tier => {
-            tier.cards.forEach(card => {
-                if(card) {
-                   let template = cardLibrary.find(c => c.name === card.name);
-                   if (template) pDeck.push(JSON.parse(JSON.stringify(template)));
-                }
-            });
-        });
-    }
-    if(pDeck.length === 0) pDeck = buildDeck(); 
-    
-    // Safely shuffle deck
-    for (let i = pDeck.length - 1; i > 0; i--) { 
-        const j = Math.floor(Math.random() * (i + 1)); 
-        let temp = pDeck[i];
-        pDeck[i] = pDeck[j];
-        pDeck[j] = temp;
-    }
-    
-    eDeck = [];
-    const wispDeckNames = ["Minor Wisp", "Minor Wisp", "Minor Wisp", "Minor Wisp", "Minor Wisp"];
-    wispDeckNames.forEach(name => {
-        let template = cardLibrary.find(c => c.name === name);
-        if(template) eDeck.push(JSON.parse(JSON.stringify(template)));
-    });
-    
-    document.getElementById('p-deck-count').innerText = pDeck.length;
-    document.getElementById('e-deck-count').innerText = eDeck.length;
-    document.getElementById('event-log').innerHTML = '';
-    
-    if (typeof addLog === 'function') addLog("AMBUSHED BY A WISP! No combat allowed on Turn 1.", "#3498db");
-    if (typeof updateUI === "function") updateUI(); 
-    
-    const drawBtn = document.getElementById('draw-cards-btn');
-    if (drawBtn) {
-        drawBtn.style.display = "block";
-        drawBtn.innerText = "DRAW HAND";
     }
 }
