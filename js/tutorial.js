@@ -26,63 +26,90 @@ function advanceDialogue() {
 }
 
 async function presentStarterCards() {
-    const container = document.createElement('div');
-    container.className = 'tutorial-card-presentation';
-    
-    const starters = ["Squire", "Archer", "Bannerman", "Great Knight", "Mana Core", "Militia"];
-    for (let i=0; i<starters.length; i++) {
-        let key = starters[i];
-        if (key === "Mana Core") key = "Mana Core";
-        if (key === "Great Knight") key = "Great Knight";
+    try {
+        const container = document.createElement('div');
+        container.className = 'tutorial-card-presentation';
+        
+        // Bulletproof inline CSS to guarantee the cards render front-and-center
+        container.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center; gap:20px; z-index:500; flex-wrap:wrap;";
+        
+        const starters = ["Squire", "Archer", "Bannerman", "Great Knight", "Mana Core", "Militia"];
+        for (let i=0; i<starters.length; i++) {
+            let key = starters[i];
 
-        const data = getCardTemplate(key, ASSET_LINKS[key]);
-        const cardDOM = createCardDOM('tut_' + i, data, true); 
-        
-        cardDOM.classList.add('tut-card');
-        cardDOM.style.animationDelay = `${i * 0.3}s`;
-        
-        let imgContainer = cardDOM.querySelector('.card-img-container');
-        if(imgContainer) {
-            imgContainer.style.backgroundImage = `url('${data.img.replace(/"/g, '&quot;').replace(/'/g, '%27')}')`;
+            // Safety fallback: If ASSET_LINKS is missing a key, it defaults to an empty string instead of crashing
+            let link = ASSET_LINKS[key] || ""; 
+            const data = getCardTemplate(key, link);
+            
+            const cardDOM = createCardDOM('tut_' + i, data, true); 
+            cardDOM.classList.add('tut-card');
+            cardDOM.style.animationDelay = `${i * 0.3}s`;
+            
+            let imgContainer = cardDOM.querySelector('.card-img-container');
+            if(imgContainer && data.img) {
+                imgContainer.style.backgroundImage = `url('${data.img.replace(/"/g, '&quot;').replace(/'/g, '%27')}')`;
+            }
+            
+            container.appendChild(cardDOM);
         }
+        document.body.appendChild(container);
+
+        const msgBox = document.createElement('div');
+        msgBox.style.cssText = `position:fixed; top:20%; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.9); border:2px solid var(--gold); padding:20px; color:white; z-index:600; text-align:center; border-radius:8px; font-size:1.2rem; opacity:0; transition:1s;`;
+        msgBox.innerHTML = `<b>BEN:</b> Here. Take these. Let's see what you can do with them.<br><br><button id="start-tut-btn" style="padding:10px 20px; margin-top:15px; background:var(--gold); border:none; cursor:pointer; font-weight:bold; color:black;">ENTER BATTLEFIELD</button>`;
+        document.body.appendChild(msgBox);
         
-        container.appendChild(cardDOM);
+        setTimeout(() => { msgBox.style.opacity = 1; }, 2000);
+
+        document.getElementById('start-tut-btn').addEventListener('click', () => {
+            container.remove();
+            msgBox.remove();
+            document.getElementById('tavern-screen').style.display = 'none';
+            startTutorialDuel();
+        });
+    } catch (err) {
+        console.error("Critical Error rendering starter cards:", err);
     }
-    document.body.appendChild(container);
-
-    const msgBox = document.createElement('div');
-    msgBox.style.cssText = `position:fixed; top:20%; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.9); border:2px solid var(--gold); padding:20px; color:white; z-index:600; text-align:center; border-radius:8px; font-size:1.2rem; opacity:0; transition:1s;`;
-    msgBox.innerHTML = `<b>BEN:</b> Here. Take these. Let's see what you can do with them.<br><br><button id="start-tut-btn" style="padding:10px 20px; margin-top:15px; background:var(--gold); border:none; cursor:pointer; font-weight:bold;">ENTER BATTLEFIELD</button>`;
-    document.body.appendChild(msgBox);
-    
-    setTimeout(() => { msgBox.style.opacity = 1; }, 2000);
-
-    document.getElementById('start-tut-btn').addEventListener('click', () => {
-        container.remove();
-        msgBox.remove();
-        document.getElementById('tavern-screen').style.display = 'none';
-        startTutorialDuel();
-    });
 }
 
 function startTutorialDuel() {
-    document.getElementById('game-area').style.display = 'flex';
-    document.getElementById('tutorial-exit-btn').style.display = 'block';
-    
-    isTutorialMode = true;
-    tutorialStep = 1;
-    pMana = 8;
-    eMana = 8;
-    eCoreHP = 1; 
-    document.getElementById('enemy-core-hp').innerText = `BEN'S CORE: 1 | MANA: 8`;
-    
-    let playerHand = ["Squire", "Archer", "Bannerman", "Mana Core", "Great Knight", "Militia"];
-    playerHand.forEach(name => {
-        const data = getCardTemplate(name, ASSET_LINKS[name]);
-        const cardId = 'p_' + name.replace(/\s+/g, '');
-        cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: 'PLAYER', turnPlaced: 0, tauntedBy: null, isRevealed: false };
-        document.getElementById('hand').appendChild(createCardDOM(cardId, cardInstances[cardId], false));
-    });
+    try {
+        document.getElementById('game-area').style.display = 'flex';
+        document.getElementById('tutorial-exit-btn').style.display = 'block';
+        
+        isTutorialMode = true;
+        tutorialStep = 1;
+        pMana = 8;
+        eMana = 8;
+        eCoreHP = 1; 
+        document.getElementById('enemy-core-hp').innerText = `BEN'S CORE: 1 | MANA: 8`;
+        
+        let playerHand = ["Squire", "Archer", "Bannerman", "Mana Core", "Great Knight", "Militia"];
+        playerHand.forEach(name => {
+            let link = ASSET_LINKS[name] || ""; // Fallback added here too
+            const data = getCardTemplate(name, link);
+            const cardId = 'p_' + name.replace(/\s+/g, '');
+            cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: 'PLAYER', turnPlaced: 0, tauntedBy: null, isRevealed: false };
+            document.getElementById('hand').appendChild(createCardDOM(cardId, cardInstances[cardId], false));
+        });
+
+        let enemyHand = ["Militia", "Archer"];
+        enemyHand.forEach((name, idx) => {
+            let link = ASSET_LINKS[name] || "";
+            const data = getCardTemplate(name, link);
+            if (name === "Archer") { data.hp = 150; data.maxHp = 150; }
+            const cardId = 'e_' + name.replace(/\s+/g, '') + '_' + idx;
+            cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: 'ENEMY', turnPlaced: 0, tauntedBy: null, isRevealed: false };
+            eHandData.push(cardId);
+        });
+
+        document.getElementById('tut-overlay-msg').style.display = 'block';
+        if (typeof updateUI === "function") updateUI();
+        if (typeof progressTutorial === "function") progressTutorial();
+    } catch (err) {
+        console.error("Critical Error starting tutorial duel:", err);
+    }
+}
 
     let enemyHand = ["Militia", "Archer"];
     enemyHand.forEach((name, idx) => {
