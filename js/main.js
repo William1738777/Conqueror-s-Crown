@@ -119,14 +119,25 @@ function enterLeonia() {
 }
 
 function enterTavern() {
-    document.getElementById('leonia-screen').style.display = 'none';
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('tavern-screen').style.display = 'block';
     
-    // If tutorial is at step 0, play the opening sequence
-    if (tutorialStep === 0 && typeof startDialogueSequence === "function") {
-        startDialogueSequence();
+    // Check if this is the very first time entering the Tavern (The Tutorial)
+    if (tutorialStep === 0) {
+        // 1. Hide the top-left menu
+        document.getElementById('tavern-menu').style.display = 'none';
+        
+        // 2. Force the dialogue box to appear
+        document.getElementById('rpg-dialogue-box').style.display = 'flex';
+        
+        // 3. Start Ben's tutorial dialogue automatically
+        if (typeof startDialogueSequence === "function") startDialogueSequence();
     } else {
-        // Otherwise, skip the tutorial and just show the standard Tavern menu
+        // NORMAL VISIT (After the tutorial)
+        // 1. Show the top-left menu options
         document.getElementById('tavern-menu').style.display = 'flex';
+        
+        // 2. Hide the dialogue box until you click "Talk to Ben"
+        document.getElementById('rpg-dialogue-box').style.display = 'none';
     }
 }
