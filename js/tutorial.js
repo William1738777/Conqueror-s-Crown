@@ -700,6 +700,11 @@ function advanceShopDialogue() {
     }
 }
 
+// ============================================================================
+// 🛡️ BARRACKS & CAPTAIN THORNE LORE EVENT
+// ============================================================================
+
+// Overwrite the placeholder unlock function so it navigates correctly
 function unlockBarracks() {
     const buttons = document.querySelectorAll('#leonia-screen .loc-btn');
     buttons.forEach(btn => {
@@ -707,7 +712,102 @@ function unlockBarracks() {
             btn.disabled = false;
             btn.classList.add('unlocked');
             btn.innerText = "Barracks";
-            // Optional: You can bind this to an enterBarracks function later!
+            btn.onclick = enterBarracks; // Bind navigation
         }
     });
+}
+
+function enterBarracks() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    const bgScreen = document.getElementById('barracks-gate-screen');
+    bgScreen.style.display = 'block';
+    bgScreen.style.backgroundImage = "var(--bk1-url)";
+}
+
+function enterBarracksInside() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    const biScreen = document.getElementById('barracks-inside-screen');
+    biScreen.style.display = 'block';
+    biScreen.style.backgroundImage = "var(--bk3-url)";
+}
+
+function backToBarracksGate() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('barracks-gate-screen').style.display = 'block';
+}
+
+let thorneDialogueStep = 0;
+let hasSeenThorneLore = false;
+
+const thorneDialogue = [
+    { s: "Captain Thorne", c: "#e74c3c", t: "You must be the new face Gladine mentioned. I'm Captain Thorne. My sister asked me to look out for you, and I honor my word. But understand this—the Barracks is no tavern." },
+    { s: "You", c: "#3498db", t: "I appreciate the help, Captain. I'm ready to pull my weight." },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Good. See that Garrison Quest Board over there? That's where you'll accept jobs. Complete them, and you'll earn gold and materials to upgrade your deck." },
+    { s: "Captain Thorne", c: "#e74c3c", t: "But don't take these tasks lightly. If ordinary folk could handle these problems, they wouldn't be paying us to do it. You risk your neck out there." },
+    { s: "You", c: "#3498db", t: "What exactly am I going up against?" },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Listen closely, because I despise repeating myself. The threats out there vary. First, you have the minor Wisps. They're playful nuisances. They'll cast a trap spell on you just to force a duel. They're relatively harmless, and I trust you can take them on without breaking a sweat." },
+    { s: "You", c: "#3498db", t: "Sounds easy enough. Are all wisps like that?" },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Not quite. If you see a Gold Wisp, stay sharp. They are much harder and far more dangerous. However, taking one down yields a heavy purse and, on occasion, a very rare ability card." },
+    { s: "You", c: "#3498db", t: "Wisps I can handle. What about actual people?" },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Rogues. Outlaws who use the same trap spells to ambush travelers. They're cunning—much smarter than any wisp. Defeat them on the board, but don't just leave them out there. Turn them in so we can lock them up here in the barracks." },
+    { s: "You", c: "#3498db", t: "Got it. Wisps and Rogues. Anything else?" },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Yes. The real threat. Corrupted Crystal Cores. They tear through portals into our lands in events we call Invasions. They spread absolute destruction. It takes about twenty elite soldiers to bring one down... but it is far easier if a Summoner handles it." },
+    { s: "You", c: "#3498db", t: "Twenty? That's intense. How do I fight something like that?" },
+    { s: "Captain Thorne", c: "#e74c3c", t: "By knowing your limits. They come in different colors representing their corruption level. Blue and Green cores are manageable—just a step up from a Wisp. You can handle those." },
+    { s: "You", c: "#3498db", t: "And the others?" },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Purple Cores are tough sons of... well, they're brutal. I advise you to leave those to the veteran summoners. And finally... the Red ones." },
+    { s: "You", c: "#3498db", t: "Let me guess. Don't engage?" },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Run. As soon as possible. You call for backup and you never, ever take a Red Core on alone. Am I clear?" },
+    { s: "You", c: "#3498db", t: "Crystal clear, Captain." },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Good. If you don't have any questions, go ahead and check the Quest Board. Let's see what you're made of." }
+];
+
+function talkToThorne() {
+    if(!hasSeenThorneLore) {
+        thorneDialogueStep = 0;
+        document.getElementById('barracks-menu').style.display = 'none';
+        document.getElementById('barracks-dialogue-box').style.display = 'flex';
+        renderThorneDialogue();
+    } else {
+        // Repeated chatter if the player talks to him again
+        document.getElementById('barracks-menu').style.display = 'none';
+        document.getElementById('barracks-dialogue-box').style.display = 'flex';
+        document.getElementById('barracks-speaker').innerText = "Captain Thorne";
+        document.getElementById('barracks-speaker').style.color = "#e74c3c";
+        document.getElementById('barracks-text').innerText = "Check the Garrison Quest Board if you're looking for work. Keep your guard up.";
+        
+        // Temporarily change the click behavior to just close the box
+        document.getElementById('barracks-dialogue-box').onclick = () => {
+            document.getElementById('barracks-dialogue-box').style.display = 'none';
+            document.getElementById('barracks-menu').style.display = 'flex';
+            document.getElementById('barracks-dialogue-box').onclick = advanceThorneDialogue; // Restore original
+        };
+    }
+}
+
+function renderThorneDialogue() {
+    const line = thorneDialogue[thorneDialogueStep];
+    const speaker = document.getElementById('barracks-speaker');
+    speaker.innerText = line.s;
+    speaker.style.color = line.c;
+    document.getElementById('barracks-text').innerText = line.t;
+}
+
+function advanceThorneDialogue() {
+    thorneDialogueStep++;
+    if (thorneDialogueStep < thorneDialogue.length) {
+        renderThorneDialogue();
+    } else {
+        hasSeenThorneLore = true;
+        document.getElementById('barracks-dialogue-box').style.display = 'none';
+        document.getElementById('barracks-menu').style.display = 'flex';
+        
+        // Dialogue is over, unlock the Garrison Board Quest!
+        const boardBtn = document.getElementById('garrison-board-btn');
+        if(boardBtn) {
+            boardBtn.disabled = false;
+            boardBtn.classList.add('unlocked');
+            boardBtn.innerText = "Garrison Board Quest";
+        }
+    }
 }
