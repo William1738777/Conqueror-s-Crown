@@ -13,6 +13,9 @@ const ASSET_LINKS = {
     "Back_Card": "./assets/Conqueror%27s%20Crown%20Back_Card.png",
     
     // -- RPG Backgrounds & Icons --
+    "Gate": "./assets/Gate.png",
+    "Eastern Mountain Pass Watch": "./assets/Eastern Mountain Pass Watch.png",
+    "Minor Wisp": "./assets/Minor Wisp.png",
     "WorldMap": "./assets/WorldMap.png",
     "LeoniaBG": "./assets/LeoniaBG.png",
     "TavernBG": "./assets/Tavern.png",
@@ -102,6 +105,8 @@ function getCardTemplate(fileName, dataUrl) {
     // Backgrounds & UI Elements
     if(cleanName.includes('worldmap')) { document.documentElement.style.setProperty('--worldmap-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('leoniabg')) { document.documentElement.style.setProperty('--leoniabg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
+    if(cleanName.includes('gate')) { document.documentElement.style.setProperty('--gate-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
+    if(cleanName.includes('eastern mountain pass watch')) { document.documentElement.style.setProperty('--mountainpass-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('tavern') && cleanName.includes('bg')) { document.documentElement.style.setProperty('--tavernbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('alley shop') || cleanName.includes('alleyshopbg')) { document.documentElement.style.setProperty('--alleyshopbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('gladine shop') || cleanName.includes('gladineshopbg')) { document.documentElement.style.setProperty('--gladineshopbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
