@@ -1088,9 +1088,65 @@ function returnToLeonia() {
 
 function startWispDuel() {
     if (typeof playClickSound === 'function') playClickSound();
-    document.getElementById('encounter-overlay').style.display = 'none';
-    stopPatrolLoops();
     
-    // Placeholder! The next step is building the actual Wisp deck and combat integration.
-    alert("Duel starting! (Wisp Combat Engine coming next!)");
+    // 1. Hide Patrol & Overlay, Show Game Area
+    document.getElementById('encounter-overlay').style.display = 'none';
+    document.getElementById('patrol-screen').style.display = 'none';
+    document.getElementById('game-area').style.display = 'flex';
+    document.getElementById('inventory-btn').style.display = 'none';
+    
+    stopPatrolLoops();
+
+    // 2. Reset Battle Variables
+    isTutorialMode = false;
+    tutorialLock = false;
+    if (typeof showInspector === 'function') showInspector('none');
+    
+    turnCount = 1; 
+    currentTurn = 'PLAYER';
+    pMana = 8; eMana = 8; 
+    pCoreHP = 2000; eCoreHP = 1500; // Wisps have slightly weaker cores
+    pQueue = []; eQueue = []; 
+    isExecuting = false; globalTargetedThisTurn = []; 
+    pArashiSouls = 0; pSquiresFallen = 0;
+    
+    document.getElementById('hand').innerHTML = ''; 
+    document.querySelectorAll('.slot .card').forEach(c => c.remove());
+    
+    // 3. Load Player Deck (From Inventory)
+    pDeck = [];
+    if(typeof battleDeckConfig !== 'undefined') {
+        Object.values(battleDeckConfig).forEach(tier => {
+            tier.cards.forEach(card => {
+                if(card) {
+                   let template = cardLibrary.find(c => c.name === card.name);
+                   if (template) pDeck.push(JSON.parse(JSON.stringify(template)));
+                }
+            });
+        });
+    }
+    if(pDeck.length === 0 && typeof buildDeck === 'function') pDeck = buildDeck(); // Fallback
+    
+    // Shuffle Player Deck
+    for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
+    
+    // 4. Load Enemy Deck (Wisp Swarm!)
+    eDeck = [];
+    const wispDeckNames = ["Wisp", "Wisp", "Wisp", "Wisp", "Wisp", "Wisp", "Wisp"];
+    wispDeckNames.forEach(name => {
+        let template = cardLibrary.find(c => c.name === name);
+        if(template) eDeck.push(JSON.parse(JSON.stringify(template)));
+    });
+    
+    // 5. Update UI & Start
+    document.getElementById('p-deck-count').innerText = pDeck.length;
+    document.getElementById('e-deck-count').innerText = eDeck.length;
+    document.getElementById('event-log').innerHTML = '';
+    
+    addLog("AMBUSHED BY WISPS! No combat allowed on Turn 1.", "var(--gold)");
+    if (typeof updateUI === 'function') updateUI(); 
+    
+    const drawBtn = document.getElementById('draw-cards-btn');
+    drawBtn.style.display = "block";
+    drawBtn.innerText = "DRAW HAND";
 }
