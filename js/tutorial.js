@@ -925,7 +925,26 @@ function enterEasternMountainPass() {
 function startPatrol() {
     if (typeof playClickSound === 'function') playClickSound();
     
-    // Logic to transition into a battle with a Wisp goes here!
-    // For now, an alert will serve as the placeholder.
-    alert("You begin patrolling the Eastern Mountain Pass Watch...\nA wild Wisp appeared! (Battle encounter logic to be implemented)");
+    // Hide all screens and show the new Patrol Screen
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    const patrolScreen = document.getElementById('patrol-screen');
+    patrolScreen.style.display = 'block';
+    
+    // Set the background to match where we are patrolling
+    patrolScreen.style.backgroundImage = "url('./assets/Eastern Mountain Pass Watch.png')";
+    
+    // TODO: Trigger the actual movement and logic loop here!
+}
+
+// Temporary placeholders so the buttons don't throw errors
+function returnToLeonia() {
+    console.log("Returning to Leonia clicked...");
+}
+
+function startWispDuel() {
+    console.log("Fight clicked! Starting duel...");
+}
+
+function escapeEncounter() {
+    console.log("Escape clicked! Resuming patrol...");
 }
