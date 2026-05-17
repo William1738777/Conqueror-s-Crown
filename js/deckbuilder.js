@@ -36,19 +36,12 @@ function openInventory() {
     if (!document.getElementById('inv-inspector')) {
         const sidebar = document.getElementById('inv-sidebar');
         const exitBtn = sidebar.querySelector('.db-btn');
-        
-        // UPDATED: Flexbox layout to maximize the portrait art and remove the scrollbar
         const inspectorHtml = `
-        <div id="inv-inspector" style="display: none; flex-direction: column; background: rgba(0,0,0,0.8); border: 1px solid var(--gold); padding: 10px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; overflow: hidden; flex-grow: 1; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);">
-            <div id="inv-ins-name" style="color: var(--gold); font-weight: bold; text-align: center; font-family: 'Cinzel'; font-size: 1.1rem; border-bottom: 1px solid #444; padding-bottom: 5px; flex-shrink: 0;">Select Card</div>
-            
-            <div style="flex-grow: 1; display: flex; justify-content: center; align-items: center; margin-top: 10px; overflow: hidden;">
-                <img id="inv-ins-art" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.8); display: none;">
-            </div>
-            
-            <div id="inv-ins-desc" style="display: none;"></div>
+        <div id="inv-inspector" style="display: none; background: rgba(0,0,0,0.8); border: 1px solid var(--gold); padding: 15px; border-radius: 8px; margin-top: 15px; margin-bottom: 15px; overflow-y: auto; flex-grow: 1; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);">
+            <div id="inv-ins-name" style="color: var(--gold); font-weight: bold; text-align: center; font-family: 'Cinzel'; font-size: 1.1rem; border-bottom: 1px solid #444; padding-bottom: 5px;">Select Card</div>
+            <div style="text-align: center;"><img id="inv-ins-art" style="width: 70%; margin-top: 10px; border: 1px solid #444; border-radius: 4px; display: none;"></div>
+            <div id="inv-ins-desc" style="font-size: 0.75rem; color: #ccc; margin-top: 10px; line-height: 1.4;"></div>
         </div>`;
-        
         exitBtn.insertAdjacentHTML('beforebegin', inspectorHtml);
     }
     
