@@ -805,3 +805,184 @@ function advanceThorneDialogue() {
         }
     }
 }
+
+// ============================================================================
+// 🌲 BORDER PATROL & ENCOUNTER SYSTEM
+// ============================================================================
+
+let activeQuest = null;
+let patrolProgress = 0;
+let encounterChance = 5;
+let patrolInterval;
+let patrolSeconds = 0;
+
+// --- 1. Quest Board Logic ---
+function selectQuest(questId) {
+    if (questId === 'wisp') {
+        document.getElementById('quest-title').innerText = "Wisp Hunt (1,000G)";
+        document.getElementById('quest-desc').innerText = "Target: 3 Minor Wisps.\nLocation: The Eastern Pass.\n\nClient Notes: The fog has been unusually thick lately, and travelers are reporting trap spells being triggered near the mountain pass. Clear them out before someone gets hurt.";
+        document.getElementById('accept-quest-btn').style.display = 'block';
+    }
+}
+
+function acceptWispQuest() {
+    activeQuest = 'wisp';
+    alert("Quest Accepted! The Gate is now unlocked.");
+    
+    // Unlock the Gate in Leonia
+    const gateBtn = document.getElementById('loc-gate-btn');
+    gateBtn.disabled = false;
+    gateBtn.classList.add('unlocked');
+    gateBtn.innerText = "Gate";
+    gateBtn.onclick = enterGate;
+    
+    // Go back to barracks menu
+    document.getElementById('garrison-board-screen').style.display = 'none';
+    document.getElementById('barracks-menu').style.display = 'flex';
+}
+
+// --- 2. Gate & Navigation ---
+function enterGate() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('gate-screen').style.display = 'block';
+    document.getElementById('gate-screen').style.backgroundImage = "var(--gate-url)";
+}
+
+function enterEasternPass() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('eastern-pass-screen').style.display = 'block';
+    document.getElementById('eastern-pass-screen').style.backgroundImage = "var(--easternpass-url)";
+}
+
+function enterMountainPass() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('mountain-pass-screen').style.display = 'block';
+    document.getElementById('mountain-pass-screen').style.backgroundImage = "var(--mountainpass-url)";
+}
+
+function backToGate() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('gate-screen').style.display = 'block';
+}
+
+// --- 3. The Patrol Loop ---
+function startPatrol() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('patrol-screen').style.display = 'block';
+    document.getElementById('patrol-screen').style.backgroundImage = "var(--mountainpass-url)";
+    
+    // Reset Variables for a 60-second patrol
+    patrolProgress = 0;
+    patrolSeconds = 0;
+    encounterChance = 5; 
+    document.getElementById('patrol-player-token').style.left = '0%';
+    document.getElementById('encounter-popup').style.display = 'none';
+    document.getElementById('retreat-patrol-btn').style.display = 'block';
+    
+    // Start the clock (ticks every 1 second)
+    patrolInterval = setInterval(patrolTick, 1000);
+}
+
+function patrolTick() {
+    patrolSeconds++;
+    
+    // Move the token (takes 60 seconds to reach 100%)
+    patrolProgress = (patrolSeconds / 60) * 100;
+    document.getElementById('patrol-player-token').style.left = `${patrolProgress}%`;
+
+    if (patrolProgress >= 100) {
+        clearInterval(patrolInterval);
+        alert("Patrol Complete! No more threats found. Returning to Leonia.");
+        backToLeonia();
+        return;
+    }
+
+    // Every 10 seconds, roll the dice for an encounter
+    if (patrolSeconds % 10 === 0) {
+        let roll = Math.random() * 100;
+        if (roll <= encounterChance) {
+            triggerEncounter();
+        } else {
+            // If nothing happens, it gets more dangerous!
+            encounterChance += 5; 
+        }
+    }
+}
+
+// --- 4. Encounters ---
+function triggerEncounter() {
+    clearInterval(patrolInterval); // Pause movement
+    document.getElementById('encounter-popup').style.display = 'block';
+    document.getElementById('retreat-patrol-btn').style.display = 'none'; // Can't casually retreat while ambushed
+}
+
+function escapeEncounter() {
+    document.getElementById('encounter-popup').style.display = 'none';
+    document.getElementById('retreat-patrol-btn').style.display = 'block';
+    
+    // Resume patrol
+    patrolInterval = setInterval(patrolTick, 1000);
+}
+
+function retreatFromPatrol() {
+    clearInterval(patrolInterval);
+    // Smooth transition back to 0
+    document.getElementById('patrol-player-token').style.transition = "left 2s ease-in-out";
+    document.getElementById('patrol-player-token').style.left = "0%";
+    
+    setTimeout(() => {
+        document.getElementById('patrol-player-token').style.transition = "none"; // reset css
+        backToLeonia();
+    }, 2000);
+}
+
+// --- 5. Start the Wisp Duel ---
+function startWispCombat() {
+    document.getElementById('patrol-screen').style.display = 'none';
+    document.getElementById('game-area').style.display = 'flex';
+    document.getElementById('inventory-btn').style.display = 'none';
+    
+    isTutorialMode = false;
+    if (typeof showInspector === 'function') showInspector('none');
+    
+    turnCount = 1; currentTurn = 'PLAYER';
+    pMana = 8; eMana = 8; pCoreHP = 2000; eCoreHP = 500; // Wisps have weak cores
+    pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = [];
+    
+    document.getElementById('hand').innerHTML = ''; 
+    document.querySelectorAll('.slot .card').forEach(c => c.remove());
+    
+    // Load Player Deck
+    pDeck = [];
+    if(typeof battleDeckConfig !== 'undefined') {
+        Object.values(battleDeckConfig).forEach(tier => {
+            tier.cards.forEach(card => {
+                if(card) {
+                   let template = cardLibrary.find(c => c.name === card.name);
+                   if (template) pDeck.push(JSON.parse(JSON.stringify(template)));
+                }
+            });
+        });
+    }
+    if(pDeck.length === 0) pDeck = buildDeck(); 
+    for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
+    
+    // Load Wisp Deck (Lots of Wisps and trick spells)
+    eDeck = [];
+    const wispDeckNames = ["Minor Wisp", "Minor Wisp", "Minor Wisp", "Minor Wisp", "Minor Wisp"];
+    wispDeckNames.forEach(name => {
+        let template = cardLibrary.find(c => c.name === name);
+        if(template) eDeck.push(JSON.parse(JSON.stringify(template)));
+    });
+    
+    document.getElementById('p-deck-count').innerText = pDeck.length;
+    document.getElementById('e-deck-count').innerText = eDeck.length;
+    document.getElementById('event-log').innerHTML = '';
+    
+    addLog("AMBUSHED BY A WISP! No combat allowed on Turn 1.", "#3498db");
+    updateUI(); 
+    
+    const drawBtn = document.getElementById('draw-cards-btn');
+    drawBtn.style.display = "block";
+    drawBtn.innerText = "DRAW HAND";
+}
