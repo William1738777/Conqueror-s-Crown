@@ -101,6 +101,28 @@ Version 7.9 (Freedom)
         <div id="shop-ui-container" style="display:none; position:absolute; top:10%; left:10%; right:10%; bottom:10%; background:rgba(0,0,0,0.95); border:2px solid var(--gold); border-radius:8px; z-index:100; overflow-y:auto; padding:20px;"></div>
     </div>
 
+    <div id="barracks-gate-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
+        <div class="top-left-menu">
+            <button class="menu-btn unlocked" onclick="enterBarracksInside()">Enter Barracks</button>
+            <button class="menu-btn" onclick="alert('Guard: State your business... Ah, Gladine mentioned you. Go on in.')">Talk to the Guard</button>
+            <button class="menu-btn" onclick="backToLeonia()">Back to Town</button>
+        </div>
+    </div>
+
+    <div id="barracks-inside-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
+        <div id="barracks-menu" class="top-left-menu">
+            <button class="menu-btn unlocked" onclick="talkToThorne()">Talk to the Man</button>
+            <button class="menu-btn" id="garrison-board-btn" disabled>Garrison Board Quest (Locked)</button>
+            <button class="menu-btn" onclick="backToBarracksGate()">Go back to Barracks Gates</button>
+        </div>
+        
+        <div id="barracks-dialogue-box" class="dialogue-box-style" style="display:none;" onclick="advanceThorneDialogue()">
+            <div id="barracks-speaker">...</div>
+            <div id="barracks-text">...</div>
+            <div style="font-size: 0.75rem; color: #aaa; text-align: right; margin-top: 15px; font-style: italic;">(Click to continue)</div>
+        </div>
+    </div>
+
     <div id="inventory-screen" class="rpg-screen">
         <div id="inv-container">
             <div id="inv-sidebar">
