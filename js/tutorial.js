@@ -111,20 +111,6 @@ function startTutorialDuel() {
     }
 }
 
-    let enemyHand = ["Militia", "Archer"];
-    enemyHand.forEach((name, idx) => {
-        const data = getCardTemplate(name, ASSET_LINKS[name]);
-        if (name === "Archer") { data.hp = 150; data.maxHp = 150; }
-        const cardId = 'e_' + name.replace(/\s+/g, '') + '_' + idx;
-        cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: 'ENEMY', turnPlaced: 0, tauntedBy: null, isRevealed: false };
-        eHandData.push(cardId);
-    });
-
-    document.getElementById('tut-overlay-msg').style.display = 'block';
-    if (typeof updateUI === "function") updateUI();
-    progressTutorial();
-}
-
 function setTutMessage(msg) {
     document.getElementById('tut-overlay-msg').innerHTML = msg;
 }
