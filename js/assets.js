@@ -29,6 +29,7 @@ const ASSET_LINKS = {
     "TG6": "./assets/TG6.png",
     "TG7": "./assets/TG7.png",
     "TG8": "./assets/TG8.png",
+    "TG9": "./assets/TG9.png",
 
     // -- Audio & SFX --
     "DragSound": "./assets/DragSound.mp3",
@@ -102,7 +103,7 @@ function getCardTemplate(fileName, dataUrl) {
     if(cleanName.includes('tavern') && cleanName.includes('bg')) { document.documentElement.style.setProperty('--tavernbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('alley shop') || cleanName.includes('alleyshopbg')) { document.documentElement.style.setProperty('--alleyshopbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('gladine shop') || cleanName.includes('gladineshopbg')) { document.documentElement.style.setProperty('--gladineshopbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
-    if(cleanName.match(/tg[1-8]/)) { return { isMapBG: true, img: dataUrl }; }
+    if(cleanName.match(/tg[1-9]/)) { return { isMapBG: true, img: dataUrl }; }
     
     if(cleanName.includes('empty slot')) { document.documentElement.style.setProperty('--empty-slot-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isEmptySlot: true, img: dataUrl }; }
     if(cleanName.includes('empty ability')) { document.documentElement.style.setProperty('--empty-ability-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
