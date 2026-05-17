@@ -302,70 +302,199 @@ function openSummonMenu() {
     // Deduct Gold
     playerGold -= summonCost;
     if(typeof playClickSound === 'function') playClickSound();
+    updateGoldUI();
 
     // 1. Calculate Pull Rarity
     let pull;
-    let roll = Math.random();
+    let pool = [];
+    let animationTier = "BASE";
     
-    if (roll < 0.05) {
-        // 5% Chance: Level 6+ Legends (Kin-Ryu, Rolyn, Jaden)
-        let legends = cardLibrary.filter(c => c.powerLevel >= 6);
-        pull = legends[Math.floor(Math.random() * legends.length)];
-    } else if (roll < 0.25) {
-        // 20% Chance: Level 5 Elites or Spells
-        let epics = cardLibrary.filter(c => c.powerLevel === 5 || c.type === 'ability');
-        pull = epics[Math.floor(Math.random() * epics.length)];
+    // Roll a number between 0 and 100
+    let roll = Math.random() * 100; 
+
+    if (roll <= 1) {
+        // 1% Chance for 7-Star (God Tier)
+        pool = cardLibrary.filter(c => c.powerLevel >= 7);
+        animationTier = "GOD";
+    } else if (roll <= 5) {
+        // 4% Chance for 6-Star (Legendary)
+        pool = cardLibrary.filter(c => c.powerLevel === 6);
+        animationTier = "GOD"; 
+    } else if (roll <= 15) {
+        // 10% Chance for 5-Star (Epic)
+        pool = cardLibrary.filter(c => c.powerLevel === 5);
+        animationTier = "EPIC";
+    } else if (roll <= 30) {
+        // 15% Chance for 4-Star (Super Rare)
+        pool = cardLibrary.filter(c => c.powerLevel === 4);
+        animationTier = "EPIC";
+    } else if (roll <= 50) {
+        // 20% Chance for Spells/Abilities (Usually PowerLevel 0)
+        pool = cardLibrary.filter(c => c.type === 'ability' || c.isBuff);
+        animationTier = "BASE";
+    } else if (roll <= 70) {
+        // 20% Chance for 3-Star (Rare)
+        pool = cardLibrary.filter(c => c.powerLevel === 3 && c.type === 'unit');
+        animationTier = "BASE";
     } else {
-        // 75% Chance: Standard Units (Level 1-4)
-        let commons = cardLibrary.filter(c => c.powerLevel < 5 && c.type === 'unit');
-        pull = commons[Math.floor(Math.random() * commons.length)];
+        // 30% Chance for 1 or 2-Star (Common)
+        pool = cardLibrary.filter(c => (c.powerLevel === 1 || c.powerLevel === 2) && c.type === 'unit');
+        animationTier = "BASE";
     }
 
-    // Failsafe if filters fail
-    if (!pull) pull = cardLibrary[Math.floor(Math.random() * cardLibrary.length)];
+    // Failsafe: If a specific rarity pool is completely empty, grab any random card
+    if (!pool || pool.length === 0) pool = cardLibrary;
+
+    // Pick a random card from the chosen pool
+    pull = pool[Math.floor(Math.random() * pool.length)];
 
     // 2. Add to Collection
     playerCollection.push({...pull, dbId: generateUID()});
 
-    // 3. Play Reveal Animation
-    showSummonAnimation(pull);
+    // 3. Play the appropriate Reveal Animation based on the tier
+    if (animationTier === "GOD") {
+        showGodTierSummonAnimation(pull);
+    } else if (animationTier === "EPIC") {
+        showEpicSummonAnimation(pull);
+    } else {
+        showSummonAnimation(pull);
+    }
 }
 
+// ==========================================
+// 🌟 TIER 1: BASE SUMMON ANIMATION (1-3 Stars)
+// ==========================================
 function showSummonAnimation(cardData) {
-    const container = document.createElement('div');
-    container.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(255,255,255,1); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; transition:background 1.5s ease-out;";
-    document.body.appendChild(container);
+    const overlay = document.createElement('div');
+    overlay.className = 'summon-overlay';
+    
+    overlay.innerHTML = `
+        <div class="energy-sphere"></div>
+        <div class="flash-bang"></div>
+        <div class="revealed-card-wrapper">
+            <h1 style="color:var(--gold); font-family:'Cinzel'; text-shadow:0 0 15px #f1c40f; letter-spacing:2px; margin-bottom: 20px; font-size: 1rem;">A GUARDIAN ANSWERS THE CALL...</h1>
+            <div id="summon-card-target"></div>
+            <button class="btn-main" style="margin-top:30px; padding:10px 20px; font-size: 0.8rem; border:1px solid var(--gold);" onclick="this.closest('.summon-overlay').remove()">ACCEPT CARD</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
 
-    // Flashbang sound effect
-    if(typeof playSound === 'function' && typeof beamAudioUrl !== 'undefined') playSound(beamAudioUrl);
+    let cardDOM = createCardDOM('summoned_card', cardData, true);
+    cardDOM.style.boxShadow = "0 0 30px var(--gold)";
+    overlay.querySelector('#summon-card-target').appendChild(cardDOM);
 
-    // Fade into the reveal
+    if (typeof playSound === 'function') {
+        if (typeof beamAudioUrl !== 'undefined') playSound(beamAudioUrl);
+        setTimeout(() => { if (typeof buffActivatedUrl !== 'undefined') playSound(buffActivatedUrl); }, 2000); 
+    }
+}
+
+// ==========================================
+// 🌟 TIER 2: EPIC SUMMON ANIMATION (4-5 Stars)
+// ==========================================
+function showEpicSummonAnimation(cardData) {
+    const overlay = document.createElement('div');
+    overlay.className = 'summon-overlay';
+    overlay.style.background = 'radial-gradient(circle, #2c1a40 0%, #000 100%)';
+    overlay.style.perspective = '1000px';
+
+    let sparks = '';
+    for(let i = 0; i < 20; i++) {
+        let leftOffset = (Math.random() * 500) - 250; 
+        let delay = Math.random() * 1.5; 
+        sparks += `<div class="divine-spark charging-element" style="left: calc(50% + ${leftOffset}px); animation-delay: ${delay}s;"></div>`;
+    }
+
+    overlay.innerHTML = `
+        <div class="shake-container">
+            <div class="magic-circle charging-element"></div>
+            <div class="magic-circle inner charging-element"></div>
+            <div class="light-pillar charging-element"></div>
+            <div class="light-pillar secondary charging-element"></div>
+            ${sparks}
+            <div class="epic-shockwave"></div>
+        </div>
+        <div class="flash-bang"></div>
+        <div class="revealed-card-wrapper" style="animation-delay: 3.5s;">
+            <h1 style="color:#f1c40f; font-family:'Cinzel'; text-shadow:0 0 25px #f1c40f, 0 0 10px #fff; letter-spacing:6px; margin-bottom: 20px; font-size: 1.3rem;">A LEGEND AWAKENS</h1>
+            <div style="position: relative;" id="epic-card-target">
+                <div class="card-aura"></div>
+            </div>
+            <button class="btn-main" style="margin-top:40px; padding:12px 25px; box-shadow: 0 0 15px #9b59b6; border: 2px solid #f1c40f;" onclick="this.closest('.summon-overlay').remove()">CLAIM LEGEND</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    let cardDOM = createCardDOM('summoned_card', cardData, true);
+    cardDOM.style.boxShadow = "inset 0 0 30px #9b59b6, 0 0 30px #f1c40f";
+    cardDOM.style.border = "3px solid #f1c40f";
+    cardDOM.style.position = "relative";
+    cardDOM.style.zIndex = "2";
+    overlay.querySelector('#epic-card-target').appendChild(cardDOM);
+
+    setTimeout(() => { document.querySelectorAll('.charging-element').forEach(el => el.remove()); }, 2900);
+
+    if (typeof playSound === 'function') {
+        if (typeof beamAudioUrl !== 'undefined') playSound(beamAudioUrl);
+        setTimeout(() => { if (typeof buffActivatedUrl !== 'undefined') playSound(buffActivatedUrl); }, 3000); 
+    }
+}
+
+// ==========================================
+// 🌟 TIER 3: GOD SUMMON ANIMATION (6-7 Stars)
+// ==========================================
+function showGodTierSummonAnimation(cardData) {
+    const overlay = document.createElement('div');
+    overlay.className = 'summon-overlay';
+    overlay.style.background = '#000';
+    overlay.style.perspective = '1000px';
+
+    overlay.innerHTML = `
+        <div class="god-shake" id="shake-core">
+            <div class="singularity charging-element"></div>
+            <div class="accretion-disk charging-element"></div>
+            <div class="supernova"></div>
+        </div>
+        <div class="revealed-card-wrapper" style="animation-delay: 4s;">
+            <h1 style="color:#fff; font-family:'Cinzel'; text-shadow:0 0 20px #fff, 0 0 40px #f1c40f; letter-spacing:10px; margin-bottom: 30px; font-size: 1.5rem;">DIVINE ENTITY MANIFESTED</h1>
+            <div style="position: relative;" id="god-card-target">
+                <div class="god-halo-container">
+                    <div class="god-halo halo-1"></div>
+                    <div class="god-halo halo-2"></div>
+                    <div class="god-halo halo-3"></div>
+                </div>
+            </div>
+            <button class="btn-main" style="margin-top:50px; padding:15px 30px; background: transparent; color: #fff; border: 2px solid #fff; box-shadow: 0 0 20px #f1c40f; backdrop-filter: blur(5px);" onclick="this.closest('.summon-overlay').remove()">SUBMIT TO WILL</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    let cardDOM = createCardDOM('summoned_card', cardData, true);
+    cardDOM.style.boxShadow = "0 0 50px #fff, inset 0 0 30px #f1c40f";
+    cardDOM.style.border = "4px solid #fff";
+    cardDOM.style.position = "relative";
+    cardDOM.style.zIndex = "2";
+    overlay.querySelector('#god-card-target').appendChild(cardDOM);
+
+    const shakeCore = overlay.querySelector('#shake-core');
+    let dustInterval = setInterval(() => {
+        let dust = document.createElement('div');
+        dust.className = 'cosmic-dust charging-element';
+        let angle = Math.random() * Math.PI * 2;
+        let distance = 600 + Math.random() * 400; 
+        dust.style.setProperty('--startX', `${Math.cos(angle) * distance}px`);
+        dust.style.setProperty('--startY', `${Math.sin(angle) * distance}px`);
+        shakeCore.appendChild(dust);
+        setTimeout(() => { if (dust) dust.remove(); }, 1000);
+    }, 50); 
+
     setTimeout(() => {
-        container.style.background = "radial-gradient(circle, #333 0%, #000 100%)";
-        
-        let title = document.createElement('h1');
-        title.innerText = "A GUARDIAN ANSWERS THE CALL...";
-        title.style.color = "var(--gold)";
-        title.style.fontFamily = "'Cinzel', serif";
-        title.style.textShadow = "0 0 15px #f1c40f";
-        title.style.letterSpacing = "2px";
-        
-        let cardDOM = createCardDOM('summoned_card', cardData, true);
-        cardDOM.style.transform = "scale(2.5)";
-        cardDOM.style.margin = "80px 0";
-        cardDOM.style.boxShadow = "0 0 30px var(--gold)";
-        
-        let btn = document.createElement('button');
-        btn.className = "btn-main";
-        btn.innerText = "ACCEPT CARD";
-        btn.style.padding = "15px 30px";
-        btn.onclick = () => container.remove();
+        clearInterval(dustInterval);
+        document.querySelectorAll('.charging-element').forEach(el => el.remove());
+    }, 3450);
 
-        container.appendChild(title);
-        container.appendChild(cardDOM);
-        container.appendChild(btn);
-        
-        // Chime for reveal
-        if(typeof playSound === 'function' && typeof buffActivatedUrl !== 'undefined') playSound(buffActivatedUrl);
-    }, 800);
+    if (typeof playSound === 'function') {
+        if (typeof beamAudioUrl !== 'undefined') playSound(beamAudioUrl);
+        setTimeout(() => { if (typeof kinSanAudioUrl !== 'undefined') playSound(kinSanAudioUrl); }, 3400); 
+    }
 }
