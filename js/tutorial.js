@@ -502,9 +502,22 @@ function advancePostDuelDialogue() {
         speaker.innerText = "You";
         speaker.style.color = "#3498db";
         text.innerText = "Will do, thanks!";
+    // ... (Keep previous steps 0 through 7 exactly the same) ...
+    } else if (postDuelStep === 7) {
+        speaker.innerText = "You";
+        speaker.style.color = "#3498db";
+        text.innerText = "Will do, thanks!";
     } else if (postDuelStep === 8) {
-        // End of sequence, return to Leonia
+        // End of sequence: hide dialog, change to TG9, show menu with ONLY the exit button
         box.style.display = 'none';
+        tgScreen.style.backgroundImage = "url('./assets/TG9.png')";
+        
+        document.getElementById('tg-menu').style.display = 'flex';
+        
+        // Hide the "Talk to the Strangers" button so they can only leave
+        const talkBtn = document.getElementById('talk-strangers-btn');
+        if (talkBtn) talkBtn.style.display = 'none';
+        
         unlockShopsAlley();
         return;
     }
@@ -513,7 +526,6 @@ function advancePostDuelDialogue() {
     // Re-bind the click event to ensure it advances this specific dialogue tree
     box.onclick = advancePostDuelDialogue;
 }
-
 function showPostDuelCardChoice() {
     const container = document.getElementById('omt-presentation');
     container.innerHTML = ''; // Clear out the old 'One More Time' UI
