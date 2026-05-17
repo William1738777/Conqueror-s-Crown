@@ -1070,6 +1070,51 @@ async function triggerLuxBeam(actorDOM, targetDOM) {
     beamContainer.remove();
 }
 
+async function triggerBlueBeam(actorDOM, targetDOM) {
+    if(!actorDOM || !targetDOM) return;
+
+    const tRect = targetDOM.getBoundingClientRect();
+    const beamX = tRect.left + (tRect.width / 2);
+
+    const beamContainer = document.createElement('div');
+    beamContainer.className = 'lux-beam-container';
+    beamContainer.style.left = (beamX - 60) + 'px';
+
+    const core = document.createElement('div');
+    core.className = 'lux-beam-core';
+    // Force the core to be white/light blue with a cyan glow
+    core.style.background = '#e0f7fa'; 
+    core.style.boxShadow = '0 0 15px #00d2ff, 0 0 30px #00d2ff';
+
+    const outer = document.createElement('div');
+    outer.className = 'lux-beam-outer';
+    // Force the outer aura to be a massive blue glow
+    outer.style.background = 'rgba(0, 210, 255, 0.6)'; 
+    outer.style.boxShadow = '0 0 40px #00d2ff, 0 0 80px #3498db';
+
+    beamContainer.appendChild(outer);
+    beamContainer.appendChild(core);
+    document.body.appendChild(beamContainer);
+
+    beamContainer.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+    beamContainer.style.opacity = "0.5";
+    beamContainer.style.transform = "scaleX(0.1)";
+    await new Promise(r => setTimeout(r, 200));
+
+    if (typeof abilityActivatedUrl !== 'undefined' && abilityActivatedUrl) playSound(abilityActivatedUrl);
+    document.body.classList.add('shake-anim');
+    beamContainer.style.transition = "opacity 0.1s ease, transform 0.1s ease";
+    beamContainer.style.opacity = "1";
+    beamContainer.style.transform = "scaleX(1)";
+    await new Promise(r => setTimeout(r, 400));
+
+    document.body.classList.remove('shake-anim');
+    beamContainer.style.transition = "opacity 0.3s ease";
+    beamContainer.style.opacity = "0";
+    await new Promise(r => setTimeout(r, 300));
+    beamContainer.remove();
+}
+
 async function triggerSanChain(actor, defSide) {
     let activeCardsOnBoard = Object.values(cardInstances).filter(c => {
         let el = document.getElementById(c.id);
