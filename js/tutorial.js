@@ -502,11 +502,6 @@ function advancePostDuelDialogue() {
         speaker.innerText = "You";
         speaker.style.color = "#3498db";
         text.innerText = "Will do, thanks!";
-    // ... (Keep previous steps 0 through 7 exactly the same) ...
-    } else if (postDuelStep === 7) {
-        speaker.innerText = "You";
-        speaker.style.color = "#3498db";
-        text.innerText = "Will do, thanks!";
     } else if (postDuelStep === 8) {
         // End of sequence: hide dialog, change to TG9, show menu with ONLY the exit button
         box.style.display = 'none';
@@ -526,6 +521,7 @@ function advancePostDuelDialogue() {
     // Re-bind the click event to ensure it advances this specific dialogue tree
     box.onclick = advancePostDuelDialogue;
 }
+
 function showPostDuelCardChoice() {
     const container = document.getElementById('omt-presentation');
     container.innerHTML = ''; // Clear out the old 'One More Time' UI
@@ -587,15 +583,15 @@ function acceptPostDuelCard(cardName, data) {
     advancePostDuelDialogue();
 }
 
+// Ensure this is the ONLY unlockShopsAlley function in the file!
 function unlockShopsAlley() {
-    // Only unlock the button, do NOT force the screen to change here
     const buttons = document.querySelectorAll('#leonia-screen .loc-btn');
     buttons.forEach(btn => {
         if (btn.innerText.includes("Shops Alley")) {
             btn.disabled = false;
             btn.classList.add('unlocked');
             btn.innerText = "Shops Alley";
-            btn.onclick = enterShopsAlley; // Bind navigation
+            btn.onclick = enterShopsAlley; 
         }
     });
 }
@@ -603,22 +599,6 @@ function unlockShopsAlley() {
 // ============================================================================
 // 🏪 SHOPS ALLEY & GLADINE LORE EVENT
 // ============================================================================
-
-// Overwrite previous unlock function to correctly bind the click event
-function unlockShopsAlley() {
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    document.getElementById('leonia-screen').style.display = 'block';
-
-    const buttons = document.querySelectorAll('#leonia-screen .loc-btn');
-    buttons.forEach(btn => {
-        if (btn.innerText.includes("Shops Alley")) {
-            btn.disabled = false;
-            btn.classList.add('unlocked');
-            btn.innerText = "Shops Alley";
-            btn.onclick = enterShopsAlley; // Bind navigation
-        }
-    });
-}
 
 function enterShopsAlley() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
