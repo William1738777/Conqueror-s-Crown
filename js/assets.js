@@ -93,6 +93,7 @@ const ASSET_LINKS = {
     "Jaden": "./assets/Jaden.png",
     "Skeleton Warrior": "./assets/Skeleton%20Warrior.png",
     "Cursed Crow": "./assets/Cursed Crow.png",
+    "Wisp": "./assets/Wisp.png",
     "Zombie": "./assets/Zombie.png"
 };
 
@@ -169,6 +170,16 @@ function getCardTemplate(fileName, dataUrl) {
             isPlayable: true, type: 'unit', name: "Leonian Squire", title: "Trainee Attendant (Level 1)", powerLevel: 1, summonCost: 1, faction: "Leonia", race: "Human", hp: 450, maxHp: 450, atk: 100, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
             skills: [ { name: "SHORTSWORD STRIKE", manaCost: 0, desc: "Deals 80-120 physical damage to a frontline enemy." } ], 
             passives: [ { name: "TRAINED DODGES", desc: "This unit has a 40% chance to dodge any incoming attack." } ]
+        };
+    }
+    else if(cleanName === 'wisp') {
+        return { 
+            isPlayable: true, type: 'unit', name: "Wisp", title: "Lvl 4", powerLevel: 4, summonCost: 0, faction: "Neutral", race: "Forest Creature", hp: 750, maxHp: 750, atk: 50, img: dataUrl || "./assets/Empty%20Slot.png", marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
+            skills: [ 
+                { name: "Force of Nature", manaCost: 1, desc: "Inflicts 150-300 damage." },
+                { name: "Mana Beam", manaCost: 5, desc: "Casts 3 beams randomly across 3 lanes, hitting max 2 separate lanes for 300-900 damage each." }
+            ], 
+            passives: [ { name: "Mana Life", desc: "If this unit dies, grants the owner 1-4 Mana." } ] 
         };
     }
     else if (cleanName.includes('great knight')) {
