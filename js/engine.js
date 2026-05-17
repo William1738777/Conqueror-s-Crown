@@ -785,6 +785,40 @@ window.queueAction = function(actorId, skillName, cost, isCore) {
             if(tInst && tInst.type === 'unit' && !tInst.exhausted && tInst.turnPlaced < turnCount) c.classList.add('target-buff-glow');
         });
     } 
+    else if (action.skillName === "Mana Beam") {
+            let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+            let allLanes = ['left', 'center', 'right'];
+            allLanes.sort(() => 0.5 - Math.random());
+            let allowedLanes = [allLanes[0], allLanes[1]]; // Restricts to max 2 separate lanes
+            
+            if(actorDOM) { actorDOM.style.transition = "transform 0.4s ease"; actorDOM.style.transform = "translateY(-20px) scale(1.1)"; await new Promise(r => setTimeout(r, 400)); }
+            
+            for(let i=0; i<3; i++) {
+                let targetLane = allowedLanes[Math.floor(Math.random() * allowedLanes.length)];
+                let fSlotId = defSide === 'PLAYER' ? 'p-front-' + targetLane : 'e-front-' + targetLane;
+                let bSlotId = defSide === 'PLAYER' ? 'p-back-' + targetLane : 'e-back-' + targetLane;
+                
+                let targetId = 'CORE'; // Defaults to hitting the core if the lane is empty!
+                let fSlot = document.getElementById(fSlotId);
+                let bSlot = document.getElementById(bSlotId);
+                
+                if (fSlot && fSlot.querySelector('.card') && cardInstances[fSlot.querySelector('.card').id].hp > 0) {
+                    targetId = fSlot.querySelector('.card').id;
+                } else if (bSlot && bSlot.querySelector('.card') && cardInstances[bSlot.querySelector('.card').id].hp > 0) {
+                    targetId = bSlot.querySelector('.card').id;
+                }
+                
+                let tDOM = targetId === 'CORE' ? document.getElementById(defSide === 'ENEMY' ? 'e-core-target' : 'p-core-target') : document.getElementById(targetId);
+                
+                if (typeof beamAudioUrl !== 'undefined' && beamAudioUrl) playSound(beamAudioUrl); 
+                if (typeof triggerLuxBeam === 'function') await triggerLuxBeam(actorDOM, tDOM);
+                
+                let dmg = Math.floor(Math.random() * (900 - 300 + 1)) + 300;
+                await applyDamage(actor, targetId, dmg, "Passive"); // Passing "Passive" prevents physical lunge animation
+                await new Promise(r => setTimeout(r, 250));
+            }
+            if(actorDOM) { actorDOM.style.transform = "scale(1) translateY(0)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
+        }
     else if (skillName === "Punishment of the Blessed") {
         if(actor.blessings < 7) { pMana += cost; actor.queued = false; return addLog("Needs 7 Blessings!", "red"); }
         isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
@@ -818,6 +852,10 @@ window.queueAction = function(actorId, skillName, cost, isCore) {
         validIds.forEach(tId => document.getElementById(tId).classList.add('target-glow'));
         
         if (validIds.length === 0) { addLog("No enemies to target.", "#e74c3c"); isTargeting = false; actor.queued = false; pMana += cost; pendingSkill = null; }
+    }
+    else if (skillName === "Mana Beam") {
+        let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'RANDOM_LANES' };
+        pQueue.push(action); addLog(`Queued [${skillName}] across the board.`, "#3498db"); systemDetector("QUEUE", { action });
     }
     else if (skillName === "Shield of Hope") {
         let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'ALLIES_FRONT' };
