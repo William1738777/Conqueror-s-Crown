@@ -811,6 +811,20 @@ window.queueAction = function(actorId, skillName, cost, isCore) {
                 let tDOM = targetId === 'CORE' ? document.getElementById(defSide === 'ENEMY' ? 'e-core-target' : 'p-core-target') : document.getElementById(targetId);
                 
                 if (typeof beamAudioUrl !== 'undefined' && beamAudioUrl) playSound(beamAudioUrl); 
+                
+                // CALL THE NEW BLUE BEAM ANIMATION HERE:
+                if (typeof triggerBlueBeam === 'function') await triggerBlueBeam(actorDOM, tDOM);
+                
+                let dmg = Math.floor(Math.random() * (900 - 300 + 1)) + 300;
+                await applyDamage(actor, targetId, dmg, "Passive"); // Passing "Passive" prevents physical lunge animation
+                await new Promise(r => setTimeout(r, 250));
+            }
+            if(actorDOM) { actorDOM.style.transform = "scale(1) translateY(0)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
+        }
+                
+                let tDOM = targetId === 'CORE' ? document.getElementById(defSide === 'ENEMY' ? 'e-core-target' : 'p-core-target') : document.getElementById(targetId);
+                
+                if (typeof beamAudioUrl !== 'undefined' && beamAudioUrl) playSound(beamAudioUrl); 
                 if (typeof triggerLuxBeam === 'function') await triggerLuxBeam(actorDOM, tDOM);
                 
                 let dmg = Math.floor(Math.random() * (900 - 300 + 1)) + 300;
