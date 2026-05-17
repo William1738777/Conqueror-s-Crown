@@ -291,13 +291,25 @@ function backToLeonia() {
     document.getElementById('leonia-screen').style.display = 'block';
 }
 
+let isJaxDefeated = false;
+
 function enterTrainingGrounds() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     const tg = document.getElementById('tg-screen');
     tg.style.display = 'block';
-    tg.style.backgroundImage = "url('./assets/TG1.png')";
+    
+    // Check if the duel is over to load the correct background and buttons
+    if (isJaxDefeated) {
+        tg.style.backgroundImage = "url('./assets/TG9.png')";
+        const talkBtn = document.getElementById('talk-strangers-btn');
+        if (talkBtn) talkBtn.style.display = 'none';
+    } else {
+        tg.style.backgroundImage = "url('./assets/TG1.png')";
+        const talkBtn = document.getElementById('talk-strangers-btn');
+        if (talkBtn) talkBtn.style.display = 'block'; 
+    }
+    
     document.getElementById('tg-menu').style.display = 'flex';
-}
 
 // --- STRANGERS EVENT LOGIC ---
 let tgStep = 0;
@@ -503,6 +515,8 @@ function advancePostDuelDialogue() {
         speaker.style.color = "#3498db";
         text.innerText = "Will do, thanks!";
     } else if (postDuelStep === 8) {
+        isJaxDefeated = true; // <--- ADD THIS LINE
+        
         // End of sequence: hide dialog, change to TG9, show menu with ONLY the exit button
         box.style.display = 'none';
         tgScreen.style.backgroundImage = "url('./assets/TG9.png')";
