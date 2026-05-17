@@ -113,9 +113,8 @@ Version 8.0 (Freedom)
     <div id="barracks-inside-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
         <div id="barracks-menu" class="top-left-menu">
             <button class="menu-btn unlocked" onclick="talkToThorne()">Talk to the Man</button>
-            <button class="menu-btn" id="garrison-board-btn" disabled>Garrison Board Quest (Locked)</button>
-            <button class="menu-btn" onclick="backToBarracksGate()">Go back to Barracks Gates</button>
             <button class="menu-btn" id="garrison-board-btn" onclick="openGarrisonBoard()" disabled>Garrison Board Quest (Locked)</button>
+            <button class="menu-btn unlocked" onclick="backToBarracksGate()">Go back to Barracks Gates</button>
         </div>
         
         <div id="barracks-dialogue-box" class="dialogue-box-style" style="display:none;" onclick="advanceThorneDialogue()">
