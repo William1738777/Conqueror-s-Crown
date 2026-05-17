@@ -1533,6 +1533,7 @@ async function processQueue(sideProcessing, queueArr) {
         }
         else {
             let dmg = actor.atk || 100; let secondDmg = 0;
+            if (action.skillName === "Force of Nature") dmg = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
             if (action.skillName === "SHORTSWORD STRIKE") dmg = isTutorialMode ? Math.floor(Math.random() * (120 - 80 + 1)) + 80 : Math.floor(Math.random() * (120 - 80 + 1)) + 80;
             if (action.skillName === "HEAVY STRIKE") dmg = Math.floor(Math.random() * (250 - 150 + 1)) + 150;
             if (action.skillName === "BANNER STRIKE") dmg = 50;
