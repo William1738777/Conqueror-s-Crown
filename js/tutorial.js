@@ -802,8 +802,15 @@ function advanceThorneDialogue() {
             boardBtn.disabled = false;
             boardBtn.classList.add('unlocked');
             boardBtn.innerText = "Garrison Board Quest";
+            boardBtn.onclick = openQuestBoard;
         }
     }
+}
+    
+// <--- ADD THIS NEW FUNCTION --->
+function openQuestBoard() {
+    document.getElementById('barracks-menu').style.display = 'none';
+    document.getElementById('garrison-board-screen').style.display = 'block';
 }
 
 // ============================================================================
