@@ -811,3 +811,121 @@ function advanceThorneDialogue() {
         }
     }
 }
+
+// ============================================================================
+// 📋 GARRISON QUEST BOARD LOGIC
+// ============================================================================
+
+let quests = {
+    wisp_hunt: {
+        id: 'wisp_hunt',
+        title: "Wisp Hunt",
+        objective: "Hunt 3 Wisps in the Eastern Pass.",
+        reward: "1,000 Gold",
+        description: "We've had reports of pesky Wisps causing trouble for merchants traveling through the Eastern Pass. Clear them out before they cause serious damage or lure in larger threats.<br><br><em>- Captain Thorne</em>",
+        isAccepted: false,
+        isCompleted: false
+    }
+};
+
+function openGarrisonBoard() {
+    // Hide the barracks menu buttons and show the board
+    document.getElementById('barracks-menu').style.display = 'none';
+    document.getElementById('garrison-board-ui').style.display = 'block';
+}
+
+function closeGarrisonBoard() {
+    // Hide the board and restore the barracks menu buttons
+    document.getElementById('garrison-board-ui').style.display = 'none';
+    document.getElementById('barracks-menu').style.display = 'flex';
+}
+
+function viewQuest(questId) {
+    const quest = quests[questId];
+    const pane = document.getElementById('quest-details-pane');
+    
+    let btnText = quest.isAccepted ? 'QUEST ACCEPTED' : 'ACCEPT QUEST';
+    let btnDisabled = quest.isAccepted ? 'disabled' : '';
+    let btnStyle = quest.isAccepted ? 'background: #333; color: #888; border: 1px solid #555;' : '';
+
+    pane.innerHTML = `
+        <h2 style="color:var(--gold); margin-top:0; font-family:'Cinzel'; font-size: 2rem;">${quest.title}</h2>
+        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 6px; border-left: 3px solid #3498db; margin-bottom: 20px;">
+            <p style="margin: 0 0 10px 0; color: #fff;"><strong>Objective:</strong> <span style="color:#3498db;">${quest.objective}</span></p>
+            <p style="margin: 0; color: #fff;"><strong>Reward:</strong> <span style="color:#f1c40f;">${quest.reward}</span></p>
+        </div>
+        <p style="color:#ddd; font-size: 1.1rem; line-height: 1.6;">${quest.description}</p>
+        
+        <button class="btn-main" style="margin-top: 30px; width: 100%; padding: 15px; ${btnStyle}" ${btnDisabled} onclick="acceptQuest('${quest.id}')">
+            ${btnText}
+        </button>
+    `;
+}
+
+function acceptQuest(questId) {
+    if (questId === 'wisp_hunt') {
+        quests.wisp_hunt.isAccepted = true;
+        
+        // Log & Notify
+        if (typeof addLog === 'function') addLog("Accepted Quest: Wisp Hunt!", "#3498db");
+        if (typeof playClickSound === 'function') playClickSound();
+        alert("Quest Accepted: Wisp Hunt!\nThe City Gate is now unlocked.");
+        
+        // Unlock the Gate in Leonia Screen
+        const gateBtn = document.getElementById('loc-gate-btn');
+        if (gateBtn) {
+            gateBtn.disabled = false;
+            gateBtn.classList.add('unlocked');
+            gateBtn.innerText = "City Gate";
+        }
+        
+        // Refresh the UI to show the button as disabled/accepted
+        viewQuest(questId);
+    }
+}
+
+// ============================================================================
+// 🗺️ GATE & EXPLORATION NAVIGATION
+// ============================================================================
+
+function enterGate() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    const gateScreen = document.getElementById('gate-screen');
+    gateScreen.style.display = 'block';
+    
+    // Setting background directly or via CSS variable. Assuming './assets/Gate.png'
+    gateScreen.style.backgroundImage = "url('./assets/Gate.png')"; 
+}
+
+function backToGate() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('gate-screen').style.display = 'block';
+}
+
+function enterEasternPass() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    const epScreen = document.getElementById('eastern-pass-screen');
+    epScreen.style.display = 'block';
+    // Inherits Gate background or uses its own if you have one
+    epScreen.style.backgroundImage = "url('./assets/Gate.png')"; 
+}
+
+function backToEasternPass() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('eastern-pass-screen').style.display = 'block';
+}
+
+function enterEasternMountainPass() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    const empScreen = document.getElementById('eastern-mountain-pass-screen');
+    empScreen.style.display = 'block';
+    empScreen.style.backgroundImage = "url('./assets/Eastern Mountain Pass Watch.png')";
+}
+
+function startPatrol() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Logic to transition into a battle with a Wisp goes here!
+    // For now, an alert will serve as the placeholder.
+    alert("You begin patrolling the Eastern Mountain Pass Watch...\nA wild Wisp appeared! (Battle encounter logic to be implemented)");
+}
