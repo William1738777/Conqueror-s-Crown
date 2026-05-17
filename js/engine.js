@@ -1232,6 +1232,13 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
              if(targetInst.hp <= 0) { 
                  died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
                  if(targetDOM) targetDOM.remove(); 
+
+                 if (targetInst.name === "Wisp") {
+                     let manaGained = Math.floor(Math.random() * 4) + 1; // Rolls 1 to 4
+                     if (targetInst.side === 'PLAYER') pMana += manaGained; else eMana += manaGained;
+                     addLog(`<b>Wisp</b>'s Mana Life activates! Grants +${manaGained} Mana!`, "var(--mana-color)");
+                     if (typeof updateUI === 'function') updateUI();
+                 }
                  
                  if(targetInst.faction === "Arashi" || targetInst.name === "Shadow Stalker") {
                      if(targetInst.side === 'PLAYER') pArashiSouls++; else eArashiSouls++;
