@@ -951,9 +951,9 @@ function startPatrol() {
 }
 
 function startPatrolLoops() {
-    // 1. The Movement Loop (runs every 100ms for smooth CSS translation)
+    // 1. The Movement Loop (Calculated for exactly 2 minutes)
     patrolTimer = setInterval(() => {
-        patrolProgress += 0.5; // Adjust this number to change walking speed
+        patrolProgress += (100 / 1200); // Moves 0.0833% every 100ms
         document.getElementById('player-patrol-marker').style.left = patrolProgress + '%';
         
         // Win Condition: Reached the end of the patrol route
@@ -972,6 +972,9 @@ function startPatrolLoops() {
         encounterChance += 5; // Increase chance by 5%
         
         let roll = Math.random() * 100;
+        // Keeping the F12 log here so you can watch the tension build!
+        console.log(`Searching for Wisps... Needed: <${encounterChance} | Rolled: ${roll.toFixed(2)}`);
+        
         if (roll < encounterChance) {
             triggerEncounter();
         }
