@@ -1036,3 +1036,77 @@ function startWispDuel() {
     document.getElementById('encounter-overlay').style.display = 'none';
     console.log("Setting up Wisp Duel... Need to pull Wisp Deck and transition to game-area.");
 }
+
+// ============================================================================
+// ⚔️ WISP ENCOUNTER DUEL INITIALIZATION
+// ============================================================================
+function startWispDuel() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // 1. Hide Patrol & Encounter UI, Show Battlefield
+    document.getElementById('encounter-overlay').style.display = 'none';
+    document.getElementById('patrol-screen').style.display = 'none';
+    
+    clearInterval(patrolTimer);
+    clearInterval(chanceTimer);
+
+    document.getElementById('game-area').style.display = 'flex';
+    document.getElementById('inventory-btn').style.display = 'none';
+    
+    // 2. Reset Game States
+    isTutorialMode = false; 
+    tutorialLock = false;
+
+    if (typeof showInspector === 'function') showInspector('none');
+    
+    turnCount = 1; currentTurn = 'PLAYER';
+    pMana = 8; eMana = 8; 
+    pCoreHP = 2000; 
+    eCoreHP = 1000; // Wisps are weaker, making for a faster skirmish!
+    pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0;
+    
+    // 3. Clear the board from any previous games
+    document.getElementById('hand').innerHTML = ''; 
+    document.querySelectorAll('.slot .card').forEach(c => c.remove());
+    
+    // 4. Pull the Player's Deck from their Inventory Bag
+    pDeck = [];
+    if(typeof battleDeckConfig !== 'undefined') {
+        Object.values(battleDeckConfig).forEach(tier => {
+            tier.cards.forEach(card => {
+                if(card) {
+                   let template = cardLibrary.find(c => c.name === card.name);
+                   if (template) pDeck.push(JSON.parse(JSON.stringify(template)));
+                }
+            });
+        });
+    }
+    // Fallback just in case their bag is empty
+    if(pDeck.length === 0) pDeck = buildDeck(); 
+    for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
+    
+    // 5. Build the Wisp Enemy Deck (F-Rank Fodder Cards)
+    eDeck = [];
+    const wispDeckNames = ["Cursed Crow", "Cursed Crow", "Zombie", "Zombie", "Skeleton Warrior", "Skeleton Warrior", "Militia"];
+    for (let k = 0; k < 40; k++) {
+        let name = wispDeckNames[k % wispDeckNames.length];
+        let template = cardLibrary.find(c => c.name === name);
+        if(template) eDeck.push(JSON.parse(JSON.stringify(template)));
+    }
+    // Shuffle the Wisp Deck
+    for(let i = eDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [eDeck[i], eDeck[j]] = [eDeck[j], eDeck[i]]; }
+    
+    // 6. Update Visuals & Start Match
+    document.getElementById('p-deck-count').innerText = pDeck.length;
+    document.getElementById('e-deck-count').innerText = eDeck.length;
+    document.getElementById('event-log').innerHTML = '';
+    
+    addLog("ENCOUNTER: WILD WISP! The enemy's core is relatively weak.", "var(--hp-color)");
+    addLog("BATTLE COMMENCED. No combat allowed on Turn 1.", "var(--gold)");
+    
+    updateUI(); 
+    
+    const drawBtn = document.getElementById('draw-cards-btn');
+    drawBtn.style.display = "block";
+    drawBtn.innerText = "DRAW HAND";
+}
