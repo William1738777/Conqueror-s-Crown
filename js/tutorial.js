@@ -922,6 +922,12 @@ function enterEasternMountainPass() {
     empScreen.style.backgroundImage = "url('./assets/Eastern Mountain Pass Watch.png')";
 }
 
+// --- PATROL STATE VARIABLES ---
+let patrolProgress = 0;
+let encounterChance = 5;
+let patrolTimer = null;
+let chanceTimer = null;
+
 function startPatrol() {
     if (typeof playClickSound === 'function') playClickSound();
     
@@ -930,21 +936,100 @@ function startPatrol() {
     const patrolScreen = document.getElementById('patrol-screen');
     patrolScreen.style.display = 'block';
     
-    // Set the background to match where we are patrolling
     patrolScreen.style.backgroundImage = "url('./assets/Eastern Mountain Pass Watch.png')";
     
-    // TODO: Trigger the actual movement and logic loop here!
+    // Reset state and setup marker
+    patrolProgress = 0;
+    encounterChance = 5;
+    const marker = document.getElementById('player-patrol-marker');
+    marker.style.left = '0%';
+    marker.classList.remove('retreating');
+    marker.classList.add('marching');
+
+    // Kick off the movement and RNG loops
+    startPatrolLoops();
 }
 
-// Temporary placeholders so the buttons don't throw errors
-function returnToLeonia() {
-    console.log("Returning to Leonia clicked...");
+function startPatrolLoops() {
+    // 1. The Movement Loop (runs every 100ms for smooth CSS translation)
+    patrolTimer = setInterval(() => {
+        patrolProgress += 0.5; // Adjust this number to change walking speed
+        document.getElementById('player-patrol-marker').style.left = patrolProgress + '%';
+        
+        // Win Condition: Reached the end of the patrol route
+        if (patrolProgress >= 100) {
+            clearInterval(patrolTimer);
+            clearInterval(chanceTimer);
+            
+            // Give a small reward for a safe patrol, then head home
+            if (typeof addLog === 'function') addLog("Patrol completed safely! Area secure.", "#2ecc71");
+            returnToLeonia();
+        }
+    }, 100);
+
+    // 2. The Encounter RNG Loop (runs every 10 seconds)
+    chanceTimer = setInterval(() => {
+        encounterChance += 5; // Increase chance by 5%
+        
+        let roll = Math.random() * 100;
+        if (roll < encounterChance) {
+            triggerEncounter();
+        }
+    }, 10000); 
 }
 
-function startWispDuel() {
-    console.log("Fight clicked! Starting duel...");
+function triggerEncounter() {
+    // Pause the movement and RNG timers
+    clearInterval(patrolTimer);
+    clearInterval(chanceTimer);
+    
+    // Stop the visual marching trail
+    document.getElementById('player-patrol-marker').classList.remove('marching');
+    
+    // Show the flashy overlay
+    document.getElementById('encounter-overlay').style.display = 'flex';
 }
 
 function escapeEncounter() {
-    console.log("Escape clicked! Resuming patrol...");
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Hide the overlay
+    document.getElementById('encounter-overlay').style.display = 'none';
+    
+    // Restart the visual trail and resume the loops
+    document.getElementById('player-patrol-marker').classList.add('marching');
+    startPatrolLoops();
+}
+
+function returnToLeonia() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Stop any forward marching
+    clearInterval(patrolTimer);
+    clearInterval(chanceTimer);
+    
+    const marker = document.getElementById('player-patrol-marker');
+    marker.classList.remove('marching');
+    marker.classList.add('retreating');
+    
+    // Reverse movement loop (moves back to 0% twice as fast)
+    let retreatTimer = setInterval(() => {
+        patrolProgress -= 1.0; 
+        marker.style.left = Math.max(0, patrolProgress) + '%';
+        
+        // Once we hit the start, load the main map
+        if (patrolProgress <= 0) {
+            clearInterval(retreatTimer);
+            marker.classList.remove('retreating');
+            
+            document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+            document.getElementById('leonia-screen').style.display = 'block';
+        }
+    }, 50);
+}
+
+// Keep this as a placeholder for the next phase
+function startWispDuel() {
+    document.getElementById('encounter-overlay').style.display = 'none';
+    console.log("Setting up Wisp Duel... Need to pull Wisp Deck and transition to game-area.");
 }
