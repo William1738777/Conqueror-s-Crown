@@ -405,6 +405,30 @@ body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !import
 .halo-2 { animation: spin3D_Y 5s linear infinite; }
 .halo-3 { animation: spin3D_Z 4s linear infinite; width: 500px; height: 500px; top: -250px; left: -250px; border-width: 2px; }
 
+/* Base styles for the marker */
+#player-patrol-marker {
+    width: 24px;
+    height: 24px;
+    background: #3498db;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 0%; 
+    transform: translate(-50%, -50%);
+    transition: left 0.5s linear, box-shadow 0.3s ease; 
+    z-index: 10;
+    box-shadow: 0 0 15px #3498db, 0 0 30px #3498db;
+}
+
+#player-patrol-marker.marching {
+    box-shadow: -15px 0 10px rgba(52, 152, 219, 0.8), -30px 0 15px rgba(52, 152, 219, 0.4), -45px 0 20px rgba(52, 152, 219, 0.1), 0 0 15px #3498db;
+}
+
+#player-patrol-marker.retreating {
+    box-shadow: 15px 0 10px rgba(52, 152, 219, 0.8), 30px 0 15px rgba(52, 152, 219, 0.4), 45px 0 20px rgba(52, 152, 219, 0.1), 0 0 15px #3498db;
+}
+
 /* --- ANIMATION KEYFRAMES --- */
 @keyframes absorbEnergy { 0% { transform: scale(0.1) rotate(0deg); opacity: 0; box-shadow: 0 0 10px var(--gold); } 50% { opacity: 1; box-shadow: 0 0 50px 20px var(--gold), inset 0 0 40px var(--mana-color); } 90% { transform: scale(0.5) rotate(720deg); box-shadow: 0 0 100px 50px #fff, inset 0 0 80px #fff; opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
 @keyframes poofFlash { 0% { opacity: 0; } 10% { opacity: 1; } 100% { opacity: 0; } }
@@ -426,3 +450,4 @@ body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !import
 @keyframes spin3D_X { 100% { transform: rotateX(360deg) rotateY(45deg); } }
 @keyframes spin3D_Y { 100% { transform: rotateY(360deg) rotateX(45deg); } }
 @keyframes spin3D_Z { 100% { transform: rotateZ(360deg) rotateX(75deg); } }
+
