@@ -30,14 +30,13 @@ async function presentStarterCards() {
         const container = document.createElement('div');
         container.className = 'tutorial-card-presentation';
         
-        // Bulletproof inline CSS to guarantee the cards render front-and-center
         container.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center; gap:20px; z-index:500; flex-wrap:wrap;";
         
-        const starters = ["Squire", "Archer", "Bannerman", "Great Knight", "Mana Core", "Militia"];
+        // FIX: Replaced "Squire" with "Leonian Squire" to match the engine's internal database
+        const starters = ["Leonian Squire", "Archer", "Bannerman", "Great Knight", "Mana Core", "Militia"];
         for (let i=0; i<starters.length; i++) {
             let key = starters[i];
 
-            // Safety fallback: If ASSET_LINKS is missing a key, it defaults to an empty string instead of crashing
             let link = ASSET_LINKS[key] || ""; 
             const data = getCardTemplate(key, link);
             
@@ -84,11 +83,12 @@ function startTutorialDuel() {
         eCoreHP = 1; 
         document.getElementById('enemy-core-hp').innerText = `BEN'S CORE: 1 | MANA: 8`;
         
-        let playerHand = ["Squire", "Archer", "Bannerman", "Mana Core", "Great Knight", "Militia"];
+        // FIX: Ensures the exact ID "p_LeonianSquire" is generated
+        let playerHand = ["Leonian Squire", "Archer", "Bannerman", "Mana Core", "Great Knight", "Militia"];
         playerHand.forEach(name => {
-            let link = ASSET_LINKS[name] || ""; // Fallback added here too
+            let link = ASSET_LINKS[name] || ""; 
             const data = getCardTemplate(name, link);
-            const cardId = 'p_' + name.replace(/\s+/g, '');
+            const cardId = 'p_' + name.replace(/\s+/g, ''); 
             cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: 'PLAYER', turnPlaced: 0, tauntedBy: null, isRevealed: false };
             document.getElementById('hand').appendChild(createCardDOM(cardId, cardInstances[cardId], false));
         });
@@ -111,45 +111,6 @@ function startTutorialDuel() {
     }
 }
 
-function setTutMessage(msg) {
-    document.getElementById('tut-overlay-msg').innerHTML = msg;
-}
-
-function clearTutHighlights() {
-    document.querySelectorAll('.tut-highlight-glow, .tut-disabled').forEach(el => {
-        el.classList.remove('tut-highlight-glow', 'tut-disabled');
-    });
-    tutorialLock = false;
-}
-
-function lockAllExcept(allowedIds, allowEndTurn = false, allowExec = false) {
-    tutorialLock = true;
-    document.querySelectorAll('.card, .slot, .btn-main').forEach(el => {
-        el.classList.add('tut-disabled');
-    });
-    allowedIds.forEach(id => {
-        let el = document.getElementById(id);
-        if(el) {
-            el.classList.remove('tut-disabled');
-            el.classList.add('tut-highlight-glow');
-        }
-    });
-    
-    let endBtn = document.getElementById('end-turn-btn');
-    if (allowEndTurn) { endBtn.classList.remove('tut-disabled'); endBtn.classList.add('tut-highlight-glow'); }
-    else { endBtn.classList.add('tut-disabled'); endBtn.classList.remove('tut-highlight-glow'); }
-    
-    let execBtn = document.getElementById('exec-btn');
-    if (allowExec) { execBtn.classList.remove('tut-disabled'); execBtn.classList.add('tut-highlight-glow'); }
-    else { execBtn.classList.add('tut-disabled'); execBtn.classList.remove('tut-highlight-glow'); }
-    
-    let cancelBtn = document.getElementById('cancel-btn');
-    if (cancelBtn) cancelBtn.classList.remove('tut-disabled');
-    
-    let drawBtn = document.getElementById('draw-cards-btn');
-    if(drawBtn) drawBtn.style.display = 'none'; 
-}
-
 function progressTutorial() {
     if (!isTutorialMode) return;
     clearTutHighlights();
@@ -157,7 +118,8 @@ function progressTutorial() {
     switch(tutorialStep) {
         case 1:
             setTutMessage("<b>BEN:</b> Welcome to the board. First, let's establish a presence. Drag your <b>Squire</b> to the <b>Frontline Center</b>.");
-            lockAllExcept(['p_Squire', 'p-front-center']);
+            // FIX: Unlocks the exact ID the engine expects
+            lockAllExcept(['p_LeonianSquire', 'p-front-center']);
             break;
         case 2:
             setTutMessage("<b>BEN:</b> Now drag your <b>Mana Core</b> to the purple <b>Ability Slot</b> in the backline.");
@@ -176,7 +138,8 @@ function progressTutorial() {
             break;
         case 6:
             setTutMessage("<b>BEN:</b> Now click your <b>Squire</b> and queue a <b>[SHORTSWORD STRIKE]</b> on my <b>Militia</b>.");
-            lockAllExcept(['p_Squire', 'e_Militia_0']);
+            // FIX: Unlocks the exact ID the engine expects
+            lockAllExcept(['p_LeonianSquire', 'e_Militia_0']);
             break;
         case 7:
             setTutMessage("<b>BEN:</b> Good. Combat doesn't happen instantly. You build a queue, then launch it all at once. Click <b>EXECUTE PENDING</b> to trigger your actions!");
@@ -227,7 +190,6 @@ function progressTutorial() {
             break;
     }
 }
-
 // --- ADVENTURER'S LICENSE LORE HANDOFF ---
 function triggerLicenseQuest() {
     isTutorialMode = false;
