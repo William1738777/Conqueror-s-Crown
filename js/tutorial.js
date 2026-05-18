@@ -26,89 +26,115 @@ function advanceDialogue() {
 }
 
 async function presentStarterCards() {
-    try {
-        const container = document.createElement('div');
-        container.className = 'tutorial-card-presentation';
-        
-        container.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center; gap:20px; z-index:500; flex-wrap:wrap;";
-        
-        // FIX: Replaced "Squire" with "Leonian Squire" to match the engine's internal database
-        const starters = ["Leonian Squire", "Archer", "Bannerman", "Great Knight", "Mana Core", "Militia"];
-        for (let i=0; i<starters.length; i++) {
-            let key = starters[i];
+    const container = document.createElement('div');
+    container.className = 'tutorial-card-presentation';
+    
+    const starters = ["Squire", "Archer", "Bannerman", "Great Knight", "Mana Core", "Militia"];
+    for (let i=0; i<starters.length; i++) {
+        let key = starters[i];
+        if (key === "Mana Core") key = "Mana Core";
+        if (key === "Great Knight") key = "Great Knight";
 
-            let link = ASSET_LINKS[key] || ""; 
-            const data = getCardTemplate(key, link);
-            
-            const cardDOM = createCardDOM('tut_' + i, data, true); 
-            cardDOM.classList.add('tut-card');
-            cardDOM.style.animationDelay = `${i * 0.3}s`;
-            
-            let imgContainer = cardDOM.querySelector('.card-img-container');
-            if(imgContainer && data.img) {
-                imgContainer.style.backgroundImage = `url('${data.img.replace(/"/g, '&quot;').replace(/'/g, '%27')}')`;
-            }
-            
-            container.appendChild(cardDOM);
+        const data = getCardTemplate(key, ASSET_LINKS[key]);
+        const cardDOM = createCardDOM('tut_' + i, data, true); 
+        
+        cardDOM.classList.add('tut-card');
+        cardDOM.style.animationDelay = `${i * 0.3}s`;
+        
+        let imgContainer = cardDOM.querySelector('.card-img-container');
+        if(imgContainer) {
+            imgContainer.style.backgroundImage = `url('${data.img.replace(/"/g, '&quot;').replace(/'/g, '%27')}')`;
         }
-        document.body.appendChild(container);
-
-        const msgBox = document.createElement('div');
-        msgBox.style.cssText = `position:fixed; top:20%; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.9); border:2px solid var(--gold); padding:20px; color:white; z-index:600; text-align:center; border-radius:8px; font-size:1.2rem; opacity:0; transition:1s;`;
-        msgBox.innerHTML = `<b>BEN:</b> Here. Take these. Let's see what you can do with them.<br><br><button id="start-tut-btn" style="padding:10px 20px; margin-top:15px; background:var(--gold); border:none; cursor:pointer; font-weight:bold; color:black;">ENTER BATTLEFIELD</button>`;
-        document.body.appendChild(msgBox);
         
-        setTimeout(() => { msgBox.style.opacity = 1; }, 2000);
-
-        document.getElementById('start-tut-btn').addEventListener('click', () => {
-            container.remove();
-            msgBox.remove();
-            document.getElementById('tavern-screen').style.display = 'none';
-            startTutorialDuel();
-        });
-    } catch (err) {
-        console.error("Critical Error rendering starter cards:", err);
+        container.appendChild(cardDOM);
     }
+    document.body.appendChild(container);
+
+    const msgBox = document.createElement('div');
+    msgBox.style.cssText = `position:fixed; top:20%; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.9); border:2px solid var(--gold); padding:20px; color:white; z-index:600; text-align:center; border-radius:8px; font-size:1.2rem; opacity:0; transition:1s;`;
+    msgBox.innerHTML = `<b>BEN:</b> Here. Take these. Let's see what you can do with them.<br><br><button id="start-tut-btn" style="padding:10px 20px; margin-top:15px; background:var(--gold); border:none; cursor:pointer; font-weight:bold;">ENTER BATTLEFIELD</button>`;
+    document.body.appendChild(msgBox);
+    
+    setTimeout(() => { msgBox.style.opacity = 1; }, 2000);
+
+    document.getElementById('start-tut-btn').addEventListener('click', () => {
+        container.remove();
+        msgBox.remove();
+        document.getElementById('tavern-screen').style.display = 'none';
+        startTutorialDuel();
+    });
 }
 
 function startTutorialDuel() {
-    try {
-        document.getElementById('game-area').style.display = 'flex';
-        document.getElementById('tutorial-exit-btn').style.display = 'block';
-        
-        isTutorialMode = true;
-        tutorialStep = 1;
-        pMana = 8;
-        eMana = 8;
-        eCoreHP = 1; 
-        document.getElementById('enemy-core-hp').innerText = `BEN'S CORE: 1 | MANA: 8`;
-        
-        // FIX: Ensures the exact ID "p_LeonianSquire" is generated
-        let playerHand = ["Leonian Squire", "Archer", "Bannerman", "Mana Core", "Great Knight", "Militia"];
-        playerHand.forEach(name => {
-            let link = ASSET_LINKS[name] || ""; 
-            const data = getCardTemplate(name, link);
-            const cardId = 'p_' + name.replace(/\s+/g, ''); 
-            cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: 'PLAYER', turnPlaced: 0, tauntedBy: null, isRevealed: false };
-            document.getElementById('hand').appendChild(createCardDOM(cardId, cardInstances[cardId], false));
-        });
+    document.getElementById('game-area').style.display = 'flex';
+    document.getElementById('tutorial-exit-btn').style.display = 'block';
+    
+    isTutorialMode = true;
+    tutorialStep = 1;
+    pMana = 8;
+    eMana = 8;
+    eCoreHP = 1; 
+    document.getElementById('enemy-core-hp').innerText = `BEN'S CORE: 1 | MANA: 8`;
+    
+    let playerHand = ["Squire", "Archer", "Bannerman", "Mana Core", "Great Knight", "Militia"];
+    playerHand.forEach(name => {
+        const data = getCardTemplate(name, ASSET_LINKS[name]);
+        const cardId = 'p_' + name.replace(/\s+/g, '');
+        cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: 'PLAYER', turnPlaced: 0, tauntedBy: null, isRevealed: false };
+        document.getElementById('hand').appendChild(createCardDOM(cardId, cardInstances[cardId], false));
+    });
 
-        let enemyHand = ["Militia", "Archer"];
-        enemyHand.forEach((name, idx) => {
-            let link = ASSET_LINKS[name] || "";
-            const data = getCardTemplate(name, link);
-            if (name === "Archer") { data.hp = 150; data.maxHp = 150; }
-            const cardId = 'e_' + name.replace(/\s+/g, '') + '_' + idx;
-            cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: 'ENEMY', turnPlaced: 0, tauntedBy: null, isRevealed: false };
-            eHandData.push(cardId);
-        });
+    let enemyHand = ["Militia", "Archer"];
+    enemyHand.forEach((name, idx) => {
+        const data = getCardTemplate(name, ASSET_LINKS[name]);
+        if (name === "Archer") { data.hp = 150; data.maxHp = 150; }
+        const cardId = 'e_' + name.replace(/\s+/g, '') + '_' + idx;
+        cardInstances[cardId] = { ...data, id: cardId, exhausted: false, queued: false, side: 'ENEMY', turnPlaced: 0, tauntedBy: null, isRevealed: false };
+        eHandData.push(cardId);
+    });
 
-        document.getElementById('tut-overlay-msg').style.display = 'block';
-        if (typeof updateUI === "function") updateUI();
-        if (typeof progressTutorial === "function") progressTutorial();
-    } catch (err) {
-        console.error("Critical Error starting tutorial duel:", err);
-    }
+    document.getElementById('tut-overlay-msg').style.display = 'block';
+    if (typeof updateUI === "function") updateUI();
+    progressTutorial();
+}
+
+function setTutMessage(msg) {
+    document.getElementById('tut-overlay-msg').innerHTML = msg;
+}
+
+function clearTutHighlights() {
+    document.querySelectorAll('.tut-highlight-glow, .tut-disabled').forEach(el => {
+        el.classList.remove('tut-highlight-glow', 'tut-disabled');
+    });
+    tutorialLock = false;
+}
+
+function lockAllExcept(allowedIds, allowEndTurn = false, allowExec = false) {
+    tutorialLock = true;
+    document.querySelectorAll('.card, .slot, .btn-main').forEach(el => {
+        el.classList.add('tut-disabled');
+    });
+    allowedIds.forEach(id => {
+        let el = document.getElementById(id);
+        if(el) {
+            el.classList.remove('tut-disabled');
+            el.classList.add('tut-highlight-glow');
+        }
+    });
+    
+    let endBtn = document.getElementById('end-turn-btn');
+    if (allowEndTurn) { endBtn.classList.remove('tut-disabled'); endBtn.classList.add('tut-highlight-glow'); }
+    else { endBtn.classList.add('tut-disabled'); endBtn.classList.remove('tut-highlight-glow'); }
+    
+    let execBtn = document.getElementById('exec-btn');
+    if (allowExec) { execBtn.classList.remove('tut-disabled'); execBtn.classList.add('tut-highlight-glow'); }
+    else { execBtn.classList.add('tut-disabled'); execBtn.classList.remove('tut-highlight-glow'); }
+    
+    let cancelBtn = document.getElementById('cancel-btn');
+    if (cancelBtn) cancelBtn.classList.remove('tut-disabled');
+    
+    let drawBtn = document.getElementById('draw-cards-btn');
+    if(drawBtn) drawBtn.style.display = 'none'; 
 }
 
 function progressTutorial() {
@@ -118,8 +144,7 @@ function progressTutorial() {
     switch(tutorialStep) {
         case 1:
             setTutMessage("<b>BEN:</b> Welcome to the board. First, let's establish a presence. Drag your <b>Squire</b> to the <b>Frontline Center</b>.");
-            // FIX: Unlocks the exact ID the engine expects
-            lockAllExcept(['p_LeonianSquire', 'p-front-center']);
+            lockAllExcept(['p_Squire', 'p-front-center']);
             break;
         case 2:
             setTutMessage("<b>BEN:</b> Now drag your <b>Mana Core</b> to the purple <b>Ability Slot</b> in the backline.");
@@ -138,8 +163,7 @@ function progressTutorial() {
             break;
         case 6:
             setTutMessage("<b>BEN:</b> Now click your <b>Squire</b> and queue a <b>[SHORTSWORD STRIKE]</b> on my <b>Militia</b>.");
-            // FIX: Unlocks the exact ID the engine expects
-            lockAllExcept(['p_LeonianSquire', 'e_Militia_0']);
+            lockAllExcept(['p_Squire', 'e_Militia_0']);
             break;
         case 7:
             setTutMessage("<b>BEN:</b> Good. Combat doesn't happen instantly. You build a queue, then launch it all at once. Click <b>EXECUTE PENDING</b> to trigger your actions!");
@@ -190,6 +214,7 @@ function progressTutorial() {
             break;
     }
 }
+
 // --- ADVENTURER'S LICENSE LORE HANDOFF ---
 function triggerLicenseQuest() {
     isTutorialMode = false;
@@ -897,231 +922,29 @@ function enterEasternMountainPass() {
     empScreen.style.backgroundImage = "url('./assets/Eastern Mountain Pass Watch.png')";
 }
 
-// ============================================================================
-// 🚶‍♂️ PATROL ENGINE & ENCOUNTER SYSTEM
-// ============================================================================
-
-let patrolProgress = 0; // Tracks percentage across the bar (0 to 100)
-let encounterChance = 5; // Starts at 5%
-let patrolMovementTimer = null;
-let encounterRollTimer = null;
-let encounterIncreaseTimer = null;
-let isReturning = false;
-let isPaused = false;
-
 function startPatrol() {
     if (typeof playClickSound === 'function') playClickSound();
     
-    // 1. Setup UI
+    // Hide all screens and show the new Patrol Screen
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     const patrolScreen = document.getElementById('patrol-screen');
     patrolScreen.style.display = 'block';
+    
+    // Set the background to match where we are patrolling
     patrolScreen.style.backgroundImage = "url('./assets/Eastern Mountain Pass Watch.png')";
     
-    // 2. Reset Patrol Variables
-    patrolProgress = 0;
-    encounterChance = 5;
-    isReturning = false;
-    isPaused = false;
-    
-    document.getElementById('player-patrol-marker').style.left = '0%';
-    document.getElementById('encounter-overlay').style.display = 'none';
-    document.getElementById('return-leonia-btn').disabled = false;
-    document.getElementById('return-leonia-btn').innerText = "Return to Leonia";
-
-    // 3. Kick off the loops!
-    startPatrolLoops();
+    // TODO: Trigger the actual movement and logic loop here!
 }
 
-function startPatrolLoops() {
-    const marker = document.getElementById('player-patrol-marker');
-    
-    // --- 1. MOVEMENT LOOP (Runs every 200ms for smooth tracking) ---
-    clearInterval(patrolMovementTimer);
-    patrolMovementTimer = setInterval(() => {
-        if (isPaused) return; // Halt movement if an encounter pops up
-
-        if (isReturning) {
-            // Move backwards towards the start
-            patrolProgress -= 1; 
-            if (patrolProgress <= 0) {
-                patrolProgress = 0;
-                stopPatrolLoops();
-                // Successfully reached the beginning - transport to town!
-                document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-                document.getElementById('leonia-screen').style.display = 'block';
-            }
-        } else {
-            // Move forward
-            patrolProgress += 0.5; 
-            if (patrolProgress >= 100) {
-                patrolProgress = 0; // Loop back to the start if they reach the end without returning
-            }
-        }
-        
-        // Apply position and spawn a trail particle
-        if (marker) {
-            marker.style.left = patrolProgress + '%';
-            spawnTrailParticle();
-        }
-    }, 200);
-
-    // --- 2. ENCOUNTER ROLL LOOP (Rolls the dice every 2 seconds) ---
-    clearInterval(encounterRollTimer);
-    encounterRollTimer = setInterval(() => {
-        if (isPaused || isReturning) return; // Don't encounter while returning or already in one
-        
-        let roll = Math.random() * 100; // Roll 0 to 100
-        if (roll <= encounterChance) {
-            triggerEncounter();
-        }
-    }, 2000);
-
-    // --- 3. ESCALATION LOOP (Increases chance by 5% every 10 seconds) ---
-    clearInterval(encounterIncreaseTimer);
-    encounterIncreaseTimer = setInterval(() => {
-        if (isPaused || isReturning) return;
-        
-        encounterChance += 5;
-        if (encounterChance > 100) encounterChance = 100; // Cap at 100%
-        console.log(`Encounter chance increased to: ${encounterChance}%`);
-    }, 10000);
-}
-
-function stopPatrolLoops() {
-    clearInterval(patrolMovementTimer);
-    clearInterval(encounterRollTimer);
-    clearInterval(encounterIncreaseTimer);
-}
-
-function spawnTrailParticle() {
-    const trackLine = document.getElementById('player-patrol-marker').parentElement;
-    
-    const particle = document.createElement('div');
-    // CSS to make it look like a fading echo of our character
-    particle.style.cssText = `
-        position: absolute;
-        top: 50%;
-        left: ${patrolProgress}%;
-        width: 16px;
-        height: 16px;
-        background: #3498db;
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        opacity: 0.5;
-        transition: opacity 1s linear, transform 1s linear;
-        pointer-events: none;
-        z-index: 9;
-    `;
-    trackLine.appendChild(particle);
-    
-    // Wait a tiny bit, then trigger the fade and shrink animation
-    setTimeout(() => {
-        particle.style.opacity = '0';
-        particle.style.transform = 'translate(-50%, -50%) scale(0.2)';
-    }, 50);
-    
-    // Clean up DOM after animation finishes
-    setTimeout(() => {
-        particle.remove();
-    }, 1050);
-}
-
-// --- ENCOUNTER ACTIONS ---
-
-function triggerEncounter() {
-    isPaused = true; // Freezes the movement and timers
-    document.getElementById('encounter-overlay').style.display = 'flex';
-    
-    // Play a dramatic alert sound if available
-    if (typeof playSound === 'function' && typeof beamAudioUrl !== 'undefined') {
-        playSound(beamAudioUrl); 
-    }
-}
-
-function escapeEncounter() {
-    if (typeof playClickSound === 'function') playClickSound();
-    document.getElementById('encounter-overlay').style.display = 'none';
-    
-    // Reset encounter chance to 5% so they don't immediately get hit again
-    encounterChance = 5; 
-    isPaused = false; // Unfreeze movement
-}
-
+// Temporary placeholders so the buttons don't throw errors
 function returnToLeonia() {
-    if (typeof playClickSound === 'function') playClickSound();
-    
-    // Change state to return mode
-    isReturning = true;
-    isPaused = false; 
-    
-    // Update button text and disable it to prevent spamming
-    const btn = document.getElementById('return-leonia-btn');
-    btn.disabled = true;
-    btn.innerText = "Heading back...";
+    console.log("Returning to Leonia clicked...");
 }
 
 function startWispDuel() {
-    if (typeof playClickSound === 'function') playClickSound();
-    
-    // 1. Hide Patrol & Overlay, Show Game Area
-    document.getElementById('encounter-overlay').style.display = 'none';
-    document.getElementById('patrol-screen').style.display = 'none';
-    document.getElementById('game-area').style.display = 'flex';
-    document.getElementById('inventory-btn').style.display = 'none';
-    
-    stopPatrolLoops();
+    console.log("Fight clicked! Starting duel...");
+}
 
-    // 2. Reset Battle Variables
-    isTutorialMode = false;
-    tutorialLock = false;
-    if (typeof showInspector === 'function') showInspector('none');
-    
-    turnCount = 1; 
-    currentTurn = 'PLAYER';
-    pMana = 8; eMana = 8; 
-    pCoreHP = 2000; eCoreHP = 1500; // Wisps have slightly weaker cores
-    pQueue = []; eQueue = []; 
-    isExecuting = false; globalTargetedThisTurn = []; 
-    pArashiSouls = 0; pSquiresFallen = 0;
-    
-    document.getElementById('hand').innerHTML = ''; 
-    document.querySelectorAll('.slot .card').forEach(c => c.remove());
-    
-    // 3. Load Player Deck (From Inventory)
-    pDeck = [];
-    if(typeof battleDeckConfig !== 'undefined') {
-        Object.values(battleDeckConfig).forEach(tier => {
-            tier.cards.forEach(card => {
-                if(card) {
-                   let template = cardLibrary.find(c => c.name === card.name);
-                   if (template) pDeck.push(JSON.parse(JSON.stringify(template)));
-                }
-            });
-        });
-    }
-    if(pDeck.length === 0 && typeof buildDeck === 'function') pDeck = buildDeck(); // Fallback
-    
-    // Shuffle Player Deck
-    for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
-    
-    // 4. Load Enemy Deck (Wisp Swarm!)
-    eDeck = [];
-    const wispDeckNames = ["Wisp", "Wisp", "Wisp", "Wisp", "Wisp", "Wisp", "Wisp"];
-    wispDeckNames.forEach(name => {
-        let template = cardLibrary.find(c => c.name === name);
-        if(template) eDeck.push(JSON.parse(JSON.stringify(template)));
-    });
-    
-    // 5. Update UI & Start
-    document.getElementById('p-deck-count').innerText = pDeck.length;
-    document.getElementById('e-deck-count').innerText = eDeck.length;
-    document.getElementById('event-log').innerHTML = '';
-    
-    addLog("AMBUSHED BY WISPS! No combat allowed on Turn 1.", "var(--gold)");
-    if (typeof updateUI === 'function') updateUI(); 
-    
-    const drawBtn = document.getElementById('draw-cards-btn');
-    drawBtn.style.display = "block";
-    drawBtn.innerText = "DRAW HAND";
+function escapeEncounter() {
+    console.log("Escape clicked! Resuming patrol...");
 }
