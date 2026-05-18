@@ -785,54 +785,6 @@ window.queueAction = function(actorId, skillName, cost, isCore) {
             if(tInst && tInst.type === 'unit' && !tInst.exhausted && tInst.turnPlaced < turnCount) c.classList.add('target-buff-glow');
         });
     } 
-    else if (action.skillName === "Mana Beam") {
-            let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
-            let allLanes = ['left', 'center', 'right'];
-            allLanes.sort(() => 0.5 - Math.random());
-            let allowedLanes = [allLanes[0], allLanes[1]]; // Restricts to max 2 separate lanes
-            
-            if(actorDOM) { actorDOM.style.transition = "transform 0.4s ease"; actorDOM.style.transform = "translateY(-20px) scale(1.1)"; await new Promise(r => setTimeout(r, 400)); }
-            
-            for(let i=0; i<3; i++) {
-                let targetLane = allowedLanes[Math.floor(Math.random() * allowedLanes.length)];
-                let fSlotId = defSide === 'PLAYER' ? 'p-front-' + targetLane : 'e-front-' + targetLane;
-                let bSlotId = defSide === 'PLAYER' ? 'p-back-' + targetLane : 'e-back-' + targetLane;
-                
-                let targetId = 'CORE'; // Defaults to hitting the core if the lane is empty!
-                let fSlot = document.getElementById(fSlotId);
-                let bSlot = document.getElementById(bSlotId);
-                
-                if (fSlot && fSlot.querySelector('.card') && cardInstances[fSlot.querySelector('.card').id].hp > 0) {
-                    targetId = fSlot.querySelector('.card').id;
-                } else if (bSlot && bSlot.querySelector('.card') && cardInstances[bSlot.querySelector('.card').id].hp > 0) {
-                    targetId = bSlot.querySelector('.card').id;
-                }
-                
-                let tDOM = targetId === 'CORE' ? document.getElementById(defSide === 'ENEMY' ? 'e-core-target' : 'p-core-target') : document.getElementById(targetId);
-                
-                if (typeof beamAudioUrl !== 'undefined' && beamAudioUrl) playSound(beamAudioUrl); 
-                
-                // CALL THE NEW BLUE BEAM ANIMATION HERE:
-                if (typeof triggerBlueBeam === 'function') await triggerBlueBeam(actorDOM, tDOM);
-                
-                let dmg = Math.floor(Math.random() * (900 - 300 + 1)) + 300;
-                await applyDamage(actor, targetId, dmg, "Passive"); // Passing "Passive" prevents physical lunge animation
-                await new Promise(r => setTimeout(r, 250));
-            }
-            if(actorDOM) { actorDOM.style.transform = "scale(1) translateY(0)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
-        }
-                
-                let tDOM = targetId === 'CORE' ? document.getElementById(defSide === 'ENEMY' ? 'e-core-target' : 'p-core-target') : document.getElementById(targetId);
-                
-                if (typeof beamAudioUrl !== 'undefined' && beamAudioUrl) playSound(beamAudioUrl); 
-                if (typeof triggerLuxBeam === 'function') await triggerLuxBeam(actorDOM, tDOM);
-                
-                let dmg = Math.floor(Math.random() * (900 - 300 + 1)) + 300;
-                await applyDamage(actor, targetId, dmg, "Passive"); // Passing "Passive" prevents physical lunge animation
-                await new Promise(r => setTimeout(r, 250));
-            }
-            if(actorDOM) { actorDOM.style.transform = "scale(1) translateY(0)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
-        }
     else if (skillName === "Punishment of the Blessed") {
         if(actor.blessings < 7) { pMana += cost; actor.queued = false; return addLog("Needs 7 Blessings!", "red"); }
         isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
@@ -866,10 +818,6 @@ window.queueAction = function(actorId, skillName, cost, isCore) {
         validIds.forEach(tId => document.getElementById(tId).classList.add('target-glow'));
         
         if (validIds.length === 0) { addLog("No enemies to target.", "#e74c3c"); isTargeting = false; actor.queued = false; pMana += cost; pendingSkill = null; }
-    }
-    else if (skillName === "Mana Beam") {
-        let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'RANDOM_LANES' };
-        pQueue.push(action); addLog(`Queued [${skillName}] across the board.`, "#3498db"); systemDetector("QUEUE", { action });
     }
     else if (skillName === "Shield of Hope") {
         let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'ALLIES_FRONT' };
@@ -1084,51 +1032,6 @@ async function triggerLuxBeam(actorDOM, targetDOM) {
     beamContainer.remove();
 }
 
-async function triggerBlueBeam(actorDOM, targetDOM) {
-    if(!actorDOM || !targetDOM) return;
-
-    const tRect = targetDOM.getBoundingClientRect();
-    const beamX = tRect.left + (tRect.width / 2);
-
-    const beamContainer = document.createElement('div');
-    beamContainer.className = 'lux-beam-container';
-    beamContainer.style.left = (beamX - 60) + 'px';
-
-    const core = document.createElement('div');
-    core.className = 'lux-beam-core';
-    // Force the core to be white/light blue with a cyan glow
-    core.style.background = '#e0f7fa'; 
-    core.style.boxShadow = '0 0 15px #00d2ff, 0 0 30px #00d2ff';
-
-    const outer = document.createElement('div');
-    outer.className = 'lux-beam-outer';
-    // Force the outer aura to be a massive blue glow
-    outer.style.background = 'rgba(0, 210, 255, 0.6)'; 
-    outer.style.boxShadow = '0 0 40px #00d2ff, 0 0 80px #3498db';
-
-    beamContainer.appendChild(outer);
-    beamContainer.appendChild(core);
-    document.body.appendChild(beamContainer);
-
-    beamContainer.style.transition = "opacity 0.2s ease, transform 0.2s ease";
-    beamContainer.style.opacity = "0.5";
-    beamContainer.style.transform = "scaleX(0.1)";
-    await new Promise(r => setTimeout(r, 200));
-
-    if (typeof abilityActivatedUrl !== 'undefined' && abilityActivatedUrl) playSound(abilityActivatedUrl);
-    document.body.classList.add('shake-anim');
-    beamContainer.style.transition = "opacity 0.1s ease, transform 0.1s ease";
-    beamContainer.style.opacity = "1";
-    beamContainer.style.transform = "scaleX(1)";
-    await new Promise(r => setTimeout(r, 400));
-
-    document.body.classList.remove('shake-anim');
-    beamContainer.style.transition = "opacity 0.3s ease";
-    beamContainer.style.opacity = "0";
-    await new Promise(r => setTimeout(r, 300));
-    beamContainer.remove();
-}
-
 async function triggerSanChain(actor, defSide) {
     let activeCardsOnBoard = Object.values(cardInstances).filter(c => {
         let el = document.getElementById(c.id);
@@ -1291,13 +1194,6 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
              if(targetInst.hp <= 0) { 
                  died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
                  if(targetDOM) targetDOM.remove(); 
-
-                 if (targetInst.name === "Wisp") {
-                     let manaGained = Math.floor(Math.random() * 4) + 1; // Rolls 1 to 4
-                     if (targetInst.side === 'PLAYER') pMana += manaGained; else eMana += manaGained;
-                     addLog(`<b>Wisp</b>'s Mana Life activates! Grants +${manaGained} Mana!`, "var(--mana-color)");
-                     if (typeof updateUI === 'function') updateUI();
-                 }
                  
                  if(targetInst.faction === "Arashi" || targetInst.name === "Shadow Stalker") {
                      if(targetInst.side === 'PLAYER') pArashiSouls++; else eArashiSouls++;
@@ -1599,7 +1495,6 @@ async function processQueue(sideProcessing, queueArr) {
         }
         else {
             let dmg = actor.atk || 100; let secondDmg = 0;
-            if (action.skillName === "Force of Nature") dmg = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
             if (action.skillName === "SHORTSWORD STRIKE") dmg = isTutorialMode ? Math.floor(Math.random() * (120 - 80 + 1)) + 80 : Math.floor(Math.random() * (120 - 80 + 1)) + 80;
             if (action.skillName === "HEAVY STRIKE") dmg = Math.floor(Math.random() * (250 - 150 + 1)) + 150;
             if (action.skillName === "BANNER STRIKE") dmg = 50;
