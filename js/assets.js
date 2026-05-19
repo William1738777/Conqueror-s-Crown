@@ -93,6 +93,7 @@ const ASSET_LINKS = {
     "Jaden": "./assets/Jaden.png",
     "Skeleton Warrior": "./assets/Skeleton%20Warrior.png",
     "Cursed Crow": "./assets/Cursed Crow.png",
+    "Wisp": "./assets/Wisp.png",
     "Zombie": "./assets/Zombie.png"
 };
 
@@ -193,6 +194,20 @@ function getCardTemplate(fileName, dataUrl) {
         };
     }
     // --- EXISTING CARDS ---
+    else if (cleanName === 'wisp') {
+        return { 
+            isPlayable: true, type: 'unit', name: "Wisp", title: "Forest Creature", 
+            powerLevel: 4, summonCost: 3, faction: "Neutral", race: "Forest Creature", 
+            hp: 750, maxHp: 750, atk: 0, img: dataUrl, marks: 0, queued: false, isRevealed: false,
+            skills: [ 
+                { name: "Force of Nature", manaCost: 1, desc: "Inflicts 150-300 damage to a target." },
+                { name: "Mana Beam", manaCost: 5, desc: "Casts 3 beams simultaneously, hitting up to 2 separate lanes. Inflicts 50-900 damage per beam." } 
+            ], 
+            passives: [ 
+                { name: "Mana Life", desc: "If this unit dies, grants the owner 1-4 Mana." } 
+            ] 
+        };
+    }
     else if (cleanName.includes('zeek')) {
         return {
             isPlayable: true, type: 'unit', name: "Zeek", title: "Captain of the Rangers (Level 5)", powerLevel: 5, summonCost: 4, faction: "Westlands", race: "Human", hp: 800, maxHp: 800, atk: 300, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
