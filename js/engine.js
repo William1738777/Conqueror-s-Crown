@@ -1505,8 +1505,59 @@ async function processQueue(sideProcessing, queueArr) {
             }
             if(actorDOM) { actorDOM.style.transform = "scale(1)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
         }
+        if(actorDOM) { actorDOM.style.transform = "scale(1)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
+        }
+        else if (action.skillName === "Mana Beam") {
+            let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+            let activeEnemies = Array.from(document.querySelectorAll(`.slot[data-side="${defSide}"] .card`)).map(c => c.id).filter(id => cardInstances[id].hp > 0 && !(cardInstances[id].ambushTurns > 0 && cardInstances[id].ambushTurns >= turnCount));
+            
+            let lanes = { 'left': [], 'center': [], 'right': [] };
+            activeEnemies.forEach(id => {
+                let el = document.getElementById(id);
+                if (el && el.parentElement && el.parentElement.id) {
+                    if (el.parentElement.id.includes('left')) lanes['left'].push(id);
+                    else if (el.parentElement.id.includes('center')) lanes['center'].push(id);
+                    else if (el.parentElement.id.includes('right')) lanes['right'].push(id);
+                }
+            });
+
+            let activeLanes = Object.keys(lanes).filter(l => lanes[l].length > 0);
+            let chosenLanes = [];
+            while(chosenLanes.length < 2 && activeLanes.length > 0) {
+                let idx = Math.floor(Math.random() * activeLanes.length);
+                chosenLanes.push(activeLanes.splice(idx, 1)[0]);
+            }
+            
+            let targetsToHit = [];
+            if (chosenLanes.length === 0) {
+                targetsToHit = ['CORE', 'CORE', 'CORE'];
+            } else {
+                for (let i = 0; i < 3; i++) {
+                    let lane = chosenLanes[Math.floor(Math.random() * chosenLanes.length)];
+                    let laneTargets = lanes[lane];
+                    targetsToHit.push(laneTargets[Math.floor(Math.random() * laneTargets.length)]);
+                }
+            }
+
+            if(actorDOM) { actorDOM.style.transition = "transform 0.4s ease"; actorDOM.style.transform = "translateY(-20px) scale(1.1)"; await new Promise(r => setTimeout(r, 400)); }
+
+            for(let i=0; i < targetsToHit.length; i++) {
+                let tId = targetsToHit[i];
+                let actualTargetId = tId === 'CORE' ? (defSide === 'ENEMY' ? 'e-core-target' : 'p-core-target') : tId;
+                let tDOM = document.getElementById(actualTargetId);
+                let dmg = Math.floor(Math.random() * (900 - 50 + 1)) + 50;
+                
+                if (actorDOM && tDOM) {
+                    if (typeof createBlueBeamFx === 'function') createBlueBeamFx(actorDOM, tId === 'CORE' ? tDOM.parentElement : tDOM);
+                    await applyDamage(actor, tId, dmg, "Mana Beam");
+                }
+                await new Promise(r => setTimeout(r, 100)); 
+            }
+            if(actorDOM) { actorDOM.style.transform = "scale(1) translateY(0)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
+        }
         else {
             let dmg = actor.atk || 100; let secondDmg = 0;
+            if (action.skillName === "Force of Nature") dmg = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
             if (action.skillName === "SHORTSWORD STRIKE") dmg = isTutorialMode ? Math.floor(Math.random() * (120 - 80 + 1)) + 80 : Math.floor(Math.random() * (120 - 80 + 1)) + 80;
             if (action.skillName === "HEAVY STRIKE") dmg = Math.floor(Math.random() * (250 - 150 + 1)) + 150;
             if (action.skillName === "BANNER STRIKE") dmg = 50;
