@@ -824,10 +824,11 @@ let quests = {
         reward: "1,000 Gold",
         description: "We've had reports of pesky Wisps causing trouble for merchants traveling through the Eastern Pass. Clear them out before they cause serious damage or lure in larger threats.<br><br><em>- Captain Thorne</em>",
         isAccepted: false,
-        isCompleted: false
+        isCompleted: false,
+        progress: 0,      // Tracks how many killed
+        maxProgress: 3    // Goal to finish
     }
 };
-
 function openGarrisonBoard() {
     // Hide the barracks menu buttons and show the board
     document.getElementById('barracks-menu').style.display = 'none';
