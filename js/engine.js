@@ -1505,8 +1505,6 @@ async function processQueue(sideProcessing, queueArr) {
             }
             if(actorDOM) { actorDOM.style.transform = "scale(1)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
         }
-        if(actorDOM) { actorDOM.style.transform = "scale(1)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
-        }
         else if (action.skillName === "Mana Beam") {
             let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
             let activeEnemies = Array.from(document.querySelectorAll(`.slot[data-side="${defSide}"] .card`)).map(c => c.id).filter(id => cardInstances[id].hp > 0 && !(cardInstances[id].ambushTurns > 0 && cardInstances[id].ambushTurns >= turnCount));
