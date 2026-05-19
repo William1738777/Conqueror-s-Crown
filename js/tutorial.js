@@ -1163,16 +1163,20 @@ function startWispDuel() {
     if(pDeck.length === 0) pDeck = buildDeck(); 
     for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
     
-    // 5. Build the Wisp Enemy Deck (F-Rank Fodder Cards)
+    // 5. Build the Wisp Enemy Deck (Exactly 4-6 Wisps total)
     eDeck = [];
-    const wispDeckNames = ["Cursed Crow", "Cursed Crow", "Zombie", "Zombie", "Skeleton Warrior", "Skeleton Warrior", "Militia"];
-    for (let k = 0; k < 40; k++) {
-        let name = wispDeckNames[k % wispDeckNames.length];
-        let template = cardLibrary.find(c => c.name === name);
-        if(template) eDeck.push(JSON.parse(JSON.stringify(template)));
+    let wispTemplate = cardLibrary.find(c => c.name === "Wisp");
+    
+    // Roll RNG for exactly 4, 5, or 6 Wisps
+    let wispPackSize = Math.floor(Math.random() * 3) + 4; 
+    
+    if (wispTemplate) {
+        for (let k = 0; k < wispPackSize; k++) {
+            eDeck.push(JSON.parse(JSON.stringify(wispTemplate)));
+        }
     }
-    // Shuffle the Wisp Deck
-    for(let i = eDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [eDeck[i], eDeck[j]] = [eDeck[j], eDeck[i]]; }
+    
+    // We don't even need to shuffle because they are all the same card!
     
     // 6. Update Visuals & Start Match
     document.getElementById('p-deck-count').innerText = pDeck.length;
