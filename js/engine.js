@@ -1635,16 +1635,21 @@ async function processQueue(sideProcessing, queueArr) {
     if(eCoreHP <= 0) { 
         if (!isTutorialMode) { 
             alert("VICTORY! Enemy Core Destroyed!"); 
-            if (typeof triggerJaxPostDuel === 'function' && typeof tgStep !== 'undefined' && tgStep >= 4) {
-                triggerJaxPostDuel();
-            } else {
+            
+            // Look at the enemy's cards to figure out what kind of duel we just won!
+            let isWispDuel = Object.values(cardInstances).some(c => c.side === 'ENEMY' && c.name === "Wisp");
+            
+            if (isWispDuel && typeof endWispDuel === 'function') {
+                endWispDuel(); // This triggers the quest progress and returns to the mountain pass!
+            } 
+            else if (typeof triggerJaxPostDuel === 'function' && typeof tgStep !== 'undefined' && tgStep >= 4) {
+                triggerJaxPostDuel(); // The Jax cutscene
+            } 
+            else {
                 location.reload(); 
             }
         } 
         else { if (typeof triggerLicenseQuest === 'function') triggerLicenseQuest(); }
-    }
-    if(pCoreHP <= 0) { 
-        if (!isTutorialMode) { alert("DEFEAT! Your Core was Destroyed!"); location.reload(); }
     }
 }
 
