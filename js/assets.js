@@ -68,6 +68,7 @@ const ASSET_LINKS = {
     "Arrow_FX": "./assets/Arrow_FX.png",
     "ShurikenKin_FX": "./assets/ShurikenKin_FX.png",
     "HealFX": "./assets/HealFX.gif",
+    "WispProjectile": "./assets/WispProjectile.png",
     "JadenLock": "./assets/JadenLock.png",
     "JadenBullet": "./assets/JadenBullet.gif",
     "Taunted": "./assets/Taunted.png",
