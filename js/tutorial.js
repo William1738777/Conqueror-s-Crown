@@ -845,22 +845,59 @@ function viewQuest(questId) {
     const quest = quests[questId];
     const pane = document.getElementById('quest-details-pane');
     
-    let btnText = quest.isAccepted ? 'QUEST ACCEPTED' : 'ACCEPT QUEST';
-    let btnDisabled = quest.isAccepted ? 'disabled' : '';
-    let btnStyle = quest.isAccepted ? 'background: #333; color: #888; border: 1px solid #555;' : '';
+    // Create the "1/3" text if the quest is accepted
+    let progressText = quest.isAccepted ? `<p style="color: #2ecc71; font-weight: bold; font-size: 1.2rem; margin-top: 10px;">Progress: ${quest.progress} / ${quest.maxProgress} Wisps Defeated</p>` : '';
+
+    // Dynamically change the button based on the quest's state
+    let btnText = 'ACCEPT QUEST';
+    let btnStyle = '';
+    let btnAction = `acceptQuest('${quest.id}')`;
+    let btnDisabled = '';
+
+    if (quest.isCompleted) {
+        btnText = 'COMPLETED';
+        btnStyle = 'background: #27ae60; color: white; border: 1px solid #2ecc71;';
+        btnDisabled = 'disabled';
+    } else if (quest.progress >= quest.maxProgress) {
+        btnText = 'CLAIM REWARD';
+        btnStyle = 'background: #f1c40f; color: black; border: 1px solid #f39c12; text-shadow: none;';
+        btnAction = `claimQuestReward('${quest.id}')`;
+    } else if (quest.isAccepted) {
+        btnText = 'QUEST ACCEPTED';
+        btnStyle = 'background: #333; color: #888; border: 1px solid #555;';
+        btnDisabled = 'disabled';
+    }
 
     pane.innerHTML = `
         <h2 style="color:var(--gold); margin-top:0; font-family:'Cinzel'; font-size: 2rem;">${quest.title}</h2>
         <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 6px; border-left: 3px solid #3498db; margin-bottom: 20px;">
             <p style="margin: 0 0 10px 0; color: #fff;"><strong>Objective:</strong> <span style="color:#3498db;">${quest.objective}</span></p>
             <p style="margin: 0; color: #fff;"><strong>Reward:</strong> <span style="color:#f1c40f;">${quest.reward}</span></p>
+            ${progressText}
         </div>
         <p style="color:#ddd; font-size: 1.1rem; line-height: 1.6;">${quest.description}</p>
         
-        <button class="btn-main" style="margin-top: 30px; width: 100%; padding: 15px; ${btnStyle}" ${btnDisabled} onclick="acceptQuest('${quest.id}')">
+        <button class="btn-main" style="margin-top: 30px; width: 100%; padding: 15px; ${btnStyle}" ${btnDisabled} onclick="${btnAction}">
             ${btnText}
         </button>
     `;
+}
+
+function claimQuestReward(questId) {
+    if (questId === 'wisp_hunt') {
+        quests.wisp_hunt.isCompleted = true;
+        
+        if (typeof playerGold !== 'undefined') {
+            playerGold += 1000;
+            if (typeof updateGoldUI === 'function') updateGoldUI();
+        }
+        
+        if (typeof playClickSound === 'function') playClickSound();
+        alert("Quest Completed! 1,000 Gold has been added to your purse.");
+        
+        // Refresh the UI to show the green "COMPLETED" state
+        viewQuest(questId);
+    }
 }
 
 function acceptQuest(questId) {
