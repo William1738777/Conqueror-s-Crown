@@ -1194,10 +1194,6 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
              if(targetInst.hp <= 0) { 
                  died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
                  if(targetDOM) targetDOM.remove(); 
-
-                 if(targetInst.hp <= 0) { 
-                 died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
-                 if(targetDOM) targetDOM.remove(); 
                  
                  // --- WISP PASSIVE: MANA LIFE ---
                  if (targetInst.passives && targetInst.passives.some(p => p.name === "Mana Life")) {
