@@ -2043,3 +2043,78 @@ document.addEventListener('keydown', (e) => {
         devInput.blur();
     }
 });
+
+// ============================================================================
+// ✨ WISP VFX FUNCTIONS
+// ============================================================================
+
+function createBlueBeamFx(sourceEl, targetEl) {
+    let beam = document.createElement('div');
+    beam.style.position = 'absolute';
+    beam.style.height = '12px';
+    beam.style.background = 'linear-gradient(90deg, rgba(0,255,255,0) 0%, rgba(52,152,219,1) 50%, rgba(0,255,255,0) 100%)';
+    beam.style.boxShadow = '0 0 15px #3498db, 0 0 30px #00ffff';
+    beam.style.borderRadius = '50%';
+    beam.style.zIndex = '1000';
+    beam.style.pointerEvents = 'none';
+    beam.style.transition = 'opacity 0.3s ease-out';
+    
+    let sRect = sourceEl.getBoundingClientRect();
+    let tRect = targetEl.getBoundingClientRect();
+    
+    let startX = sRect.left + sRect.width / 2;
+    let startY = sRect.top + sRect.height / 2;
+    let endX = tRect.left + tRect.width / 2;
+    let endY = tRect.top + tRect.height / 2;
+    
+    let length = Math.hypot(endX - startX, endY - startY);
+    let angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+    
+    beam.style.width = `${length}px`;
+    beam.style.left = `${startX}px`;
+    beam.style.top = `${startY}px`;
+    beam.style.transformOrigin = '0 50%';
+    beam.style.transform = `translateY(-50%) rotate(${angle}deg)`;
+    
+    document.body.appendChild(beam);
+    setTimeout(() => { beam.style.opacity = '0'; }, 150);
+    setTimeout(() => { beam.remove(); }, 500);
+}
+
+function createWispProjectileFx(sourceEl, targetEl) {
+    let projectile = document.createElement('img');
+    
+    // Explicitly targeting your specific image asset
+    projectile.src = './assets/WispProjectile.png';
+    projectile.style.position = 'fixed'; // fixed to easily overlay across the board
+    projectile.style.width = '30px';     // Change this if your image is too big/small
+    projectile.style.height = '30px';
+    projectile.style.zIndex = '9999';
+    projectile.style.pointerEvents = 'none';
+    projectile.style.transition = 'all 0.3s linear';
+    projectile.style.filter = 'drop-shadow(0 0 10px #2ecc71)'; // Optional green glow
+    
+    let sRect = sourceEl.getBoundingClientRect();
+    let tRect = targetEl.getBoundingClientRect();
+    
+    let startX = sRect.left + sRect.width / 2;
+    let startY = sRect.top + sRect.height / 2;
+    let endX = tRect.left + tRect.width / 2;
+    let endY = tRect.top + tRect.height / 2;
+    
+    let angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+    
+    projectile.style.left = startX + 'px';
+    projectile.style.top = startY + 'px';
+    projectile.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+    
+    document.body.appendChild(projectile);
+    
+    // Force reflow
+    void projectile.offsetWidth;
+    
+    projectile.style.left = endX + 'px';
+    projectile.style.top = endY + 'px';
+    
+    setTimeout(() => { projectile.remove(); }, 300);
+}
