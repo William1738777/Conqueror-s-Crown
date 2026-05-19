@@ -1093,7 +1093,7 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
     let actorSlotDOM = (actorDOM && actorDOM.parentElement && actorDOM.parentElement.classList.contains('slot')) ? actorDOM.parentElement : null;
     
     let isSlash = ["SHORTSWORD STRIKE", "HEAVY STRIKE", "BANNER STRIKE", "ATTACK", "ICHI", "NI", "BLADE STRIKE", "SLASH", "Lion's Challenge", "Bite", "Peck"].includes(skillName);
-    let isRanged = ["VOLLEY", "Bullseye", "Arrow Rain", "Sniping Shot", "Double-Shot", "SHADOW STAR", "Trigger Unbound", "Punishment of the Blessed"].includes(skillName) || (skillName === "ATTACK CORE" && ["Archer", "Zeek", "Shadow Stalker", "Jaden", "Althea", "Cursed Crow"].includes(actor.name)); 
+    let isRanged = ["VOLLEY", "Bullseye", "Arrow Rain", "Sniping Shot", "Double-Shot", "SHADOW STAR", "Trigger Unbound", "Punishment of the Blessed", "Force of Nature", "Mana Beam"].includes(skillName) || (skillName === "ATTACK CORE" && ["Archer", "Zeek", "Shadow Stalker", "Jaden", "Althea", "Cursed Crow", "Wisp"].includes(actor.name)); 
 
     let targetHadMarkBeforeHit = (targetInst && targetInst.marks > 0);
 
@@ -1122,7 +1122,7 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
 
     let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
-    if(actorDOM && skillName !== "Passive" && skillName !== "RALLY" && skillName !== "BLOCK" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && actor.name !== "Zeek" && skillName !== "Lion's Roar" && skillName !== "Dauntless") {
+    if(actorDOM && skillName !== "Passive" && skillName !== "RALLY" && skillName !== "BLOCK" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && actor.name !== "Zeek" && skillName !== "Lion's Roar" && skillName !== "Dauntless" && skillName !== "Mana Beam" && skillName !== "Force of Nature") {
         if (!isRanged) {
             if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
             actorDOM.style.zIndex = "9999"; 
@@ -1194,6 +1194,18 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
              if(targetInst.hp <= 0) { 
                  died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
                  if(targetDOM) targetDOM.remove(); 
+
+                 if(targetInst.hp <= 0) { 
+                 died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
+                 if(targetDOM) targetDOM.remove(); 
+                 
+                 // --- WISP PASSIVE: MANA LIFE ---
+                 if (targetInst.passives && targetInst.passives.some(p => p.name === "Mana Life")) {
+                     let mGain = Math.floor(Math.random() * 4) + 1;
+                     if (targetInst.side === 'PLAYER') pMana += mGain; else eMana += mGain;
+                     addLog(`[Mana Life] granted ${mGain} Mana!`, "#3498db");
+                     if (typeof updateUI === 'function') updateUI();
+                 }
                  
                  if(targetInst.faction === "Arashi" || targetInst.name === "Shadow Stalker") {
                      if(targetInst.side === 'PLAYER') pArashiSouls++; else eArashiSouls++;
