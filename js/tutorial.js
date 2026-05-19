@@ -1039,6 +1039,46 @@ function startWispDuel() {
 }
 
 // ============================================================================
+// ⚔️ WISP DEFEAT & QUEST PROGRESSION
+// ============================================================================
+
+function processWispDefeat() {
+    let quest = quests.wisp_hunt;
+    
+    // Only increment if the quest is active and not already finished
+    if (quest.isAccepted && !quest.isCompleted && quest.progress < quest.maxProgress) {
+        quest.progress++;
+        
+        if (quest.progress < quest.maxProgress) {
+            if (typeof addLog === 'function') addLog(`Quest Progress: Hunted Wisps ${quest.progress}/3`, "#3498db");
+        } else {
+            if (typeof addLog === 'function') addLog("Wisp Hunt Complete! Return to the Garrison Board.", "#2ecc71");
+            // Optional: Play a victory chime here!
+        }
+    }
+}
+
+function endWispDuel() {
+    // 1. Hide the game area
+    document.getElementById('game-area').style.display = 'none';
+    
+    // 2. Return to the Eastern Mountain Pass so they can patrol again
+    document.getElementById('eastern-mountain-pass-screen').style.display = 'block';
+    
+    // 3. Restore the inventory button
+    document.getElementById('inventory-btn').style.display = 'block';
+    
+    // 4. Update the quest math
+    processWispDefeat();
+    
+    // 5. Give a small immediate reward for the skirmish
+    if (typeof playerGold !== 'undefined') {
+        playerGold += 50; 
+        if (typeof updateGoldUI === 'function') updateGoldUI();
+    }
+}
+
+// ============================================================================
 // ⚔️ WISP ENCOUNTER DUEL INITIALIZATION
 // ============================================================================
 function startWispDuel() {
