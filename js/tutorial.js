@@ -991,13 +991,19 @@ function startPatrol() {
 }
 
 function startPatrolLoops() {
+    // --- FIX 1: DESTROY ANY GHOST TIMERS BEFORE STARTING ---
+    if (patrolTimer) clearInterval(patrolTimer);
+    if (chanceTimer) clearInterval(chanceTimer);
+
     // 1. The Movement Loop (Calculated for exactly 2 minutes)
     patrolTimer = setInterval(() => {
-        patrolProgress += (100 / 1200); // Moves 0.0833% every 100ms
-        document.getElementById('player-patrol-marker').style.left = patrolProgress + '%';
+        patrolProgress += (100 / 1200); 
         
-        // Win Condition: Reached the physical end of the patrol route!
+        // --- FIX 2: CLAMP PROGRESS SO IT HITS A BRICK WALL AT 100% ---
         if (patrolProgress >= 100) {
+            patrolProgress = 100;
+            document.getElementById('player-patrol-marker').style.left = '100%';
+            
             clearInterval(patrolTimer);
             clearInterval(chanceTimer);
             
@@ -1007,7 +1013,10 @@ function startPatrolLoops() {
             } else {
                 returnToLeonia();
             }
+            return; // This 'return' prevents the loop from running another inch!
         }
+        
+        document.getElementById('player-patrol-marker').style.left = patrolProgress + '%';
     }, 100);
 
     // 2. The Encounter RNG Loop (runs every 10 seconds)
@@ -1022,6 +1031,7 @@ function startPatrolLoops() {
         }
     }, 10000); 
 }
+
 function triggerEncounter() {
     // --- FIX 1: AGGRESSIVELY KILL THE TIMERS ---
     if (patrolTimer) clearInterval(patrolTimer);
