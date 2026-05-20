@@ -1047,6 +1047,9 @@ function escapeEncounter() {
 function returnToLeonia() {
     if (typeof playClickSound === 'function') playClickSound();
     
+    // --- FIX: STOP THE AMBIENT TEXT ---
+    if (typeof stopPatrolAtmosphere === 'function') stopPatrolAtmosphere();
+    
     // Stop any forward marching
     clearInterval(patrolTimer);
     clearInterval(chanceTimer);
@@ -1101,8 +1104,9 @@ function endWispDuel() {
     // 1. Hide the game area
     document.getElementById('game-area').style.display = 'none';
     
-    // 2. Return to the Eastern Mountain Pass so they can patrol again
-    document.getElementById('eastern-mountain-pass-screen').style.display = 'block';
+    // 2. Return to the ACTIVE PATROL SCREEN (not the menu!)
+    document.getElementById('patrol-screen').style.display = 'block';
+    document.getElementById('player-patrol-marker').classList.add('marching');
     
     // 3. Restore the inventory button
     document.getElementById('inventory-btn').style.display = 'block';
@@ -1116,16 +1120,17 @@ function endWispDuel() {
         if (typeof updateGoldUI === 'function') updateGoldUI();
     }
 
-    // 6. --- NEW: CHECK PATROL PROGRESS ---
-    encountersThisPatrol++; // Add a point to the trail tracker
+    // 6. CHECK PATROL PROGRESS
+    encountersThisPatrol++; 
     
     if (encountersThisPatrol >= MAX_PATROL_LENGTH) {
         // They reached the end of the trail!
         triggerPatrolComplete();
-        encountersThisPatrol = 0; // Reset it for the next time they patrol
+        encountersThisPatrol = 0; 
     } else {
-        // Not at the end yet, keep walking!
+        // Resume the atmosphere AND the walking loops!
         if (typeof startPatrolAtmosphere === 'function') startPatrolAtmosphere();
+        startPatrolLoops();
     }
 }
 // ============================================================================
