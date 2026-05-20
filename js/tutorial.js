@@ -1114,8 +1114,17 @@ function endWispDuel() {
         if (typeof updateGoldUI === 'function') updateGoldUI();
     }
 
-    // 6. Resume the immersive patrol text!
-    if (typeof startPatrolAtmosphere === 'function') startPatrolAtmosphere();
+    // 6. --- NEW: CHECK PATROL PROGRESS ---
+    encountersThisPatrol++; // Add a point to the trail tracker
+    
+    if (encountersThisPatrol >= MAX_PATROL_LENGTH) {
+        // They reached the end of the trail!
+        triggerPatrolComplete();
+        encountersThisPatrol = 0; // Reset it for the next time they patrol
+    } else {
+        // Not at the end yet, keep walking!
+        if (typeof startPatrolAtmosphere === 'function') startPatrolAtmosphere();
+    }
 }
 // ============================================================================
 // ⚔️ WISP ENCOUNTER DUEL INITIALIZATION
@@ -1249,4 +1258,40 @@ function stopPatrolAtmosphere() {
         clearInterval(patrolTimer);
         patrolTimer = null;
     }
+}
+
+// ============================================================================
+// 🚩 PATROL COMPLETION LOGIC
+// ============================================================================
+let encountersThisPatrol = 0;
+const MAX_PATROL_LENGTH = 3; // The trail ends after 3 battles
+
+function triggerPatrolComplete() {
+    // 1. Stop the ambient text so the screen is clear
+    if (typeof stopPatrolAtmosphere === 'function') stopPatrolAtmosphere();
+
+    // 2. Create the massive "Patrol Completed!" text
+    let completeText = document.createElement('div');
+    completeText.innerText = "Patrol Completed!";
+    completeText.style.cssText = "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #f1c40f; font-size: 3rem; font-weight: bold; text-shadow: 0 0 20px #e67e22, 2px 2px 5px #000; z-index: 9999; opacity: 0; transition: opacity 1s ease-in-out; font-family: monospace; text-align: center;";
+    document.body.appendChild(completeText);
+
+    // 3. Fade it in smoothly
+    setTimeout(() => { completeText.style.opacity = '1'; }, 100);
+
+    // 4. Leave it on screen for 2.5 seconds, fade it out, and trigger the return sequence
+    setTimeout(() => {
+        completeText.style.opacity = '0';
+        setTimeout(() => {
+            completeText.remove();
+            
+            // 🚨 IMPORTANT: Change 'return-to-barracks-btn' to whatever the actual ID of your return button is!
+            let returnBtn = document.getElementById('return-to-barracks-btn'); 
+            if (returnBtn) {
+                returnBtn.click(); // This simulates a physical click so your exact UI animation plays!
+            } else {
+                console.log("Could not find the Return button. Check the ID!");
+            }
+        }, 1000);
+    }, 2500);
 }
