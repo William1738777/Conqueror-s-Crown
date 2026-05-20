@@ -429,6 +429,29 @@ body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !import
     box-shadow: 15px 0 10px rgba(52, 152, 219, 0.8), 30px 0 15px rgba(52, 152, 219, 0.4), 45px 0 20px rgba(52, 152, 219, 0.1), 0 0 15px #3498db;
 }
 
+/* --- AMBIENT PATROL TEXT --- */
+@keyframes patrol-float {
+    0% { opacity: 0; transform: translate(-50%, -10px); }
+    20% { opacity: 1; transform: translate(-50%, 0); }
+    80% { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, 10px); }
+}
+
+.patrol-text {
+    position: fixed;
+    top: 40%; /* Slightly above dead center */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #bdc3c7; /* A nice subdued silver/gray */
+    font-size: 1.5rem;
+    font-style: italic;
+    font-family: monospace; /* Gives it a cool tactical/RPG vibe */
+    z-index: 5000;
+    pointer-events: none; /* Prevents it from blocking clicks */
+    animation: patrol-float 3s ease-in-out forwards;
+    text-shadow: 2px 2px 4px #000;
+}
+
 /* --- ANIMATION KEYFRAMES --- */
 @keyframes absorbEnergy { 0% { transform: scale(0.1) rotate(0deg); opacity: 0; box-shadow: 0 0 10px var(--gold); } 50% { opacity: 1; box-shadow: 0 0 50px 20px var(--gold), inset 0 0 40px var(--mana-color); } 90% { transform: scale(0.5) rotate(720deg); box-shadow: 0 0 100px 50px #fff, inset 0 0 80px #fff; opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
 @keyframes poofFlash { 0% { opacity: 0; } 10% { opacity: 1; } 100% { opacity: 0; } }
