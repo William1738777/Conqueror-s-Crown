@@ -1671,22 +1671,52 @@ async function processQueue(sideProcessing, queueArr) {
     if(isTutorialMode && tutorialStep === 7) { tutorialStep = 8; progressTutorial(); }
     if(isTutorialMode && tutorialStep === 16) { tutorialStep = 17; progressTutorial(); }
     
-    if(eCoreHP <= 0) { 
+   if(eCoreHP <= 0) { 
         if (!isTutorialMode) { 
-            alert("VICTORY! Enemy Core Destroyed!"); 
             
-            // Look at the enemy's cards to figure out what kind of duel we just won!
+            // 1. Identify the Duel Type
             let isWispDuel = Object.values(cardInstances).some(c => c.side === 'ENEMY' && c.name === "Wisp");
+            let isJaxDuel = (typeof triggerJaxPostDuel === 'function' && typeof tgStep !== 'undefined' && tgStep >= 4);
             
-            if (isWispDuel && typeof endWispDuel === 'function') {
-                endWispDuel(); // This triggers the quest progress and returns to the mountain pass!
-            } 
-            else if (typeof triggerJaxPostDuel === 'function' && typeof tgStep !== 'undefined' && tgStep >= 4) {
-                triggerJaxPostDuel(); // The Jax cutscene
-            } 
-            else {
-                location.reload(); 
+            // 2. Set the appropriate text and next-step function
+            let rewardText = "No rewards.";
+            let callbackFunc = () => { location.reload(); };
+
+            if (isWispDuel) {
+                rewardText = "50 Gold<br><span style='font-size:1rem; color:#aaa;'>Trail Progress Saved</span>";
+                callbackFunc = () => { if (typeof endWispDuel === 'function') endWispDuel(); };
+            } else if (isJaxDuel) {
+                rewardText = "New Cards Available<br><span style='font-size:1rem; color:#aaa;'>Stranger's Respect</span>";
+                callbackFunc = () => { triggerJaxPostDuel(); };
             }
+
+            // 3. Create the Custom Victory Screen
+            let vicBox = document.createElement('div');
+            vicBox.style.cssText = "position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(15,15,20,0.95); border:2px solid var(--gold); padding:30px 50px; text-align:center; color:white; z-index:9999; border-radius:8px; box-shadow:0 0 30px rgba(212,175,55,0.4); font-family:'Cinzel', serif; min-width:350px;";
+
+            vicBox.innerHTML = `
+                <h1 style="color:var(--gold); text-shadow:2px 2px 4px #000; margin-top:0; font-size:2.5rem;">VICTORY</h1>
+                <p style="color:#aaa; font-size:1.1rem; margin-bottom:10px;">Enemy Core Destroyed</p>
+                <hr style="border-color:#333; margin:20px 0;">
+                <h3 style="color:#2ecc71; margin-bottom:15px; letter-spacing:2px;">REWARDS</h3>
+                <div style="font-size:1.5rem; color:#f1c40f; margin-bottom:35px; line-height:1.5;">${rewardText}</div>
+                <button id="vic-continue-btn" style="background:var(--gold); color:black; border:none; padding:12px 30px; font-size:1.2rem; font-weight:bold; cursor:pointer; border-radius:4px; box-shadow:0 4px 6px rgba(0,0,0,0.5); transition:transform 0.1s;">CONTINUE</button>
+            `;
+
+            document.body.appendChild(vicBox);
+
+            // Add hover effect to button
+            let btn = document.getElementById('vic-continue-btn');
+            btn.onmouseover = () => btn.style.transform = "scale(1.05)";
+            btn.onmouseout = () => btn.style.transform = "scale(1)";
+
+            // 4. Wait for the player to click Continue before running the game logic
+            btn.addEventListener('click', () => {
+                if (typeof playClickSound === 'function') playClickSound();
+                vicBox.remove();
+                callbackFunc(); // This runs endWispDuel() which adds the gold and resumes the trail!
+            });
+
         } 
         else { if (typeof triggerLicenseQuest === 'function') triggerLicenseQuest(); }
     }
