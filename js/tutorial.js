@@ -1192,3 +1192,59 @@ function startWispDuel() {
     drawBtn.style.display = "block";
     drawBtn.innerText = "DRAW HAND";
 }
+
+// ============================================================================
+// 🚶‍♂️ PATROL ATMOSPHERE LOGIC
+// ============================================================================
+
+let patrolTimer = null;
+
+function spawnPatrolText() {
+    const phrases = [
+        "Patrolling the Eastern Pass...",
+        "Scouting the valley...",
+        "Continuous walking...",
+        "The wind howls through the trees...",
+        "Watching for movement in the brush...",
+        "Footsteps echo on the mountain path..."
+    ];
+
+    // Pick a random phrase
+    let text = phrases[Math.floor(Math.random() * phrases.length)];
+
+    // Create the visual element
+    let textEl = document.createElement('div');
+    textEl.className = 'patrol-text';
+    textEl.innerText = text;
+
+    // Optional: Add a tiny random offset so they don't appear in the EXACT same pixel every time
+    let yOffset = Math.floor(Math.random() * 40) - 20; 
+    textEl.style.marginTop = `${yOffset}px`;
+
+    document.body.appendChild(textEl);
+
+    // Delete the element from the game code after the CSS animation finishes (3 seconds)
+    setTimeout(() => {
+        if(textEl) textEl.remove();
+    }, 3000);
+}
+
+// Call this when they enter the patrol map
+function startPatrolAtmosphere() {
+    // Clear any existing timer just to be safe
+    if (patrolTimer) clearInterval(patrolTimer);
+    
+    // Spawn the first text immediately
+    spawnPatrolText();
+    
+    // Loop it every 3.5 seconds
+    patrolTimer = setInterval(spawnPatrolText, 3500);
+}
+
+// Call this when combat starts or they leave the map
+function stopPatrolAtmosphere() {
+    if (patrolTimer) {
+        clearInterval(patrolTimer);
+        patrolTimer = null;
+    }
+}
