@@ -984,6 +984,8 @@ function startPatrol() {
     marker.classList.remove('retreating');
     marker.classList.add('marching');
 
+    if (typeof startPatrolAtmosphere === 'function') startPatrolAtmosphere();
+
     // Kick off the movement and RNG loops
     startPatrolLoops();
 }
@@ -1131,6 +1133,8 @@ function endWispDuel() {
 // ============================================================================
 function startWispDuel() {
     if (typeof playClickSound === 'function') playClickSound();
+
+    if (typeof stopPatrolAtmosphere === 'function') stopPatrolAtmosphere();
     
     // 1. Hide Patrol & Encounter UI, Show Battlefield
     document.getElementById('encounter-overlay').style.display = 'none';
