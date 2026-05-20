@@ -1542,6 +1542,9 @@ async function processQueue(sideProcessing, queueArr) {
                 let dmg = Math.floor(Math.random() * (900 - 50 + 1)) + 50;
                 
                 if (actorDOM && tDOM) {
+                    // --- PLAY GENERIC MAGIC SOUND ---
+                    if (typeof abilityActivatedUrl !== 'undefined' && abilityActivatedUrl) playSound(abilityActivatedUrl);
+                    
                     if (typeof createBlueBeamFx === 'function') createBlueBeamFx(actorDOM, tId === 'CORE' ? tDOM.parentElement : tDOM);
                     await applyDamage(actor, tId, dmg, "Mana Beam");
                 }
@@ -1593,6 +1596,14 @@ async function processQueue(sideProcessing, queueArr) {
             for(let tId of finalTargets) {
                 if (tId !== 'CORE' && (!cardInstances[tId] || cardInstances[tId].hp <= 0)) continue;
                 if (tId !== 'CORE') globalTargetedThisTurn.push(tId);
+
+                // --- RESTORED: WISP PROJECTILE FIX ---
+                if (action.skillName === "Force of Nature" && actorDOM) {
+                    let actualTargetId = tId === 'CORE' ? (actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : tId;
+                    if (typeof createWispProjectileFx === 'function') createWispProjectileFx(actorDOM, document.getElementById(actualTargetId));
+                    await new Promise(r => setTimeout(r, 300));
+                }
+                // -------------------------------------
 
                 let targetDied = await applyDamage(actor, tId, dmg, action.skillName);
                 
