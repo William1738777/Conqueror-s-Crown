@@ -1199,9 +1199,16 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
              showFloatingText(targetDOM, `-${dmg}`, "#ff4d4d", "2.5rem"); 
         }
 
-        if(dmg > 0) {
-             targetInst.hp -= dmg; syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
-             addLog(`<b>${actor.name}</b> hits ${targetInst.name} for ${dmg} DMG!`, '#ff4d4d');
+        // --- LAST STAND IMMORTALITY PROTECTION ---
+                if (isLastStandActive && targetInst.hp - dmg < 1) {
+                    dmg = targetInst.hp - 1; 
+                    if (dmg < 0) dmg = 0;
+                    if (dmg > 0) addLog(`<b>Last Stand</b> prevents fatal damage!`, '#f1c40f');
+                }
+
+                targetInst.hp -= dmg; 
+                syncVisualHP(targetDOM, targetInst.hp, targetInst.maxHp);
+                addLog(`<b>${actor.name}</b> hits ${targetInst.name} for ${dmg} DMG!`, '#ff4d4d');
 
              if(targetInst.name === "Zombie" && targetInst.hp > 0 && targetInst.hp <= 100) {
                  let healAmt = Math.floor(targetInst.maxHp * 0.20);
