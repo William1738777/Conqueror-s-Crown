@@ -1242,7 +1242,6 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
                  }
              } 
         }
-    }
 
     if (died && actor.name === "Zeek" && skillName === "Ambush") {
         actor.ambushTurns = turnCount + 2;
