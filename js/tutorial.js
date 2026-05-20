@@ -1113,8 +1113,10 @@ function endWispDuel() {
         playerGold += 50; 
         if (typeof updateGoldUI === 'function') updateGoldUI();
     }
-}
 
+    // 6. Resume the immersive patrol text!
+    if (typeof startPatrolAtmosphere === 'function') startPatrolAtmosphere();
+}
 // ============================================================================
 // ⚔️ WISP ENCOUNTER DUEL INITIALIZATION
 // ============================================================================
