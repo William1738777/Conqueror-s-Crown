@@ -1208,7 +1208,7 @@ function startWispDuel() {
 // 🚶‍♂️ PATROL ATMOSPHERE LOGIC
 // ============================================================================
 
-let patrolTimer = null;
+let atmosphereTimer = null;
 
 function spawnPatrolText() {
     const phrases = [
