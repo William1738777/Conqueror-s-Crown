@@ -996,14 +996,17 @@ function startPatrolLoops() {
         patrolProgress += (100 / 1200); // Moves 0.0833% every 100ms
         document.getElementById('player-patrol-marker').style.left = patrolProgress + '%';
         
-        // Win Condition: Reached the end of the patrol route
+        // Win Condition: Reached the physical end of the patrol route!
         if (patrolProgress >= 100) {
             clearInterval(patrolTimer);
             clearInterval(chanceTimer);
             
-            // Give a small reward for a safe patrol, then head home
-            if (typeof addLog === 'function') addLog("Patrol completed safely! Area secure.", "#2ecc71");
-            returnToLeonia();
+            // Trigger the cinematic completion text!
+            if (typeof triggerPatrolComplete === 'function') {
+                triggerPatrolComplete();
+            } else {
+                returnToLeonia();
+            }
         }
     }, 100);
 
@@ -1012,7 +1015,6 @@ function startPatrolLoops() {
         encounterChance += 5; // Increase chance by 5%
         
         let roll = Math.random() * 100;
-        // Keeping the F12 log here so you can watch the tension build!
         console.log(`Searching for Wisps... Needed: <${encounterChance} | Rolled: ${roll.toFixed(2)}`);
         
         if (roll < encounterChance) {
@@ -1020,7 +1022,6 @@ function startPatrolLoops() {
         }
     }, 10000); 
 }
-
 function triggerEncounter() {
     // Pause the movement and RNG timers
     clearInterval(patrolTimer);
@@ -1104,7 +1105,7 @@ function endWispDuel() {
     // 1. Hide the game area
     document.getElementById('game-area').style.display = 'none';
     
-    // 2. Return to the ACTIVE PATROL SCREEN (not the menu!)
+    // 2. Return to the ACTIVE PATROL SCREEN
     document.getElementById('patrol-screen').style.display = 'block';
     document.getElementById('player-patrol-marker').classList.add('marching');
     
@@ -1120,18 +1121,9 @@ function endWispDuel() {
         if (typeof updateGoldUI === 'function') updateGoldUI();
     }
 
-    // 6. CHECK PATROL PROGRESS
-    encountersThisPatrol++; 
-    
-    if (encountersThisPatrol >= MAX_PATROL_LENGTH) {
-        // They reached the end of the trail!
-        triggerPatrolComplete();
-        encountersThisPatrol = 0; 
-    } else {
-        // Resume the atmosphere AND the walking loops!
-        if (typeof startPatrolAtmosphere === 'function') startPatrolAtmosphere();
-        startPatrolLoops();
-    }
+    // 6. Resume the atmosphere AND the walking loops indefinitely!
+    if (typeof startPatrolAtmosphere === 'function') startPatrolAtmosphere();
+    startPatrolLoops();
 }
 // ============================================================================
 // ⚔️ WISP ENCOUNTER DUEL INITIALIZATION
