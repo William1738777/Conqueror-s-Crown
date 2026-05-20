@@ -1023,9 +1023,9 @@ function startPatrolLoops() {
     }, 10000); 
 }
 function triggerEncounter() {
-    // Pause the movement and RNG timers
-    clearInterval(patrolTimer);
-    clearInterval(chanceTimer);
+    // --- FIX 1: AGGRESSIVELY KILL THE TIMERS ---
+    if (patrolTimer) clearInterval(patrolTimer);
+    if (chanceTimer) clearInterval(chanceTimer);
     
     // Stop the visual marching trail
     document.getElementById('player-patrol-marker').classList.remove('marching');
