@@ -1122,6 +1122,28 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
 
     let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
+    // --- 1. LAST STAND DETECTION ---
+    let isLastStandActive = false;
+    let checkSide = targetId === 'CORE' ? (actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER') : targetInst.side;
+    if (checkSide === 'PLAYER') {
+        let pBuff = document.getElementById('player-buff-slot').querySelector('.card');
+        if (pBuff && cardInstances[pBuff.id] && cardInstances[pBuff.id].name === "Last Stand") isLastStandActive = true;
+    } else if (checkSide === 'ENEMY') {
+        let eBuff = document.getElementById('enemy-buff-slot').querySelector('.card');
+        if (eBuff && cardInstances[eBuff.id] && cardInstances[eBuff.id].name === "Last Stand") isLastStandActive = true;
+    }
+
+    // --- 2. SKELETON BLOCK STANCE ---
+    if (targetInst && targetInst.blockActive && targetId !== 'CORE') {
+        targetInst.blockActive = false; // Consume the block
+        dmg = 0; // Negate the damage
+        if (targetDOM) {
+            showFloatingText(targetDOM, `BLOCKED`, "#ccc", "2.5rem");
+            if (typeof shieldBlockAudioUrl !== 'undefined' && shieldBlockAudioUrl) playSound(shieldBlockAudioUrl);
+        }
+        addLog(`<b>${targetInst.name}</b> BLOCKED the attack!`, '#ccc');
+    }
+
     if(actorDOM && skillName !== "Passive" && skillName !== "RALLY" && skillName !== "BLOCK" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && actor.name !== "Zeek" && skillName !== "Lion's Roar" && skillName !== "Dauntless" && skillName !== "Mana Beam" && skillName !== "Force of Nature") {
         if (!isRanged) {
             if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
