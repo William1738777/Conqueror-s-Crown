@@ -1586,7 +1586,10 @@ async function processQueue(sideProcessing, queueArr) {
             if (action.skillName === "SHORTSWORD STRIKE") dmg = isTutorialMode ? Math.floor(Math.random() * (120 - 80 + 1)) + 80 : Math.floor(Math.random() * (120 - 80 + 1)) + 80;
             if (action.skillName === "HEAVY STRIKE") dmg = Math.floor(Math.random() * (250 - 150 + 1)) + 150;
             if (action.skillName === "BANNER STRIKE") dmg = 50;
-            if (action.skillName === "VOLLEY") dmg = Math.floor(Math.random() * (150 - 80 + 1)) + 80;
+            if (action.skillName === "VOLLEY") {
+                if (actor.name === "Goblin Archer") dmg = Math.floor(Math.random() * (100 - 50 + 1)) + 50;
+                else dmg = Math.floor(Math.random() * (150 - 80 + 1)) + 80; // Standard Archer
+            }
             if (action.skillName === "ICHI") { dmg = Math.floor(Math.random() * (1100 - 300 + 1)) + 300; if(dmg < 500) { secondDmg = Math.floor(Math.random() * (1100 - 500 + 1)) + 500; } }
             if (action.skillName === "NI") { if(kinSfx1Url) playSound(kinSfx1Url); dmg = Math.floor(Math.random() * 101) + 300; }
             if (action.skillName === "Bullseye") { let isAmbush = (actor.ambushTurns >= turnCount); dmg = isAmbush ? Math.floor(Math.random() * (1000 - 600 + 1)) + 600 : Math.floor(Math.random() * (400 - 200 + 1)) + 200; }
@@ -1672,6 +1675,54 @@ async function processQueue(sideProcessing, queueArr) {
                     }
                 }
         }
+
+        // --- GOBLIN ARCHER [THE SWARM] PASSIVE ---
+                if (actor.name === "Goblin Archer" && action.skillName === "VOLLEY" && (!targetDied || tId === 'CORE')) {
+                    // Find all other friendly, living Goblin Archers that are ready to attack
+                    let allies = Object.values(cardInstances).filter(c => c.side === actor.side && c.name === "Goblin Archer" && c.id !== actor.id && !c.exhausted && c.turnPlaced < turnCount && c.hp > 0);
+                    let activeCardsOnBoard = Array.from(document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`)).map(el => el.id);
+                    allies = allies.filter(c => activeCardsOnBoard.includes(c.id));
+
+                    if (allies.length > 0) {
+                        addLog(`<b>[THE SWARM]</b> The rest of the Goblin Archers open fire!`, "#2ecc71");
+                        
+                        let swarmPromises = [];
+                        
+                        for (let i = 0; i < allies.length; i++) {
+                            let ally = allies[i];
+                            ally.exhausted = true; // Consumes their turn so they can't manually attack later!
+                            
+                            let aDOM = document.getElementById(ally.id);
+                            let tDOM = tId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(tId);
+                            
+                            // Wrap each shot in a promise so they fire with a perfect 150ms delay
+                            let shotPromise = new Promise(resolve => {
+                                setTimeout(async () => {
+                                    // Abort if target died mid-swarm
+                                    if (tId !== 'CORE' && (!cardInstances[tId] || cardInstances[tId].hp <= 0)) { resolve(); return; }
+                                    
+                                    if (aDOM && tDOM) {
+                                        aDOM.style.transition = "transform 0.1s ease-out"; aDOM.style.transform = `scale(1.1)`;
+                                        shootProjectile(aDOM, tDOM, true); 
+                                        setTimeout(() => { if (aDOM) aDOM.style.transform = `scale(1)`; }, 200);
+                                    }
+                                    
+                                    await new Promise(r => setTimeout(r, 300)); // Wait for the arrow to travel
+                                    
+                                    let swarmDmg = Math.floor(Math.random() * (100 - 50 + 1)) + 50;
+                                    await applyDamage(ally, tId, swarmDmg, "VOLLEY");
+                                    resolve();
+                                }, (i + 1) * 150); // <-- This 150ms delay creates the "shoot--shoot--shoot" effect
+                            });
+                            
+                            swarmPromises.push(shotPromise);
+                        }
+                        
+                        // Tell the game engine to wait until all Swarm arrows have landed
+                        await Promise.all(swarmPromises);
+                    }
+                }
+                // --- END SWARM LOGIC ---
         
         if((actor.type === 'ability' || actor.isBuff) && action.skillName !== "Double Action") { actor.hp = 0; if(actorDOM) actorDOM.remove(); }
         updateUI(); await new Promise(r => setTimeout(r, 400)); 
