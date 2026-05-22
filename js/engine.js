@@ -2156,13 +2156,8 @@ document.addEventListener('keydown', (e) => {
         // --- COMMAND LIST ---
         if (command === '/kill core') {
             eCoreHP = 0; // Drop Enemy Core to 0
-            
             if (typeof updateUI === 'function') updateUI();
             if (typeof addLog === 'function') addLog("⚠️ DEV COMMAND: Enemy Core Annihilated!", "#0f0");
-            
-            // NOTE: If your game doesn't instantly end when HP hits 0, you might need 
-            // to press 'Execute' or 'End Turn' to force the game to check the win condition.
-            // If you have a specific win function (like checkWinCondition()), call it right here!
         }
         else if (command === '/add gold') {
             if (typeof playerGold !== 'undefined') {
@@ -2171,6 +2166,11 @@ document.addEventListener('keydown', (e) => {
                 if (typeof addLog === 'function') addLog("⚠️ DEV COMMAND: +1000 Gold", "#0f0");
             }
         }
+        // 👇 THIS IS THE NEW FIX 👇
+        else if (command.startsWith('/get card ')) {
+            processDevCommand(command);
+        }
+        // 👆 ------------------- 👆
         else {
             if (typeof addLog === 'function') addLog(`⚠️ Unknown Command: ${command}`, "#e74c3c");
         }
@@ -2180,7 +2180,6 @@ document.addEventListener('keydown', (e) => {
         devInput.blur();
     }
 });
-
 // ============================================================================
 // 🛠️ DEVELOPER CONSOLE & COMMANDS
 // ============================================================================
