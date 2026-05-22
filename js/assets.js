@@ -96,6 +96,7 @@ const ASSET_LINKS = {
     "Cursed Crow": "./assets/Cursed Crow.png",
     "Wisp": "./assets/Wisp.png",
     "Goblin Warrior": "./assets/GoblineWarrior.png",
+    "Goblin Archer": "./assets/GoblinArcher.png",
     "Zombie": "./assets/Zombie.png"
 };
 
@@ -179,6 +180,13 @@ function getCardTemplate(fileName, dataUrl) {
             isPlayable: true, type: 'unit', name: "Goblin Warrior", title: "N/A", powerLevel: 1, summonCost: 0, faction: "Neutral", race: "Forest Creatures", hp: 350, maxHp: 350, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
             skills: [ { name: "Cut", manaCost: 0, desc: "Attacks inflicting 30-90 damage roll." } ], 
             passives: [ { name: "RUN IT BACK", desc: "Always has a 10% chance to do double-attack/retrigger [Cut] the same turn." } ] 
+        };
+    }
+    else if(cleanName.includes('goblin archer')) {
+        return { 
+            isPlayable: true, type: 'unit', name: "Goblin Archer", title: "N/A", powerLevel: 1, summonCost: 0, faction: "Neutral", race: "Forest Creatures", hp: 300, maxHp: 300, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
+            skills: [ { name: "VOLLEY", manaCost: 0, desc: "Inflicts between 50 and 100 physical damage to a single enemy target." } ], 
+            passives: [ { name: "THE SWARM", desc: "Whenever this unit uses [Volley], all other unexhausted friendly Goblin Archers fire at the same target. Consumes their action." } ] 
         };
     }
     else if (cleanName.includes('great knight')) {
