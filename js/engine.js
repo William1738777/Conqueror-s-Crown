@@ -1722,7 +1722,9 @@ async function processQueue(sideProcessing, queueArr) {
                         await Promise.all(swarmPromises);
                     }
                 }
-                // --- END SWARM LOGIC ---
+               // --- END SWARM LOGIC ---
+            } 
+        } 
         
         if((actor.type === 'ability' || actor.isBuff) && action.skillName !== "Double Action") { actor.hp = 0; if(actorDOM) actorDOM.remove(); }
         updateUI(); await new Promise(r => setTimeout(r, 400)); 
