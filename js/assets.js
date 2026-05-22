@@ -95,6 +95,7 @@ const ASSET_LINKS = {
     "Skeleton Warrior": "./assets/Skeleton%20Warrior.png",
     "Cursed Crow": "./assets/Cursed Crow.png",
     "Wisp": "./assets/Wisp.png",
+    "Goblin Warrior": "./assets/GoblineWarrior.png",
     "Zombie": "./assets/Zombie.png"
 };
 
@@ -171,6 +172,13 @@ function getCardTemplate(fileName, dataUrl) {
             isPlayable: true, type: 'unit', name: "Leonian Squire", title: "Trainee Attendant (Level 1)", powerLevel: 1, summonCost: 1, faction: "Leonia", race: "Human", hp: 450, maxHp: 450, atk: 100, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
             skills: [ { name: "SHORTSWORD STRIKE", manaCost: 0, desc: "Deals 80-120 physical damage to a frontline enemy." } ], 
             passives: [ { name: "TRAINED DODGES", desc: "This unit has a 40% chance to dodge any incoming attack." } ]
+        };
+    }
+    else if(cleanName.includes('goblin warrior')) {
+        return { 
+            isPlayable: true, type: 'unit', name: "Goblin Warrior", title: "N/A", powerLevel: 1, summonCost: 0, faction: "Neutral", race: "Forest Creatures", hp: 350, maxHp: 350, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
+            skills: [ { name: "Cut", manaCost: 0, desc: "Attacks inflicting 30-90 damage roll." } ], 
+            passives: [ { name: "RUN IT BACK", desc: "Always has a 10% chance to do double-attack/retrigger [Cut] the same turn." } ] 
         };
     }
     else if (cleanName.includes('great knight')) {
