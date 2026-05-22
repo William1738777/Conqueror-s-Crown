@@ -1332,3 +1332,5 @@ function triggerPatrolComplete() {
         }, 1000);
     }, 2500);
 }
+
+
