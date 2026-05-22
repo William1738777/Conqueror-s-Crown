@@ -1784,7 +1784,7 @@ async function processQueue(sideProcessing, queueArr) {
         } 
         else { if (typeof triggerLicenseQuest === 'function') triggerLicenseQuest(); }
     }
-}
+
 
 document.getElementById('exec-btn').addEventListener('click', () => { 
     if(pQueue.length > 0 && !isExecuting) processQueue('PLAYER', pQueue); 
