@@ -1597,6 +1597,13 @@ async function processQueue(sideProcessing, queueArr) {
             if (action.skillName === "Bite") dmg = Math.floor(Math.random() * (200 - 100 + 1)) + 100;
             if (action.skillName === "Uncoordinated attack") dmg = Math.floor(Math.random() * (200 - 100 + 1)) + 100;
             if (action.skillName === "Suicidal attack") { if (villagerSuicideSfxUrl) playSound(villagerSuicideSfxUrl); await new Promise(r => setTimeout(r, 100)); dmg = isTutorialMode ? 650 : Math.floor(Math.random() * (700 - 1 + 1)) + 1; }
+            if (action.skillName === "Cut") { 
+                dmg = Math.floor(Math.random() * (90 - 30 + 1)) + 30; 
+                // 10% chance to roll a second attack
+                if (Math.random() <= 0.10) {
+                    secondDmg = Math.floor(Math.random() * (90 - 30 + 1)) + 30; 
+                }
+            }
 
             // Focus Fire Passive
             if (actor.name === "Archer" && action.targetId !== 'CORE') {
@@ -1656,10 +1663,14 @@ async function processQueue(sideProcessing, queueArr) {
                 }
 
                 if (secondDmg > 0 && (!targetDied || tId === 'CORE')) { 
-                    addLog(`<b>KIN-RYU</b> [ICHI Reroll]: Strikes again!`, '#e74c3c'); 
-                    targetDied = await applyDamage(actor, tId, secondDmg, "ICHI_REROLL"); 
+                    if (action.skillName === "Cut") {
+                        addLog(`<b>Goblin Warrior</b> [RUN IT BACK]: Strikes again!`, '#f1c40f'); 
+                        targetDied = await applyDamage(actor, tId, secondDmg, "Cut");
+                    } else {
+                        addLog(`<b>KIN-RYU</b> [ICHI Reroll]: Strikes again!`, '#e74c3c'); 
+                        targetDied = await applyDamage(actor, tId, secondDmg, "ICHI_REROLL"); 
+                    }
                 }
-            }
         }
         
         if((actor.type === 'ability' || actor.isBuff) && action.skillName !== "Double Action") { actor.hp = 0; if(actorDOM) actorDOM.remove(); }
