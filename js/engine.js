@@ -1674,7 +1674,7 @@ async function processQueue(sideProcessing, queueArr) {
                         targetDied = await applyDamage(actor, tId, secondDmg, "ICHI_REROLL"); 
                     }
                 }
-        }
+        
 
         // --- GOBLIN ARCHER [THE SWARM] PASSIVE ---
                 if (actor.name === "Goblin Archer" && action.skillName === "VOLLEY" && (!targetDied || tId === 'CORE')) {
@@ -1724,7 +1724,7 @@ async function processQueue(sideProcessing, queueArr) {
                 }
                // --- END SWARM LOGIC ---
             } 
-        } 
+        
         
         if((actor.type === 'ability' || actor.isBuff) && action.skillName !== "Double Action") { actor.hp = 0; if(actorDOM) actorDOM.remove(); }
         updateUI(); await new Promise(r => setTimeout(r, 400)); 
