@@ -1724,6 +1724,7 @@ async function processQueue(sideProcessing, queueArr) {
                 }
                // --- END SWARM LOGIC ---
             } 
+        } 
         
         
         if((actor.type === 'ability' || actor.isBuff) && action.skillName !== "Double Action") { actor.hp = 0; if(actorDOM) actorDOM.remove(); }
