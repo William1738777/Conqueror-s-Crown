@@ -824,9 +824,10 @@ let quests = {
         reward: "1,000 Gold",
         description: "We've had reports of pesky Wisps causing trouble for merchants traveling through the Eastern Pass. Clear them out before they cause serious damage or lure in larger threats.<br><br><em>- Captain Thorne</em>",
         isAccepted: false,
-        isCompleted: false,
-        progress: 0,      // Tracks how many killed
-        maxProgress: 3    // Goal to finish
+        isCompleted: false, // We no longer permanently lock the quest
+        progress: 0,      
+        maxProgress: 3,    
+        cooldownUntil: 0  // --- NEW: Tracks when the quest can be accepted again ---
     }
 };
 function openGarrisonBoard() {
@@ -845,24 +846,30 @@ function viewQuest(questId) {
     const quest = quests[questId];
     const pane = document.getElementById('quest-details-pane');
     
-    // Create the "1/3" text if the quest is accepted
     let progressText = quest.isAccepted ? `<p style="color: #2ecc71; font-weight: bold; font-size: 1.2rem; margin-top: 10px;">Progress: ${quest.progress} / ${quest.maxProgress} Wisps Defeated</p>` : '';
 
-    // Dynamically change the button based on the quest's state
     let btnText = 'ACCEPT QUEST';
     let btnStyle = '';
     let btnAction = `acceptQuest('${quest.id}')`;
     let btnDisabled = '';
 
-    if (quest.isCompleted) {
-        btnText = 'COMPLETED';
-        btnStyle = 'background: #27ae60; color: white; border: 1px solid #2ecc71;';
+    let now = Date.now();
+
+    // --- 1. Check if the quest is on Cooldown ---
+    if (quest.cooldownUntil && now < quest.cooldownUntil) {
+        let remainingMins = Math.ceil((quest.cooldownUntil - now) / 60000);
+        btnText = `ON COOLDOWN (${remainingMins}m)`;
+        btnStyle = 'background: #555; color: #aaa; border: 1px solid #444; cursor: not-allowed;';
         btnDisabled = 'disabled';
-    } else if (quest.progress >= quest.maxProgress) {
+    } 
+    // --- 2. Check if the quest is ready to claim ---
+    else if (quest.progress >= quest.maxProgress && quest.isAccepted) {
         btnText = 'CLAIM REWARD';
         btnStyle = 'background: #f1c40f; color: black; border: 1px solid #f39c12; text-shadow: none;';
         btnAction = `claimQuestReward('${quest.id}')`;
-    } else if (quest.isAccepted) {
+    } 
+    // --- 3. Check if the quest is currently active ---
+    else if (quest.isAccepted) {
         btnText = 'QUEST ACCEPTED';
         btnStyle = 'background: #333; color: #888; border: 1px solid #555;';
         btnDisabled = 'disabled';
@@ -877,15 +884,43 @@ function viewQuest(questId) {
         </div>
         <p style="color:#ddd; font-size: 1.1rem; line-height: 1.6;">${quest.description}</p>
         
-        <button class="btn-main" style="margin-top: 30px; width: 100%; padding: 15px; ${btnStyle}" ${btnDisabled} onclick="${btnAction}">
+        <button class="btn-main" id="quest-action-btn" style="margin-top: 30px; width: 100%; padding: 15px; ${btnStyle}" ${btnDisabled} onclick="${btnAction}">
             ${btnText}
         </button>
     `;
-}
 
+    // --- 4. Live Countdown UI Effect ---
+    if (quest.cooldownUntil && now < quest.cooldownUntil) {
+        let liveTimer = setInterval(() => {
+            let currentNow = Date.now();
+            let btn = document.getElementById('quest-action-btn');
+            
+            // If the player closed the board, kill the timer to save memory
+            if (!btn) { clearInterval(liveTimer); return; }
+            
+            // If time is up, refresh the screen automatically!
+            if (currentNow >= quest.cooldownUntil) {
+                clearInterval(liveTimer);
+                viewQuest(questId); 
+            } else {
+                // Math to show exact Minutes and Seconds
+                let remainingMs = quest.cooldownUntil - currentNow;
+                let m = Math.floor(remainingMs / 60000);
+                let s = Math.floor((remainingMs % 60000) / 1000);
+                btn.innerText = `ON COOLDOWN (${m}m ${s}s)`;
+            }
+        }, 1000);
+    }
+}
 function claimQuestReward(questId) {
     if (questId === 'wisp_hunt') {
-        quests.wisp_hunt.isCompleted = true;
+        // 1. RESET THE QUEST SO IT CAN BE REPEATED
+        quests.wisp_hunt.isCompleted = false;
+        quests.wisp_hunt.isAccepted = false;
+        quests.wisp_hunt.progress = 0;
+
+        // 2. SET THE 15-MINUTE COOLDOWN (15 mins * 60 secs * 1000 ms)
+        quests.wisp_hunt.cooldownUntil = Date.now() + (15 * 60 * 1000);
         
         if (typeof playerGold !== 'undefined') {
             playerGold += 1000;
@@ -895,7 +930,7 @@ function claimQuestReward(questId) {
         if (typeof playClickSound === 'function') playClickSound();
         alert("Quest Completed! 1,000 Gold has been added to your purse.");
         
-        // Refresh the UI to show the green "COMPLETED" state
+        // 3. Refresh the UI to show the Cooldown State
         viewQuest(questId);
     }
 }
