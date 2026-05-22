@@ -2115,6 +2115,61 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ============================================================================
+// 🛠️ DEVELOPER CONSOLE & COMMANDS
+// ============================================================================
+
+function processDevCommand(cmd) {
+    // COMMAND: /get card [Card Name]
+    if (cmd.toLowerCase().startsWith('/get card ')) {
+        // Extract the name the player typed after the command
+        let cardName = cmd.substring(10).trim();
+        
+        // Search the master cardLibrary (ignoring upper/lower case mistakes)
+        let template = cardLibrary.find(c => c.name.toLowerCase() === cardName.toLowerCase());
+        
+        if (template) {
+            // Clone the card so it doesn't edit the master template
+            let newCard = JSON.parse(JSON.stringify(template));
+            
+            // Give it a unique ID for the inventory system
+            newCard.dbId = typeof generateUID === 'function' ? generateUID() : Math.random().toString(36).substr(2, 9);
+            
+            // Push it directly to the bag!
+            if (typeof playerCollection !== 'undefined') {
+                playerCollection.push(newCard);
+                
+                // Visual feedback
+                if (typeof addLog === 'function') addLog(`[DEV] ${template.name} spawned into bag!`, "#f1c40f");
+                if (typeof playClickSound === 'function') playClickSound();
+                console.log(`[DEV SUCCESS] Spawned 1x ${template.name}`);
+            } else {
+                alert("[DEV ERROR] playerCollection (Bag) is not loaded yet!");
+            }
+        } else {
+            alert(`[DEV ERROR] Could not find a card named "${cardName}". Check your spelling!`);
+        }
+        return;
+    }
+    
+    // If command isn't recognized
+    alert(`[DEV ERROR] Unknown command: ${cmd}`);
+}
+
+// --- THE HIDDEN TRIGGER ---
+// Listens for the ` or ~ key to open the prompt
+document.addEventListener('keydown', (e) => {
+    if (e.key === '`' || e.key === '~') {
+        e.preventDefault(); // Stops the browser from actually typing the ` character
+        
+        let command = prompt("🛠️ DEV CONSOLE\nEnter command (e.g., /get card Zombie):");
+        
+        if (command) {
+            processDevCommand(command);
+        }
+    }
+});
+
+// ============================================================================
 // ✨ WISP VFX FUNCTIONS
 // ============================================================================
 
