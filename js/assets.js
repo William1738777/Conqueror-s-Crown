@@ -61,6 +61,7 @@ const ASSET_LINKS = {
     "HealSFXVoice2": "./assets/HealSFXVoice2.mp3",
     "ShieldSFXVoice": "./assets/ShieldSFXVoice.mp3",
     "ShieldSFXVoice2": "./assets/ShieldSFXVoice2.mp3",
+    "wardrummersfx": "./assets/wardrummersfx.mp3",
     "ShieldSFX": "./assets/ShieldSFX.mp3",
     
     // -- Visual FX & Icons --
