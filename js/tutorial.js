@@ -995,7 +995,7 @@ function acceptQuest(questId) {
                 btn.classList.add('unlocked');
                 btn.innerText = "The Northern Watch";
                 // Placeholder until you build the Northside map area!
-                btn.onclick = () => { alert("Northern Watch area coming soon!"); }; 
+                btn.onclick = enterNorthside; 
             }
         });
         viewQuest(questId);
@@ -1037,6 +1037,20 @@ function enterEasternMountainPass() {
     const empScreen = document.getElementById('eastern-mountain-pass-screen');
     empScreen.style.display = 'block';
     empScreen.style.backgroundImage = "url('./assets/Eastern Mountain Pass Watch.png')";
+}
+
+function enterNorthside() {
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    const northScreen = document.getElementById('northside-screen');
+    northScreen.style.display = 'block';
+    
+    // Using the Gate background as a placeholder until you have a specific Northside image!
+    northScreen.style.backgroundImage = "url('./assets/Gate.png')"; 
+}
+
+function enterNorthsideWatchtower() {
+    // We will build this out in the next step!
+    alert("Entering the Northside Watchtower... (Coming Next!)");
 }
 
 // --- PATROL STATE VARIABLES ---
