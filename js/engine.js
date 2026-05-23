@@ -156,6 +156,23 @@ function updateUI() {
         if (data.ambushTurns && data.ambushTurns >= turnCount && isDeployed) c.classList.add('ambush-stance');
         else c.classList.remove('ambush-stance');
 
+        if(data.battleHymnTurns && data.battleHymnTurns >= turnCount) {
+             if (gwdAtkIconUrl) {
+                 const bHymn = document.createElement('div');
+                 bHymn.className = 'badge-bhymn';
+                 bHymn.style.cssText = `position:absolute; bottom:-5px; left:-5px; width:24px; height:24px; background-image:url('${gwdAtkIconUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #e74c3c);`;
+                 c.appendChild(bHymn);
+             }
+        }
+        if(data.defensiveHymnTurns && data.defensiveHymnTurns >= turnCount) {
+             if (gwDefIconUrl) {
+                 const dHymn = document.createElement('div');
+                 dHymn.className = 'badge-dhymn';
+                 dHymn.style.cssText = `position:absolute; bottom:-5px; left:20px; width:24px; height:24px; background-image:url('${gwDefIconUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #3498db);`;
+                 c.appendChild(dHymn);
+             }
+        }
+
         if(data.queued) c.classList.add('queued-status'); else c.classList.remove('queued-status');
         if(data.exhausted) c.classList.add('exhausted'); else c.classList.remove('exhausted');
         if(!data.extraAction) c.classList.remove('buff-double-action');
@@ -410,6 +427,13 @@ function showInspector(id, cardElement) {
     }
     if (data.ambushTurns && data.ambushTurns >= turnCount) {
         statusHtml += `<div class="status-item"><div class="status-desc" style="color: #3498db;"><b>AMBUSH STANCE:</b> Untargettable by enemies.</div></div>`;
+    }
+
+    if (data.battleHymnTurns && data.battleHymnTurns >= turnCount) {
+        statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${gwdAtkIconUrl ? gwdAtkIconUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc" style="color: #e74c3c;"><b>BATTLE HYMN:</b> Attack damage increased by 50%.</div></div>`;
+    }
+    if (data.defensiveHymnTurns && data.defensiveHymnTurns >= turnCount) {
+        statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${gwDefIconUrl ? gwDefIconUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc" style="color: #3498db;"><b>DEFENSIVE HYMN:</b> Regenerating 20% Max HP every turn.</div></div>`;
     }
     
     if (statusHtml === `<div style="color:#e74c3c; font-weight:bold; font-size:0.85rem; margin-bottom:8px; padding-bottom:8px; border-bottom: 1px solid #333; text-align:center;">BASE ATK: ${data.atk || 0}</div>`) {
