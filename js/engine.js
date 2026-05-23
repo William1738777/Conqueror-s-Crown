@@ -275,8 +275,20 @@ function createCardDOM(id, data, isVisualOnly = false) {
                 if(targetInst.side === currentTurn && targetInst.type === 'unit') validTarget = true;
             } else if(pendingSkill.skillName === "Double Action") {
                 if(targetInst.side === currentTurn && targetInst.type === 'unit' && !targetInst.exhausted && targetInst.turnPlaced < turnCount) validTarget = true;
-            } else if(pendingSkill.skillName === "Punishment of the Blessed") {
-                if(targetInst.side !== currentTurn && c.parentElement.classList.contains('frontline')) validTarget = true;
+            } else if (pendingSkill.skillName === "Punishment of the Blessed" || pendingSkill.skillName === "Beast's Roar") {
+                if(targetInst.side !== currentTurn && c.parentElement.classList.contains('frontline')) {
+                    validTarget = true;
+                }
+            } else if (pendingSkill.skillName === "Devour") {
+                // Logic for Devour:
+                // 1. Ally sacrifice: Must be an allied unit, not the Troll itself.
+                // 2. Enemy Devour: Must be an enemy unit with strictly lower HP than Troll.
+                let actorInst = cardInstances[pendingSkill.actorId];
+                if (targetInst.side === currentTurn && targetInst.type === 'unit' && targetInst.id !== pendingSkill.actorId) {
+                    validTarget = true;
+                } else if (targetInst.side !== currentTurn && targetInst.type === 'unit' && targetInst.hp < actorInst.hp) {
+                    validTarget = true;
+                }
             } else if(pendingSkill.skillName === "Sniping Shot" || pendingSkill.skillName === "Lion's Roar") {
                 if(targetInst.side !== currentTurn) validTarget = true;
             } else if (pendingSkill.skillName === "Arrow Rain") {
