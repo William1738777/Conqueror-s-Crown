@@ -65,6 +65,7 @@ const ASSET_LINKS = {
     "ShieldSFXVoice2": "./assets/ShieldSFXVoice2.mp3",
     "wardrummersfx": "./assets/wardrummersfx.mp3",
     "ShieldSFX": "./assets/ShieldSFX.mp3",
+    "EnslavedRoar": "./assets/EnslavedRoar.mp3",
     "GoblinKill": "./assets/GoblinKill.mp3",
     
     // -- Visual FX & Icons --
@@ -78,6 +79,7 @@ const ASSET_LINKS = {
     "Taunted": "./assets/Taunted.png",
     "Barrier": "./assets/Barrier.png",
     "Bleed": "./assets/Bleed.png",
+    "FearDebuff": "./assets/FearDebuff.png",
     "ShinobiMark": "./assets/Bleed.png", 
     
     // -- Cards --
@@ -102,6 +104,7 @@ const ASSET_LINKS = {
     "Goblin Warrior": "./assets/GoblinWarrior.png",
     "Goblin Archer": "./assets/GoblinArcher.png",
     "Goblin Wardrummer": "./assets/GoblinWarDrummer.png",
+    "Enslaved Troll": "./assets/EnslavedTroll.png",
     "Zombie": "./assets/Zombie.png"
 };
 
@@ -156,6 +159,8 @@ function getCardTemplate(fileName, dataUrl) {
     if(cleanName.includes('menumusic')) { menuMusicUrl = dataUrl; return { isAudio: true }; }
     if(cleanName.includes('wardrummersfx')) { wardrummerSfxUrl = dataUrl; return { isAudio: true }; }
     if(cleanName.includes('goblinkill')) { goblinKillSfxUrl = dataUrl; return { isAudio: true }; }
+    if(cleanName.includes('feardebuff')) { return { isIcon: true, iconType: 'fear', img: dataUrl }; }
+    if(cleanName.includes('enslavedroar')) { enslavedRoarSfxUrl = dataUrl; return { isAudio: true }; }
 
     if(cleanName.includes('back_card') || cleanName.includes('back card') || cleanName.includes('crown back')) { return { isCardBack: true, img: dataUrl }; }
     if(cleanName.includes('slash')) { return { isSlash: true, img: dataUrl }; }
@@ -184,6 +189,17 @@ function getCardTemplate(fileName, dataUrl) {
             passives: [ { name: "TRAINED DODGES", desc: "This unit has a 40% chance to dodge any incoming attack." } ]
         };
     }
+    else if(cleanName.includes('enslaved troll')) {
+     return { 
+         isPlayable: true, type: 'unit', name: "Enslaved Troll", title: "Chained Behemoth", powerLevel: 5, summonCost: 6, faction: "Neutral", race: "Forest Creatures", hp: 1500, maxHp: 1500, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0, fearTurns: 0,
+         skills: [ 
+             { name: "Giant Bash", manaCost: 1, desc: "Rolls damage from 400-600." },
+             { name: "Devour", manaCost: 6, desc: "Kill an ally to heal 50% of their max HP, or kill an enemy with lower HP than the Troll, taking 80% of their current HP as recoil damage." },
+             { name: "Beast's Roar", manaCost: 2, desc: "Targets a lane; applies Fear (-30% damage) for 2 turns." }
+         ], 
+         passives: [] 
+         };
+     }
     else if(cleanName.includes('goblin warrior')) {
         return { 
             isPlayable: true, type: 'unit', name: "Goblin Warrior", title: "N/A", powerLevel: 1, summonCost: 0, faction: "Neutral", race: "Forest Creatures", hp: 350, maxHp: 350, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
