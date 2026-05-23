@@ -1732,20 +1732,23 @@ async function processQueue(sideProcessing, queueArr) {
         
 
         // --- GOBLIN ARCHER [THE SWARM] PASSIVE ---
-                if (actor.name === "Goblin Archer" && action.skillName === "VOLLEY" && (!targetDied || tId === 'CORE')) {
-                    // Find all other friendly, living Goblin Archers that are ready to attack
-                    let allies = Object.values(cardInstances).filter(c => c.side === actor.side && c.name === "Goblin Archer" && c.id !== actor.id && !c.exhausted && c.turnPlaced < turnCount && c.hp > 0);
+                window.lastSwarmTurn = window.lastSwarmTurn || { PLAYER: 0, ENEMY: 0 };
+                
+                if (actor.name === "Goblin Archer" && action.skillName === "VOLLEY" && window.lastSwarmTurn[actor.side] !== turnCount && (!targetDied || tId === 'CORE')) {
+                    // Find all other friendly, living Goblin Archers on the board
                     let activeCardsOnBoard = Array.from(document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`)).map(el => el.id);
-                    allies = allies.filter(c => activeCardsOnBoard.includes(c.id));
+                    let allies = Object.values(cardInstances).filter(c => c.side === actor.side && c.name === "Goblin Archer" && c.id !== actor.id && c.turnPlaced < turnCount && c.hp > 0 && activeCardsOnBoard.includes(c.id));
 
                     if (allies.length > 0) {
+                        window.lastSwarmTurn[actor.side] = turnCount; // Locks the Swarm so it only happens once this turn
                         addLog(`<b>[THE SWARM]</b> The rest of the Goblin Archers open fire!`, "#2ecc71");
                         
                         let swarmPromises = [];
                         
                         for (let i = 0; i < allies.length; i++) {
                             let ally = allies[i];
-                            ally.exhausted = true; // Consumes their turn so they can't manually attack later!
+                            
+                            // ❌ ally.exhausted = true;  <-- REMOVED! The swarm is now a completely free action!
                             
                             let aDOM = document.getElementById(ally.id);
                             let tDOM = tId === 'CORE' ? document.getElementById(actor.side === 'PLAYER' ? 'e-core-target' : 'p-core-target') : document.getElementById(tId);
@@ -1767,7 +1770,7 @@ async function processQueue(sideProcessing, queueArr) {
                                     let swarmDmg = Math.floor(Math.random() * (100 - 50 + 1)) + 50;
                                     await applyDamage(ally, tId, swarmDmg, "VOLLEY");
                                     resolve();
-                                }, (i + 1) * 150); // <-- This 150ms delay creates the "shoot--shoot--shoot" effect
+                                }, (i + 1) * 150); 
                             });
                             
                             swarmPromises.push(shotPromise);
