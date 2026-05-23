@@ -95,7 +95,7 @@ const ASSET_LINKS = {
     "Skeleton Warrior": "./assets/Skeleton%20Warrior.png",
     "Cursed Crow": "./assets/Cursed Crow.png",
     "Wisp": "./assets/Wisp.png",
-    "Goblin Warrior": "./assets/GoblineWarrior.png",
+    "Goblin Warrior": "./assets/GoblinWarrior.png",
     "Goblin Archer": "./assets/GoblinArcher.png",
     "Zombie": "./assets/Zombie.png"
 };
