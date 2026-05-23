@@ -168,16 +168,19 @@ function updateUI() {
              if (gwdAtkIconUrl) {
                  const bHymn = document.createElement('div');
                  bHymn.className = 'badge-bhymn';
-                 bHymn.style.cssText = `position:absolute; bottom:-5px; left:-5px; width:24px; height:24px; background-image:url('${gwdAtkIconUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #e74c3c);`;
+                 bHymn.style.cssText = `position:absolute; top:-8px; right:${topRightOffset}px; width:24px; height:24px; background-image:url('${gwdAtkIconUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #e74c3c);`;
                  c.appendChild(bHymn);
+                 topRightOffset += 24;
              }
         }
+        
         if(data.defensiveHymnTurns && data.defensiveHymnTurns >= turnCount) {
              if (gwDefIconUrl) {
                  const dHymn = document.createElement('div');
                  dHymn.className = 'badge-dhymn';
-                 dHymn.style.cssText = `position:absolute; bottom:-5px; left:20px; width:24px; height:24px; background-image:url('${gwDefIconUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #3498db);`;
+                 dHymn.style.cssText = `position:absolute; top:-8px; right:${topRightOffset}px; width:24px; height:24px; background-image:url('${gwDefIconUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #3498db);`;
                  c.appendChild(dHymn);
+                 topRightOffset += 24;
              }
         }
 
