@@ -429,6 +429,7 @@ function showInspector(id, cardElement) {
 
     let statusHtml = `<div style="color:#e74c3c; font-weight:bold; font-size:0.85rem; margin-bottom:8px; padding-bottom:8px; border-bottom: 1px solid #333; text-align:center;">BASE ATK: ${data.atk || 0}</div>`;
     if (data.tauntedBy) statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${tauntedImgUrl ? tauntedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>TAUNTED:</b> Must attack taunting unit.</div></div>`;
+    if (data.fearTurns && data.fearTurns >= turnCount) statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${fearDebuffImgUrl ? fearDebuffImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc" style="color:#8e44ad;"><b>FEAR:</b> Damage output reduced by 30%.</div></div>`;
     if (data.bleedStacks > 0) statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${bleedImgUrl ? bleedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>BLEED:</b> Takes damage at end of turn. (${data.bleedStacks} Stacks)</div></div>`;
     if (data.shield && data.shield > 0) statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${barrierImgUrl ? barrierImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>SHIELDED:</b> Absorbs up to ${data.shield} damage.</div></div>`;
     if (data.atkBuffTurns && data.atkBuffTurns >= turnCount) statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${atkIconUrl ? atkIconUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>ATK UP:</b> Attack power increased by 8%.</div></div>`;
@@ -719,6 +720,7 @@ async function systemDetector(trigger, payload) {
         }
         
         // Ambush Damage Buffs
+        if (payload.actor.fearTurns && payload.actor.fearTurns >= turnCount) dmg = Math.floor(dmg * 0.70);
         if (payload.actor.ambushTurns && payload.actor.ambushTurns >= turnCount) {
             if (payload.skillName === "Bullseye") dmg = Math.floor(Math.random() * (1000 - 600 + 1)) + 600;
             if (payload.skillName === "Arrow Rain") dmg = Math.floor(Math.random() * (180 - 90 + 1)) + 90;
@@ -822,14 +824,30 @@ window.queueAction = function(actorId, skillName, cost, isCore) {
             if(tInst && tInst.type === 'unit' && !tInst.exhausted && tInst.turnPlaced < turnCount) c.classList.add('target-buff-glow');
         });
     } 
-    else if (skillName === "Punishment of the Blessed") {
-        if(actor.blessings < 7) { pMana += cost; actor.queued = false; return addLog("Needs 7 Blessings!", "red"); }
+    else if (skillName === "Punishment of the Blessed" || skillName === "Beast's Roar") {
+        if(skillName === "Punishment of the Blessed" && actor.blessings < 7) { pMana += cost; actor.queued = false; return addLog("Needs 7 Blessings!", "red"); }
         isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
-        targetCountReq = 1; addLog("Select an Enemy Frontline target...", "var(--gold)");
+        targetCountReq = 1; addLog(skillName === "Beast's Roar" ? "Select an Enemy Frontline target to terrify the lane..." : "Select an Enemy Frontline target...", "var(--gold)");
         document.querySelectorAll('.slot.frontline[data-side="ENEMY"] .card').forEach(c => {
             if (!(cardInstances[c.id].ambushTurns > 0 && cardInstances[c.id].ambushTurns >= turnCount)) c.classList.add('target-glow');
         });
-    } 
+    }
+    else if (skillName === "Devour") {
+        isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
+        targetCountReq = 1; addLog("Select an Ally to sacrifice, or a weaker Enemy to devour...", "#8e44ad");
+        
+        // Highlight valid allies (green heal glow)
+        document.querySelectorAll(`.slot[data-side="${actor.side}"] .card`).forEach(c => {
+            if (c.id !== actorId && cardInstances[c.id].type === 'unit') c.classList.add('target-heal-glow');
+        });
+        
+        // Highlight valid enemies (red target glow) - MUST BE LOWER HP
+        let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+        document.querySelectorAll(`.slot[data-side="${defSide}"] .card`).forEach(c => {
+            let tInst = cardInstances[c.id];
+            if (tInst && tInst.hp < actor.hp && !(tInst.ambushTurns > 0 && tInst.ambushTurns >= turnCount)) c.classList.add('target-glow');
+        });
+    }
     else if (skillName === "Sniping Shot") {
         isTargeting = true; pendingSkill = { actorId, actorName: actor.name, side: actor.side, skillName, cost };
         targetCountReq = 1; let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
@@ -1493,6 +1511,62 @@ async function processQueue(sideProcessing, queueArr) {
                  actor.blessings = (actor.blessings || 0) + 1;
                  addLog(`<b>${actor.name}</b> heals ${targetInst.name} for ${heal}!`, "#2ecc71");
                  await new Promise(r => setTimeout(r, 1000)); if(targetDOM) targetDOM.classList.remove('shimmer-fx');
+            }
+        }
+        else if (action.skillName === "Beast's Roar") {
+            let frontTargetId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
+            let frontDOM = document.getElementById(frontTargetId);
+            let targetsToHit = [frontTargetId]; let defSide = actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER';
+            if(frontDOM && frontDOM.parentElement.classList.contains('frontline')) {
+                 let slots = Array.from(document.querySelectorAll(`.slot.frontline[data-side="${defSide}"]`));
+                 let idx = slots.indexOf(frontDOM.parentElement);
+                 if(idx > -1) { let backSlot = document.querySelectorAll(`.slot.backline[data-side="${defSide}"]`)[idx]; let backCard = backSlot.querySelector('.card'); if(backCard) targetsToHit.push(backCard.id); }
+            }
+            if(actorDOM) { actorDOM.style.transition = "transform 0.4s ease"; actorDOM.style.transform = "scale(1.3)"; await new Promise(r => setTimeout(r, 400)); }
+            if (typeof enslavedRoarSfxUrl !== 'undefined' && enslavedRoarSfxUrl) playSound(enslavedRoarSfxUrl);
+            document.body.classList.add('shake-anim'); setTimeout(() => document.body.classList.remove('shake-anim'), 500);
+
+            for (let tId of targetsToHit) {
+                let tInst = cardInstances[tId]; let tDOM = document.getElementById(tId);
+                if (tInst && tInst.hp > 0 && tId !== 'CORE') {
+                    tInst.fearTurns = turnCount + 2;
+                    if (tDOM) showFloatingText(tDOM, "FEAR", "#8e44ad", "1.5rem");
+                    addLog(`<b>${actor.name}</b> terrified ${tInst.name}! (-30% DMG)`, "#8e44ad");
+                }
+            }
+            if(actorDOM) { actorDOM.style.transform = "scale(1)"; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
+        }
+        else if (action.skillName === "Devour") {
+            let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
+            let tInst = cardInstances[tId]; let tDOM = document.getElementById(tId);
+
+            if (tInst && tDOM && tInst.hp > 0) {
+                if(actorDOM) { actorDOM.style.transition = "transform 0.2s cubic-bezier(0.4, 0, 1, 1)"; actorDOM.style.transform = "scale(1.5)"; actorDOM.style.zIndex = "9999"; await new Promise(r => setTimeout(r, 200)); }
+                
+                if (typeof bloodAudioUrl !== 'undefined' && bloodAudioUrl) playSound(bloodAudioUrl);
+
+                if (tInst.side === actor.side) {
+                    let heal = Math.floor(tInst.maxHp * 0.5);
+                    actor.hp = Math.min(actor.maxHp, actor.hp + heal);
+                    showFloatingText(actorDOM, `+${heal} HP`, "#2ecc71", "2.5rem");
+                    actorDOM.classList.add('shimmer-fx'); setTimeout(() => actorDOM.classList.remove('shimmer-fx'), 1000);
+                    syncVisualHP(actorDOM, actor.hp, actor.maxHp);
+                    addLog(`<b>${actor.name}</b> devoured ally ${tInst.name} to heal ${heal} HP!`, "#2ecc71");
+                } else {
+                    let recoil = Math.floor(tInst.hp * 0.8);
+                    actor.hp -= recoil;
+                    showFloatingText(actorDOM, `-${recoil} RECOIL`, "#ff4d4d", "2.5rem");
+                    actorDOM.classList.add('shake-anim'); setTimeout(() => actorDOM.classList.remove('shake-anim'), 500);
+                    syncVisualHP(actorDOM, actor.hp, actor.maxHp);
+                    addLog(`<b>${actor.name}</b> devoured enemy ${tInst.name} but took ${recoil} recoil damage!`, "#e74c3c");
+                }
+
+                if (tDOM) { tDOM.style.transform = "scale(0)"; setTimeout(() => tDOM.remove(), 300); }
+                tInst.hp = 0; 
+                await systemDetector("ATTACK_END", { actor, targetInst: tInst, action: {skillName: "Devour", targetId: tId}, targetDied: true });
+
+                if (actor.hp <= 0) { addLog(`<b>${actor.name}</b> died from Devour recoil!`, "#aaa"); if (actorDOM) actorDOM.remove(); }
+                else if(actorDOM) { actorDOM.style.transform = "scale(1)"; actorDOM.style.zIndex = ""; await new Promise(r => setTimeout(r, 300)); actorDOM.style.transition = ""; }
             }
         }
         else if(action.skillName === "Punishment of the Blessed") {
