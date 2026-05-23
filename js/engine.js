@@ -133,6 +133,14 @@ function updateUI() {
             }
         } else { data.bleedStacks = 0; }
 
+        if(data.fearTurns && data.fearTurns >= turnCount) {
+         if (fearDebuffImgUrl) {
+             const fr = document.createElement('div'); fr.className = 'badge-fear';
+             fr.style.cssText = `position:absolute; top:-8px; right:${topRightOffset}px; width:24px; height:24px; background-image:url('${fearDebuffImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27')}'); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #8e44ad);`;
+             c.appendChild(fr); topRightOffset += 24;
+         }
+     }
+
         if (data.marks && data.marks > 0) {
             let actualMarks = Math.min(3, data.marks);
             if (shinobiMarkImgUrl) {
