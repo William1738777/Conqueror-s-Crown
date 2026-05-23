@@ -812,6 +812,21 @@ function advanceThorneDialogue() {
     }
 }
 
+// ==========================================
+// 👇 Northside Whereabouts Quest 👇
+// ==========================================
+
+let northsideDialogueStep = 0;
+let hasSeenNorthsideLore = false;
+let wispQuestFirstClear = false; // Tracks if they've beaten the wisps at least once
+
+const northsideDialogue = [
+    { s: "Captain Thorne", c: "#e74c3c", t: "You're back. Good. I have a situation that requires a capable hand." },
+    { s: "Captain Thorne", c: "#e74c3c", t: "We've received reports that an entire village just north of our borders vanished overnight. I sent a scouting party to investigate, and they haven't reported back." },
+    { s: "Captain Thorne", c: "#e74c3c", t: "I need someone who can handle themselves to find out what happened. Investigate the area and report back the moment you know what we're dealing with. Do not engage unless absolutely necessary." },
+    { s: "You", c: "#3498db", t: "Understood, Captain. I'll get it done." }
+];
+
 // ============================================================================
 // 📋 GARRISON QUEST BOARD LOGIC
 // ============================================================================
@@ -837,11 +852,25 @@ function openGarrisonBoard() {
 }
 
 function closeGarrisonBoard() {
-    // Hide the board and restore the barracks menu buttons
+    // 1. Hide the board UI
     document.getElementById('garrison-board-ui').style.display = 'none';
-    document.getElementById('barracks-menu').style.display = 'flex';
+    
+    // 2. Check if they just finished the Wisp quest and haven't seen Thorne's new dialogue
+    if (wispQuestFirstClear && !hasSeenNorthsideLore) {
+        northsideDialogueStep = 0;
+        const box = document.getElementById('barracks-dialogue-box');
+        box.style.display = 'flex';
+        
+        // Temporarily bind the click event to our new Northside dialogue logic
+        box.onclick = advanceNorthsideDialogue;
+        
+        // Start the dialogue!
+        renderNorthsideDialogue();
+    } else {
+        // Otherwise, just show the normal barracks menu buttons
+        document.getElementById('barracks-menu').style.display = 'flex';
+    }
 }
-
 function viewQuest(questId) {
     const quest = quests[questId];
     const pane = document.getElementById('quest-details-pane');
@@ -921,6 +950,8 @@ function claimQuestReward(questId) {
 
         // 2. SET THE 15-MINUTE COOLDOWN (15 mins * 60 secs * 1000 ms)
         quests.wisp_hunt.cooldownUntil = Date.now() + (15 * 60 * 1000);
+
+        wispQuestFirstClear = true;
         
         if (typeof playerGold !== 'undefined') {
             playerGold += 1000;
@@ -938,25 +969,38 @@ function claimQuestReward(questId) {
 function acceptQuest(questId) {
     if (questId === 'wisp_hunt') {
         quests.wisp_hunt.isAccepted = true;
-        
-        // Log & Notify
         if (typeof addLog === 'function') addLog("Accepted Quest: Wisp Hunt!", "#3498db");
         if (typeof playClickSound === 'function') playClickSound();
         alert("Quest Accepted: Wisp Hunt!\nThe City Gate is now unlocked.");
         
-        // Unlock the Gate in Leonia Screen
         const gateBtn = document.getElementById('loc-gate-btn');
         if (gateBtn) {
             gateBtn.disabled = false;
             gateBtn.classList.add('unlocked');
             gateBtn.innerText = "City Gate";
         }
+        viewQuest(questId);
         
-        // Refresh the UI to show the button as disabled/accepted
+    } else if (questId === 'northside_investigation') { // <-- NEW BLOCK
+        quests.northside_investigation.isAccepted = true;
+        if (typeof addLog === 'function') addLog("Accepted Quest: Northside Whereabouts!", "#3498db");
+        if (typeof playClickSound === 'function') playClickSound();
+        alert("Quest Accepted: Northside Whereabouts!\nThe Northern Watch is now accessible from the Gate.");
+        
+        // Unlock the Northern Watch in the Gate Screen UI
+        const buttons = document.querySelectorAll('#gate-screen .menu-btn');
+        buttons.forEach(btn => {
+            if (btn.innerText.includes("The Northern Watch")) {
+                btn.disabled = false;
+                btn.classList.add('unlocked');
+                btn.innerText = "The Northern Watch";
+                // Placeholder until you build the Northside map area!
+                btn.onclick = () => { alert("Northern Watch area coming soon!"); }; 
+            }
+        });
         viewQuest(questId);
     }
 }
-
 // ============================================================================
 // 🗺️ GATE & EXPLORATION NAVIGATION
 // ============================================================================
@@ -1332,3 +1376,60 @@ function triggerPatrolComplete() {
         }, 1000);
     }, 2500);
 }
+
+function renderNorthsideDialogue() {
+    const line = northsideDialogue[northsideDialogueStep];
+    const speaker = document.getElementById('barracks-speaker');
+    speaker.innerText = line.s;
+    speaker.style.color = line.c;
+    document.getElementById('barracks-text').innerText = line.t;
+}
+
+function advanceNorthsideDialogue() {
+    northsideDialogueStep++;
+    if (northsideDialogueStep < northsideDialogue.length) {
+        renderNorthsideDialogue();
+    } else {
+        hasSeenNorthsideLore = true;
+        document.getElementById('barracks-dialogue-box').style.display = 'none';
+        document.getElementById('barracks-menu').style.display = 'flex';
+        
+        // Restore the original onclick behavior for the barracks box
+        document.getElementById('barracks-dialogue-box').onclick = advanceThorneDialogue;
+        
+        unlockNorthsideQuest();
+    }
+}
+
+function unlockNorthsideQuest() {
+    // 1. Add quest to the database
+    quests.northside_investigation = {
+        id: 'northside_investigation',
+        title: "Northside Whereabouts",
+        objective: "Investigate the missing village at the Northern Watch.",
+        reward: "2,500 Gold & Rare Card", // You can change this reward!
+        description: "An entire village north of the borders has vanished overnight. The scouting party sent to investigate has not returned. Proceed to the Northern Watch, find out what happened, and report back immediately. Do not engage unless absolutely necessary.<br><br><em>- Captain Thorne</em>",
+        isAccepted: false,
+        isCompleted: false,
+        progress: 0,      
+        maxProgress: 1,    
+        cooldownUntil: 0
+    };
+    
+    // 2. Dynamically add the button to the Garrison Board UI
+    const questListDiv = document.querySelector('#garrison-board-ui > div > div:first-child');
+    if(questListDiv && !document.getElementById('btn-quest-northside')) {
+        const newBtn = document.createElement('button');
+        newBtn.id = 'btn-quest-northside';
+        newBtn.className = 'menu-btn unlocked';
+        newBtn.style.width = '100%';
+        newBtn.style.textAlign = 'left';
+        newBtn.style.marginBottom = '10px';
+        newBtn.innerText = "[F-Rank] Northside Whereabouts";
+        newBtn.onclick = () => viewQuest('northside_investigation');
+        questListDiv.appendChild(newBtn);
+    }
+    
+    if (typeof addLog === 'function') addLog("New Quest Available: Northside Whereabouts!", "#f1c40f");
+}
+
