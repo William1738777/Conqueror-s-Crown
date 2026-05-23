@@ -65,6 +65,7 @@ const ASSET_LINKS = {
     "ShieldSFXVoice2": "./assets/ShieldSFXVoice2.mp3",
     "wardrummersfx": "./assets/wardrummersfx.mp3",
     "ShieldSFX": "./assets/ShieldSFX.mp3",
+    "GoblinKill": "./assets/GoblinKill.mp3",
     
     // -- Visual FX & Icons --
     "Slash": "./assets/Slash.gif",
@@ -154,6 +155,7 @@ function getCardTemplate(fileName, dataUrl) {
     if(cleanName.includes('shieldsfx') && !cleanName.includes('voice')) { shieldSfxUrl = dataUrl; return { isAudio: true }; }
     if(cleanName.includes('menumusic')) { menuMusicUrl = dataUrl; return { isAudio: true }; }
     if(cleanName.includes('wardrummersfx')) { wardrummerSfxUrl = dataUrl; return { isAudio: true }; }
+    if(cleanName.includes('goblinkill')) { goblinKillSfxUrl = dataUrl; return { isAudio: true }; }
 
     if(cleanName.includes('back_card') || cleanName.includes('back card') || cleanName.includes('crown back')) { return { isCardBack: true, img: dataUrl }; }
     if(cleanName.includes('slash')) { return { isSlash: true, img: dataUrl }; }
