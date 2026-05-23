@@ -1248,6 +1248,10 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
              if(targetInst.hp <= 0) { 
                  died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
                  if(targetDOM) targetDOM.remove(); 
+
+                 if ((actor.name === "Goblin Warrior" || actor.name === "Goblin Archer") && Math.random() <= 0.50) {
+                     if (typeof goblinKillSfxUrl !== 'undefined' && goblinKillSfxUrl) playSound(goblinKillSfxUrl);
+                 }
                  
                  // --- WISP PASSIVE: MANA LIFE ---
                  if (targetInst.passives && targetInst.passives.some(p => p.name === "Mana Life")) {
