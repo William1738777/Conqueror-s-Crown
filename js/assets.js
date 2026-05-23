@@ -21,6 +21,8 @@ const ASSET_LINKS = {
     "GladineShopBG": "./assets/Gladine Shop.png",
     "BK1": "./assets/BK1.png",
     "BK3": "./assets/BK3.png",
+    "GWDAtkIcon": "./assets/GWDAtkIcon.png",
+    "GWDefIcon": "./assets/GWDefIcon.png",
 
     // Training Grounds Dialog //
     "TG1": "./assets/TG1.png",
@@ -165,6 +167,8 @@ function getCardTemplate(fileName, dataUrl) {
     if(cleanName.includes('barrier')) { return { isIcon: true, iconType: 'barrier', img: dataUrl }; }
     if(cleanName.includes('bleed') && !cleanName.includes('mark')) { return { isIcon: true, iconType: 'bleed', img: dataUrl }; }
     if(cleanName.includes('shinobimark') || cleanName.includes('mark')) { return { isIcon: true, iconType: 'shinobimark', img: dataUrl }; }
+    if(cleanName.includes('gwdatkicon')) { gwdAtkIconUrl = dataUrl; return { isIcon: true, iconType: 'gwdatk', img: dataUrl }; }
+    if(cleanName.includes('gwdeficon')) { gwDefIconUrl = dataUrl; return { isIcon: true, iconType: 'gwdef', img: dataUrl }; }
     if(cleanName.includes('atkicon')) { document.documentElement.style.setProperty('--atkicon-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isIcon: true, iconType: 'atkbuff', img: dataUrl }; }
 
     let type = 'unit';
