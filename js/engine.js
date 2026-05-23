@@ -668,6 +668,7 @@ async function systemDetector(trigger, payload) {
         
         // Atk Buff check
         if (payload.actor.atkBuffTurns && payload.actor.atkBuffTurns >= turnCount) dmg = Math.floor(dmg * 1.08);
+        if (payload.actor.battleHymnTurns && payload.actor.battleHymnTurns >= turnCount) dmg = Math.floor(dmg * 1.50);
         
         // Shinobi Mark + Arashi Faction Bonus
         if (payload.targetInst && payload.targetInst.marks && payload.targetInst.marks > 0 && payload.actor.faction === "Arashi") {
@@ -823,7 +824,7 @@ window.queueAction = function(actorId, skillName, cost, isCore) {
         let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'ALLIES_FRONT' };
         pQueue.push(action); addLog(`Queued [${skillName}] on Frontline.`, "#3498db"); systemDetector("QUEUE", { action });
     }
-    else if (skillName === "RALLY" || skillName === "VALIANT GUARD" || skillName === "Mana Initiation" || skillName === "BLOCK" || actor.type === 'ability' || skillName === "Trigger Unbound") {
+    else if (skillName === "RALLY" || skillName === "VALIANT GUARD" || skillName === "Mana Initiation" || skillName === "BLOCK" || actor.type === 'ability' || skillName === "Trigger Unbound" || skillName === "BATTLE HYMN" || skillName === "DEFENSIVE HYMN") {
         let action = { actorId, actorName: actor.name, side: actor.side, skillName, cost, targetId: 'SELF' };
         pQueue.push(action); addLog(`Queued [${skillName}].`, "#aaa"); 
         
@@ -1376,6 +1377,35 @@ async function processQueue(sideProcessing, queueArr) {
                 await new Promise(r => setTimeout(r, 600)); updateUI();
             }
         }
+        else if (action.skillName === "BATTLE HYMN" || action.skillName === "DEFENSIVE HYMN") {
+            let isBattle = (action.skillName === "BATTLE HYMN");
+            let color = isBattle ? "#e74c3c" : "#3498db";
+            
+            if (typeof wardrummerSfxUrl !== 'undefined' && wardrummerSfxUrl) playSound(wardrummerSfxUrl);
+            
+            if(actorDOM) {
+                actorDOM.style.transition = "transform 0.2s ease";
+                actorDOM.style.transform = "scale(1.3)";
+                if (typeof createEchoFx === 'function') createEchoFx(actorDOM, color);
+                await new Promise(r => setTimeout(r, 1000)); // Wait for echoing rings to finish
+                actorDOM.style.transform = "scale(1)";
+                actorDOM.style.transition = "";
+            }
+            
+            let allies = Array.from(document.querySelectorAll(`.slot[data-side="${sideProcessing}"] .card`)).map(el => cardInstances[el.id]).filter(c => c && c.hp > 0);
+            let buffCount = 0;
+            allies.forEach(ally => {
+                if (isBattle) { ally.battleHymnTurns = turnCount + 1; } 
+                else { ally.defensiveHymnTurns = turnCount + 1; }
+                let allyDOM = document.getElementById(ally.id);
+                if (allyDOM) showFloatingText(allyDOM, isBattle ? "ATK +50%" : "REGEN", color, "1.5rem");
+                buffCount++;
+            });
+            
+            addLog(`<b>${actor.name}</b>'s ${action.skillName} echoed! Buffed ${buffCount} allies.`, color);
+            await new Promise(r => setTimeout(r, 400));
+            updateUI();
+        }
         else if (action.skillName === "VALIANT GUARD") {
             // --- NEW HEAL LOGIC ---
             let healAmt = 200;
@@ -1583,6 +1613,7 @@ async function processQueue(sideProcessing, queueArr) {
         else {
             let dmg = actor.atk || 100; let secondDmg = 0;
             if (action.skillName === "Force of Nature") dmg = Math.floor(Math.random() * (300 - 150 + 1)) + 150;
+            if (action.skillName === "DRUMSTICK BASH") dmg = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
             if (action.skillName === "SHORTSWORD STRIKE") dmg = isTutorialMode ? Math.floor(Math.random() * (120 - 80 + 1)) + 80 : Math.floor(Math.random() * (120 - 80 + 1)) + 80;
             if (action.skillName === "HEAVY STRIKE") dmg = Math.floor(Math.random() * (250 - 150 + 1)) + 150;
             if (action.skillName === "BANNER STRIKE") dmg = 50;
@@ -2105,6 +2136,19 @@ async function aiTurn() {
             if (c.side === 'PLAYER') pSkeletonMana++; if (c.side === 'ENEMY') eSkeletonMana++;
             showFloatingText(dDOM, "+1 MANA", "var(--mana-color)", "1.5rem");
         }
+    // 👇 NEW HYMN REGEN LOGIC GOES HERE (INSIDE THE LOOP!) 👇
+        if (c.hp > 0 && c.defensiveHymnTurns && c.defensiveHymnTurns >= turnCount) {
+            let healAmt = Math.floor(c.maxHp * 0.20);
+            c.hp = Math.min(c.maxHp, c.hp + healAmt);
+            if (dDOM) {
+                syncVisualHP(dDOM, c.hp, c.maxHp);
+                showFloatingText(dDOM, `+${healAmt} REGEN`, "#3498db", "1.5rem");
+                dDOM.classList.add('shimmer-fx'); setTimeout(() => dDOM.classList.remove('shimmer-fx'), 1000);
+            }
+            addLog(`<b>${c.name}</b> regenerates ${healAmt} HP from Defensive Hymn!`, "#3498db");
+        }
+        // 👆 ------------------------------------------------ 👆
+
     }); 
     
     let manaGain = (turnCount <= 10 ? 2 : turnCount <= 20 ? 3 : turnCount <= 30 ? 4 : 5); 
@@ -2308,4 +2352,26 @@ function createWispProjectileFx(sourceEl, targetEl) {
     projectile.style.top = endY + 'px';
     
     setTimeout(() => { projectile.remove(); }, 300);
+}
+function createEchoFx(sourceEl, color) {
+    if(!sourceEl) return;
+    let rect = sourceEl.getBoundingClientRect();
+    let centerX = rect.left + rect.width / 2;
+    let centerY = rect.top + rect.height / 2;
+
+    for(let i=0; i<3; i++) {
+        setTimeout(() => {
+            let ring = document.createElement('div');
+            ring.style.cssText = `position:fixed; left:${centerX}px; top:${centerY}px; width:0px; height:0px; border: 6px solid ${color}; border-radius:50%; transform:translate(-50%, -50%); z-index:999; pointer-events:none; opacity:0.8; box-shadow: 0 0 30px ${color}, inset 0 0 30px ${color}; transition: all 1s ease-out;`;
+            document.body.appendChild(ring);
+            
+            void ring.offsetWidth; // Force browser to register the 0px size
+            
+            ring.style.width = '800px';
+            ring.style.height = '800px';
+            ring.style.opacity = '0';
+            
+            setTimeout(() => ring.remove(), 1000);
+        }, i * 300); // Shoots 3 waves, 300ms apart
+    }
 }
