@@ -97,6 +97,7 @@ const ASSET_LINKS = {
     "Wisp": "./assets/Wisp.png",
     "Goblin Warrior": "./assets/GoblinWarrior.png",
     "Goblin Archer": "./assets/GoblinArcher.png",
+    "Goblin Wardrummer": "./assets/GoblinWardrummer.png",
     "Zombie": "./assets/Zombie.png"
 };
 
@@ -149,6 +150,7 @@ function getCardTemplate(fileName, dataUrl) {
     if(cleanName.includes('shieldsfxvoice') && !cleanName.includes('2')) { shieldSfxVoiceUrl = dataUrl; return { isAudio: true }; }
     if(cleanName.includes('shieldsfx') && !cleanName.includes('voice')) { shieldSfxUrl = dataUrl; return { isAudio: true }; }
     if(cleanName.includes('menumusic')) { menuMusicUrl = dataUrl; return { isAudio: true }; }
+    if(cleanName.includes('wardrummersfx')) { wardrummerSfxUrl = dataUrl; return { isAudio: true }; }
 
     if(cleanName.includes('back_card') || cleanName.includes('back card') || cleanName.includes('crown back')) { return { isCardBack: true, img: dataUrl }; }
     if(cleanName.includes('slash')) { return { isSlash: true, img: dataUrl }; }
@@ -189,6 +191,17 @@ function getCardTemplate(fileName, dataUrl) {
             passives: [ { name: "THE SWARM", desc: "Whenever this unit uses [Volley], all other unexhausted friendly Goblin Archers fire at the same target. Consumes their action." } ] 
         };
     }
+    else if(cleanName.includes('goblin wardrummer')) {
+     return { 
+         isPlayable: true, type: 'unit', name: "Goblin Wardrummer", title: "Level 3", powerLevel: 3, summonCost: 3, faction: "Neutral", race: "Forest Creature", hp: 600, maxHp: 600, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0, battleHymnTurns: 0, defensiveHymnTurns: 0,
+         skills: [ 
+             { name: "DRUMSTICK BASH", manaCost: 0, desc: "Inflicts 1-10 physical damage to a single enemy target." },
+             { name: "BATTLE HYMN", manaCost: 3, desc: "Grants all allies +50% bonus attack damage for 2 turns." },
+             { name: "DEFENSIVE HYMN", manaCost: 3, desc: "Grants all allies a 20% max HP heal at the start of each turn for 2 turns." }
+         ], 
+         passives: [] 
+     };
+ }
     else if (cleanName.includes('great knight')) {
         return {
             isPlayable: true, type: 'unit', name: "Great Knight", title: "Level 4", powerLevel: 4, summonCost: 3, summonRequires: { type: 'squiresFallen', amount: 1 }, faction: "Leonia", race: "Human", hp: 950, maxHp: 950, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
