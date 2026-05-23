@@ -83,7 +83,7 @@ function updateUI() {
             }
         }
 
-        c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier, .badge-bleed, .badge-block, .badge-shinobi, .badge-atkbuff').forEach(el => el.remove());
+        c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier, .badge-bleed, .badge-block, .badge-shinobi, .badge-atkbuff, .badge-bhymn, .badge-dhymn').forEach(el => el.remove());
 
         if(data.turnPlaced === turnCount) {
             const b = document.createElement('div'); b.className = 'placed-badge'; b.innerText = '{PLACED}'; c.appendChild(b);
