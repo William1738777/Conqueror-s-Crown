@@ -453,35 +453,57 @@ body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !import
 }
 
 /* =========================================
-   DISCARD PILE (New Feature)
+   DISCARD PILE UI (Repositioned to the Right)
    ========================================= */
 #discard-pile {
-    position: fixed;
-    bottom: 20px; /* Positioned near the player's hand */
-    left: 20px;
-    width: 140px;
-    height: 180px; /* Sized similarly to a vertical card slot */
-    
-    background-color: rgba(0, 0, 0, 0.6);
-    border: 3px dashed #666; /* Dotted outline drop zone */
-    border-radius: 12px;
-    
+    position: absolute;
+    bottom: 20px;
+    left: 630px; /* 👇 Moves it to the right of the hand container slider 👇 */
+    width: 100px;
+    height: 140px;
+    background: rgba(15, 15, 20, 0.9);
+    border: 2px dashed #666;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    
-    color: white;
-    font-family: 'Cinzel', serif;
-    font-size: 1.4rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-align: center;
-    
-    cursor: default;
-    z-index: 1000;
-    transition: all 0.2s ease-out;
+    color: #aaa;
+    z-index: 100;
+    transition: all 0.2s ease;
 }
+
+#discard-pile .discard-title { 
+    font-family: 'Cinzel', serif; 
+    font-size: 0.9rem; 
+    font-weight: bold; 
+    color: var(--gold); 
+}
+
+#discard-pile #discard-count { 
+    font-size: 1.5rem; 
+    font-weight: bold; 
+    margin-top: 2px; 
+    color: #fff; 
+}
+
+/* Hover highlight behavior when dragging a card over the pile */
+#discard-pile.valid-drop {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.2);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+}
+
+/* Disabled styling state when all 5 discards are consumed */
+#discard-pile.disabled {
+    border-style: solid;
+    border-color: #333;
+    opacity: 0.5;
+    pointer-events: none;
+}
+#discard-pile.disabled .discard-title { color: #555; text-decoration: line-through; }
+#discard-pile.disabled #discard-count { color: #555; }
 
 /* 🟢 Visually highlight when a card is hovering over the pile */
 #discard-pile.valid-drop {
