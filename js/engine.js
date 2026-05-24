@@ -2341,6 +2341,22 @@ document.addEventListener('keydown', (e) => {
                 if (typeof addLog === 'function') addLog("⚠️ DEV COMMAND: +1000 Gold", "#0f0");
             }
         }
+        // 👇 NEW: SKIP COMMAND 👇
+        else if (command === '/skip to northsideseq') {
+            if (typeof addLog === 'function') addLog("⚠️ DEV COMMAND: Skipping to Northside Watchtower...", "#0f0");
+            
+            // Hide the main menu and map screens if they are open
+            if (document.getElementById('start-screen')) document.getElementById('start-screen').style.display = 'none';
+            if (document.getElementById('world-map-screen')) document.getElementById('world-map-screen').style.display = 'none';
+            
+            // Immediately trigger the cinematic
+            if (typeof enterNorthsideWatchtower === 'function') {
+                enterNorthsideWatchtower();
+            } else {
+                alert("Error: enterNorthsideWatchtower() not found!");
+            }
+        }
+        // 👆 ---------------- 👆
         // 👇 THIS IS THE NEW FIX 👇
         else if (command.startsWith('/get card ')) {
             processDevCommand(command);
@@ -2355,8 +2371,9 @@ document.addEventListener('keydown', (e) => {
         devInput.blur();
     }
 });
+
 // ============================================================================
-// 🛠️ DEVELOPER CONSOLE & COMMANDS
+// 🛠️ DEVELOPER CONSOLE & COMMANDS (PROMPT FALLBACK)
 // ============================================================================
 
 function processDevCommand(cmd) {
@@ -2392,6 +2409,15 @@ function processDevCommand(cmd) {
         return;
     }
     
+    // 👇 NEW: FALLBACK SKIP COMMAND 👇
+    if (cmd.toLowerCase() === '/skip to northsideseq') {
+        if (document.getElementById('start-screen')) document.getElementById('start-screen').style.display = 'none';
+        if (document.getElementById('world-map-screen')) document.getElementById('world-map-screen').style.display = 'none';
+        if (typeof enterNorthsideWatchtower === 'function') enterNorthsideWatchtower();
+        return;
+    }
+    // 👆 ------------------------ 👆
+    
     // If command isn't recognized
     alert(`[DEV ERROR] Unknown command: ${cmd}`);
 }
@@ -2409,7 +2435,7 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
-
+    
 // ============================================================================
 // ✨ WISP VFX FUNCTIONS
 // ============================================================================
