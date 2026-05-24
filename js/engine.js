@@ -1028,13 +1028,18 @@ function triggerSlash(targetDOM, muteBodyShot = false) {
     if(!targetDOM) return; 
     if(!muteBodyShot && typeof bodyShotAudioUrl !== 'undefined' && bodyShotAudioUrl) playSound(bodyShotAudioUrl);
     
+    // Find the exact center of the target card
     const rect = targetDOM.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
     const slash = document.createElement('div'); 
-    slash.className = 'slash-fx'; 
+    slash.className = 'slash-fx'; // Hooks directly back into your fixed CSS rules
     
-    // Two-line layout pairing for coordinate tracking and dimension layout bounds
-    slash.style.cssText = `left: ${rect.left + rect.width / 2}px; top: ${rect.top + rect.height / 2}px;`;
-    slash.style.width = '200px'; slash.style.height = '200px'; slash.style.transform = 'translate(-50%, -50%)';
+    // Only inline coordinates required to pin it dynamically to the target positions
+    slash.style.position = 'fixed';
+    slash.style.left = centerX + 'px';
+    slash.style.top = centerY + 'px';
     
     document.body.appendChild(slash); 
     setTimeout(() => slash.remove(), 600);
@@ -1043,13 +1048,15 @@ function triggerSlash(targetDOM, muteBodyShot = false) {
 function triggerHeal(targetDOM) {
     if(!targetDOM) return;
     
+    // Find the exact center of the target card
     const rect = targetDOM.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
     const healFx = document.createElement('div'); 
-    healFx.className = 'heal-fx'; 
+    healFx.className = 'heal-fx'; // Hooks directly back into your fixed CSS rules
     
+    // Only inline coordinates required to pin it dynamically to the target positions
     healFx.style.position = 'fixed';
     healFx.style.left = centerX + 'px';
     healFx.style.top = centerY + 'px';
@@ -1060,42 +1067,42 @@ function triggerHeal(targetDOM) {
 // 👆 ---------------------------------------- 👆
 function shootSpear(actorDOM, targetDOM) {
     if (!actorDOM || !targetDOM) return;
-    const aRect = actorDOM.getBoundingClientRect(); 
-    const tRect = targetDOM.getBoundingClientRect();
-    const startX = aRect.left + aRect.width / 2; 
-    const startY = aRect.top + aRect.height / 2;
-    const endX = tRect.left + tRect.width / 2; 
-    const endY = tRect.top + tRect.height / 2;
+    const aRect = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
+    const startX = aRect.left + aRect.width / 2; const startY = aRect.top + aRect.height / 2;
+    const endX = tRect.left + tRect.width / 2; const endY = tRect.top + tRect.height / 2;
 
     const projectile = document.createElement('div');
-    
-    // 🌟 FIX 2: Align name with your actual asset system selector
-    projectile.className = 'spear-projectile'; 
-    
-    // Inline dimensions layer validation
-    projectile.style.position = 'fixed';
-    projectile.style.width = '80px';
-    projectile.style.height = '30px';
-    projectile.style.zIndex = '9999';
-    projectile.style.pointerEvents = 'none';
-    projectile.style.left = startX + 'px'; 
-    projectile.style.top = startY + 'px';
+    projectile.className = 'spear-fx'; 
+    projectile.style.left = startX + 'px'; projectile.style.top = startY + 'px';
 
     const angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
     projectile.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
 
     document.body.appendChild(projectile);
 
-    setTimeout(() => { 
-        projectile.style.left = endX + 'px'; 
-        projectile.style.top = endY + 'px'; 
-    }, 20);
-    
-    setTimeout(() => { 
-        projectile.remove(); 
-        if (typeof arrowHitAudioUrl !== 'undefined' && arrowHitAudioUrl) playSound(arrowHitAudioUrl); 
-    }, 300);
+    setTimeout(() => { projectile.style.left = endX + 'px'; projectile.style.top = endY + 'px'; }, 10);
+    setTimeout(() => { projectile.remove(); if (arrowHitAudioUrl) playSound(arrowHitAudioUrl); }, 300);
 }
+
+function shootProjectile(actorDOM, targetDOM, isArrow = true) {
+    if (!actorDOM || !targetDOM) return;
+    const aRect = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
+    const startX = aRect.left + aRect.width / 2; const startY = aRect.top + aRect.height / 2;
+    const endX = tRect.left + tRect.width / 2; const endY = tRect.top + tRect.height / 2;
+
+    const projectile = document.createElement('div');
+    projectile.className = isArrow ? 'arrow-fx' : 'shuriken-fx';
+    projectile.style.left = startX + 'px'; projectile.style.top = startY + 'px';
+
+    const angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
+    projectile.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+
+    document.body.appendChild(projectile);
+
+    setTimeout(() => { projectile.style.left = endX + 'px'; projectile.style.top = endY + 'px'; }, 10);
+    setTimeout(() => { projectile.remove(); if (isArrow && arrowHitAudioUrl) playSound(arrowHitAudioUrl); }, 300);
+}
+
 function showJadenLock(targetDOM) {
     if(!targetDOM || !jadenLockUrl) return null;
     const lock = document.createElement('div');
@@ -1628,33 +1635,36 @@ async function processQueue(sideProcessing, queueArr) {
         // ============================================================================
         // ⚔️ PRAETORIAN GUARD: SPEAR THROW LOCKOUT (Fixed Variable Context)
         // ============================================================================
-       // Inside processQueue loop -> else if (action.skillName === "SPEAR THROW")
-else if (action.skillName === "SPEAR THROW") {
-    let dmg = Math.floor(Math.random() * 301) + 200; // 200 - 500
-    let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
-    let tInst = cardInstances[tId];
-    let tDOM = document.getElementById(tId);
-
-    if (actorDOM && tDOM) {
-        // 🌟 FIX 1: Explicitly call your dedicated spear animation path
-        shootSpear(actorDOM, tDOM); 
-        await new Promise(r => setTimeout(r, 300)); 
+        else if (action.skillName === "SPEAR THROW") {
+            let dmg = Math.floor(Math.random() * 301) + 200; // 200 - 500
+            let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
+            let tInst = cardInstances[tId];
+            let tDOM = document.getElementById(tId);
         
-        await applyDamage(actor, tId, dmg, "SPEAR THROW");
-        
-        if (tInst && tInst.hp > 0) {
-            if (!tInst.statuses) tInst.statuses = [];
-            tInst.statuses.push({ 
-                name: "Speared", 
-                originId: actor.id, 
-                desc: "Takes 40% more damage from the Praetorian Guard who threw the spear." 
-            });
-            actor.spearTargetId = tId; 
-            addLog(`${tInst.name} is Speared!`, "#9b59b6");
-            updateUI();
+            if (actorDOM && tDOM) {
+                shootProjectile(actorDOM, tDOM, false); // Triggers travel paths across screen canvas
+                await new Promise(r => setTimeout(r, 300)); // Pause thread for projectile arrival path
+                
+                await applyDamage(actor, tId, dmg, "SPEAR THROW");
+                
+                if (tInst && tInst.hp > 0) {
+                    if (!tInst.statuses) tInst.statuses = [];
+                    
+                    // Store the precise ID of the Guard who threw it for accurate modifier multiplier math
+                    tInst.statuses.push({ 
+                        name: "Speared", 
+                        originId: actor.id, 
+                        desc: "Takes 40% more damage from the Praetorian Guard who threw the spear." 
+                    });
+                    
+                    // Lock out UI skill interactions by binding target instance to attacker object properties
+                    actor.spearTargetId = tId; 
+                    
+                    addLog(`${tInst.name} is Speared!`, "#9b59b6");
+                    updateUI();
+                }
+            }
         }
-    }
-}
         else if (action.skillName === "Blessing of the Light") {
             let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
             let targetInst = cardInstances[tId]; let targetDOM = document.getElementById(tId);
