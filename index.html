@@ -26,6 +26,28 @@ Version 8.11 (Freedom)
         <div id="absorbing-text">Loading Assets...</div>
     </div>
 
+    <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:white; z-index:10000; flex-direction:column; justify-content:center; align-items:center; font-family:'Cinzel', serif; font-size:2rem; letter-spacing:5px;">
+        <div class="energy-sphere" style="position:relative; margin-bottom: 20px; transform: scale(0.5);"></div>
+        LOADING...
+    </div>
+
+    <div id="video-container" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:9999;">
+        <video id="cutscene-video" width="100%" height="100%" style="object-fit:cover;">
+            <source src="./assets/WatchtowerScene.mp4" type="video/mp4">
+        </video>
+        <button onclick="skipVideo()" style="position:absolute; bottom:20px; right:20px; background:rgba(0,0,0,0.5); color:#fff; border:1px solid #fff; padding:5px 10px; cursor:pointer;">Skip</button>
+    </div>
+
+    <div id="watchtower-cinematic-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center; transition: background-image 0.5s ease;">
+        <div id="cinematic-fx-layer" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:50;"></div>
+        
+        <div id="watchtower-dialogue-box" class="dialogue-box-style" onclick="advanceWatchtowerCinematic()" style="z-index: 100;">
+            <div id="wt-speaker">...</div>
+            <div id="wt-text">...</div>
+            <div style="font-size: 0.75rem; color: #aaa; text-align: right; margin-top: 15px; font-style: italic;">(Click to continue)</div>
+        </div>
+    </div>
+
     <div id="world-map-screen" class="rpg-screen">
         <div id="map-darkness"></div>
         <div class="map-hotspot" style="top: 45%; left: 50%; width: 160px; height: 100px;" onclick="enterLeonia()">
