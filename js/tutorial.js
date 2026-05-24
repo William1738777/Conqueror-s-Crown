@@ -1179,21 +1179,38 @@ function summonGreatKnightCinematic(layer) {
     // Play the beam sound
     if(typeof beamAudioUrl !== 'undefined') playSound(beamAudioUrl);
     
-    // Create ONLY the light pillar effect (no floating Great Knight card)
+    // Add the epic magic circle and shockwave from the Gacha animation!
+    const magicCircle = document.createElement('div');
+    magicCircle.className = 'magic-circle charging-element';
+    magicCircle.style.left = '50%';
+    magicCircle.style.top = '50%';
+    magicCircle.style.zIndex = '51';
+    
     const pillar = document.createElement('div');
     pillar.className = 'light-pillar charging-element';
     pillar.style.left = '50%';
     pillar.style.zIndex = '52'; // Ensures the pillar draws over the background
+
+    const shockwave = document.createElement('div');
+    shockwave.className = 'epic-shockwave';
+    shockwave.style.left = '50%';
+    shockwave.style.top = '50%';
+    shockwave.style.zIndex = '53';
+    
+    layer.appendChild(magicCircle);
     layer.appendChild(pillar);
+    layer.appendChild(shockwave);
 
     // Play the activation sound slightly after the beam
     setTimeout(() => {
         if(typeof buffActivatedUrl !== 'undefined') playSound(buffActivatedUrl);
     }, 200);
 
-    // Clean up the light pillar after the animation is done
+    // Clean up all effects after the animation is done
     setTimeout(() => {
         if (pillar) pillar.remove();
+        if (magicCircle) magicCircle.remove();
+        if (shockwave) shockwave.remove();
     }, 1000);
 }
 
