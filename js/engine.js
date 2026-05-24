@@ -1001,20 +1001,48 @@ function showFloatingText(targetDOM, text, color="#ff4d4d", fontSize="2rem") {
     document.body.appendChild(el); setTimeout(() => el.remove(), 1200);
 }
 
+// 👇 UPDATED FX FUNCTIONS TO PREVENT CLIPPING 👇
 function triggerSlash(targetDOM, muteBodyShot = false) {
-    if(!targetDOM) return; if(!muteBodyShot && bodyShotAudioUrl) playSound(bodyShotAudioUrl);
-    const slash = document.createElement('div'); slash.className = 'slash-fx'; targetDOM.appendChild(slash); setTimeout(() => slash.remove(), 600);
+    if(!targetDOM) return; 
+    if(!muteBodyShot && bodyShotAudioUrl) playSound(bodyShotAudioUrl);
+    
+    // Find the exact center of the card on the screen
+    const rect = targetDOM.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const slash = document.createElement('div'); 
+    slash.className = 'slash-fx'; 
+    
+    // Force it to overlay the whole screen at those coordinates
+    slash.style.position = 'fixed';
+    slash.style.left = centerX + 'px';
+    slash.style.top = centerY + 'px';
+    
+    document.body.appendChild(slash); 
+    setTimeout(() => slash.remove(), 600);
 }
 
 function triggerHeal(targetDOM) {
     if(!targetDOM) return;
+    
+    // Find the exact center of the card on the screen
+    const rect = targetDOM.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
     const healFx = document.createElement('div'); 
     healFx.className = 'heal-fx'; 
-    targetDOM.appendChild(healFx); 
     
-    // Assumes your heal gif takes about 800ms to play
+    // Force it to overlay the whole screen at those coordinates
+    healFx.style.position = 'fixed';
+    healFx.style.left = centerX + 'px';
+    healFx.style.top = centerY + 'px';
+    
+    document.body.appendChild(healFx); 
     setTimeout(() => healFx.remove(), 800);
 }
+// 👆 ---------------------------------------- 👆
 
 function shootProjectile(actorDOM, targetDOM, isArrow = true) {
     if (!actorDOM || !targetDOM) return;
