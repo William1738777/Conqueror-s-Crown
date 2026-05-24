@@ -1065,44 +1065,48 @@ function triggerHeal(targetDOM) {
     setTimeout(() => healFx.remove(), 800);
 }
 // 👆 ---------------------------------------- 👆
-function shootSpear(actorDOM, targetDOM) {
-    if (!actorDOM || !targetDOM) return;
-    const aRect = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
-    const startX = aRect.left + aRect.width / 2; const startY = aRect.top + aRect.height / 2;
-    const endX = tRect.left + tRect.width / 2; const endY = tRect.top + tRect.height / 2;
+function createSpearProjectileFx(sourceEl, targetEl) {
+    if (!sourceEl || !targetEl) return;
+    
+    // WISP METHOD: Create an actual image element instead of relying on CSS variables
+    let projectile = document.createElement('img');
+    projectile.src = './assets/PraetorianSpear.png'; // Direct hardcoded path
+    
+    projectile.style.position = 'fixed';
+    projectile.style.width = '80px';   
+    projectile.style.height = '30px';
+    projectile.style.zIndex = '9999';
+    projectile.style.pointerEvents = 'none';
+    projectile.style.transition = 'all 0.3s linear';
+    projectile.style.filter = 'drop-shadow(2px 2px 5px rgba(0,0,0,0.5))';
 
-    const projectile = document.createElement('div');
-    projectile.className = 'spear-fx'; 
-    projectile.style.left = startX + 'px'; projectile.style.top = startY + 'px';
+    let sRect = sourceEl.getBoundingClientRect();
+    let tRect = targetEl.getBoundingClientRect();
 
-    const angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
+    let startX = sRect.left + sRect.width / 2;
+    let startY = sRect.top + sRect.height / 2;
+    let endX = tRect.left + tRect.width / 2;
+    let endY = tRect.top + tRect.height / 2;
+
+    let angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
+
+    projectile.style.left = startX + 'px';
+    projectile.style.top = startY + 'px';
     projectile.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
 
     document.body.appendChild(projectile);
 
-    setTimeout(() => { projectile.style.left = endX + 'px'; projectile.style.top = endY + 'px'; }, 10);
-    setTimeout(() => { projectile.remove(); if (arrowHitAudioUrl) playSound(arrowHitAudioUrl); }, 300);
+    // Force browser reflow to ensure the transition animates
+    void projectile.offsetWidth;
+
+    projectile.style.left = endX + 'px';
+    projectile.style.top = endY + 'px';
+
+    setTimeout(() => { 
+        projectile.remove(); 
+        if (typeof arrowHitAudioUrl !== 'undefined' && arrowHitAudioUrl) playSound(arrowHitAudioUrl);
+    }, 300);
 }
-
-function shootProjectile(actorDOM, targetDOM, isArrow = true) {
-    if (!actorDOM || !targetDOM) return;
-    const aRect = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
-    const startX = aRect.left + aRect.width / 2; const startY = aRect.top + aRect.height / 2;
-    const endX = tRect.left + tRect.width / 2; const endY = tRect.top + tRect.height / 2;
-
-    const projectile = document.createElement('div');
-    projectile.className = isArrow ? 'arrow-fx' : 'shuriken-fx';
-    projectile.style.left = startX + 'px'; projectile.style.top = startY + 'px';
-
-    const angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
-    projectile.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
-
-    document.body.appendChild(projectile);
-
-    setTimeout(() => { projectile.style.left = endX + 'px'; projectile.style.top = endY + 'px'; }, 10);
-    setTimeout(() => { projectile.remove(); if (isArrow && arrowHitAudioUrl) playSound(arrowHitAudioUrl); }, 300);
-}
-
 function showJadenLock(targetDOM) {
     if(!targetDOM || !jadenLockUrl) return null;
     const lock = document.createElement('div');
@@ -1636,35 +1640,32 @@ async function processQueue(sideProcessing, queueArr) {
         // ⚔️ PRAETORIAN GUARD: SPEAR THROW LOCKOUT (Fixed Variable Context)
         // ============================================================================
         else if (action.skillName === "SPEAR THROW") {
-            let dmg = Math.floor(Math.random() * 301) + 200; // 200 - 500
+            let dmg = Math.floor(Math.random() * 301) + 200; 
             let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
             let tInst = cardInstances[tId];
             let tDOM = document.getElementById(tId);
         
             if (actorDOM && tDOM) {
-                shootProjectile(actorDOM, tDOM, false); // Triggers travel paths across screen canvas
-                await new Promise(r => setTimeout(r, 300)); // Pause thread for projectile arrival path
+                // 🌟 Use the bulletproof Wisp-style direct image injection
+                createSpearProjectileFx(actorDOM, tDOM); 
+                await new Promise(r => setTimeout(r, 300)); 
                 
                 await applyDamage(actor, tId, dmg, "SPEAR THROW");
                 
                 if (tInst && tInst.hp > 0) {
                     if (!tInst.statuses) tInst.statuses = [];
-                    
-                    // Store the precise ID of the Guard who threw it for accurate modifier multiplier math
                     tInst.statuses.push({ 
                         name: "Speared", 
                         originId: actor.id, 
                         desc: "Takes 40% more damage from the Praetorian Guard who threw the spear." 
                     });
-                    
-                    // Lock out UI skill interactions by binding target instance to attacker object properties
                     actor.spearTargetId = tId; 
-                    
                     addLog(`${tInst.name} is Speared!`, "#9b59b6");
                     updateUI();
                 }
             }
         }
+        else if (action.skillName === "Blessing of the Light") {
         else if (action.skillName === "Blessing of the Light") {
             let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
             let targetInst = cardInstances[tId]; let targetDOM = document.getElementById(tId);
