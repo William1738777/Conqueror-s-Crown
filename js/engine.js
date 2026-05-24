@@ -1025,23 +1025,15 @@ function showFloatingText(targetDOM, text, color="#ff4d4d", fontSize="2rem") {
 // ============================================================================
 
 function triggerSlash(targetDOM, muteBodyShot = false) {
-    if(!targetDOM) return; 
+    if(!targetDOM) return;
     if(!muteBodyShot && typeof bodyShotAudioUrl !== 'undefined' && bodyShotAudioUrl) playSound(bodyShotAudioUrl);
     
-    // Find the exact center of the target card
-    const rect = targetDOM.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
     const slash = document.createElement('div'); 
-    slash.className = 'slash-fx'; // Hooks directly back into your fixed CSS rules
+    slash.className = 'slash-fx'; 
     
-    // Only inline coordinates required to pin it dynamically to the target positions
-    slash.style.position = 'fixed';
-    slash.style.left = centerX + 'px';
-    slash.style.top = centerY + 'px';
+    // THE FIX: Append directly to the card. It inherits the card's position automatically.
+    targetDOM.appendChild(slash); 
     
-    document.body.appendChild(slash); 
     setTimeout(() => slash.remove(), 600);
 }
 
