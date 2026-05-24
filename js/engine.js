@@ -105,6 +105,12 @@ c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambe
         
         let topRightOffset = -8; let topLeftOffset = -8;
 
+        if (data.statuses && data.statuses.some(s => s.name === "Speared")) {
+            const sp = document.createElement('div');
+            sp.className = 'badge-speared'; // Automatically hooks into our custom CSS layout variables
+            c.appendChild(sp);
+        }
+
         if (data.tauntedBy) {
             c.classList.add('taunted-status');
             if (tauntedImgUrl) {
@@ -498,6 +504,12 @@ function showInspector(id, cardElement) {
                     let meetsCondition = true;
                     if(skill.requiresBlessings) meetsCondition = (data.blessings >= skill.requiresBlessings);
                     if(skill.name === "Trigger Unbound" && (!data.chamberedRounds || data.chamberedRounds === 0)) meetsCondition = false;
+                    
+                    // 👇 NEW: LOCK OUT SPEAR THROW IF AMMUNITION IS OUT 👇
+                    if(skill.name === "SPEAR THROW" && data.spearTargetId && cardInstances[data.spearTargetId]) {
+                        meetsCondition = false;
+                    }
+                    // 👆 ----------------------------------------------- 👆
                     
                     let skillCanAct = canAct;
                     if (isTutorialMode && data.name === "Mana Core" && tutorialStep === 5) skillCanAct = true; 
@@ -1235,6 +1247,13 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
 
     let dmg = await systemDetector("DAMAGE_CALC", { actor, targetInst, skillName, baseDmg });
 
+    // 👇 NEW: PRAETORIAN AMPLIFICATION CHECK 👇
+    if (targetInst && targetInst.statuses && targetInst.statuses.some(s => s.name === "Speared" && s.originId === actor.id)) {
+        dmg = Math.floor(dmg * 1.4); // Apply the 1.4x (40%) damage multiplier
+        addLog(`Spear puncture amplifies damage output!`, "#e67e22");
+    }
+    // 👆 ------------------------------------- 👆
+
     // --- 1. LAST STAND DETECTION ---
     let isLastStandActive = false;
     let checkSide = targetId === 'CORE' ? (actor.side === 'PLAYER' ? 'ENEMY' : 'PLAYER') : targetInst.side;
@@ -1336,6 +1355,15 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
              if(targetInst.hp <= 0) { 
                  died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
                  if(targetDOM) targetDOM.remove(); 
+
+                 // 👇 NEW: RETRIEVE SPEAR FROM FALLEN ENEMY 👇
+                 Object.values(cardInstances).forEach(c => {
+                     if (c.name === "Praetorian Guard" && c.spearTargetId === targetId) {
+                         c.spearTargetId = null; // Unlocks the weapon parameter cache
+                         addLog(`<b>${c.name}</b> recovered their spear from the battlefield!`, "#2ecc71");
+                     }
+                 });
+                 // 👆 -------------------------------------- 👆
 
                  if ((actor.name === "Goblin Warrior" || actor.name === "Goblin Archer") && Math.random() <= 0.50) {
                      if (typeof goblinKillSfxUrl !== 'undefined' && goblinKillSfxUrl) playSound(goblinKillSfxUrl);
@@ -1552,6 +1580,72 @@ async function processQueue(sideProcessing, queueArr) {
             if(targetInst && targetDOM) { targetInst.extraAction = true; targetInst.exhausted = false; targetDOM.classList.add('buff-double-action'); addLog(`<b>${targetInst.name}</b> is granted One More Time!`, "#9b59b6"); }
             if(actorDOM) { actorDOM.style.opacity = "0"; await new Promise(r => setTimeout(r, 300)); actorDOM.remove(); }
             actor.hp = 0; 
+        }
+        // ============================================================================
+        // ⚔️ PRAETORIAN GUARD: RELENTLESS STRIKES CASCADE (Fixed Variable Context)
+        // ============================================================================
+        else if (action.skillName === "RELENTLESS STRIKES") {
+            let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
+            let tInst = cardInstances[tId];
+            
+            // STRIKE 1 (50 - 150)
+            let dmg1 = Math.floor(Math.random() * 101) + 50; 
+            await applyDamage(actor, tId, dmg1, "RELENTLESS STRIKES");
+        
+            // Check cascade condition 1 (Target must live and damage must hit 100+)
+            if (tInst && tInst.hp > 0 && dmg1 >= 100) {
+                await new Promise(r => setTimeout(r, 600)); // Maintain perfect async pacing tempo
+                
+                // STRIKE 2 (100 - 200)
+                let dmg2 = Math.floor(Math.random() * 101) + 100;
+                await applyDamage(actor, tId, dmg2, "RELENTLESS STRIKES");
+        
+                // Check cascade condition 2 (Target must live and damage must hit 150+)
+                if (tInst && tInst.hp > 0 && dmg2 >= 150) {
+                    await new Promise(r => setTimeout(r, 600));
+                    
+                    // STRIKE 3 (200 - 400)
+                    let dmg3 = Math.floor(Math.random() * 201) + 200;
+                    await applyDamage(actor, tId, dmg3, "RELENTLESS STRIKES");
+                } else {
+                    addLog(`Relentless Strikes combo ended.`, "#aaa");
+                }
+            } else {
+                addLog(`Relentless Strikes combo ended.`, "#aaa");
+            }
+        }
+        // ============================================================================
+        // ⚔️ PRAETORIAN GUARD: SPEAR THROW LOCKOUT (Fixed Variable Context)
+        // ============================================================================
+        else if (action.skillName === "SPEAR THROW") {
+            let dmg = Math.floor(Math.random() * 301) + 200; // 200 - 500
+            let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
+            let tInst = cardInstances[tId];
+            let tDOM = document.getElementById(tId);
+        
+            if (actorDOM && tDOM) {
+                shootProjectile(actorDOM, tDOM, false); // Triggers travel paths across screen canvas
+                await new Promise(r => setTimeout(r, 300)); // Pause thread for projectile arrival path
+                
+                await applyDamage(actor, tId, dmg, "SPEAR THROW");
+                
+                if (tInst && tInst.hp > 0) {
+                    if (!tInst.statuses) tInst.statuses = [];
+                    
+                    // Store the precise ID of the Guard who threw it for accurate modifier multiplier math
+                    tInst.statuses.push({ 
+                        name: "Speared", 
+                        originId: actor.id, 
+                        desc: "Takes 40% more damage from the Praetorian Guard who threw the spear." 
+                    });
+                    
+                    // Lock out UI skill interactions by binding target instance to attacker object properties
+                    actor.spearTargetId = tId; 
+                    
+                    addLog(`${tInst.name} is Speared!`, "#9b59b6");
+                    updateUI();
+                }
+            }
         }
         else if (action.skillName === "Blessing of the Light") {
             let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
