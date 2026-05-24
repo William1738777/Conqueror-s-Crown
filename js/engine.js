@@ -1901,6 +1901,8 @@ async function processQueue(sideProcessing, queueArr) {
             // 1. Identify the Duel Type
             let isWispDuel = Object.values(cardInstances).some(c => c.side === 'ENEMY' && c.name === "Wisp");
             let isJaxDuel = (typeof triggerJaxPostDuel === 'function' && typeof tgStep !== 'undefined' && tgStep >= 4);
+            // NEW: Detect if we are fighting the Goblin Ambush
+            let isAmbushDuel = Object.values(cardInstances).some(c => c.side === 'ENEMY' && (c.name === "Goblin Warrior" || c.name === "Goblin Archer"));
             
             // 2. Set the appropriate text and next-step function
             let rewardText = "No rewards.";
@@ -1912,6 +1914,9 @@ async function processQueue(sideProcessing, queueArr) {
             } else if (isJaxDuel) {
                 rewardText = "New Cards Available<br><span style='font-size:1rem; color:#aaa;'>Stranger's Respect</span>";
                 callbackFunc = () => { triggerJaxPostDuel(); };
+            } else if (isAmbushDuel) { // NEW: Northside Victory Logic
+                rewardText = "2,500 Gold & Legend Core<br><span style='font-size:1rem; color:#aaa;'>Ambush Survived!</span>";
+                callbackFunc = () => { triggerNorthsideVictory(); };
             }
 
             // 3. Create the Custom Victory Screen
@@ -1938,14 +1943,12 @@ async function processQueue(sideProcessing, queueArr) {
             btn.addEventListener('click', () => {
                 if (typeof playClickSound === 'function') playClickSound();
                 vicBox.remove();
-                callbackFunc(); // This runs endWispDuel() which adds the gold and resumes the trail!
+                callbackFunc(); 
             });
 
         } 
         else { if (typeof triggerLicenseQuest === 'function') triggerLicenseQuest(); }
     }
-}
-
 
 
 document.getElementById('exec-btn').addEventListener('click', () => { 
