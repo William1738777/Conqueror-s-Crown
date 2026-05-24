@@ -452,6 +452,65 @@ body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !import
     text-shadow: 2px 2px 4px #000;
 }
 
+/* =========================================
+   DISCARD PILE (New Feature)
+   ========================================= */
+#discard-pile {
+    position: fixed;
+    bottom: 20px; /* Positioned near the player's hand */
+    left: 20px;
+    width: 140px;
+    height: 180px; /* Sized similarly to a vertical card slot */
+    
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 3px dashed #666; /* Dotted outline drop zone */
+    border-radius: 12px;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    color: white;
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    
+    cursor: default;
+    z-index: 1000;
+    transition: all 0.2s ease-out;
+}
+
+/* 🟢 Visually highlight when a card is hovering over the pile */
+#discard-pile.valid-drop {
+    border-color: #27ae60; /* Green outline */
+    background-color: rgba(39, 174, 96, 0.2);
+    transform: scale(1.05); /* Slight puff up */
+}
+
+/* 🔴 Sytling for when the feature is completely used up */
+#discard-pile.disabled {
+    border-style: solid;
+    border-color: #555;
+    background-color: rgba(20, 20, 20, 0.8);
+    opacity: 0.5;
+    color: #888;
+    cursor: not-allowed;
+}
+#discard-pile.disabled::after {
+    content: "EMPTY";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    font-size: 2.5rem;
+    color: #c0392b;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 /* --- ANIMATION KEYFRAMES --- */
 @keyframes absorbEnergy { 0% { transform: scale(0.1) rotate(0deg); opacity: 0; box-shadow: 0 0 10px var(--gold); } 50% { opacity: 1; box-shadow: 0 0 50px 20px var(--gold), inset 0 0 40px var(--mana-color); } 90% { transform: scale(0.5) rotate(720deg); box-shadow: 0 0 100px 50px #fff, inset 0 0 80px #fff; opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
 @keyframes poofFlash { 0% { opacity: 0; } 10% { opacity: 1; } 100% { opacity: 0; } }
