@@ -82,12 +82,14 @@ const ASSET_LINKS = {
     "ShurikenKin_FX": "./assets/ShurikenKin_FX.png",
     "HealFX": "./assets/HealFX.gif",
     "WispProjectile": "./assets/WispProjectile.png",
+    "praetorian_spear": "./assets/PraetorianSpear.png",
     "JadenLock": "./assets/JadenLock.png",
     "JadenBullet": "./assets/JadenBullet.gif",
     "Taunted": "./assets/Taunted.png",
     "Barrier": "./assets/Barrier.png",
     "Bleed": "./assets/Bleed.png",
     "FearDebuff": "./assets/FearDebuff.png",
+    "speared_icon": "./assets/Speared.png"
     "ShinobiMark": "./assets/Bleed.png", 
     
     // -- Cards --
@@ -113,6 +115,7 @@ const ASSET_LINKS = {
     "Goblin Archer": "./assets/GoblinArcher.png",
     "Goblin Wardrummer": "./assets/GoblinWarDrummer.png",
     "Enslaved Troll": "./assets/EnslavedTroll.png",
+    "praetorian_guard": "./assets/Praetorian Guard.png",
     "Zombie": "./assets/Zombie.png"
 };
 
