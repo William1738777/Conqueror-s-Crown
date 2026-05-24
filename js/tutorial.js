@@ -1119,13 +1119,11 @@ function advanceWatchtowerCinematic() {
         for(let i = 0; i < 3; i++) {
             setTimeout(() => fireCinematicArrow(fxLayer), i * 300);
         }
-        
-        setTimeout(() => {
-            screen.style.backgroundImage = "url('./assets/OldWatchtower3.png')";
-        }, 1200); // Smooth transition to background 3 while arrows fly
 
     } else if (wtStep === 2) {
         wtStep = 3;
+        // Now OldWatchtower3 (which has the Knight in it) appears exactly as you summon him
+        screen.style.backgroundImage = "url('./assets/OldWatchtower3.png')";
         text.innerText = "I summon thee... Great Knight!";
         summonGreatKnightCinematic(fxLayer);
         
@@ -1178,27 +1176,25 @@ function fireCinematicArrow(layer, deflected = false) {
 }
 
 function summonGreatKnightCinematic(layer) {
+    // Play the beam sound
     if(typeof beamAudioUrl !== 'undefined') playSound(beamAudioUrl);
     
+    // Create ONLY the light pillar effect (no floating Great Knight card)
     const pillar = document.createElement('div');
     pillar.className = 'light-pillar charging-element';
     pillar.style.left = '50%';
+    pillar.style.zIndex = '52'; // Ensures the pillar draws over the background
     layer.appendChild(pillar);
 
-    const gk = document.createElement('div');
-    gk.style.cssText = `
-        position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%); width: 400px; height: 500px;
-        background-image: url('./assets/Great%20Knight.png'); background-size: contain; background-repeat: no-repeat; background-position: bottom center;
-        filter: drop-shadow(0 0 20px #f1c40f); opacity: 0; transition: opacity 1s ease-out, bottom 1s ease-out; z-index: 52;
-    `;
-    layer.appendChild(gk);
-    
+    // Play the activation sound slightly after the beam
     setTimeout(() => {
-        gk.style.opacity = '1';
-        gk.style.bottom = '10%';
         if(typeof buffActivatedUrl !== 'undefined') playSound(buffActivatedUrl);
-        setTimeout(() => pillar.remove(), 1000);
     }, 200);
+
+    // Clean up the light pillar after the animation is done
+    setTimeout(() => {
+        if (pillar) pillar.remove();
+    }, 1000);
 }
 
 // --- Custom Duel Logic for the Ambush ---
