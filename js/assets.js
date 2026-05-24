@@ -128,6 +128,9 @@ function getCardTemplate(fileName, dataUrl) {
     if(cleanName.includes('bk1')) { document.documentElement.style.setProperty('--bk1-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('bk3')) { document.documentElement.style.setProperty('--bk3-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.match(/tg[1-9]/)) { return { isMapBG: true, img: dataUrl }; }
+    if(cleanName.includes('oldwatchtower')) { return { isMapBG: true, img: dataUrl }; }
+    if(cleanName.includes('watchtowervideo')) { return { isFX: true }; }
+    if(cleanName.includes('wispprojectile')) { return { isFX: true }; }
     
     if(cleanName.includes('empty slot')) { document.documentElement.style.setProperty('--empty-slot-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isEmptySlot: true, img: dataUrl }; }
     if(cleanName.includes('empty ability')) { document.documentElement.style.setProperty('--empty-ability-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
