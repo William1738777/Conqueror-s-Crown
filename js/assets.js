@@ -231,16 +231,15 @@ function getCardTemplate(fileName, dataUrl) {
         };
     }
     else if(cleanName.includes('goblin wardrummer')) {
-     return { 
-         isPlayable: true, type: 'unit', name: "Goblin Wardrummer", title: "Level 3", powerLevel: 3, summonCost: 3, faction: "Neutral", race: "Forest Creature", hp: 600, maxHp: 600, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0, battleHymnTurns: 0, defensiveHymnTurns: 0,
-         skills: [ 
-             { name: "DRUMSTICK BASH", manaCost: 0, desc: "Inflicts 1-10 physical damage to a single enemy target." },
-             { name: "BATTLE HYMN", manaCost: 3, desc: "Grants all allies +50% bonus attack damage for 2 turns." },
-             { name: "DEFENSIVE HYMN", manaCost: 3, desc: "Grants all allies a 20% max HP heal at the start of each turn for 2 turns." }
-         ], 
-         passives: [] 
-     };
-         }
+        return { 
+            isPlayable: true, type: 'unit', name: "Goblin Wardrummer", title: "Level 3", powerLevel: 3, summonCost: 3, faction: "Neutral", race: "Forest Creature", hp: 600, maxHp: 600, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0, battleHymnTurns: 0, defensiveHymnTurns: 0,
+            skills: [ 
+                { name: "DRUMSTICK BASH", manaCost: 0, desc: "Inflicts 1-10 physical damage to a single enemy target." },
+                { name: "BATTLE HYMN", manaCost: 3, desc: "Grants all allies +50% bonus attack damage for 2 turns." },
+                { name: "DEFENSIVE HYMN", manaCost: 3, desc: "Grants all allies a 20% max HP heal at the start of each turn for 2 turns." }
+            ], 
+            passives: [] 
+        };
     } else if (cleanName.includes('praetorian guard')) {
         return {
             isPlayable: true, type: 'unit', name: "Praetorian Guard", title: "Level 5", powerLevel: 5, summonCost: 5, faction: "Leonia", race: "Human", hp: 1250, maxHp: 1250, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0, spearTargetId: null,
@@ -251,7 +250,6 @@ function getCardTemplate(fileName, dataUrl) {
             passives: []
         };
     }
-    
     else if (cleanName.includes('great knight')) {
         return {
             isPlayable: true, type: 'unit', name: "Great Knight", title: "Level 4", powerLevel: 4, summonCost: 3, summonRequires: { type: 'squiresFallen', amount: 1 }, faction: "Leonia", race: "Human", hp: 950, maxHp: 950, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
