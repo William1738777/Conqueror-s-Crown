@@ -89,7 +89,7 @@ const ASSET_LINKS = {
     "Barrier": "./assets/Barrier.png",
     "Bleed": "./assets/Bleed.png",
     "FearDebuff": "./assets/FearDebuff.png",
-    "speared_icon": "./assets/Speared.png"
+    "speared_icon": "./assets/Speared.png",
     "ShinobiMark": "./assets/Bleed.png", 
     
     // -- Cards --
