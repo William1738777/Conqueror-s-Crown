@@ -474,3 +474,35 @@ body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !import
 @keyframes spin3D_Y { 100% { transform: rotateY(360deg) rotateX(45deg); } }
 @keyframes spin3D_Z { 100% { transform: rotateZ(360deg) rotateX(75deg); } }
 
+/* =========================================
+   COMBAT VISUAL FX
+   ========================================= */
+.slash-fx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+    background-image: var(--slash-url);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.heal-fx {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+    background-image: var(--healfx-url);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+    z-index: 9999;
+}
