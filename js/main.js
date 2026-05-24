@@ -79,6 +79,11 @@ async function initializeGame() {
             document.getElementById('player-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
             document.getElementById('enemy-deck-stack').style.backgroundImage = `url("${deckBackImg.replace(/"/g, '&quot;').replace(/'/g, '%27')}")`;
         } else if (cardData.isSlash) { document.documentElement.style.setProperty('--slash-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
+        // Add these to your existing else-if chain inside the asset loading loop:
+        } else if (key === 'praetorian_spear') { 
+    document.documentElement.style.setProperty('--praetorian-spear-url', `url(${fileUrl.replace(/"/g, '')})`);
+        } else if (key === 'speared_icon') { 
+    document.documentElement.style.setProperty('--speared-icon-url', `url(${fileUrl.replace(/"/g, '')})`);
         } else if (cardData.isHealFx) { document.documentElement.style.setProperty('--healfx-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
         } else if (cardData.isArrow) { arrowImgUrl = cardData.img; document.documentElement.style.setProperty('--arrow-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
         } else if (cardData.isShuriken) { shurikenImgUrl = cardData.img; document.documentElement.style.setProperty('--shuriken-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
