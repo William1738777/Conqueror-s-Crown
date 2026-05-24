@@ -1264,6 +1264,30 @@ function startAmbushDuel() {
     drawBtn.style.display = "block";
     drawBtn.innerText = "DRAW HAND";
 }
+
+function triggerNorthsideVictory() {
+    // 1. Hide Battlefield and restore UI
+    document.getElementById('game-area').style.display = 'none';
+    document.getElementById('inventory-btn').style.display = 'block';
+    
+    // 2. Complete the Quest
+    if (quests.northside_investigation) {
+        quests.northside_investigation.isCompleted = true;
+        quests.northside_investigation.progress = 1;
+    }
+    
+    // 3. Give Rewards
+    if (typeof playerGold !== 'undefined') {
+        playerGold += 2500;
+        if (typeof updateGoldUI === 'function') updateGoldUI();
+    }
+    
+    // 4. Return to Barracks to report to Thorne
+    document.getElementById('barracks-inside-screen').style.display = 'block';
+    
+    // Optional: Add a log or trigger a new dialogue with Thorne here!
+    if (typeof addLog === 'function') addLog("Northside Ambush cleared! Report back to Captain Thorne.", "#2ecc71");
+}
 // --- PATROL STATE VARIABLES ---
 let patrolProgress = 0;
 let encounterChance = 5;
