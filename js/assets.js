@@ -238,7 +238,18 @@ function getCardTemplate(fileName, dataUrl) {
          ], 
          passives: [] 
      };
- }
+         }
+    } else if (cleanName.includes('praetorian guard')) {
+        return {
+            isPlayable: true, type: 'unit', name: "Praetorian Guard", title: "Level 5", powerLevel: 5, summonCost: 5, faction: "Leonia", race: "Human", hp: 1250, maxHp: 1250, atk: 0, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0, spearTargetId: null,
+            skills: [
+                { name: "RELENTLESS STRIKES", manaCost: 1, desc: "Strikes rolling 50-150. If 100+, strikes again (100-200). If 150+, final swing (200-400)." },
+                { name: "SPEAR THROW", manaCost: 0, desc: "Throws a spear for 200-500. Targets become (Speared), taking 40% more dmg from this Guard. Cannot throw again while target lives." }
+            ],
+            passives: []
+        };
+    }
+    
     else if (cleanName.includes('great knight')) {
         return {
             isPlayable: true, type: 'unit', name: "Great Knight", title: "Level 4", powerLevel: 4, summonCost: 3, summonRequires: { type: 'squiresFallen', amount: 1 }, faction: "Leonia", race: "Human", hp: 950, maxHp: 950, atk: 200, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, ambushTurns: 0, atkBuffTurns: 0,
