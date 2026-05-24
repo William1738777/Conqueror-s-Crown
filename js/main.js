@@ -100,6 +100,9 @@ async function initializeGame() {
         alert("No playable cards found! Check your asset links.");
         return;
     }
+
+    const discardPile = document.getElementById('discard-pile');
+    if(discardPile) discardPile.style.display = 'flex';
     
     setTimeout(showOverworldMap, 500); 
 }
