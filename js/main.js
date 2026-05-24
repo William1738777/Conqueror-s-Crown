@@ -5,6 +5,7 @@ let cardLibrary = [];
 let eHandData = [];
 let currentTurn = 'PLAYER', turnCount = 1;
 let pMana = 8, eMana = 8;
+let playerDiscardsRemaining = 5;
 let pCoreHP = 2000, eCoreHP = 2000;
 let pArashiSouls = 0, eArashiSouls = 0; 
 let pSquiresFallen = 0, eSquiresFallen = 0; 
