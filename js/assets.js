@@ -285,7 +285,7 @@ function getCardTemplate(fileName, dataUrl) {
     }
     else if(cleanName.includes('kin-ryu') || cleanName.includes('kin ryu')) {
         return { 
-            isPlayable: true, type: 'unit', name: "KIN-RYU", title: "YAMI NO SHINOBI (Level 7)", powerLevel: 7, summonCost: 8, summonRequires: { type: 'arashiSouls', amount: 4 }, faction: "Arashi", race: "Human", hp: 1200, maxHp: 1200, atk: 400, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
+            isPlayable: true, type: 'unit', name: "KIN-RYU", title: "YAMI NO SHINOBI (Level 7)", powerLevel: 7, summonCost: 8, summonRequires: { type: 'arashiSouls', amount: 3 }, faction: "Arashi", race: "Human", hp: 1200, maxHp: 1200, atk: 400, img: dataUrl, marks: 0, queued: false, extraAction: false, blockActive: false, isRevealed: false, atkBuffTurns: 0,
             skills: [ { name: "ICHI", manaCost: 1, desc: "Cuts target. 300-1100 DMG. If <500, rerolls." }, { name: "NI", manaCost: 2, desc: "Hits 2 targets for 300-400 damage each." } ], 
             passives: [ { name: "SHADOW STANCE", desc: "Shinobi Marks (Max 3) grant Arashi Faction units +6/12/18% DMG against the target." }, { name: "SAN", desc: "Auto-chains shurikens upon killing a target afflicted with Shinobi Mark." } ] 
         };
