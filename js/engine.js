@@ -1065,6 +1065,24 @@ function triggerHeal(targetDOM) {
     setTimeout(() => healFx.remove(), 800);
 }
 // 👆 ---------------------------------------- 👆
+function shootSpear(actorDOM, targetDOM) {
+    if (!actorDOM || !targetDOM) return;
+    const aRect = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
+    const startX = aRect.left + aRect.width / 2; const startY = aRect.top + aRect.height / 2;
+    const endX = tRect.left + tRect.width / 2; const endY = tRect.top + tRect.height / 2;
+
+    const projectile = document.createElement('div');
+    projectile.className = 'spear-fx'; 
+    projectile.style.left = startX + 'px'; projectile.style.top = startY + 'px';
+
+    const angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
+    projectile.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+
+    document.body.appendChild(projectile);
+
+    setTimeout(() => { projectile.style.left = endX + 'px'; projectile.style.top = endY + 'px'; }, 10);
+    setTimeout(() => { projectile.remove(); if (arrowHitAudioUrl) playSound(arrowHitAudioUrl); }, 300);
+}
 
 function shootProjectile(actorDOM, targetDOM, isArrow = true) {
     if (!actorDOM || !targetDOM) return;
@@ -1235,7 +1253,7 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
             addLog(`<b>${actor.name}</b> missed! The Leonian Squire dodged the attack!`, "#f1c40f");
             
             // Clean up the attacking animation and abort the damage!
-            if(actorDOM && skillName !== "RALLY" && skillName !== "BLOCK" && skillName !== "SAN" && actor.name !== "Jaden" && skillName !== "Lion's Roar") {
+            if(actorDOM && skillName !== "RALLY" && skillName !== "BLOCK" && skillName !== "SAN" && actor.name !== "Jaden" && skillName !== "Lion's Roar" && skillName !== "SPEAR THROW") {
                 setTimeout(() => { actorDOM.style.transition = "transform 0.3s ease-out"; actorDOM.style.transform = "scale(1) translate(0, 0)"; actorDOM.style.zIndex = ""; }, 300);
             }
             if(actorSlotDOM) actorSlotDOM.classList.remove('attacking-slot');
@@ -1276,7 +1294,7 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
         addLog(`<b>${targetInst.name}</b> BLOCKED the attack!`, '#ccc');
     }
 
-    if(actorDOM && skillName !== "Passive" && skillName !== "RALLY" && skillName !== "BLOCK" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && actor.name !== "Zeek" && skillName !== "Lion's Roar" && skillName !== "Dauntless" && skillName !== "Mana Beam" && skillName !== "Force of Nature") {
+    if(actorDOM && skillName !== "Passive" && skillName !== "RALLY" && skillName !== "BLOCK" && skillName !== "SAN" && !skillName.includes("Punishment") && actor.name !== "Jaden" && actor.name !== "Zeek" && skillName !== "Lion's Roar" && skillName !== "Dauntless" && skillName !== "Mana Beam" && skillName !== "Force of Nature" && skillName !== "SPEAR THROW") {
         if (!isRanged) {
             if(actorSlotDOM) actorSlotDOM.classList.add('attacking-slot');
             actorDOM.style.zIndex = "9999"; 
