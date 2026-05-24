@@ -35,6 +35,14 @@ const ASSET_LINKS = {
     "TG8": "./assets/TG8.png",
     "TG9": "./assets/TG9.png",
 
+    // -- Northside Cinematic Assets --
+    "WatchtowerVideo": "./assets/WatchtowerScene.mp4",
+    "OldWatchtower1": "./assets/OldWatchtower1.png",
+    "OldWatchtower2": "./assets/OldWatchtower2.png",
+    "OldWatchtower3": "./assets/OldWatchtower3.png",
+    "OldWatchtower4": "./assets/OldWatchtower4.png",
+    "OldWatchtower5": "./assets/OldWatchtower5.png",
+
     // -- Audio & SFX --
     "DragSound": "./assets/DragSound.mp3",
     "DropSound": "./assets/DropSound.mp3",
