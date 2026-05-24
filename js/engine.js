@@ -2571,3 +2571,91 @@ function createEchoFx(sourceEl, color) {
         }, i * 300); // Shoots 3 waves, 300ms apart
     }
 }
+// ============================================================================
+// 🗑️ DISCARD PILE DROP ZONE INTERACTION
+// ============================================================================
+window.playerDiscardsRemaining = 5;
+
+// This safe loop hooks directly into your actual DOM setup on startup
+setTimeout(() => {
+    const discardPile = document.getElementById('discard-pile');
+    if (discardPile) {
+        discardPile.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Required by browsers to accept drops
+            
+            // 👇 ARCHITECTURE FIX: Checks your true drag tracker + locks out tutorial
+            if (draggedCardId && window.playerDiscardsRemaining > 0 && !isTutorialMode) {
+                const cardDOM = document.getElementById(draggedCardId);
+                
+                // Idiot-proofing: Confirm card is being dragged from the hand, not the board
+                if (cardDOM && cardDOM.parentElement.id === 'hand') {
+                    discardPile.classList.add('valid-drop');
+                }
+            }
+        });
+        
+        // Remove highlighting when drag leaves the zone
+        discardPile.addEventListener('dragleave', () => {
+            discardPile.classList.remove('valid-drop');
+        });
+        
+        // Handle the card drop execution
+        discardPile.addEventListener('drop', (e) => {
+            e.preventDefault();
+            discardPile.classList.remove('valid-drop');
+            
+            if (draggedCardId) {
+                handleDiscardDrop(draggedCardId);
+            }
+        });
+    }
+}, 500);
+
+function handleDiscardDrop(cardId) {
+    if (isTutorialMode) {
+        addLog("Ben: Hey! Don't throw my cards away, you need those!", "#e74c3c");
+        return;
+    }
+
+    if (window.playerDiscardsRemaining <= 0) return;
+
+    const cardDOM = document.getElementById(cardId);
+    const liveData = cardInstances[cardId];
+    
+    // Safety check ensuring card exists and is explicitly in your hand container
+    if (!cardDOM || !liveData || cardDOM.parentElement.id !== 'hand') return;
+
+    // 1. Decrement use count and update UI text
+    window.playerDiscardsRemaining--;
+    document.getElementById('discard-count').innerText = `(${window.playerDiscardsRemaining})`;
+
+    // 2. Clear from engine logical memory completely
+    delete cardInstances[cardId];
+    
+    // 3. Visual Impact Calculations (Centers your overlay FX on the card drop)
+    const rect = cardDOM.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const burnFx = document.createElement('div');
+    burnFx.className = 'slash-fx'; 
+    burnFx.style.position = 'fixed';
+    burnFx.style.left = centerX + 'px';
+    burnFx.style.top = centerY + 'px';
+    burnFx.style.filter = "sepia(1) hue-rotate(-50deg) saturate(500%) brightness(1.5)"; 
+    document.body.appendChild(burnFx);
+    
+    cardDOM.remove(); 
+    setTimeout(() => burnFx.remove(), 600); 
+
+    // 4. Update logs and check for ultimate depletion state
+    if (window.playerDiscardsRemaining === 0) {
+        document.getElementById('discard-pile').classList.add('disabled');
+        addLog(`Discard Stash DEPLETED.`, "#e74c3c");
+    } else {
+        addLog(`Discarded ${liveData.name}. Uses left: ${window.playerDiscardsRemaining}.`, "#2ecc71");
+    }
+    
+    updateUI(); 
+    if (typeof bodyShotAudioUrl !== 'undefined') playSound(bodyShotAudioUrl); 
+}
