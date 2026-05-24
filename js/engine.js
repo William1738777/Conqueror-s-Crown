@@ -1217,7 +1217,7 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
     let targetInst = cardInstances[targetId]; let actorDOM = document.getElementById(actor.id);
     let actorSlotDOM = (actorDOM && actorDOM.parentElement && actorDOM.parentElement.classList.contains('slot')) ? actorDOM.parentElement : null;
     
-    let isSlash = ["SHORTSWORD STRIKE", "HEAVY STRIKE", "BANNER STRIKE", "ATTACK", "ICHI", "NI", "BLADE STRIKE", "SLASH", "Lion's Challenge", "Bite", "Peck", "Giant Bash", "Cut"].includes(skillName);
+    let isSlash = ["SHORTSWORD STRIKE", "HEAVY STRIKE", "BANNER STRIKE", "ATTACK", "ICHI", "NI", "BLADE STRIKE", "SLASH", "Lion's Challenge", "Bite", "Peck", "Giant Bash", "Cut", "RELENTLESS STRIKES"].includes(skillName);
     let isRanged = ["VOLLEY", "Bullseye", "Arrow Rain", "Sniping Shot", "Double-Shot", "SHADOW STAR", "Trigger Unbound", "Punishment of the Blessed", "Force of Nature", "Mana Beam"].includes(skillName) || (skillName === "ATTACK CORE" && ["Archer", "Zeek", "Shadow Stalker", "Jaden", "Althea", "Cursed Crow", "Wisp"].includes(actor.name)); 
 
     let targetHadMarkBeforeHit = (targetInst && targetInst.marks > 0);
