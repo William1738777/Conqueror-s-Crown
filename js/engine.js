@@ -1006,6 +1006,16 @@ function triggerSlash(targetDOM, muteBodyShot = false) {
     const slash = document.createElement('div'); slash.className = 'slash-fx'; targetDOM.appendChild(slash); setTimeout(() => slash.remove(), 600);
 }
 
+function triggerHeal(targetDOM) {
+    if(!targetDOM) return;
+    const healFx = document.createElement('div'); 
+    healFx.className = 'heal-fx'; 
+    targetDOM.appendChild(healFx); 
+    
+    // Assumes your heal gif takes about 800ms to play
+    setTimeout(() => healFx.remove(), 800);
+}
+
 function shootProjectile(actorDOM, targetDOM, isArrow = true) {
     if (!actorDOM || !targetDOM) return;
     const aRect = actorDOM.getBoundingClientRect(); const tRect = targetDOM.getBoundingClientRect();
@@ -1157,7 +1167,7 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
     let targetInst = cardInstances[targetId]; let actorDOM = document.getElementById(actor.id);
     let actorSlotDOM = (actorDOM && actorDOM.parentElement && actorDOM.parentElement.classList.contains('slot')) ? actorDOM.parentElement : null;
     
-    let isSlash = ["SHORTSWORD STRIKE", "HEAVY STRIKE", "BANNER STRIKE", "ATTACK", "ICHI", "NI", "BLADE STRIKE", "SLASH", "Lion's Challenge", "Bite", "Peck"].includes(skillName);
+    let isSlash = ["SHORTSWORD STRIKE", "HEAVY STRIKE", "BANNER STRIKE", "ATTACK", "ICHI", "NI", "BLADE STRIKE", "SLASH", "Lion's Challenge", "Bite", "Peck", "Giant Bash", "Cut"].includes(skillName);
     let isRanged = ["VOLLEY", "Bullseye", "Arrow Rain", "Sniping Shot", "Double-Shot", "SHADOW STAR", "Trigger Unbound", "Punishment of the Blessed", "Force of Nature", "Mana Beam"].includes(skillName) || (skillName === "ATTACK CORE" && ["Archer", "Zeek", "Shadow Stalker", "Jaden", "Althea", "Cursed Crow", "Wisp"].includes(actor.name)); 
 
     let targetHadMarkBeforeHit = (targetInst && targetInst.marks > 0);
