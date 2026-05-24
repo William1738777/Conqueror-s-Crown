@@ -1658,7 +1658,6 @@ async function processQueue(sideProcessing, queueArr) {
             }
         }
         else if (action.skillName === "Blessing of the Light") {
-        else if (action.skillName === "Blessing of the Light") {
             let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
             let targetInst = cardInstances[tId]; let targetDOM = document.getElementById(tId);
             if(targetInst && targetDOM && targetInst.hp > 0) {
