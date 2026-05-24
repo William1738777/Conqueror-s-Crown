@@ -1008,12 +1008,10 @@ function showFloatingText(targetDOM, text, color="#ff4d4d", fontSize="2rem") {
     document.body.appendChild(el); setTimeout(() => el.remove(), 1200);
 }
 
-// 👇 UPDATED FX FUNCTIONS TO PREVENT CLIPPING 👇
 function triggerSlash(targetDOM, muteBodyShot = false) {
     if(!targetDOM) return; 
     if(!muteBodyShot && bodyShotAudioUrl) playSound(bodyShotAudioUrl);
     
-    // Find the exact center of the card on the screen
     const rect = targetDOM.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -1021,10 +1019,23 @@ function triggerSlash(targetDOM, muteBodyShot = false) {
     const slash = document.createElement('div'); 
     slash.className = 'slash-fx'; 
     
-    // Force it to overlay the whole screen at those coordinates
-    slash.style.position = 'fixed';
-    slash.style.left = centerX + 'px';
-    slash.style.top = centerY + 'px';
+    // 👇 DEFENSIVE INLINE ENGINE: Force overrides against external CSS stylesheets 👇
+    slash.style.setProperty('position', 'fixed', 'important');
+    slash.style.setProperty('left', centerX + 'px', 'important');
+    slash.style.setProperty('top', centerY + 'px', 'important');
+    slash.style.setProperty('width', '250px', 'important');
+    slash.style.setProperty('height', '250px', 'important');
+    slash.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+    slash.style.setProperty('background-image', 'var(--slash-url)', 'important');
+    slash.style.setProperty('background-size', 'contain', 'important');
+    slash.style.setProperty('background-repeat', 'no-repeat', 'important');
+    slash.style.setProperty('background-position', 'center', 'important');
+    slash.style.setProperty('pointer-events', 'none', 'important');
+    slash.style.setProperty('z-index', '999999', 'important'); // Overkill layer depth
+    
+    // 🧪 DIAGNOSTIC TEST: Temporary bright red backup color box
+    slash.style.setProperty('background-color', 'rgba(255, 0, 0, 0.5)', 'important');
+    // 👆 ------------------------------------------------------------------------- 👆
     
     document.body.appendChild(slash); 
     setTimeout(() => slash.remove(), 600);
