@@ -1027,13 +1027,33 @@ function showFloatingText(targetDOM, text, color="#ff4d4d", fontSize="2rem") {
 function triggerSlash(targetDOM, muteBodyShot = false) {
     if(!targetDOM) return;
     if(!muteBodyShot && typeof bodyShotAudioUrl !== 'undefined' && bodyShotAudioUrl) playSound(bodyShotAudioUrl);
+
+    // 1. Calculate the exact center of the card on the screen
+    const rect = targetDOM.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // 2. THE WISP METHOD: Create a direct image element
+    const slash = document.createElement('img');
     
-    const slash = document.createElement('div'); 
-    slash.className = 'slash-fx'; 
-    
-    // THE FIX: Append directly to the card. It inherits the card's position automatically.
-    targetDOM.appendChild(slash); 
-    
+    // ⚠️ IMPORTANT: Ensure this matches your exact filename in the assets folder! 
+    // If your file is a GIF, change this to './assets/Slash.gif'
+    slash.src = './assets/Slash.gif'; 
+
+    // 3. Force absolute layout dominance so it can never be hidden or clipped
+    slash.style.position = 'fixed';
+    slash.style.left = centerX + 'px';
+    slash.style.top = centerY + 'px';
+    slash.style.width = '200px';
+    slash.style.height = '200px';
+    slash.style.pointerEvents = 'none';
+    slash.style.zIndex = '9999';
+
+    // 4. Hook into your CSS animation
+    slash.style.animation = 'slashFade 0.6s ease-out forwards';
+
+    document.body.appendChild(slash);
+
     setTimeout(() => slash.remove(), 600);
 }
 
