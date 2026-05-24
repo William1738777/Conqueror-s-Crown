@@ -115,7 +115,7 @@ const ASSET_LINKS = {
     "Goblin Archer": "./assets/GoblinArcher.png",
     "Goblin Wardrummer": "./assets/GoblinWarDrummer.png",
     "Enslaved Troll": "./assets/EnslavedTroll.png",
-    "praetorian_guard": "./assets/Praetorian Guard.png",
+    "Praetorian Guard": "./assets/Praetorian Guard.png",
     "Zombie": "./assets/Zombie.png"
 };
 
