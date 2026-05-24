@@ -2,7 +2,8 @@
     --bg-color: #0d0d12; --gold: #d4af37; --mana-color: #3498db; --hp-color: #2ecc71; --card-unit: #232931; 
     --slash-url: none; --arrow-url: none; --shuriken-url: none; --healfx-url: none; --empty-slot-url: none; 
     --empty-ability-url: none; --empty-buff-url: none; --mymana-url: none; --managain-url: none; --cc-logo-url: none;
-    --worldmap-url: none; --leoniabg-url: none; --tavernbg-url: none; --atkicon-url: none;
+    --worldmap-url: none; --leoniabg-url: none; --tavernbg-url: none; --atkicon-url: none;--praetorian-spear-url: none; 
+    --speared-icon-url: none;
 }
 body { margin: 0; font-family: 'Cinzel', 'Georgia', serif; background-color: var(--bg-color); color: white; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
 
@@ -161,7 +162,18 @@ body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !import
 .badge-barrier { position: absolute; top: -8px; right: 15px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #3498db); }
 .badge-block { background: #888 !important; box-shadow: 0 0 10px #888; }
 .badge-atkbuff { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #e67e22); }
-
+.badge-speared { 
+    position: absolute; 
+    top: 15px; 
+    right: -8px; 
+    width: 24px; 
+    height: 24px; 
+    background-image: var(--speared-icon-url);
+    background-size: contain; 
+    background-repeat: no-repeat; 
+    z-index: 26; 
+    filter: drop-shadow(0 0 5px #8e44ad); 
+}
 .deck-container { position: absolute; right: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 50; }
 #enemy-deck-area { top: 20px; }
 #player-deck-area { bottom: 20px; }
