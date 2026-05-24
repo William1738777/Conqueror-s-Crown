@@ -141,6 +141,8 @@ function getCardTemplate(fileName, dataUrl) {
     if(cleanName.includes('mymana')) { document.documentElement.style.setProperty('--mymana-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
     if(cleanName.includes('managain')) { document.documentElement.style.setProperty('--managain-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
     if(cleanName.includes('cclogo')) { document.documentElement.style.setProperty('--cc-logo-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isFX: true }; }
+    if(cleanName.includes('praetorian_spear')) { return { isFX: true }; }
+    if(cleanName.includes('speared_icon')) { return { isIcon: true, iconType: 'speared', img: dataUrl }; }
     
     // Audio & FX
     if(cleanName.includes('dragsound')) { dragSoundUrl = dataUrl; return { isAudio: true }; }
