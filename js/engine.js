@@ -1029,20 +1029,12 @@ function triggerSlash(targetDOM, muteBodyShot = false) {
     if(!muteBodyShot && typeof bodyShotAudioUrl !== 'undefined' && bodyShotAudioUrl) playSound(bodyShotAudioUrl);
     
     const rect = targetDOM.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
     const slash = document.createElement('div'); 
     slash.className = 'slash-fx'; 
     
-    // 🌟 FIX 3: Lock anchoring dimensions directly to standard viewport mapping metrics
-    slash.style.position = 'fixed';
-    slash.style.left = centerX + 'px';
-    slash.style.top = centerY + 'px';
-    slash.style.width = '200px'; 
-    slash.style.height = '200px';
-    slash.style.transform = 'translate(-50%, -50%)';
-    slash.style.opacity = '1';
+    // Two-line layout pairing for coordinate tracking and dimension layout bounds
+    slash.style.cssText = `left: ${rect.left + rect.width / 2}px; top: ${rect.top + rect.height / 2}px;`;
+    slash.style.width = '200px'; slash.style.height = '200px'; slash.style.transform = 'translate(-50%, -50%)';
     
     document.body.appendChild(slash); 
     setTimeout(() => slash.remove(), 600);
@@ -1051,15 +1043,13 @@ function triggerSlash(targetDOM, muteBodyShot = false) {
 function triggerHeal(targetDOM) {
     if(!targetDOM) return;
     
-    // Find the exact center of the target card
     const rect = targetDOM.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
     const healFx = document.createElement('div'); 
-    healFx.className = 'heal-fx'; // Hooks directly back into your fixed CSS rules
+    healFx.className = 'heal-fx'; 
     
-    // Only inline coordinates required to pin it dynamically to the target positions
     healFx.style.position = 'fixed';
     healFx.style.left = centerX + 'px';
     healFx.style.top = centerY + 'px';
