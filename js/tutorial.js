@@ -1048,11 +1048,222 @@ function enterNorthside() {
     northScreen.style.backgroundImage = "url('./assets/Gate.png')"; 
 }
 
+// ============================================================================
+// ⛰️ NORTHSIDE WATCHTOWER CINEMATIC & AMBUSH
+// ============================================================================
+let wtStep = 0;
+
 function enterNorthsideWatchtower() {
-    // We will build this out in the next step!
-    alert("Entering the Northside Watchtower... (Coming Next!)");
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Hide all normal RPG screens
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    
+    // 1. Show Black Loading Screen
+    const loader = document.getElementById('loading-overlay');
+    loader.style.display = 'flex';
+    
+    setTimeout(() => {
+        loader.style.display = 'none';
+        
+        // 2. Play Video Cutscene
+        const vidContainer = document.getElementById('video-container');
+        const vid = document.getElementById('cutscene-video');
+        vidContainer.style.display = 'block';
+        
+        // Attempt to play the video. If it fails (e.g. missing asset), it immediately skips to the dialog.
+        let playPromise = vid.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.warn("Video failed to play or asset missing, skipping to cinematic.", error);
+                skipVideo();
+            });
+        }
+        
+        vid.onended = () => skipVideo();
+        
+    }, 2500); // 2.5 seconds of "Loading..."
 }
 
+function skipVideo() {
+    const vidContainer = document.getElementById('video-container');
+    const vid = document.getElementById('cutscene-video');
+    vid.pause();
+    vidContainer.style.display = 'none';
+    startWatchtowerCinematic();
+}
+
+function startWatchtowerCinematic() {
+    const screen = document.getElementById('watchtower-cinematic-screen');
+    screen.style.display = 'block';
+    screen.style.backgroundImage = "url('./assets/OldWatchtower1.png')";
+    
+    wtStep = 1;
+    document.getElementById('watchtower-dialogue-box').style.display = 'flex';
+    document.getElementById('wt-speaker').innerText = "You";
+    document.getElementById('wt-speaker').style.color = "#3498db";
+    document.getElementById('wt-text').innerText = "An ambush! Goblins... and a lot of them, too. Looks like a mid-sized raiding party.";
+}
+
+function advanceWatchtowerCinematic() {
+    const screen = document.getElementById('watchtower-cinematic-screen');
+    const text = document.getElementById('wt-text');
+    const fxLayer = document.getElementById('cinematic-fx-layer');
+    
+    if (wtStep === 1) {
+        wtStep = 2;
+        screen.style.backgroundImage = "url('./assets/OldWatchtower2.png')";
+        text.innerText = "(Arrows whistle past you, narrowly missing!)";
+        
+        // Shoot 3 arrows from right to left
+        for(let i = 0; i < 3; i++) {
+            setTimeout(() => fireCinematicArrow(fxLayer), i * 300);
+        }
+        
+        setTimeout(() => {
+            screen.style.backgroundImage = "url('./assets/OldWatchtower3.png')";
+        }, 1200); // Smooth transition to background 3 while arrows fly
+
+    } else if (wtStep === 2) {
+        wtStep = 3;
+        text.innerText = "I summon thee... Great Knight!";
+        summonGreatKnightCinematic(fxLayer);
+        
+    } else if (wtStep === 3) {
+        wtStep = 4;
+        screen.style.backgroundImage = "url('./assets/OldWatchtower4.png')";
+        text.innerText = "(More arrows deflect off the Knight's heavy armor!)";
+        
+        // Shoot arrows that get deflected
+        for(let i = 0; i < 4; i++) {
+            setTimeout(() => fireCinematicArrow(fxLayer, true), i * 250);
+        }
+        
+    } else if (wtStep === 4) {
+        wtStep = 5;
+        screen.style.backgroundImage = "url('./assets/OldWatchtower5.png')";
+        text.innerText = "Let's slay these rats.";
+        
+    } else if (wtStep === 5) {
+        document.getElementById('watchtower-dialogue-box').style.display = 'none';
+        fxLayer.innerHTML = ''; // Clean up animations
+        startAmbushDuel();
+    }
+}
+
+// --- Cinematic Visual Effects ---
+function fireCinematicArrow(layer, deflected = false) {
+    if(typeof arrowHitAudioUrl !== 'undefined' && arrowHitAudioUrl) playSound(arrowHitAudioUrl);
+    
+    const arrow = document.createElement('div');
+    arrow.className = 'arrow-fx';
+    
+    let startY = 30 + Math.random() * 40; 
+    arrow.style.cssText = `position: absolute; top: ${startY}%; left: 110%; transform: translate(-50%, -50%) rotate(180deg); transition: left 0.4s linear, top 0.4s linear; z-index: 51;`;
+    
+    // Explicitly set the arrow image if css class falls back
+    arrow.style.backgroundImage = "var(--arrow-url, url('./assets/Arrow_FX.png'))";
+    layer.appendChild(arrow);
+    
+    // Force reflow
+    void arrow.offsetWidth;
+    
+    arrow.style.left = deflected ? '55%' : '-10%'; // If deflected, it stops in the middle of the screen
+    arrow.style.top = (startY + (Math.random() * 10 - 5)) + '%';
+    
+    setTimeout(() => {
+        if(deflected && typeof shieldBlockAudioUrl !== 'undefined') playSound(shieldBlockAudioUrl);
+        arrow.remove();
+    }, 400);
+}
+
+function summonGreatKnightCinematic(layer) {
+    if(typeof beamAudioUrl !== 'undefined') playSound(beamAudioUrl);
+    
+    const pillar = document.createElement('div');
+    pillar.className = 'light-pillar charging-element';
+    pillar.style.left = '50%';
+    layer.appendChild(pillar);
+
+    const gk = document.createElement('div');
+    gk.style.cssText = `
+        position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%); width: 400px; height: 500px;
+        background-image: url('./assets/Great%20Knight.png'); background-size: contain; background-repeat: no-repeat; background-position: bottom center;
+        filter: drop-shadow(0 0 20px #f1c40f); opacity: 0; transition: opacity 1s ease-out, bottom 1s ease-out; z-index: 52;
+    `;
+    layer.appendChild(gk);
+    
+    setTimeout(() => {
+        gk.style.opacity = '1';
+        gk.style.bottom = '10%';
+        if(typeof buffActivatedUrl !== 'undefined') playSound(buffActivatedUrl);
+        setTimeout(() => pillar.remove(), 1000);
+    }, 200);
+}
+
+// --- Custom Duel Logic for the Ambush ---
+function startAmbushDuel() {
+    document.getElementById('watchtower-cinematic-screen').style.display = 'none';
+    document.getElementById('game-area').style.display = 'flex';
+    document.getElementById('inventory-btn').style.display = 'none';
+    
+    isTutorialMode = false;
+    tutorialLock = false;
+
+    if (typeof showInspector === 'function') showInspector('none');
+    
+    turnCount = 1; currentTurn = 'PLAYER';
+    pMana = 8; eMana = 8; 
+    pCoreHP = 2000; eCoreHP = 2000; 
+    pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0;
+    
+    document.getElementById('hand').innerHTML = ''; 
+    document.querySelectorAll('.slot .card').forEach(c => c.remove());
+    
+    // Pull Player Deck
+    pDeck = [];
+    if(typeof battleDeckConfig !== 'undefined') {
+        Object.values(battleDeckConfig).forEach(tier => {
+            tier.cards.forEach(card => {
+                if(card) {
+                   let template = cardLibrary.find(c => c.name === card.name);
+                   if (template) pDeck.push(JSON.parse(JSON.stringify(template)));
+                }
+            });
+        });
+    }
+    if(pDeck.length === 0) pDeck = buildDeck(); 
+    for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
+    
+    // Custom Goblin Deck Construction (10 Warriors, 8 Archers)
+    eDeck = [];
+    let gobWarTemplate = cardLibrary.find(c => c.name === "Goblin Warrior");
+    let gobArchTemplate = cardLibrary.find(c => c.name === "Goblin Archer");
+    
+    if (gobWarTemplate && gobArchTemplate) {
+        for (let k = 0; k < 10; k++) eDeck.push(JSON.parse(JSON.stringify(gobWarTemplate)));
+        for (let k = 0; k < 8; k++) eDeck.push(JSON.parse(JSON.stringify(gobArchTemplate)));
+    } else {
+        console.warn("Goblin cards not found in library, falling back to random deck.");
+        eDeck = buildDeck(); 
+    }
+    
+    // Shuffle the Enemy Deck
+    for(let i = eDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [eDeck[i], eDeck[j]] = [eDeck[j], eDeck[i]]; }
+    
+    document.getElementById('p-deck-count').innerText = pDeck.length;
+    document.getElementById('e-deck-count').innerText = eDeck.length;
+    document.getElementById('event-log').innerHTML = '';
+    
+    addLog("AMBUSH! A Goblin raiding party has attacked!", "#e74c3c");
+    addLog("BATTLE COMMENCED. No combat allowed on Turn 1.", "var(--gold)");
+    
+    updateUI(); 
+    
+    const drawBtn = document.getElementById('draw-cards-btn');
+    drawBtn.style.display = "block";
+    drawBtn.innerText = "DRAW HAND";
+}
 // --- PATROL STATE VARIABLES ---
 let patrolProgress = 0;
 let encounterChance = 5;
