@@ -2625,7 +2625,41 @@ function createBlueBeamFx(sourceEl, targetEl) {
     setTimeout(() => { beam.style.opacity = '0'; }, 150);
     setTimeout(() => { beam.remove(); }, 500);
 }
+function shootProjectile(actorDOM, targetDOM, isArrow = true) {
+    if (!actorDOM || !targetDOM) return;
+    const aRect = actorDOM.getBoundingClientRect(); 
+    const tRect = targetDOM.getBoundingClientRect();
+    const startX = aRect.left + aRect.width / 2; 
+    const startY = aRect.top + aRect.height / 2;
+    const endX = tRect.left + tRect.width / 2; 
+    const endY = tRect.top + tRect.height / 2;
 
+    const projectile = document.createElement('div');
+    
+    // Assigns arrow or shuriken based on the attack type
+    projectile.className = isArrow ? 'arrow-fx' : 'shuriken-fx';
+    
+    projectile.style.position = 'fixed';
+    projectile.style.zIndex = '9999';
+    projectile.style.pointerEvents = 'none';
+    projectile.style.left = startX + 'px'; 
+    projectile.style.top = startY + 'px';
+
+    const angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
+    projectile.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+
+    document.body.appendChild(projectile);
+
+    setTimeout(() => { 
+        projectile.style.left = endX + 'px'; 
+        projectile.style.top = endY + 'px'; 
+    }, 20);
+    
+    setTimeout(() => { 
+        projectile.remove(); 
+        if (isArrow && typeof arrowHitAudioUrl !== 'undefined' && arrowHitAudioUrl) playSound(arrowHitAudioUrl); 
+    }, 300);
+}
 function createWispProjectileFx(sourceEl, targetEl) {
     let projectile = document.createElement('img');
     
