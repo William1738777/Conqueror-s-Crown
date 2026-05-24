@@ -33,6 +33,13 @@ function startGame() {
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('game-area').style.display = 'flex';
     document.getElementById('inventory-btn').style.display = 'none';
+    window.playerDiscardsRemaining = 5;
+    const dp = document.getElementById('discard-pile');
+    if(dp) {
+        dp.style.display = 'flex';
+        dp.classList.remove('disabled');
+        document.getElementById('discard-count').innerText = '(5)';
+    }
     pDeck = buildDeck();
     eDeck = buildDeck();
     document.getElementById('p-deck-count').innerText = pDeck.length;
