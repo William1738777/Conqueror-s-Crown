@@ -111,13 +111,11 @@ function filterBag(filterType) {
     if (filterType === 'items') {
         collectionGrid.style.display = 'none';
         itemsGrid.style.display = 'grid'; 
-        document.getElementById('return-to-cards-container').style.display = 'flex'; // Show return button
         renderItemBag(); 
         return; 
     } else {
-        collectionGrid.style.display = 'flex'; // <-- THIS MUST BE 'flex', NOT ''
+        collectionGrid.style.display = 'flex'; // Keeps your cards rendering correctly!
         itemsGrid.style.display = 'none';
-        document.getElementById('return-to-cards-container').style.display = 'none'; // Hide return button
     }
 
     // Filter Cards
