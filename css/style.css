@@ -564,6 +564,76 @@ body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !import
     pointer-events: none;
 }
 
+/* =========================================
+   🛡️ BARRACKS & NPC INTERACTION STYLES
+   ========================================= */
+#barracks-screen {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 14, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.npc-interaction-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid var(--gold);
+    padding: 30px;
+    background: rgba(15, 15, 20, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+    max-width: 600px;
+    width: 90%;
+}
+
+.npc-portrait {
+    width: 350px;
+    height: auto;
+    border: 2px solid #333;
+    border-radius: 4px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+}
+
+.npc-text {
+    font-size: 1.3rem;
+    color: #e0e0e0;
+    text-align: center;
+    margin-bottom: 30px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1px;
+}
+
+.dialogue-options {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.dialogue-options button {
+    background: #1a1a24;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 12px 25px;
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease-out;
+}
+
+.dialogue-options button:hover {
+    background: var(--gold);
+    color: black;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+}
+
 /* --- ANIMATION KEYFRAMES --- */
 @keyframes absorbEnergy { 0% { transform: scale(0.1) rotate(0deg); opacity: 0; box-shadow: 0 0 10px var(--gold); } 50% { opacity: 1; box-shadow: 0 0 50px 20px var(--gold), inset 0 0 40px var(--mana-color); } 90% { transform: scale(0.5) rotate(720deg); box-shadow: 0 0 100px 50px #fff, inset 0 0 80px #fff; opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
 @keyframes poofFlash { 0% { opacity: 0; } 10% { opacity: 1; } 100% { opacity: 0; } }
