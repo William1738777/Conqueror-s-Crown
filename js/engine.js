@@ -90,7 +90,7 @@ function updateUI() {
             }
         }
 
-c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier, .badge-bleed, .badge-block, .badge-shinobi, .badge-atkbuff, .badge-bhymn, .badge-dhymn, .badge-fear').forEach(el => el.remove());
+c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambered, .badge-taunted, .badge-barrier, .badge-bleed, .badge-block, .badge-shinobi, .badge-atkbuff, .badge-bhymn, .badge-dhymn, .badge-fear, .badge-speared').forEach(el => el.remove());
         if(data.turnPlaced === turnCount) {
             const b = document.createElement('div'); b.className = 'placed-badge'; b.innerText = '{PLACED}'; c.appendChild(b);
         }
@@ -455,6 +455,9 @@ function showInspector(id, cardElement) {
     if (data.fearTurns && data.fearTurns >= turnCount) statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${fearDebuffImgUrl ? fearDebuffImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc" style="color:#8e44ad;"><b>FEAR:</b> Damage output reduced by 30%.</div></div>`;
     if (data.bleedStacks > 0) statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${bleedImgUrl ? bleedImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>BLEED:</b> Takes damage at end of turn. (${data.bleedStacks} Stacks)</div></div>`;
     if (data.shield && data.shield > 0) statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${barrierImgUrl ? barrierImgUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>SHIELDED:</b> Absorbs up to ${data.shield} damage.</div></div>`;
+    if (data.statuses && data.statuses.some(s => s.name === "Speared")) {
+        statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:var(--speared-icon-url)"></div><div class="status-desc" style="color:#9b59b6;"><b>SPEARED:</b> Takes 40% more damage from the Praetorian Guard.</div></div>`;
+    }
     if (data.atkBuffTurns && data.atkBuffTurns >= turnCount) statusHtml += `<div class="status-item"><div class="status-icon" style="background-image:url('${atkIconUrl ? atkIconUrl.replace(/"/g, '&quot;').replace(/'/g, '%27') : ''}')"></div><div class="status-desc"><b>ATK UP:</b> Attack power increased by 8%.</div></div>`;
     if (data.marks > 0) {
         let actualMarks = Math.min(3, data.marks);
