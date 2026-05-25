@@ -67,6 +67,22 @@ Version 8.17 (Freedom)
         </div>
     </div>
 
+    <div id="barracks-screen" style="display: none;">
+    <div class="npc-interaction-container">
+        <img src="./assets/BK2.png" alt="Barracks Guard" class="npc-portrait">
+        
+        <div class="dialogue-box">
+            <p class="npc-text">"Halt! State your business at the Barracks."</p>
+            
+            <div class="dialogue-options">
+                <button onclick="openBarracksQuests()">Quests</button>
+                <button onclick="openBarracksShop()">Shop</button>
+                <button onclick="leaveBarracks()">Go back</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div id="tavern-screen" class="rpg-screen">
         <div id="tavern-menu" class="top-left-menu" style="display:none;">
             <button class="menu-btn" onclick="talkToBen()">Talk to Ben</button>
