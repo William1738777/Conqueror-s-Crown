@@ -265,18 +265,48 @@ function enterTavern() {
 // 🛡️ BARRACKS NAVIGATION
 // ============================================================================
 
-function enterBarracks() {
-    // Hide the Leonia town screen and show the Barracks interaction
-    document.getElementById('leonia-screen').style.display = 'none';
-    document.getElementById('barracks-screen').style.display = 'flex';
-    
+// 1. Entering the Gate from Leonia Town
+function enterBarracksGate() {
     if (typeof playClickSound === 'function') playClickSound();
+    document.getElementById('leonia-screen').style.display = 'none';
+    document.getElementById('barracks-gate-screen').style.display = 'block';
 }
 
-function leaveBarracks() {
-    // Hide the Barracks and return to Leonia
-    document.getElementById('barracks-screen').style.display = 'none';
-    document.getElementById('leonia-screen').style.display = 'block';
-    
+// 2. Talking to the Guard (Opens the visual NPC Interaction we built)
+function talkToBarracksGuard() {
     if (typeof playClickSound === 'function') playClickSound();
+    document.getElementById('barracks-gate-screen').style.display = 'none';
+    document.getElementById('barracks-screen').style.display = 'flex';
 }
+
+// 3. Leaving the Guard Interaction (Goes back to Gate)
+function leaveBarracksGuard() {
+    if (typeof playClickSound === 'function') playClickSound();
+    document.getElementById('barracks-screen').style.display = 'none';
+    document.getElementById('barracks-gate-screen').style.display = 'block';
+}
+
+// 4. Going inside the actual Barracks
+function enterBarracksInside() {
+    if (typeof playClickSound === 'function') playClickSound();
+    document.getElementById('barracks-gate-screen').style.display = 'none';
+    document.getElementById('barracks-inside-screen').style.display = 'block';
+}
+
+// 5. Returning to Gate from Inside
+function backToBarracksGate() {
+    if (typeof playClickSound === 'function') playClickSound();
+    document.getElementById('barracks-inside-screen').style.display = 'none';
+    document.getElementById('barracks-gate-screen').style.display = 'block';
+}
+
+// 6. Leaving Barracks entirely to go back to Town
+function backToLeonia() {
+    if (typeof playClickSound === 'function') playClickSound();
+    // Safely hide any active sub-screens and show the Town
+    document.getElementById('barracks-gate-screen').style.display = 'none';
+    document.getElementById('shops-alley-screen').style.display = 'none'; 
+    document.getElementById('leonia-screen').style.display = 'block';
+}
+
+// (Leave your openBarracksQuests and openBarracksShop functions exactly as they are down here!)
