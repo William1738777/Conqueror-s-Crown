@@ -94,27 +94,31 @@ function filterBag(filterType) {
     if (typeof playClickSound === 'function') playClickSound();
 
     // Safely highlight active tab
-    document.querySelectorAll('#card-filter-bar .filter-tab').forEach(tab => tab.classList.remove('active'));
-    if (window.event && window.event.target) {
-        let activeBtn = window.event.target.closest('.filter-tab');
-        if (activeBtn) activeBtn.classList.add('active');
-    }
+    const tabs = document.querySelectorAll('#card-filter-bar .filter-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    if (filterType === 'all' && tabs[0]) tabs[0].classList.add('active');
+    else if (filterType === 'unit' && tabs[1]) tabs[1].classList.add('active');
+    else if (filterType === 'ability' && tabs[2]) tabs[2].classList.add('active');
+    else if (filterType === 'items' && tabs[3]) tabs[3].classList.add('active');
 
     const collectionGrid = document.getElementById('collection-grid');
     const itemsGrid = document.getElementById('items-grid');
+
+    if (!collectionGrid || !itemsGrid) return; // Failsafe against crashes
 
     // Toggle Grids
     if (filterType === 'items') {
         collectionGrid.style.display = 'none';
         itemsGrid.style.display = 'grid'; 
-        renderItemBag(); 
+        if (typeof renderItemBag === 'function') renderItemBag(); 
         return; 
     } else {
         collectionGrid.style.display = 'flex'; 
         itemsGrid.style.display = 'none';
     }
 
-    // Filter Cards using the new data tags!
+    // Filter Cards using dataset tags
     const cards = collectionGrid.children; 
     Array.from(cards).forEach(card => {
         const isAbility = card.dataset.type === 'ability' || card.dataset.isBuff === 'true';
