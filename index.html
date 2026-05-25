@@ -233,14 +233,15 @@ Version 8.19 (Freedom)
                     <button class="filter-tab active" onclick="filterBag('all')">ALL ASSETS</button>
                     <button class="filter-tab" onclick="filterBag('unit')">UNITS</button>
                     <button class="filter-tab" onclick="filterBag('ability')">ABILITIES</button>
-                    <button class="filter-tab" style="border-color: #3498db; color: #3498db;" onclick="openItemBag()">ITEMS</button>
+                    <button class="filter-tab" style="border-color: #3498db; color: #3498db;" onclick="filterBag('items')">ITEMS</button>
                 </div>
 
                 <div class="bag-grid-container" id="collection-grid" ondrop="dropToCollection(event)" ondragover="allowDrop(event)">
-                    </div>
+                </div>
 
                 <div class="bag-grid-container" id="items-grid" style="display: none; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));">
-                    </div>
+                </div>
+            </div>
 
                 <div id="return-to-cards-container" style="display: none; justify-content: center; margin-top: 20px;">
                     <button class="filter-tab" style="border-color: var(--gold); color: var(--gold);" onclick="closeItemBag()">Go Back to Cards</button>
