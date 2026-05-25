@@ -280,16 +280,3 @@ function leaveBarracks() {
     
     if (typeof playClickSound === 'function') playClickSound();
 }
-
-// Placeholder functions for your next steps!
-function openBarracksQuests() {
-    if (typeof playClickSound === 'function') playClickSound();
-    addLog("Guard: We have no bounties posted at the moment.", "var(--gold)");
-    alert("Quest menu coming soon!");
-}
-
-function openBarracksShop() {
-    if (typeof playClickSound === 'function') playClickSound();
-    addLog("Guard: Let me show you our surplus armory...", "var(--gold)");
-    alert("Barracks Shop coming soon!");
-}
