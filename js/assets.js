@@ -182,6 +182,11 @@ function getCardTemplate(fileName, dataUrl) {
     if(cleanName.includes('goblinkill')) { goblinKillSfxUrl = dataUrl; return { isAudio: true }; }
     if(cleanName.includes('feardebuff')) { return { isIcon: true, iconType: 'fear', img: dataUrl }; }
     if(cleanName.includes('enslavedroar')) { enslavedRoarSfxUrl = dataUrl; return { isAudio: true }; }
+    if(cleanName.includes('praetoriansfx1')) { praetorianSfx1 = dataUrl; return { isAudio: true }; }
+    if(cleanName.includes('praetoriansfx2')) { praetorianSfx2 = dataUrl; return { isAudio: true }; }
+    if(cleanName.includes('praetoriansfx3')) { praetorianSfx3 = dataUrl; return { isAudio: true }; }
+    if(cleanName.includes('praetorianspearrelease')) { praetorianSpearReleaseUrl = dataUrl; return { isAudio: true }; }
+    if(cleanName.includes('praetorianspearconnect')) { praetorianSpearConnectUrl = dataUrl; return { isAudio: true }; }
 
     if(cleanName.includes('back_card') || cleanName.includes('back card') || cleanName.includes('crown back')) { return { isCardBack: true, img: dataUrl }; }
     if(cleanName.includes('slash')) { return { isSlash: true, img: dataUrl }; }
