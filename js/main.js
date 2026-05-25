@@ -40,6 +40,11 @@ const log = document.getElementById('event-log');
 
 function openBarracksShop() {
     if (typeof playClickSound === 'function') playClickSound();
+    
+    // Hide the bag so it doesn't block the UI
+    const invBtn = document.getElementById('inventory-btn');
+    if (invBtn) invBtn.style.display = 'none';
+
     document.getElementById('barracks-shop-panel').classList.add('open');
     // Clear inspector on open
     document.getElementById('barracks-inspector-content').innerHTML = `<div style="text-align:center; color:#666; margin-top:50%; font-style:italic;">Select an item.</div>`;
@@ -48,6 +53,11 @@ function openBarracksShop() {
 
 function closeBarracksShop() {
     if (typeof playClickSound === 'function') playClickSound();
+    
+    // Bring the bag back!
+    const invBtn = document.getElementById('inventory-btn');
+    if (invBtn) invBtn.style.display = 'block';
+
     document.getElementById('barracks-shop-panel').classList.remove('open');
     document.getElementById('barracks-inspector-panel').classList.remove('open');
 }
