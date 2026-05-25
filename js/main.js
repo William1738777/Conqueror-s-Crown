@@ -38,15 +38,69 @@ const log = document.getElementById('event-log');
 // 🛒 BARRACKS SHOP LOGIC
 // ============================================================================
 
-// Overwrite the placeholder you made earlier
 function openBarracksShop() {
     if (typeof playClickSound === 'function') playClickSound();
     document.getElementById('barracks-shop-panel').classList.add('open');
+    // Clear inspector on open
+    document.getElementById('barracks-inspector-content').innerHTML = `<div style="text-align:center; color:#666; margin-top:50%; font-style:italic;">Select an item.</div>`;
+    document.getElementById('barracks-inspector-panel').classList.remove('open');
 }
 
 function closeBarracksShop() {
     if (typeof playClickSound === 'function') playClickSound();
     document.getElementById('barracks-shop-panel').classList.remove('open');
+    document.getElementById('barracks-inspector-panel').classList.remove('open');
+}
+
+function inspectBarracksItem(itemName) {
+    if (typeof playClickSound === 'function') playClickSound();
+    const inspector = document.getElementById('barracks-inspector-panel');
+    const content = document.getElementById('barracks-inspector-content');
+    
+    // Slide the inspector out!
+    inspector.classList.add('open');
+    
+    if (itemName === 'Praetorian Guard') {
+        let template = cardLibrary.find(c => c.name === "Praetorian Guard");
+        if (!template) {
+            content.innerHTML = `<div style="color:red;">Error: Asset not loaded.</div>`;
+            return;
+        }
+        
+        // Render the visual card via the engine
+        let visualCard = createCardDOM('inspect_shop', template, true);
+        visualCard.style.margin = "0 auto 20px auto"; 
+        visualCard.style.transform = "scale(1.1)"; // Make it pop a bit
+        
+        // Inject AQW-style Layout
+        content.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; height:100%;">
+                
+                <div id="inspector-card-target" style="height: 220px; display:flex; align-items:center;"></div>
+                
+                <h4 style="color:var(--gold); margin:15px 0; font-family:'Cinzel'; font-size:1.3rem;">${template.name}</h4>
+                
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 15px; width: 100%; box-sizing: border-box; margin-bottom: 20px;">
+                    <div style="font-size:0.8rem; color:#aaa; margin-bottom:10px; text-transform:uppercase;">Requirements</div>
+                    
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span><img src="./assets/LeonianMedal.png" style="width:20px; vertical-align:middle; margin-right:5px;"> Leonian Medal</span>
+                        <span style="color:#e74c3c; font-weight:bold;">100</span>
+                    </div>
+                    
+                    <div style="display:flex; justify-content:space-between;">
+                        <span><img src="./assets/ValorianMedal.png" style="width:20px; vertical-align:middle; margin-right:5px;"> Valorian Medal</span>
+                        <span style="color:#e74c3c; font-weight:bold;">3</span>
+                    </div>
+                </div>
+                
+                <div style="flex-grow:1;"></div> 
+                <button class="btn-main" style="background:#2ecc71; color:#000; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);" onclick="buyPraetorianGuard()">RECRUIT UNIT</button>
+            </div>
+        `;
+        
+        document.getElementById('inspector-card-target').appendChild(visualCard);
+    }
 }
 
 function buyPraetorianGuard() {
@@ -77,6 +131,9 @@ function buyPraetorianGuard() {
             addLog("Purchased 1x Praetorian Guard!", "#2ecc71");
             if (typeof playClickSound === 'function') playClickSound();
             alert("Transaction Successful! Praetorian Guard added to your stash.");
+            
+            // Re-render the inspector to show updated item counts
+            inspectBarracksItem('Praetorian Guard');
         } else {
             alert("Error: Praetorian Guard not found in card library.");
         }
