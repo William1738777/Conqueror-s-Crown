@@ -75,6 +75,11 @@ const ASSET_LINKS = {
     "ShieldSFX": "./assets/ShieldSFX.mp3",
     "EnslavedRoar": "./assets/EnslavedRoar.mp3",
     "GoblinKill": "./assets/GoblinKill.mp3",
+    "PraetorianSFX1": "./assets/PraetorianSFX1.mp3",
+    "PraetorianSFX2": "./assets/PraetorianSFX2.mp3",
+    "PraetorianSFX3": "./assets/PraetorianSFX3.mp3",
+    "PraetorianSpearRelease": "./assets/PraetorianSpearRelease.mp3",
+    "PraetorianSpearConnect": "./assets/PraetorianSpearConnect.mp3",
     
     // -- Visual FX & Icons --
     "Slash": "./assets/Slash.gif",
