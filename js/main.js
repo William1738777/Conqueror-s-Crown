@@ -178,6 +178,118 @@ function buyPraetorianGuard() {
 }
 
 // ============================================================================
+// 📜 BARRACKS QUEST LOGIC
+// ============================================================================
+
+// Quest State Trackers
+let questPestControlStatus = 'unaccepted'; // Can be 'unaccepted', 'active', or 'completed'
+let goblinsSlain = 0;
+
+function openBarracksQuests() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Hide the bag to prevent UI overlap
+    const invBtn = document.getElementById('inventory-btn');
+    if (invBtn) invBtn.style.display = 'none';
+
+    document.getElementById('barracks-quest-panel').classList.add('open');
+    document.getElementById('barracks-quest-content').innerHTML = `<div style="text-align:center; color:#666; margin-top:50%; font-style:italic;">Select a quest.</div>`;
+    document.getElementById('barracks-quest-inspector').classList.remove('open');
+}
+
+function closeBarracksQuests() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Bring the bag back
+    const invBtn = document.getElementById('inventory-btn');
+    if (invBtn) invBtn.style.display = 'block';
+
+    document.getElementById('barracks-quest-panel').classList.remove('open');
+    document.getElementById('barracks-quest-inspector').classList.remove('open');
+}
+
+function inspectBarracksQuest(questName) {
+    if (typeof playClickSound === 'function') playClickSound();
+    const inspector = document.getElementById('barracks-quest-inspector');
+    const content = document.getElementById('barracks-quest-content');
+    
+    inspector.classList.add('open');
+    
+    if (questName === 'Pest Control') {
+        let actionButtons = '';
+        let progressTracker = '';
+
+        // Determine what buttons/trackers to show based on quest status
+        if (questPestControlStatus === 'unaccepted') {
+            actionButtons = `
+                <div style="display:flex; gap:10px; margin-top: 15px;">
+                    <button class="btn-main" style="flex:1; background:#e74c3c; color:#fff;" onclick="closeBarracksQuests()">DECLINE</button>
+                    <button class="btn-main" style="flex:1; background:#2ecc71; color:#000;" onclick="acceptQuest('Pest Control')">ACCEPT</button>
+                </div>
+            `;
+        } else if (questPestControlStatus === 'active') {
+            progressTracker = `
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid #3498db; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 15px;">
+                    <span style="color:#3498db; font-weight:bold; letter-spacing: 1px;">GOBLINS SLAIN: ${goblinsSlain} / 30</span>
+                </div>
+            `;
+            actionButtons = `<button class="btn-main" style="width:100%; background:#888; color:#fff; cursor:not-allowed;" disabled>QUEST IN PROGRESS</button>`;
+        } else if (questPestControlStatus === 'completed') {
+            progressTracker = `
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid #2ecc71; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 15px;">
+                    <span style="color:#2ecc71; font-weight:bold; letter-spacing: 1px;">REQUIREMENTS MET</span>
+                </div>
+            `;
+            actionButtons = `<button class="btn-main" style="width:100%; background:#f1c40f; color:#000;" onclick="turnInQuest('Pest Control')">CLAIM REWARDS</button>`;
+        }
+
+        // Inject the Quest Inspector UI
+        content.innerHTML = `
+            <div style="display:flex; flex-direction:column; height:100%;">
+                
+                <h4 style="color:var(--gold); margin:0 0 5px 0; font-family:'Cinzel'; font-size:1.4rem; text-align:center;">Pest Control</h4>
+                <div style="color:#aaa; font-size:0.8rem; margin-bottom:20px; text-align:center; letter-spacing: 2px;">★☆☆☆☆</div>
+                
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 15px; box-sizing: border-box; margin-bottom: 15px; font-size: 0.95rem; line-height: 1.5; color: #ddd; font-style: italic;">
+                    "Goblins breed like roaches in the eastern woods. If we don't cull their numbers every season, they start raiding the supply caravans. Head out there, slay 30 of them, and report back. We'll make it worth your time."
+                </div>
+                
+                ${progressTracker}
+                
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 10px 15px; width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+                    <div style="font-size:0.8rem; color:#aaa; margin-bottom:10px; text-transform:uppercase; text-align:center; letter-spacing: 1px;">Rewards</div>
+                    
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span><span style="color:#f1c40f; font-weight:bold;">G</span> Gold</span>
+                        <span style="color:#2ecc71; font-weight:bold;">250</span>
+                    </div>
+                    
+                    <div style="display:flex; justify-content:space-between;">
+                        <span><img src="./assets/LeonianMedal.png" style="width:20px; vertical-align:middle; margin-right:5px;"> Leonian Medals</span>
+                        <span style="color:#2ecc71; font-weight:bold;">3 - 8</span>
+                    </div>
+                </div>
+                
+                <div style="flex-grow:1;"></div> 
+                
+                ${actionButtons}
+            </div>
+        `;
+    }
+}
+
+function acceptQuest(questName) {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    if (questName === 'Pest Control') {
+        questPestControlStatus = 'active';
+        if (typeof addLog === 'function') addLog("Quest Accepted: Pest Control", "#3498db");
+        // Instantly re-render the inspector to show the tracker and hide the accept buttons
+        inspectBarracksQuest('Pest Control');
+    }
+}
+
+// ============================================================================
 // 🎒 INVENTORY VIEW, FILTER & ROUTING LOGIC
 // ============================================================================
 
