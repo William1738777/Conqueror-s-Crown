@@ -101,6 +101,28 @@ Version 8.22 (Freedom)
             <div style="text-align:center; color:#666; margin-top:50%; font-style:italic;">Select an item.</div>
         </div>
     </div>
+
+    <div id="barracks-quest-panel" class="shop-side-panel shop-right-panel" style="z-index: 2000;">
+        <div class="panel-header">
+            <h3>GARRISON BOARD</h3>
+            <button class="close-panel-btn" onclick="closeBarracksQuests()">X</button>
+        </div>
+        <div class="shop-list">
+            <button class="shop-list-btn" onclick="inspectBarracksQuest('Pest Control')">
+                [F-Rank] Pest Control
+                <div style="font-size: 0.75rem; color: #aaa; margin-top: 4px; letter-spacing: 2px;">★☆☆☆☆</div>
+            </button>
+        </div>
+    </div>
+
+    <div id="barracks-quest-inspector" class="shop-side-panel shop-inspector-panel" style="z-index: 1999;">
+        <div class="panel-header">
+            <h3>QUEST DETAILS</h3>
+        </div>
+        <div id="barracks-quest-content" style="height: 100%;">
+            <div style="text-align:center; color:#666; margin-top:50%; font-style:italic;">Select a quest.</div>
+        </div>
+    </div>
     
     <div id="tavern-screen" class="rpg-screen">
         <div id="tavern-menu" class="top-left-menu" style="display:none;">
