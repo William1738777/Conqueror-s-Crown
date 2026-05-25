@@ -138,6 +138,9 @@ function createDBCardDOM(card, location, tierKey, index) {
     el.className = 'db-card';
     el.draggable = true;
     el.style.backgroundImage = `url('${card.img.replace(/"/g, '&quot;').replace(/'/g, '%27')}')`;
+
+    el.dataset.type = card.type;
+    el.dataset.isBuff = card.isBuff ? 'true' : 'false';
     
     el.addEventListener('dragstart', (e) => {
         draggingCardData = { card: card, from: location, tier: tierKey, index: index };
