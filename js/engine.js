@@ -1400,6 +1400,10 @@ async function applyDamage(actor, targetId, baseDmg, skillName) {
                  died = true; addLog(`${targetInst.name} was destroyed!`, '#aaa'); 
                  if(targetDOM) targetDOM.remove(); 
 
+                 if (typeof trackQuestKills === 'function') {
+                 trackQuestKills(targetInst.name);
+         }
+
                  // 👇 NEW: RETRIEVE SPEAR FROM FALLEN ENEMY 👇
                  Object.values(cardInstances).forEach(c => {
                      if (c.name === "Praetorian Guard" && c.spearTargetId === targetId) {
