@@ -303,17 +303,25 @@ function enterBarracksGate() {
     document.getElementById('barracks-gate-screen').style.display = 'block';
 }
 
-// 2. Talking to the Guard (Opens the visual NPC Interaction we built)
+// 2. Talking to the Guard (Standardized Full Screen)
 function talkToBarracksGuard() {
     if (typeof playClickSound === 'function') playClickSound();
-    document.getElementById('barracks-gate-screen').style.display = 'none';
-    document.getElementById('barracks-screen').style.display = 'flex';
+    
+    // Safely hide screens
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    
+    const guardScreen = document.getElementById('barracks-screen');
+    guardScreen.style.display = 'block';
+    
+    // Apply the BK2.png background dynamically
+    guardScreen.style.backgroundImage = "var(--bk2-url)"; 
 }
 
-// 3. Leaving the Guard Interaction (Goes back to Gate)
+// 3. Leaving the Guard Interaction
 function leaveBarracksGuard() {
     if (typeof playClickSound === 'function') playClickSound();
-    document.getElementById('barracks-screen').style.display = 'none';
+    
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('barracks-gate-screen').style.display = 'block';
 }
 
