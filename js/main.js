@@ -79,40 +79,64 @@ function inspectBarracksItem(itemName) {
         
         // Render the visual card via the engine
         let visualCard = createCardDOM('inspect_shop', template, true);
-        visualCard.style.margin = "0 auto 20px auto"; 
-        visualCard.style.transform = "scale(1.1)"; // Make it pop a bit
+        visualCard.style.margin = "0 auto 10px auto"; 
+        visualCard.style.transform = "scale(1.1)"; 
         
-        // Inject AQW-style Layout
+        // 👇 FETCH LIVE INVENTORY COUNTS 👇
+        let leoMedal = playerItems.find(i => i.id === 'leonian_medal');
+        let valMedal = playerItems.find(i => i.id === 'valorian_medal');
+        let leoCount = leoMedal ? leoMedal.count : 0;
+        let valCount = valMedal ? valMedal.count : 0;
+        
+        // Inject AQW-style Layout with Overview & Dynamic Requirements
         content.innerHTML = `
             <div style="display:flex; flex-direction:column; align-items:center; height:100%;">
                 
                 <div id="inspector-card-target" style="height: 220px; display:flex; align-items:center;"></div>
                 
-                <h4 style="color:var(--gold); margin:15px 0; font-family:'Cinzel'; font-size:1.3rem;">${template.name}</h4>
+                <h4 style="color:var(--gold); margin:10px 0 5px 0; font-family:'Cinzel'; font-size:1.3rem; text-align:center;">${template.name}</h4>
+                <div style="color:#aaa; font-size:0.8rem; margin-bottom:15px; letter-spacing: 2px;">★★★★★</div>
                 
-                <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 15px; width: 100%; box-sizing: border-box; margin-bottom: 20px;">
-                    <div style="font-size:0.8rem; color:#aaa; margin-bottom:10px; text-transform:uppercase;">Requirements</div>
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 10px 15px; width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+                    <div style="font-size:0.8rem; color:#aaa; margin-bottom:8px; text-transform:uppercase; text-align:center; letter-spacing: 1px;">Overview</div>
+                    <div style="display:flex; justify-content:space-between; font-size: 0.85rem;">
+                        
+                        <div style="display:flex; flex-direction:column; gap:5px; width:48%;">
+                            <div><span style="color:#888;">Lethality:</span> <span style="color:#e74c3c; font-weight:bold; float:right;">S+</span></div>
+                            <div><span style="color:#888;">Utility:</span> <span style="color:#3498db; font-weight:bold; float:right;">B</span></div>
+                            <div><span style="color:#888;">Synergy:</span> <span style="color:#9b59b6; font-weight:bold; float:right;">C</span></div>
+                        </div>
+                        
+                        <div style="display:flex; flex-direction:column; gap:5px; width:48%;">
+                            <div><span style="color:#888;">Survivability:</span> <span style="color:#2ecc71; font-weight:bold; float:right;">S</span></div>
+                            <div><span style="color:#888;">Economy:</span> <span style="color:#f1c40f; font-weight:bold; float:right;">A</span></div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 10px 15px; width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+                    <div style="font-size:0.8rem; color:#aaa; margin-bottom:10px; text-transform:uppercase; text-align:center; letter-spacing: 1px;">Requirements</div>
                     
                     <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                         <span><img src="./assets/LeonianMedal.png" style="width:20px; vertical-align:middle; margin-right:5px;"> Leonian Medal</span>
-                        <span style="color:#e74c3c; font-weight:bold;">100</span>
+                        <span style="color:${leoCount >= 100 ? '#2ecc71' : '#e74c3c'}; font-weight:bold;">${leoCount} / 100</span>
                     </div>
                     
                     <div style="display:flex; justify-content:space-between;">
                         <span><img src="./assets/ValorianMedal.png" style="width:20px; vertical-align:middle; margin-right:5px;"> Valorian Medal</span>
-                        <span style="color:#e74c3c; font-weight:bold;">3</span>
+                        <span style="color:${valCount >= 3 ? '#2ecc71' : '#e74c3c'}; font-weight:bold;">${valCount} / 3</span>
                     </div>
                 </div>
                 
                 <div style="flex-grow:1;"></div> 
-                <button class="btn-main" style="background:#2ecc71; color:#000; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);" onclick="buyPraetorianGuard()">RECRUIT UNIT</button>
+                <button class="btn-main" style="background:#2ecc71; color:#000; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);" onclick="buyPraetorianGuard()">CALL FORTH</button>
             </div>
         `;
         
         document.getElementById('inspector-card-target').appendChild(visualCard);
     }
 }
-
 function buyPraetorianGuard() {
     // 1. Find the required items in the player's inventory
     let leoMedal = playerItems.find(i => i.id === 'leonian_medal');
