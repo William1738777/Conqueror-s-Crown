@@ -95,6 +95,7 @@ async function initializeGame() {
             if (cardData.iconType === 'barrier') barrierImgUrl = cardData.img;
             if (cardData.iconType === 'speared') {
                 document.documentElement.style.setProperty('--speared-icon-url', `url("${cardData.img.replace(/"/g, '&quot;')}")`);
+            }
             if (cardData.iconType === 'bleed') bleedImgUrl = cardData.img;
             if (cardData.iconType === 'fear') fearDebuffImgUrl = cardData.img;
             if (cardData.iconType === 'shinobimark') shinobiMarkImgUrl = cardData.img;
