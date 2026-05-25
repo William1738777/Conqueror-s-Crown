@@ -105,10 +105,14 @@ c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambe
         
         let topRightOffset = -8; let topLeftOffset = -8;
 
+        let topRightOffset = -8; let topLeftOffset = -8;
+
         if (data.statuses && data.statuses.some(s => s.name === "Speared")) {
             const sp = document.createElement('div');
-            sp.className = 'badge-speared'; // Automatically hooks into our custom CSS layout variables
+            sp.className = 'badge-speared'; 
+            sp.style.cssText = `position:absolute; top:-8px; right:${topRightOffset}px; width:24px; height:24px; background-image:var(--speared-icon-url); background-size:contain; background-repeat:no-repeat; z-index:26; filter:drop-shadow(0 0 5px #9b59b6);`;
             c.appendChild(sp);
+            topRightOffset += 24; // Pushes the next badge over so they don't overlap!
         }
 
         if (data.tauntedBy) {
