@@ -35,6 +35,116 @@ let praetorianSfx1 = ''; let praetorianSfx2 = ''; let praetorianSfx3 = ''; let p
 const log = document.getElementById('event-log');
 
 // ============================================================================
+// 🛒 BARRACKS SHOP LOGIC
+// ============================================================================
+
+// Overwrite the placeholder you made earlier
+function openBarracksShop() {
+    if (typeof playClickSound === 'function') playClickSound();
+    document.getElementById('barracks-shop-panel').classList.add('open');
+}
+
+function closeBarracksShop() {
+    if (typeof playClickSound === 'function') playClickSound();
+    document.getElementById('barracks-shop-panel').classList.remove('open');
+}
+
+function buyPraetorianGuard() {
+    // 1. Find the required items in the player's inventory
+    let leoMedal = playerItems.find(i => i.id === 'leonian_medal');
+    let valMedal = playerItems.find(i => i.id === 'valorian_medal');
+
+    let leoCount = leoMedal ? leoMedal.count : 0;
+    let valCount = valMedal ? valMedal.count : 0;
+
+    // 2. Check if they have enough
+    if (leoCount >= 100 && valCount >= 3) {
+        
+        // 3. Deduct the cost
+        leoMedal.count -= 100;
+        valMedal.count -= 3;
+        
+        // Clean up empty stacks if they hit exactly 0
+        playerItems = playerItems.filter(i => i.count > 0);
+
+        // 4. Give the player the card
+        let guardData = cardLibrary.find(c => c.name === "Praetorian Guard");
+        if (guardData) {
+            let newCard = JSON.parse(JSON.stringify(guardData));
+            newCard.dbId = 'card_' + Math.random().toString(36).substr(2, 9);
+            playerCollection.push(newCard); // Assuming this is your bag array name
+            
+            addLog("Purchased 1x Praetorian Guard!", "#2ecc71");
+            if (typeof playClickSound === 'function') playClickSound();
+            alert("Transaction Successful! Praetorian Guard added to your stash.");
+        } else {
+            alert("Error: Praetorian Guard not found in card library.");
+        }
+    } else {
+        // Not enough currency
+        alert(`Insufficient funds!\nYou need 100 Leonian Medals and 3 Valorian Medals.\nYou have: ${leoCount} Leonian, ${valCount} Valorian.`);
+    }
+}
+
+// ============================================================================
+// 🎒 INVENTORY "ITEMS" VIEW LOGIC
+// ============================================================================
+
+function openItemBag() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Hide Cards & Card Filters
+    document.getElementById('inventory-grid').style.display = 'none';
+    document.getElementById('card-filter-bar').style.display = 'none';
+    
+    // Show Items & Return Button
+    document.getElementById('items-grid').style.display = 'grid';
+    document.getElementById('return-to-cards-container').style.display = 'flex';
+    
+    renderItemBag();
+}
+
+function closeItemBag() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Show Cards & Card Filters
+    document.getElementById('inventory-grid').style.display = 'grid';
+    document.getElementById('card-filter-bar').style.display = 'flex';
+    
+    // Hide Items & Return Button
+    document.getElementById('items-grid').style.display = 'none';
+    document.getElementById('return-to-cards-container').style.display = 'none';
+}
+
+function renderItemBag() {
+    const grid = document.getElementById('items-grid');
+    grid.innerHTML = ''; // Clear old items
+
+    if (playerItems.length === 0) {
+        grid.innerHTML = `<div style="color:#666; font-style:italic; grid-column: 1 / -1; text-align:center;">Your bag is empty.</div>`;
+        return;
+    }
+
+    playerItems.forEach(item => {
+        let slot = document.createElement('div');
+        slot.className = 'item-slot';
+        slot.style.backgroundImage = `url('${item.img}')`;
+        slot.title = item.name; // Shows name on hover
+
+        // Only show the number if they have more than 1
+        if (item.count > 1) {
+            let countEl = document.createElement('div');
+            countEl.className = 'item-count';
+            countEl.innerText = item.count;
+            slot.appendChild(countEl);
+        }
+
+        grid.appendChild(slot);
+    });
+}
+
+
+// ============================================================================
 // 🎵 AUDIO ENGINE
 // ============================================================================
 function playClickSound() {
