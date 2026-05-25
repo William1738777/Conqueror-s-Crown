@@ -159,6 +159,7 @@ body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !import
 .badge-blessing { position: absolute; top: -8px; left: 20px; background: #f1c40f; color: #111; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 26; box-shadow: 0 0 10px #f1c40f;}
 .badge-shield { position: absolute; bottom: 20px; right: -5px; background: #3498db; color: white; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; font-weight: bold; border: 1px solid #111; z-index: 15; box-shadow: 0 0 10px #3498db;}
 .badge-taunted { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #e74c3c); }
+.badge-speared { position: absolute; top: -8px; right: 16px; width: 24px; height: 24px; background: var(--speared-icon-url) no-repeat center/contain; z-index: 26; filter: drop-shadow(0 0 5px #9b59b6); }
 .badge-barrier { position: absolute; top: -8px; right: 15px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #3498db); }
 .badge-block { background: #888 !important; box-shadow: 0 0 10px #888; }
 .badge-atkbuff { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeat; z-index: 26; filter: drop-shadow(0 0 5px #e67e22); }
