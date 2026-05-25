@@ -651,6 +651,36 @@ body.in-combat-mode .card.exhausted { filter: grayscale(0) brightness(1) !import
 .buy-btn { background: var(--gold); color: black; border: none; padding: 8px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; font-family: 'Cinzel', serif; }
 .buy-btn:hover { background: #fff; transform: scale(1.05); }
 
+/* AQW Style Shop Layout additions */
+.shop-inspector-panel { 
+    right: 350px; /* Sits exactly to the left of the main panel */
+    transform: translateX(200%); /* Hides under the main panel when closed */
+    border-left: 2px solid var(--gold); 
+    border-right: none;
+}
+.shop-inspector-panel.open { 
+    transform: translateX(0); 
+}
+
+.shop-list { display: flex; flex-direction: column; gap: 8px; }
+.shop-list-btn { 
+    background: #1a1a24; 
+    color: var(--gold); 
+    border: 1px solid #444; 
+    padding: 15px; 
+    text-align: left; 
+    font-family: 'Cinzel', serif; 
+    font-size: 1.1rem; 
+    cursor: pointer; 
+    transition: 0.2s; 
+    border-radius: 4px; 
+}
+.shop-list-btn:hover { 
+    background: #333; 
+    border-color: var(--gold); 
+    transform: translateX(-5px); /* Slides slightly left on hover */
+}
+
 /* =========================================
    🎒 ITEM INVENTORY SLOTS
    ========================================= */
