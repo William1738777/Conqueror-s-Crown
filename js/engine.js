@@ -105,8 +105,6 @@ c.querySelectorAll('.placed-badge, .badge-blessing, .badge-shield, .badge-chambe
         
         let topRightOffset = -8; let topLeftOffset = -8;
 
-        let topRightOffset = -8; let topLeftOffset = -8;
-
         if (data.statuses && data.statuses.some(s => s.name === "Speared")) {
             const sp = document.createElement('div');
             sp.className = 'badge-speared'; 
