@@ -309,4 +309,9 @@ function backToLeonia() {
     document.getElementById('leonia-screen').style.display = 'block';
 }
 
-// (Leave your openBarracksQuests and openBarracksShop functions exactly as they are down here!)
+// 7. Quest Board Placeholder
+function openBarracksQuests() {
+    if (typeof playClickSound === 'function') playClickSound();
+    addLog("Guard: We have no bounties posted at the moment.", "var(--gold)");
+    alert("Quest menu coming soon!");
+}
