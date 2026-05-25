@@ -1671,8 +1671,20 @@ async function processQueue(sideProcessing, queueArr) {
                 await new Promise(r => setTimeout(r, 300)); 
                 
                 await applyDamage(actor, tId, dmg, "SPEAR THROW");
-                // ... rest of the block remains identical ...
-                 }
+                
+                // --- RESTORED: Speared Status Application ---
+                if (tInst && tInst.hp > 0) {
+                    if (!tInst.statuses) tInst.statuses = [];
+                    tInst.statuses.push({ 
+                        name: "Speared", 
+                        originId: actor.id, 
+                        desc: "Takes 40% more damage from the Praetorian Guard who threw the spear." 
+                    });
+                    actor.spearTargetId = tId; 
+                    addLog(`${tInst.name} is Speared!`, "#9b59b6");
+                    updateUI();
+                }
+            }
         }
         else if (action.skillName === "Blessing of the Light") {
             let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
