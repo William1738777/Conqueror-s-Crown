@@ -83,6 +83,27 @@ Version 8.17 (Freedom)
     </div>
 </div>
 
+    <div id="barracks-shop-panel" class="side-panel right-panel">
+    <div class="panel-header">
+        <h3>BARRACKS ARMORY</h3>
+        <button class="close-panel-btn" onclick="closeBarracksShop()">X</button>
+    </div>
+    
+    <div class="shop-grid">
+        <div class="shop-item-card">
+            <div class="shop-item-img" style="background-image: url('./assets/PraetorianGuard.png');"></div>
+            <div class="shop-item-info">
+                <h4>Praetorian Guard</h4>
+                <div class="shop-costs">
+                    <span><img src="./assets/LeoniandMedal.png" class="cost-icon"> 100</span>
+                    <span><img src="./assets/ValorianMedal.png" class="cost-icon"> 3</span>
+                </div>
+                <button class="buy-btn" onclick="buyPraetorianGuard()">RECRUIT</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div id="tavern-screen" class="rpg-screen">
         <div id="tavern-menu" class="top-left-menu" style="display:none;">
             <button class="menu-btn" onclick="talkToBen()">Talk to Ben</button>
@@ -178,40 +199,57 @@ Version 8.17 (Freedom)
 
     </div>
 
-    <div id="inventory-screen" class="rpg-screen">
-        <div id="inv-container">
-            <div id="inv-sidebar">
-                <div id="player-profile">
-                    <div id="player-name">ADVENTURER</div>
-                    <div id="player-gold">GOLD: 500</div>
+   <div id="inventory-screen" class="rpg-screen" style="display: none;">
+    <div id="inv-container">
+        
+        <div id="inv-sidebar">
+            <div id="player-profile">
+                <div id="player-name">ADVENTURER</div>
+                <div id="player-gold">GOLD: 500</div>
+            </div>
+            
+            <div id="license-section">
+                <div class="inv-label" style="color:var(--gold); font-weight:bold; margin-bottom:10px;">KINGDOM LICENSES</div>
+                <div id="license-list">
+                    <div class="license-slot blank">LEONIA: [NO LICENSE]</div>
+                    <div class="license-slot blank">ARASHI: [NO LICENSE]</div>
                 </div>
-                <div id="license-section">
-                    <div class="inv-label" style="color:var(--gold); font-weight:bold; margin-bottom:10px;">KINGDOM LICENSES</div>
-                    <div id="license-list">
-                        <div class="license-slot blank">LEONIA: [NO LICENSE]</div>
-                        <div class="license-slot blank">ARASHI: [NO LICENSE]</div>
+            </div>
+            
+            <button class="db-btn" style="margin-top: auto;" onclick="closeInventory()">EXIT INVENTORY</button>
+        </div>
+
+        <div id="inv-main-content">
+            
+            <div id="battle-deck-panel">
+                <h3 class="db-title">BATTLE DECK (40 CARDS)</h3>
+                <div id="battle-deck-tiers"></div>
+            </div>
+
+            <div id="collection-panel" class="inventory-window">
+                <h2 class="screen-title" style="font-size: 1.8rem; margin-bottom: 15px;">TACTICAL ARMY STASH</h2>
+
+                <div class="bag-filter-bar" id="card-filter-bar">
+                    <button class="filter-tab active" onclick="filterBag('all')">ALL ASSETS</button>
+                    <button class="filter-tab" onclick="filterBag('unit')">UNITS</button>
+                    <button class="filter-tab" onclick="filterBag('ability')">ABILITIES</button>
+                    <button class="filter-tab" style="border-color: #3498db; color: #3498db;" onclick="openItemBag()">ITEMS</button>
+                </div>
+
+                <div class="bag-grid-container" id="inventory-grid" ondrop="dropToCollection(event)" ondragover="allowDrop(event)">
                     </div>
+
+                <div class="bag-grid-container" id="items-grid" style="display: none; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));">
+                    </div>
+
+                <div id="return-to-cards-container" style="display: none; justify-content: center; margin-top: 20px;">
+                    <button class="filter-tab" style="border-color: var(--gold); color: var(--gold);" onclick="closeItemBag()">Go Back to Cards</button>
                 </div>
-                <nav id="inv-tabs">
-                    <button class="tab-btn active">CARDS</button>
-                    <button class="tab-btn" disabled>ITEMS</button>
-                </nav>
-                <button class="db-btn" style="margin-top: auto;" onclick="closeInventory()">EXIT INVENTORY</button>
             </div>
 
-            <div id="inv-main-content">
-                <div id="battle-deck-panel">
-                    <h3 class="db-title">BATTLE DECK (40 CARDS)</h3>
-                    <div id="battle-deck-tiers"></div>
-                </div>
-
-                <div id="collection-panel">
-                    <h3 class="db-title">YOUR COLLECTION</h3>
-                    <div id="collection-grid" ondrop="dropToCollection(event)" ondragover="allowDrop(event)"></div>
-                </div>
-            </div>
         </div>
     </div>
+</div>
 
     <button id="tutorial-exit-btn" onclick="location.reload()">EXIT GAME (TESTING)</button>
 
