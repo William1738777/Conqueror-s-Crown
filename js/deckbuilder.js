@@ -143,6 +143,8 @@ function createDBCardDOM(card, location, tierKey, index) {
     el.dataset.isBuff = card.isBuff ? 'true' : 'false';
     
     el.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', card.dbId || 'card');
+        
         draggingCardData = { card: card, from: location, tier: tierKey, index: index };
         if(typeof playSound === 'function' && typeof dragSoundUrl !== 'undefined') playSound(dragSoundUrl, false);
     });
