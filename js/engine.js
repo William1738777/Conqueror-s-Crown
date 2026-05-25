@@ -1672,6 +1672,8 @@ async function processQueue(sideProcessing, queueArr) {
                 
                 await applyDamage(actor, tId, dmg, "SPEAR THROW");
                 // ... rest of the block remains identical ...
+                 }
+        }
         else if (action.skillName === "Blessing of the Light") {
             let tId = Array.isArray(action.targetId) ? action.targetId[0] : action.targetId;
             let targetInst = cardInstances[tId]; let targetDOM = document.getElementById(tId);
