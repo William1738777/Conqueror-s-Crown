@@ -289,6 +289,61 @@ function acceptQuest(questName) {
     }
 }
 
+// Function to call whenever an enemy dies in combat
+function trackQuestKills(deadUnitName) {
+    // Only track if the Pest Control quest is currently active
+    if (questPestControlStatus === 'active') {
+        
+        // Check if the dead unit is one of the targeted Goblins
+        if (deadUnitName === 'Goblin Warrior' || 
+            deadUnitName === 'Goblin Archer' || 
+            deadUnitName === 'Goblin Wardrummer') {
+            
+            goblinsSlain++;
+            
+            // Log the progress so the player sees it in combat
+            if (typeof addLog === 'function') addLog(`Goblin Slain! Progress: ${goblinsSlain}/30`, "#f1c40f");
+
+            // Check if they hit the goal
+            if (goblinsSlain >= 30) {
+                questPestControlStatus = 'completed';
+                if (typeof addLog === 'function') addLog("Quest Objective Complete: Return to the Barracks!", "#2ecc71");
+            }
+        }
+    }
+}
+
+// Function to claim the rewards when 30/30 is reached
+function turnInQuest(questName) {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    if (questName === 'Pest Control' && questPestControlStatus === 'completed') {
+        // Roll between 3 and 8 Leonian Medals
+        const medalReward = Math.floor(Math.random() * 6) + 3; 
+        
+        // 1. Award Gold
+        if (typeof playerGold !== 'undefined') playerGold += 250;
+        
+        // 2. Award Medals
+        let leoMedal = playerItems.find(i => i.id === 'leonian_medal');
+        if (leoMedal) {
+            leoMedal.count += medalReward;
+        } else {
+            // If they somehow have 0 medals and the object was removed, recreate it
+            playerItems.push({ id: 'leonian_medal', name: 'Leonian Gold Medal', count: medalReward, img: './assets/LeonianMedal.png' });
+        }
+        
+        // 3. Update Quest Status (Mark it done so they can't farm it forever)
+        questPestControlStatus = 'turned_in'; 
+        
+        if (typeof addLog === 'function') addLog(`Quest Complete! Rewarded 250G and ${medalReward} Leonian Medals.`, "#2ecc71");
+        alert(`Quest Complete!\nReceived: 250 Gold\nReceived: ${medalReward} Leonian Medals`);
+        
+        // Refresh the UI or close the board
+        closeBarracksQuests();
+    }
+}
+
 // ============================================================================
 // 🎒 INVENTORY VIEW, FILTER & ROUTING LOGIC
 // ============================================================================
