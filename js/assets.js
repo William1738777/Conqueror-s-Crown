@@ -20,6 +20,7 @@ const ASSET_LINKS = {
     "AlleyShopBG": "./assets/Alley Shop.png",
     "GladineShopBG": "./assets/Gladine Shop.png",
     "BK1": "./assets/BK1.png",
+    "BK2": "./assets/BK2.png",
     "BK3": "./assets/BK3.png",
     "GWDAtkIcon": "./assets/GWDAtkIcon.png",
     "GWDefIcon": "./assets/GWDefIcon.png",
@@ -134,6 +135,7 @@ function getCardTemplate(fileName, dataUrl) {
     if(cleanName.includes('alley shop') || cleanName.includes('alleyshopbg')) { document.documentElement.style.setProperty('--alleyshopbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('gladine shop') || cleanName.includes('gladineshopbg')) { document.documentElement.style.setProperty('--gladineshopbg-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('bk1')) { document.documentElement.style.setProperty('--bk1-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
+    if(cleanName.includes('bk2')) { document.documentElement.style.setProperty('--bk2-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('bk3')) { document.documentElement.style.setProperty('--bk3-url', `url("${dataUrl.replace(/"/g, '&quot;')}")`); return { isMapBG: true, img: dataUrl }; }
     if(cleanName.match(/tg[1-9]/)) { return { isMapBG: true, img: dataUrl }; }
     if(cleanName.includes('oldwatchtower')) { return { isMapBG: true, img: dataUrl }; }
