@@ -604,10 +604,3 @@ function backToLeonia() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('leonia-screen').style.display = 'block';
 }
-
-// 7. Quest Board Placeholder
-function openBarracksQuests() {
-    if (typeof playClickSound === 'function') playClickSound();
-    addLog("Guard: We have no bounties posted at the moment.", "var(--gold)");
-    alert("Quest menu coming soon!");
-}
