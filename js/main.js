@@ -243,12 +243,12 @@ function inspectBarracksQuest(questName) {
             actionButtons = `<button class="btn-main" style="width:100%; background:#f1c40f; color:#000;" onclick="turnInQuest('Pest Control')">CLAIM REWARDS</button>`;
         }
 
-        // Inject the Quest Inspector UI
+        // Inject the updated Quest Inspector UI with E-Rank details
         content.innerHTML = `
             <div style="display:flex; flex-direction:column; height:100%;">
                 
                 <h4 style="color:var(--gold); margin:0 0 5px 0; font-family:'Cinzel'; font-size:1.4rem; text-align:center;">Pest Control</h4>
-                <div style="color:#aaa; font-size:0.8rem; margin-bottom:20px; text-align:center; letter-spacing: 2px;">★☆☆☆☆</div>
+                <div style="color:#f1c40f; font-size:0.8rem; margin-bottom:20px; text-align:center; letter-spacing: 2px;">★★☆☆☆☆☆</div>
                 
                 <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 15px; box-sizing: border-box; margin-bottom: 15px; font-size: 0.95rem; line-height: 1.5; color: #ddd; font-style: italic;">
                     "Goblins breed like roaches in the eastern woods. If we don't cull their numbers every season, they start raiding the supply caravans. Head out there, slay 30 of them, and report back. We'll make it worth your time."
