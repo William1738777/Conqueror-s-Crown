@@ -333,12 +333,11 @@ function backToBarracksGate() {
     document.getElementById('barracks-gate-screen').style.display = 'block';
 }
 
-// 6. Leaving Barracks entirely to go back to Town
+// 6. Leaving entirely to go back to Town
 function backToLeonia() {
     if (typeof playClickSound === 'function') playClickSound();
-    // Safely hide any active sub-screens and show the Town
-    document.getElementById('barracks-gate-screen').style.display = 'none';
-    document.getElementById('shops-alley-screen').style.display = 'none'; 
+    // Safely hide ALL active sub-screens and show the Town
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('leonia-screen').style.display = 'block';
 }
 
