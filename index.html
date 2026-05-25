@@ -80,26 +80,24 @@ Version 8.21 (Freedom)
         </div>
     </div>
 
-    <div id="barracks-shop-panel" class="shop-side-panel shop-right-panel">
-    <div class="panel-header">
-        <h3>BARRACKS ARMORY</h3>
-        <button class="close-panel-btn" onclick="closeBarracksShop()">X</button>
-    </div>
-    
-    <div class="shop-grid">
-        <div class="shop-item-card">
-            <div class="shop-item-img" style="background-image: url('./assets/PraetorianGuard.png');"></div>
-            <div class="shop-item-info">
-                <h4>Praetorian Guard</h4>
-                <div class="shop-costs">
-                    <span><img src="./assets/LeoniandMedal.png" class="cost-icon"> 100</span>
-                    <span><img src="./assets/ValorianMedal.png" class="cost-icon"> 3</span>
-                </div>
-                <button class="buy-btn" onclick="buyPraetorianGuard()">RECRUIT</button>
+    <div id="barracks-shop-panel" class="shop-side-panel shop-right-panel" style="z-index: 2000;">
+        <div class="panel-header">
+            <h3>BARRACKS ARMORY</h3>
+            <button class="close-panel-btn" onclick="closeBarracksShop()">X</button>
+        </div>
+        <div class="shop-list">
+            <button class="shop-list-btn" onclick="inspectBarracksItem('Praetorian Guard')">Praetorian Guard</button>
             </div>
+    </div>
+
+    <div id="barracks-inspector-panel" class="shop-side-panel shop-inspector-panel" style="z-index: 1999;">
+        <div class="panel-header">
+            <h3>INSPECT</h3>
+        </div>
+        <div id="barracks-inspector-content" style="height: 100%;">
+            <div style="text-align:center; color:#666; margin-top:50%; font-style:italic;">Select an item.</div>
         </div>
     </div>
-</div>
     
     <div id="tavern-screen" class="rpg-screen">
         <div id="tavern-menu" class="top-left-menu" style="display:none;">
