@@ -67,21 +67,18 @@ Version 8.21 (Freedom)
         </div>
     </div>
 
-    <div id="barracks-screen" style="display: none;">
-    <div class="npc-interaction-container">
-        <img src="./assets/BK2.png" alt="Barracks Guard" class="npc-portrait">
-        
-        <div class="dialogue-box">
-            <p class="npc-text">"Halt! State your business at the Barracks."</p>
-            
-            <div class="dialogue-options">
-                <button onclick="openBarracksQuests()">Quests</button>
-                <button onclick="openBarracksShop()">Shop</button>
-                <button onclick="leaveBarracksGuard()">Go back</button>
-            </div>
+    <div id="barracks-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
+        <div class="top-left-menu">
+            <button class="menu-btn unlocked" onclick="openBarracksQuests()">Quests</button>
+            <button class="menu-btn unlocked" onclick="openBarracksShop()">Shop</button>
+            <button class="menu-btn" onclick="leaveBarracksGuard()">Go back</button>
+        </div>
+
+        <div class="dialogue-box-style" style="pointer-events: none;">
+            <div style="font-weight: bold; font-family: 'Cinzel'; font-size: 1.2rem; color: #b71c1c; margin-bottom: 10px; text-transform: uppercase;">Barracks Guard</div>
+            <div style="font-size: 1.1rem; line-height: 1.5; min-height: 50px;">"Halt! State your business at the Barracks... Ah, Gladine mentioned you. I suppose you can browse the armory."</div>
         </div>
     </div>
-</div>
 
     <div id="barracks-shop-panel" class="shop-side-panel shop-right-panel">
     <div class="panel-header">
