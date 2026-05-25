@@ -90,51 +90,49 @@ function buyPraetorianGuard() {
 // 🎒 INVENTORY VIEW, FILTER & ROUTING LOGIC
 // ============================================================================
 
-// 🌟 THE FIX: Safe Inventory toggling so it NEVER routes you to the Tavern!
-function openInventory() {
-    if (typeof playClickSound === 'function') playClickSound();
-    document.getElementById('inventory-screen').style.display = 'block';
-}
-
+// 🌟 THE FIX: We ONLY override closeInventory so it stops forcing you to the Tavern. 
+// We removed openInventory so deckbuilder.js can successfully render the Battle Deck again!
 function closeInventory() {
     if (typeof playClickSound === 'function') playClickSound();
     document.getElementById('inventory-screen').style.display = 'none';
 }
 
-// 🌟 THE FIX: Unified Tab System (No "Go Back" button needed)
+// 🌟 THE FIX: Safe Unified Tab System
 function filterBag(filterType) {
     if (typeof playClickSound === 'function') playClickSound();
 
-    // Update Active Tab Visual State
+    // Safely highlight active tab
     document.querySelectorAll('#card-filter-bar .filter-tab').forEach(tab => tab.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    if (window.event && window.event.target) {
+        let activeBtn = window.event.target.closest('.filter-tab');
+        if (activeBtn) activeBtn.classList.add('active');
+    }
 
     const collectionGrid = document.getElementById('collection-grid');
     const itemsGrid = document.getElementById('items-grid');
 
-    // Toggle between Cards and Items view
+    // Toggle Grids
     if (filterType === 'items') {
         collectionGrid.style.display = 'none';
-        itemsGrid.style.display = 'grid';
+        itemsGrid.style.display = 'grid'; 
         renderItemBag(); 
-        return; // Stop here so it doesn't process cards
+        return; 
     } else {
-        collectionGrid.style.display = 'flex'; // Restore card grid visibility
+        collectionGrid.style.display = ''; // Restores CSS default grid
         itemsGrid.style.display = 'none';
     }
 
-    // Process Card Visibility Matches
-    const cards = document.querySelectorAll('#collection-grid > div'); 
-    
-    cards.forEach(card => {
+    // Filter Cards
+    const cards = collectionGrid.children; 
+    Array.from(cards).forEach(card => {
         const isAbility = card.innerHTML.includes('Spell') || card.innerHTML.includes('Ability') || card.innerHTML.includes('Buff');
 
         if (filterType === 'all') {
-            card.style.display = 'block'; 
+            card.style.display = ''; 
         } else if (filterType === 'unit') {
-            card.style.display = isAbility ? 'none' : 'block';
+            card.style.display = isAbility ? 'none' : '';
         } else if (filterType === 'ability') {
-            card.style.display = isAbility ? 'block' : 'none';
+            card.style.display = isAbility ? '' : 'none';
         }
     });
 }
@@ -150,7 +148,6 @@ function renderItemBag() {
     }
 
     playerItems.forEach(item => {
-        // Create a wrapper to hold both the icon and the name cleanly
         let container = document.createElement('div');
         container.style.display = 'flex';
         container.style.flexDirection = 'column';
@@ -168,7 +165,6 @@ function renderItemBag() {
             slot.appendChild(countEl);
         }
 
-        // The new text label for the item name
         let nameEl = document.createElement('div');
         nameEl.style.color = 'var(--gold)';
         nameEl.style.fontSize = '0.75rem';
