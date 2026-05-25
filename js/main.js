@@ -143,3 +143,36 @@ function enterTavern() {
         document.getElementById('tavern-menu').style.display = 'flex';
     }
 }
+
+// ============================================================================
+// 🛡️ BARRACKS NAVIGATION
+// ============================================================================
+
+function enterBarracks() {
+    // Hide the Leonia town screen and show the Barracks interaction
+    document.getElementById('leonia-screen').style.display = 'none';
+    document.getElementById('barracks-screen').style.display = 'flex';
+    
+    if (typeof playClickSound === 'function') playClickSound();
+}
+
+function leaveBarracks() {
+    // Hide the Barracks and return to Leonia
+    document.getElementById('barracks-screen').style.display = 'none';
+    document.getElementById('leonia-screen').style.display = 'block';
+    
+    if (typeof playClickSound === 'function') playClickSound();
+}
+
+// Placeholder functions for your next steps!
+function openBarracksQuests() {
+    if (typeof playClickSound === 'function') playClickSound();
+    addLog("Guard: We have no bounties posted at the moment.", "var(--gold)");
+    alert("Quest menu coming soon!");
+}
+
+function openBarracksShop() {
+    if (typeof playClickSound === 'function') playClickSound();
+    addLog("Guard: Let me show you our surplus armory...", "var(--gold)");
+    alert("Barracks Shop coming soon!");
+}
