@@ -92,10 +92,6 @@ function buyPraetorianGuard() {
 
 // 🌟 THE FIX: We ONLY override closeInventory so it stops forcing you to the Tavern. 
 // We removed openInventory so deckbuilder.js can successfully render the Battle Deck again!
-function closeInventory() {
-    if (typeof playClickSound === 'function') playClickSound();
-    document.getElementById('inventory-screen').style.display = 'none';
-}
 
 // 🌟 THE FIX: Safe Unified Tab System
 function filterBag(filterType) {
