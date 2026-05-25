@@ -22,7 +22,7 @@ let tutorialLock = false;
 // --- INVENTORY GLOBALS ---
 // Stores stacking items. I've given you some starting medals to test the shop!
 let playerItems = [
-    { id: 'leonian_medal', name: 'Leonian Gold Medal', count: 120, img: './assets/LeoniandMedal.png' },
+    { id: 'leonian_medal', name: 'Leonian Gold Medal', count: 120, img: './assets/LeonianMedal.png' },
     { id: 'valorian_medal', name: 'Valorian Medal', count: 5, img: './assets/ValorianMedal.png' }
 ];
 
