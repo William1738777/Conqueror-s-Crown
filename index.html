@@ -60,7 +60,7 @@ Version 8.19 (Freedom)
             <button class="loc-btn" id="loc-gate-btn" onclick="enterGate()" disabled>Gate (Locked)</button>
             <button class="loc-btn unlocked" onclick="enterTavern()">Tavern</button>
             <button class="loc-btn" id="loc-tg-btn" onclick="enterTrainingGrounds()" disabled>Training Grounds (Locked)</button>
-            <button class="loc-btn" disabled>Barracks (Locked)</button>
+            <button class="loc-btn unlocked" onclick="enterBarracksGate()">Barracks</button>
             <button class="loc-btn" disabled>Shops Alley (Locked)</button>
             <button class="loc-btn" disabled>Arena (Locked)</button>
             <button class="loc-btn" disabled>The Castle (Locked)</button>
@@ -77,7 +77,7 @@ Version 8.19 (Freedom)
             <div class="dialogue-options">
                 <button onclick="openBarracksQuests()">Quests</button>
                 <button onclick="openBarracksShop()">Shop</button>
-                <button onclick="leaveBarracks()">Go back</button>
+                <button onclick="leaveBarracksGuard()">Go back</button>
             </div>
         </div>
     </div>
@@ -163,8 +163,8 @@ Version 8.19 (Freedom)
     <div id="barracks-gate-screen" class="rpg-screen" style="display:none; background-size:cover; background-position:center;">
         <div class="top-left-menu">
             <button class="menu-btn unlocked" onclick="enterBarracksInside()">Enter Barracks</button>
-            <button class="menu-btn" onclick="alert('Guard: State your business... Ah, Gladine mentioned you. Go on in.')">Talk to the Guard</button>
-            <button class="menu-btn" onclick="backToLeonia()">Back to Town</button>
+            <button class="menu-btn unlocked" onclick="talkToBarracksGuard()">Talk to the Guard</button>
+            <button class="menu-btn unlocked" onclick="backToLeonia()">Back to Town</button>
         </div>
     </div>
 
@@ -236,7 +236,7 @@ Version 8.19 (Freedom)
                     <button class="filter-tab" style="border-color: #3498db; color: #3498db;" onclick="openItemBag()">ITEMS</button>
                 </div>
 
-                <div class="bag-grid-container" id="inventory-grid" ondrop="dropToCollection(event)" ondragover="allowDrop(event)">
+                <div class="bag-grid-container" id="collection-grid" ondrop="dropToCollection(event)" ondragover="allowDrop(event)">
                     </div>
 
                 <div class="bag-grid-container" id="items-grid" style="display: none; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));">
