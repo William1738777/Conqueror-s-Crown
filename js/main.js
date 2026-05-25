@@ -90,10 +90,6 @@ function buyPraetorianGuard() {
 // 🎒 INVENTORY VIEW, FILTER & ROUTING LOGIC
 // ============================================================================
 
-// 🌟 THE FIX: We ONLY override closeInventory so it stops forcing you to the Tavern. 
-// We removed openInventory so deckbuilder.js can successfully render the Battle Deck again!
-
-// 🌟 THE FIX: Safe Unified Tab System
 function filterBag(filterType) {
     if (typeof playClickSound === 'function') playClickSound();
 
@@ -114,14 +110,14 @@ function filterBag(filterType) {
         renderItemBag(); 
         return; 
     } else {
-        collectionGrid.style.display = 'flex'; // Keeps your cards rendering correctly!
+        collectionGrid.style.display = 'flex'; 
         itemsGrid.style.display = 'none';
     }
 
-    // Filter Cards
+    // Filter Cards using the new data tags!
     const cards = collectionGrid.children; 
     Array.from(cards).forEach(card => {
-        const isAbility = card.innerHTML.includes('Spell') || card.innerHTML.includes('Ability') || card.innerHTML.includes('Buff');
+        const isAbility = card.dataset.type === 'ability' || card.dataset.isBuff === 'true';
 
         if (filterType === 'all') {
             card.style.display = ''; 
