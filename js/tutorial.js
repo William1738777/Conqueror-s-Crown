@@ -830,110 +830,124 @@ function openGarrisonBoard() {
     // Hide the barracks menu buttons and show the board
     document.getElementById('barracks-menu').style.display = 'none';
     document.getElementById('garrison-board-ui').style.display = 'block';
+    
+    // Clear the right side details pane to mirror the Guard shop initialization
+    const pane = document.getElementById('quest-details-pane');
+    if (pane) {
+        pane.innerHTML = `<div style="text-align:center; color:#666; margin-top:50%; font-style:italic; font-size:0.9rem;">Select a quest assignment.</div>`;
+    }
 }
-
 function viewQuest(questId) {
     const quest = quests[questId];
     const pane = document.getElementById('quest-details-pane');
-    
-    // --- 1. Star Rating based on quest ---
+    if (!pane) return;
+
+    // --- 1. Star Rating based on quest level ---
     let stars = questId === 'northside_investigation' ? '★★☆☆☆☆☆' : '★☆☆☆☆☆☆';
-    
-    // --- 2. Progress Tracker Box ---
+    let difficultyText = questId === 'northside_investigation' ? 'F-Rank Story Quest' : 'E-Rank Bounty';
+
+    // --- 2. AQW Progress Tracker Sub-Panel ---
     let progressTracker = '';
     if (quest.isAccepted && quest.progress < quest.maxProgress) {
         progressTracker = `
-            <div style="background: rgba(0,0,0,0.5); border: 1px solid #3498db; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 15px;">
-                <span style="color:#3498db; font-weight:bold; letter-spacing: 1px;">PROGRESS: ${quest.progress} / ${quest.maxProgress}</span>
-                <div style="font-size:0.8rem; color:#aaa; margin-top:5px;">${quest.objective}</div>
+            <div style="background: rgba(0,0,0,0.6); border: 1px solid #3498db; border-radius: 6px; padding: 12px; text-align: center; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(52,152,219,0.2);">
+                <span style="color:#3498db; font-weight:bold; letter-spacing: 1px; font-size:0.9rem;">GOAL IN PROGRESS</span>
+                <div style="color:#fff; font-size:1.1rem; font-weight:bold; margin: 5px 0;">${quest.progress} / ${quest.maxProgress}</div>
+                <div style="font-size:0.8rem; color:#aaa; font-style:italic;">${quest.objective}</div>
             </div>
         `;
     } else if (quest.isAccepted && quest.progress >= quest.maxProgress) {
         progressTracker = `
-            <div style="background: rgba(0,0,0,0.5); border: 1px solid #2ecc71; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 15px;">
-                <span style="color:#2ecc71; font-weight:bold; letter-spacing: 1px;">REQUIREMENTS MET</span>
+            <div style="background: rgba(0,0,0,0.6); border: 1px solid #2ecc71; border-radius: 6px; padding: 12px; text-align: center; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(46,204,113,0.3);">
+                <span style="color:#2ecc71; font-weight:bold; letter-spacing: 1px; font-size:0.9rem;">REQUIREMENTS MET</span>
+                <div style="font-size:0.8rem; color:#aaa; margin-top:3px;">Ready to turn in to Captain Thorne.</div>
             </div>
         `;
     }
 
-    // --- 3. Dynamic Action Buttons & State ---
+    // --- 3. Dynamic Side-Panel Action Buttons ---
     let actionButtons = '';
     let actionType = 'accept';
     let now = Date.now();
 
     if (quest.cooldownUntil && now < quest.cooldownUntil) {
         let remainingMins = Math.ceil((quest.cooldownUntil - now) / 60000);
-        actionButtons = `<button class="btn-main" id="quest-action-btn" style="width:100%; background:#555; color:#aaa; cursor:not-allowed;" disabled>ON COOLDOWN (${remainingMins}m)</button>`;
+        actionButtons = `<button class="btn-main" id="quest-action-btn" style="width:100%; background:#555; color:#aaa; border:1px solid #444; cursor:not-allowed;" disabled>ON COOLDOWN (${remainingMins}m)</button>`;
         actionType = 'cooldown';
     } else if (quest.progress >= quest.maxProgress && quest.isAccepted) {
-        actionButtons = `<button class="btn-main" id="quest-action-btn" style="width:100%; background:#f1c40f; color:#000; box-shadow: 0 0 15px rgba(241, 196, 15, 0.4);">CLAIM REWARDS</button>`;
+        actionButtons = `<button class="btn-main" id="quest-action-btn" style="width:100%; background:#f1c40f; color:#000; font-weight:bold; box-shadow: 0 0 15px rgba(241, 196, 15, 0.4); border:1px solid #f39c12;">CLAIM REWARDS</button>`;
         actionType = 'claim';
     } else if (quest.isAccepted) {
-        actionButtons = `<button class="btn-main" id="quest-action-btn" style="width:100%; background:#888; color:#fff; cursor:not-allowed;" disabled>QUEST IN PROGRESS</button>`;
+        actionButtons = `<button class="btn-main" id="quest-action-btn" style="width:100%; background:#333; color:#888; border:1px solid #555; cursor:not-allowed;" disabled>QUEST IN PROGRESS</button>`;
         actionType = 'active';
     } else {
-        // Not accepted yet
         actionButtons = `
-            <div style="display:flex; gap:10px; margin-top: 15px;">
-                <button class="btn-main" style="flex:1; background:#e74c3c; color:#fff;" onclick="closeGarrisonBoard()">DECLINE</button>
-                <button class="btn-main" id="quest-action-btn" style="flex:1; background:#2ecc71; color:#000;">ACCEPT</button>
+            <div style="display:flex; gap:10px; width:100%;">
+                <button class="btn-main" style="flex:1; background:#e74c3c; color:#fff; border:1px solid #c0392b;" onclick="closeGarrisonBoard()">DECLINE</button>
+                <button class="btn-main" id="quest-action-btn" style="flex:1; background:#2ecc71; color:#000; font-weight:bold; box-shadow: 0 0 15px rgba(46, 204, 113, 0.3);">ACCEPT</button>
             </div>
         `;
     }
 
-    // --- 4. Dynamic Rewards Box ---
+    // --- 4. AQW Columns Rewards Box Sub-Panel ---
     let rewardLines = '';
     if (questId === 'wisp_hunt') {
         rewardLines = `
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                <span><span style="color:#f1c40f; font-weight:bold;">G</span> Gold</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:0.9rem;">
+                <span style="color:#eee;"><span style="color:#f1c40f; font-weight:bold; margin-right:5px;">G</span> Gold Bounty</span>
                 <span style="color:#2ecc71; font-weight:bold;">1,000</span>
             </div>
         `;
     } else if (questId === 'northside_investigation') {
         rewardLines = `
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                <span><span style="color:#f1c40f; font-weight:bold;">G</span> Gold</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:0.9rem;">
+                <span style="color:#eee;"><span style="color:#f1c40f; font-weight:bold; margin-right:5px;">G</span> Gold Bounty</span>
                 <span style="color:#2ecc71; font-weight:bold;">2,500</span>
             </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span><span style="color:#9b59b6; font-weight:bold;">★</span> Bonus Item</span>
-                <span style="color:#9b59b6; font-weight:bold;">Rare Card</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;">
+                <span style="color:#eee;"><span style="color:#9b59b6; font-weight:bold; margin-right:5px;">★</span> Item Drop</span>
+                <span style="color:#9b59b6; font-weight:bold; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px;">Rare Card</span>
             </div>
         `;
     }
 
-    // --- 5. Inject the AQW Style HTML ---
-    // Note: We use a small replace() trick below to separate Thorne's signature nicely.
+    // --- 5. Inject Clean AQW Layout Into the Right Inspector Panel ---
     pane.innerHTML = `
-        <div style="display:flex; flex-direction:column; height:100%;">
+        <div style="display:flex; flex-direction:column; height:100%; box-sizing:border-box; padding:5px;">
             
-            <h4 style="color:var(--gold); margin:0 0 5px 0; font-family:'Cinzel'; font-size:1.4rem; text-align:center;">${quest.title}</h4>
-            <div style="color:#f1c40f; font-size:0.8rem; margin-bottom:20px; text-align:center; letter-spacing: 2px;">${stars}</div>
+            <div style="text-align:center; margin-bottom:15px;">
+                <h4 style="color:var(--gold); margin:0 0 4px 0; font-family:'Cinzel'; font-size:1.4rem; text-shadow:1px 1px 3px #000;">${quest.title}</h4>
+                <div style="color:#aaa; font-size:0.75rem; letter-spacing:1px; text-transform:uppercase; margin-bottom:4px;">${difficultyText}</div>
+                <div style="color:#f1c40f; font-size:0.8rem; letter-spacing: 2px;">${stars}</div>
+            </div>
             
-            <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 15px; box-sizing: border-box; margin-bottom: 15px; font-size: 0.95rem; line-height: 1.5; color: #ddd; font-style: italic;">
-                "${quest.description.replace('<br><br>', '"<br><br>')}"
+            <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 12px 15px; box-sizing: border-box; margin-bottom: 15px; font-size: 0.9rem; line-height: 1.4; color: #ddd; font-style: italic; max-height:180px; overflow-y:auto;">
+                "${quest.description.split('<br><br>')[0]}"
+                <div style="text-align:right; margin-top:8px; color:var(--gold); font-weight:bold; font-size:0.8rem; font-family:'Cinzel'; font-style:normal;">
+                    — Captain Thorne
+                </div>
             </div>
             
             ${progressTracker}
             
-            <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 10px 15px; width: 100%; box-sizing: border-box; margin-bottom: 10px;">
-                <div style="font-size:0.8rem; color:#aaa; margin-bottom:10px; text-transform:uppercase; text-align:center; letter-spacing: 1px;">Rewards</div>
+            <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 12px 15px; width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+                <div style="font-size:0.75rem; color:#aaa; margin-bottom:10px; text-transform:uppercase; text-align:center; letter-spacing: 1px; border-bottom:1px solid #333; padding-bottom:5px;">Quest Rewards</div>
                 ${rewardLines}
             </div>
             
             <div style="flex-grow:1;"></div> 
             
-            ${actionButtons}
+            <div style="width:100%; margin-top:10px;">
+                ${actionButtons}
+            </div>
         </div>
     `;
 
-    // --- 6. Safely Bind the Master Accept Function ---
+    // --- 6. Safe Event Binding ---
     const actionBtn = document.getElementById('quest-action-btn');
     if (actionBtn && actionType !== 'cooldown' && actionType !== 'active') {
         actionBtn.onclick = () => {
             if (actionType === 'accept') {
-                // Call the global master quest handler we built!
                 window.acceptQuest(quest.id);
             } else if (actionType === 'claim') {
                 claimQuestReward(quest.id);
@@ -941,16 +955,14 @@ function viewQuest(questId) {
         };
     }
 
-    // --- 7. Live Countdown Cooldown Logic ---
+    // --- 7. Precision Real-time Cooldown Loop ---
     if (quest.cooldownUntil && now < quest.cooldownUntil) {
         let liveTimer = setInterval(() => {
             let currentNow = Date.now();
             let btn = document.getElementById('quest-action-btn');
             
-            // If the player closed the board, kill the timer to save memory
             if (!btn) { clearInterval(liveTimer); return; }
             
-            // If time is up, refresh the screen automatically!
             if (currentNow >= quest.cooldownUntil) {
                 clearInterval(liveTimer);
                 viewQuest(questId); 
@@ -961,42 +973,6 @@ function viewQuest(questId) {
                 btn.innerText = `ON COOLDOWN (${m}m ${s}s)`;
             }
         }, 1000);
-    }
-}
-
-function acceptQuest(questId) {
-    if (questId === 'wisp_hunt') {
-        quests.wisp_hunt.isAccepted = true;
-        if (typeof addLog === 'function') addLog("Accepted Quest: Wisp Hunt!", "#3498db");
-        if (typeof playClickSound === 'function') playClickSound();
-        alert("Quest Accepted: Wisp Hunt!\nThe City Gate is now unlocked.");
-        
-        const gateBtn = document.getElementById('loc-gate-btn');
-        if (gateBtn) {
-            gateBtn.disabled = false;
-            gateBtn.classList.add('unlocked');
-            gateBtn.innerText = "City Gate";
-        }
-        viewQuest(questId);
-        
-    } else if (questId === 'northside_investigation') { // <-- NEW BLOCK
-        quests.northside_investigation.isAccepted = true;
-        if (typeof addLog === 'function') addLog("Accepted Quest: Northside Whereabouts!", "#3498db");
-        if (typeof playClickSound === 'function') playClickSound();
-        alert("Quest Accepted: Northside Whereabouts!\nThe Northern Watch is now accessible from the Gate.");
-        
-        // Unlock the Northern Watch in the Gate Screen UI
-        const buttons = document.querySelectorAll('#gate-screen .menu-btn');
-        buttons.forEach(btn => {
-            if (btn.innerText.includes("The Northern Watch")) {
-                btn.disabled = false;
-                btn.classList.add('unlocked');
-                btn.innerText = "The Northern Watch";
-                // Placeholder until you build the Northside map area!
-                btn.onclick = enterNorthside; 
-            }
-        });
-        viewQuest(questId);
     }
 }
 // ============================================================================
