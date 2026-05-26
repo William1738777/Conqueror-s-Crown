@@ -38,10 +38,6 @@ const log = document.getElementById('event-log');
 // 🛒 BARRACKS SHOP LOGIC
 // ============================================================================
 
-// ============================================================================
-// 🛒 BARRACKS SHOP LOGIC
-// ============================================================================
-
 function openBarracksShop() {
     if (typeof playClickSound === 'function') playClickSound();
     
@@ -62,7 +58,10 @@ function openBarracksShop() {
 function closeBarracksShop() {
     if (typeof playClickSound === 'function') playClickSound();
     
-    // Bring the bag back!
+    // Force close enlarged view if it was open
+    const overlay = document.getElementById('enlarged-shop-card-overlay');
+    if (overlay) overlay.remove();
+
     const invBtn = document.getElementById('inventory-btn');
     if (invBtn) invBtn.style.display = 'block';
 
@@ -89,14 +88,53 @@ function inspectBarracksItem(itemName) {
         let visualCard = createCardDOM('inspect_shop', template, true);
         visualCard.style.margin = "0 auto 10px auto"; 
         visualCard.style.transform = "scale(1.1)"; 
+        visualCard.style.cursor = "pointer"; // Add pointer cursor
+        visualCard.title = "Click to Enlarge";
+        
+        // Bind the new Full-Screen View
+        visualCard.onclick = () => showEnlargedShopCard(template);
         
         // 👇 FETCH LIVE INVENTORY COUNTS 👇
         let leoMedal = playerItems.find(i => i.id === 'leonian_medal');
         let valMedal = playerItems.find(i => i.id === 'valorian_medal');
         let leoCount = leoMedal ? leoMedal.count : 0;
         let valCount = valMedal ? valMedal.count : 0;
+
+        // 👇 DYNAMICALLY GENERATE SKILLS & PASSIVES 👇
+        let skillsHTML = '';
+        if (template.skills && template.skills.length > 0) {
+            template.skills.forEach(skill => {
+                skillsHTML += `
+                    <div style="margin-bottom: 8px;">
+                        <span style="color:#3498db; font-weight:bold; text-shadow: 1px 1px 2px #000;">[${skill.name}]</span> 
+                        <span style="color:#f1c40f; font-size:0.75rem;">(${skill.manaCost} Mana)</span><br>
+                        <span style="color:#ccc; font-size:0.8rem; line-height:1.2; display:block; margin-top:2px;">${skill.desc}</span>
+                    </div>
+                `;
+            });
+        }
+        if (template.passives && template.passives.length > 0) {
+            template.passives.forEach(passive => {
+                skillsHTML += `
+                    <div style="margin-bottom: 8px;">
+                        <span style="color:#9b59b6; font-weight:bold; text-shadow: 1px 1px 2px #000;">[Passive: ${passive.name}]</span><br>
+                        <span style="color:#ccc; font-size:0.8rem; line-height:1.2; display:block; margin-top:2px;">${passive.desc}</span>
+                    </div>
+                `;
+            });
+        }
+
+        let skillsSection = '';
+        if (skillsHTML !== '') {
+            skillsSection = `
+                <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 10px 15px; width: 100%; box-sizing: border-box; margin-bottom: 10px; text-align: left;">
+                    <div style="font-size:0.8rem; color:#aaa; margin-bottom:8px; text-transform:uppercase; text-align:center; letter-spacing: 1px;">Skills & Abilities</div>
+                    ${skillsHTML}
+                </div>
+            `;
+        }
         
-        // Inject AQW-style Layout with Overview & Dynamic Requirements
+        // Inject AQW-style Layout with Overview, Requirements, and Skills
         content.innerHTML = `
             <div style="display:flex; flex-direction:column; align-items:center; height:100%;">
                 
@@ -136,6 +174,8 @@ function inspectBarracksItem(itemName) {
                         <span style="color:${valCount >= 3 ? '#2ecc71' : '#e74c3c'}; font-weight:bold;">${valCount} / 3</span>
                     </div>
                 </div>
+
+                ${skillsSection}
                 
                 <div style="flex-grow:1;"></div> 
                 <button class="btn-main" style="background:#2ecc71; color:#000; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);" onclick="buyPraetorianGuard()">CALL FORTH</button>
@@ -145,6 +185,7 @@ function inspectBarracksItem(itemName) {
         document.getElementById('inspector-card-target').appendChild(visualCard);
     }
 }
+
 function buyPraetorianGuard() {
     // 1. Find the required items in the player's inventory
     let leoMedal = playerItems.find(i => i.id === 'leonian_medal');
@@ -182,6 +223,50 @@ function buyPraetorianGuard() {
     } else {
         // Not enough currency
         alert(`Insufficient funds!\nYou need 100 Leonian Medals and 3 Valorian Medals.\nYou have: ${leoCount} Leonian, ${valCount} Valorian.`);
+    }
+}
+
+// --- ENLARGED SHOP CARD PREVIEW ---
+function showEnlargedShopCard(template) {
+    if (typeof playClickSound === 'function') playClickSound();
+    if (document.getElementById('enlarged-shop-card-overlay')) return;
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'enlarged-shop-card-overlay';
+    overlay.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:99999; display:flex; flex-direction:column; justify-content:center; align-items:center; opacity:0; transition: opacity 0.3s ease;";
+    
+    // Clicking the background dismisses it
+    overlay.onclick = (e) => { if (e.target === overlay) closeEnlargedShopCard(); };
+
+    const bigCard = createCardDOM('enlarged_view', template, true);
+    bigCard.style.transform = "scale(1.8)";
+    bigCard.style.margin = "50px"; 
+    bigCard.style.pointerEvents = "none"; // Lets clicks pass through to the background
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.className = "btn-main";
+    closeBtn.innerText = "CLOSE PREVIEW";
+    closeBtn.style.marginTop = "120px"; // Clearance for the scaled up card
+    closeBtn.style.background = "#e74c3c";
+    closeBtn.style.color = "#fff";
+    closeBtn.style.padding = "10px 30px";
+    closeBtn.style.fontSize = "1.2rem";
+    closeBtn.onclick = () => closeEnlargedShopCard();
+    
+    overlay.appendChild(bigCard);
+    overlay.appendChild(closeBtn);
+    document.body.appendChild(overlay);
+    
+    // Trigger smooth fade-in
+    setTimeout(() => overlay.style.opacity = '1', 10);
+}
+
+function closeEnlargedShopCard() {
+    if (typeof playClickSound === 'function') playClickSound();
+    const overlay = document.getElementById('enlarged-shop-card-overlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 300);
     }
 }
 
@@ -588,24 +673,17 @@ function talkToBarracksGuard() {
 // 3. Leaving the Guard Interaction
 function leaveBarracksGuard() {
     if (typeof playClickSound === 'function') playClickSound();
+    closeBarracksShop(); // <-- Cleans up shop and overlay if open
+    
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('barracks-gate-screen').style.display = 'block';
-}
-
-// 4. Going inside the actual Barracks (Fixed Background Rendering!)
-function enterBarracksInside() {
-    if (typeof playClickSound === 'function') playClickSound();
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    
-    const biScreen = document.getElementById('barracks-inside-screen');
-    biScreen.style.display = 'block';
-    // This is the line that was missing in the duplicate!
-    biScreen.style.backgroundImage = "var(--bk3-url, url('./assets/BK3.png'))";
 }
 
 // 5. Returning to Gate from Inside
 function backToBarracksGate() {
     if (typeof playClickSound === 'function') playClickSound();
+    closeBarracksShop(); // <-- Cleans up shop and overlay if open
+    
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('barracks-gate-screen').style.display = 'block';
 }
@@ -613,6 +691,8 @@ function backToBarracksGate() {
 // 6. Leaving entirely to go back to Town
 function backToLeonia() {
     if (typeof playClickSound === 'function') playClickSound();
+    closeBarracksShop(); // <-- Cleans up shop and overlay if open
+    
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('leonia-screen').style.display = 'block';
 }
