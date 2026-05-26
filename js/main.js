@@ -64,7 +64,6 @@ window.acceptQuest = function(questId) {
 window.claimQuestReward = function(questId) {
     if (typeof playClickSound === 'function') playClickSound();
     
-    // Safely find the quest in your tutorial.js data
     const quest = typeof quests !== 'undefined' ? quests[questId] : null;
     if (!quest || quest.progress < quest.maxProgress) return;
 
@@ -72,17 +71,48 @@ window.claimQuestReward = function(questId) {
     if (questId === 'wisp_hunt') {
         if (typeof playerGold !== 'undefined') {
             playerGold += 1000;
-            // Update the UI if you have a gold updater function
             if (typeof updateGoldUI === 'function') updateGoldUI(); 
         }
         
         if (typeof addLog === 'function') addLog("Claimed Wisp Hunt Rewards: +1,000 Gold!", "#2ecc71");
-        alert("Rewards Claimed!\n+1,000 Gold");
+        
+        // --- TRIGGER NORTHSIDE QUEST ON FIRST WISP CLAIM ---
+        let extraAlert = "";
+        const questListDiv = document.querySelector('#garrison-board-ui > div > div:first-child');
+        if (questListDiv && !document.getElementById('btn-quest-northside') && typeof quests !== 'undefined') {
+            quests.northside_investigation = {
+                id: 'northside_investigation',
+                title: "Northside Whereabouts",
+                objective: "Investigate the missing village at the Northern Watch.",
+                reward: "2,500 Gold & Rare Card",
+                description: "An entire village north of the borders has vanished overnight. The scouting party sent to investigate has not returned. Proceed to the Northern Watch, find out what happened, and report back immediately. Do not engage unless absolutely necessary.<br><br><em>- Captain Thorne</em>",
+                isAccepted: false,
+                isCompleted: false,
+                progress: 0,      
+                maxProgress: 1,    
+                cooldownUntil: 0
+            };
 
-        // Reset the quest so they can do it again, but put it on a 5-minute cooldown!
+            const newBtn = document.createElement('button');
+            newBtn.id = 'btn-quest-northside';
+            newBtn.className = 'menu-btn unlocked';
+            newBtn.style.width = '100%';
+            newBtn.style.textAlign = 'left';
+            newBtn.style.marginBottom = '10px';
+            newBtn.style.color = "#f1c40f";
+            newBtn.innerText = "[F-Rank] Northside Whereabouts";
+            newBtn.onclick = () => viewQuest('northside_investigation');
+            questListDiv.appendChild(newBtn);
+            
+            extraAlert = "\n\n⚠️ CAPTAIN THORNE HAS URGENT NEWS!\nA new F-Rank Story Quest has appeared on the Garrison Board.";
+            if (typeof addLog === 'function') addLog("New Story Quest Available: Northside Whereabouts", "#f1c40f");
+        }
+
+        alert("Rewards Claimed!\n+1,000 Gold" + extraAlert);
+
         quest.isAccepted = false;
         quest.progress = 0;
-        quest.cooldownUntil = Date.now() + (5 * 60 * 1000); // 5 minutes in milliseconds
+        quest.cooldownUntil = Date.now() + (5 * 60 * 1000); 
     } 
     
     // --- 2. NORTHSIDE WHEREABOUTS REWARDS (One-Time Story) ---
@@ -92,7 +122,6 @@ window.claimQuestReward = function(questId) {
             if (typeof updateGoldUI === 'function') updateGoldUI();
         }
         
-        // Give them a random Level 5 Rare Card!
         let rareCardName = "Unknown";
         if (typeof playerCollection !== 'undefined' && typeof cardLibrary !== 'undefined') {
             let rareCards = cardLibrary.filter(c => c.powerLevel === 5);
@@ -106,12 +135,10 @@ window.claimQuestReward = function(questId) {
         if (typeof addLog === 'function') addLog(`Claimed Northside Rewards: +2,500 Gold & ${rareCardName}!`, "#2ecc71");
         alert(`Rewards Claimed!\n+2,500 Gold\n+ Rare Card: ${rareCardName}`);
 
-        // Mark this one as permanently completed
         quest.isAccepted = false;
         quest.isCompleted = true; 
     }
 
-    // Instantly refresh the board UI to show the cooldown timer (or completion state)
     if (typeof viewQuest === 'function') {
         viewQuest(questId);
     }
