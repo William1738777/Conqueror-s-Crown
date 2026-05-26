@@ -20,7 +20,7 @@ let tutorialStep = 0;
 let tutorialLock = false; 
 
 // ============================================================================
-// 📜 MASTER QUEST HANDLER (Place in main.js)
+// 📜 MASTER QUEST HANDLER
 // ============================================================================
 window.acceptQuest = function(questId) {
     if (typeof playClickSound === 'function') playClickSound();
@@ -36,7 +36,6 @@ window.acceptQuest = function(questId) {
             gateBtn.classList.add('unlocked');
             gateBtn.innerText = "City Gate";
         }
-        // Refresh the board UI to show "In Progress"
         if (typeof viewQuest === 'function') viewQuest(questId);
         
     } else if (questId === 'northside_investigation') {
@@ -44,7 +43,17 @@ window.acceptQuest = function(questId) {
         if (typeof addLog === 'function') addLog("Accepted Quest: Northside Whereabouts!", "#3498db");
         alert("Quest Accepted: Northside Whereabouts!\nThe Northern Watch is now accessible.");
         
-        // Refresh the board UI to show "In Progress"
+        // 🛠️ FIX: We must actually unlock the gate button so you can travel there!
+        const buttons = document.querySelectorAll('#gate-screen .menu-btn');
+        buttons.forEach(btn => {
+            if (btn.innerText.includes("The Northern Watch")) {
+                btn.disabled = false;
+                btn.classList.add('unlocked');
+                btn.innerText = "The Northern Watch";
+                btn.onclick = enterNorthside; 
+            }
+        });
+        
         if (typeof viewQuest === 'function') viewQuest(questId);
     }
 };
