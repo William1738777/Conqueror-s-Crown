@@ -502,7 +502,6 @@ function advancePostDuelDialogue() {
         speaker.innerText = "You";
         speaker.style.color = "#3498db";
         text.innerText = "Will do, thanks!";
-    // ... (Keep previous steps 0 through 7 exactly the same) ...
     } else if (postDuelStep === 8) {
         // End of sequence: hide dialog, change to TG9, show menu with ONLY the exit button
         box.style.display = 'none';
@@ -600,22 +599,6 @@ function unlockShopsAlley() {
 // 🏪 SHOPS ALLEY & GLADINE LORE EVENT
 // ============================================================================
 
-// Overwrite previous unlock function to correctly bind the click event
-function unlockShopsAlley() {
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    document.getElementById('leonia-screen').style.display = 'block';
-
-    const buttons = document.querySelectorAll('#leonia-screen .loc-btn');
-    buttons.forEach(btn => {
-        if (btn.innerText.includes("Shops Alley")) {
-            btn.disabled = false;
-            btn.classList.add('unlocked');
-            btn.innerText = "Shops Alley";
-            btn.onclick = enterShopsAlley; // Bind navigation
-        }
-    });
-}
-
 function enterShopsAlley() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     const alleyScreen = document.getElementById('shops-alley-screen');
@@ -634,7 +617,7 @@ let hasSeenShopLore = false;
 
 const shopDialogue = [
     { s: "Gladine", c: "#2ecc71", t: "The name's Gladine by the way, thank you so much for coming!" },
-    { s: "You", c: "#3498db", t: "Nice to meet you, Gladine, my name's ADVENTURER." }, // You can swap ADVENTURER with a dynamic player name later
+    { s: "You", c: "#3498db", t: "Nice to meet you, Gladine, my name's ADVENTURER." }, 
     { s: "Gladine", c: "#2ecc71", t: "Pleasure's all mine." },
     { s: "You", c: "#3498db", t: "I've been curious, why did the guy ran from me, like I was going to hurt him?" },
     { s: "Gladine", c: "#2ecc71", t: "Well you did broke his Core Crystals, defense so, yea you could have." },
@@ -685,6 +668,7 @@ function renderShopDialogue() {
 }
 
 function advanceShopDialogue() {
+    if (typeof playClickSound === 'function') playClickSound();
     shopDialogueStep++;
     if (shopDialogueStep < shopDialogue.length) {
         renderShopDialogue();
@@ -700,7 +684,6 @@ function advanceShopDialogue() {
 // 🛡️ BARRACKS & CAPTAIN THORNE LORE EVENT
 // ============================================================================
 
-// Overwrite the placeholder unlock function so it navigates correctly
 function unlockBarracks() {
     const buttons = document.querySelectorAll('#leonia-screen .loc-btn');
     buttons.forEach(btn => {
@@ -709,8 +692,6 @@ function unlockBarracks() {
             btn.classList.add('unlocked');
             btn.innerText = "Barracks";
             
-            // 🛡️ BULLETPROOF NAVIGATION FIX 🛡️
-            // Instead of searching for a function in main.js, we do it right here!
             btn.onclick = () => {
                 if (typeof playClickSound === 'function') playClickSound();
                 document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
@@ -724,8 +705,6 @@ function unlockBarracks() {
     });
 }
 
-// 🛡️ GUARANTEE 'ENTER BARRACKS INSIDE' WORKS 🛡️
-// We are putting this here so your index.html can ALWAYS find it.
 window.enterBarracksInside = function() {
     if (typeof playClickSound === 'function') playClickSound();
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
@@ -766,7 +745,6 @@ const thorneDialogue = [
 let northsidePostDialogueStep = 0;
 let hasSeenNorthsidePostLore = false;
 
-/// The New Post-Ambush Lore Sequence
 const northsidePostDialogue = [
     { s: "You", c: "#3498db", t: "Captain! Goblins... and a lot of them. I was ambushed by the Old Watchtower. They definitely know what happened to the villagers." },
     { s: "Captain Thorne", c: "#e74c3c", t: "Damn those rats! I knew it wouldn't be a simple disappearance." },
@@ -785,7 +763,7 @@ function talkToThorne() {
         thorneDialogueStep = 0;
         document.getElementById('barracks-menu').style.display = 'none';
         document.getElementById('barracks-dialogue-box').style.display = 'flex';
-        renderThorneDialogue(); // 🌟 RESTORED! This will now work correctly!
+        renderThorneDialogue(); 
         
     } else if (quests.northside_investigation && quests.northside_investigation.progress >= 1 && !hasSeenNorthsidePostLore) {
         northsidePostDialogueStep = 0;
@@ -816,9 +794,6 @@ function talkToThorne() {
     }
 }
 
-// ==========================================
-// 🌟 ORIGINAL DIALOGUE FUNCTIONS RESTORED 🌟
-// ==========================================
 function renderThorneDialogue() {
     const line = thorneDialogue[thorneDialogueStep];
     const speaker = document.getElementById('barracks-speaker');
@@ -846,9 +821,6 @@ function advanceThorneDialogue() {
     }
 }
 
-// ==========================================
-// 🌟 NEW POST-AMBUSH DIALOGUE FUNCTIONS 🌟
-// ==========================================
 function renderNorthsidePostDialogue() {
     const line = northsidePostDialogue[northsidePostDialogueStep];
     const speaker = document.getElementById('barracks-speaker');
@@ -916,37 +888,6 @@ function unlockNorthsidePart2Quest() {
     
     if (typeof addLog === 'function') addLog("New Deployment Order Available: Northside Part 2!", "#f1c40f");
 }
-    // 2. Dynamically add the button to the Garrison Board UI
-    const questListDiv = document.querySelector('#garrison-board-ui > div > div:first-child');
-    if(questListDiv && !document.getElementById('btn-quest-northside-part2')) {
-        const newBtn = document.createElement('button');
-        newBtn.id = 'btn-quest-northside-part2';
-        newBtn.className = 'menu-btn unlocked';
-        newBtn.style.width = '100%';
-        newBtn.style.textAlign = 'left';
-        newBtn.style.marginBottom = '10px';
-        newBtn.style.color = "#f1c40f";
-        newBtn.innerText = "[E-Rank] Northside Whereabouts Pt. 2";
-        newBtn.onclick = () => viewQuest('northside_part2');
-        questListDiv.appendChild(newBtn);
-    }
-    
-    if (typeof addLog === 'function') addLog("New Deployment Order Available: Northside Part 2!", "#f1c40f");
-}
-// ==========================================
-// 👇 Northside Whereabouts Quest 👇
-// ==========================================
-
-let northsideDialogueStep = 0;
-let hasSeenNorthsideLore = false;
-let wispQuestFirstClear = false; // Tracks if they've beaten the wisps at least once
-
-const northsideDialogue = [
-    { s: "Captain Thorne", c: "#e74c3c", t: "You're back. Good. I have a situation that requires a capable hand." },
-    { s: "Captain Thorne", c: "#e74c3c", t: "We've received reports that an entire village just north of our borders vanished overnight. I sent a scouting party to investigate, and they haven't reported back." },
-    { s: "Captain Thorne", c: "#e74c3c", t: "I need someone who can handle themselves to find out what happened. Investigate the area and report back the moment you know what we're dealing with. Do not engage unless absolutely necessary." },
-    { s: "You", c: "#3498db", t: "Understood, Captain. I'll get it done." }
-];
 
 // ============================================================================
 // 📋 GARRISON QUEST BOARD LOGIC
@@ -966,6 +907,7 @@ let quests = {
         cooldownUntil: 0  // --- NEW: Tracks when the quest can be accepted again ---
     }
 };
+
 function openGarrisonBoard() {
     // Hide the barracks menu buttons and show the board
     document.getElementById('barracks-menu').style.display = 'none';
@@ -1144,6 +1086,7 @@ function viewQuest(questId) {
         }, 1000);
     }
 }
+
 // ============================================================================
 // 🗺️ GATE & EXPLORATION NAVIGATION
 // ============================================================================
@@ -1152,8 +1095,6 @@ function enterGate() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     const gateScreen = document.getElementById('gate-screen');
     gateScreen.style.display = 'block';
-    
-    // Setting background directly or via CSS variable. Assuming './assets/Gate.png'
     gateScreen.style.backgroundImage = "url('./assets/Gate.png')"; 
 }
 
@@ -1166,7 +1107,6 @@ function enterEasternPass() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     const epScreen = document.getElementById('eastern-pass-screen');
     epScreen.style.display = 'block';
-    // Inherits Gate background or uses its own if you have one
     epScreen.style.backgroundImage = "url('./assets/Gate.png')"; 
 }
 
@@ -1186,8 +1126,6 @@ function enterNorthside() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     const northScreen = document.getElementById('northside-screen');
     northScreen.style.display = 'block';
-    
-    // Using the Gate background as a placeholder until you have a specific Northside image!
     northScreen.style.backgroundImage = "url('./assets/Gate.png')"; 
 }
 
@@ -1214,7 +1152,6 @@ function enterNorthsideWatchtower() {
         const vid = document.getElementById('cutscene-video');
         vidContainer.style.display = 'block';
         
-        // Attempt to play the video. If it fails (e.g. missing asset), it immediately skips to the dialog.
         let playPromise = vid.play();
         if (playPromise !== undefined) {
             playPromise.catch(error => {
@@ -1225,7 +1162,7 @@ function enterNorthsideWatchtower() {
         
         vid.onended = () => skipVideo();
         
-    }, 2500); // 2.5 seconds of "Loading..."
+    }, 2500); 
 }
 
 function skipVideo() {
@@ -1265,7 +1202,6 @@ function advanceWatchtowerCinematic() {
 
     } else if (wtStep === 2) {
         wtStep = 3;
-        // Now OldWatchtower3 (which has the Knight in it) appears exactly as you summon him
         screen.style.backgroundImage = "url('./assets/OldWatchtower3.png')";
         text.innerText = "I summon thee... Great Knight!";
         summonGreatKnightCinematic(fxLayer);
@@ -1275,7 +1211,6 @@ function advanceWatchtowerCinematic() {
         screen.style.backgroundImage = "url('./assets/OldWatchtower4.png')";
         text.innerText = "(More arrows deflect off the Knight's heavy armor!)";
         
-        // Shoot arrows that get deflected
         for(let i = 0; i < 4; i++) {
             setTimeout(() => fireCinematicArrow(fxLayer, true), i * 250);
         }
@@ -1287,12 +1222,11 @@ function advanceWatchtowerCinematic() {
         
     } else if (wtStep === 5) {
         document.getElementById('watchtower-dialogue-box').style.display = 'none';
-        fxLayer.innerHTML = ''; // Clean up animations
+        fxLayer.innerHTML = ''; 
         startAmbushDuel();
     }
 }
 
-// --- Cinematic Visual Effects ---
 function fireCinematicArrow(layer, deflected = false) {
     if(typeof arrowHitAudioUrl !== 'undefined' && arrowHitAudioUrl) playSound(arrowHitAudioUrl);
     
@@ -1302,14 +1236,12 @@ function fireCinematicArrow(layer, deflected = false) {
     let startY = 30 + Math.random() * 40; 
     arrow.style.cssText = `position: absolute; top: ${startY}%; left: 110%; transform: translate(-50%, -50%) rotate(180deg); transition: left 0.4s linear, top 0.4s linear; z-index: 51;`;
     
-    // Explicitly set the arrow image if css class falls back
     arrow.style.backgroundImage = "var(--arrow-url, url('./assets/Arrow_FX.png'))";
     layer.appendChild(arrow);
     
-    // Force reflow
     void arrow.offsetWidth;
     
-    arrow.style.left = deflected ? '55%' : '-10%'; // If deflected, it stops in the middle of the screen
+    arrow.style.left = deflected ? '55%' : '-10%'; 
     arrow.style.top = (startY + (Math.random() * 10 - 5)) + '%';
     
     setTimeout(() => {
@@ -1319,10 +1251,8 @@ function fireCinematicArrow(layer, deflected = false) {
 }
 
 function summonGreatKnightCinematic(layer) {
-    // Play the beam sound
     if(typeof beamAudioUrl !== 'undefined') playSound(beamAudioUrl);
     
-    // Add the epic magic circle and shockwave from the Gacha animation!
     const magicCircle = document.createElement('div');
     magicCircle.className = 'magic-circle charging-element';
     magicCircle.style.left = '50%';
@@ -1332,7 +1262,7 @@ function summonGreatKnightCinematic(layer) {
     const pillar = document.createElement('div');
     pillar.className = 'light-pillar charging-element';
     pillar.style.left = '50%';
-    pillar.style.zIndex = '52'; // Ensures the pillar draws over the background
+    pillar.style.zIndex = '52'; 
 
     const shockwave = document.createElement('div');
     shockwave.className = 'epic-shockwave';
@@ -1344,12 +1274,10 @@ function summonGreatKnightCinematic(layer) {
     layer.appendChild(pillar);
     layer.appendChild(shockwave);
 
-    // Play the activation sound slightly after the beam
     setTimeout(() => {
         if(typeof buffActivatedUrl !== 'undefined') playSound(buffActivatedUrl);
     }, 200);
 
-    // Clean up all effects after the animation is done
     setTimeout(() => {
         if (pillar) pillar.remove();
         if (magicCircle) magicCircle.remove();
@@ -1357,7 +1285,6 @@ function summonGreatKnightCinematic(layer) {
     }, 1000);
 }
 
-// --- Custom Duel Logic for the Ambush ---
 function startAmbushDuel() {
     document.getElementById('watchtower-cinematic-screen').style.display = 'none';
     document.getElementById('game-area').style.display = 'flex';
@@ -1376,7 +1303,6 @@ function startAmbushDuel() {
     document.getElementById('hand').innerHTML = ''; 
     document.querySelectorAll('.slot .card').forEach(c => c.remove());
     
-    // Pull Player Deck
     pDeck = [];
     if(typeof battleDeckConfig !== 'undefined') {
         Object.values(battleDeckConfig).forEach(tier => {
@@ -1391,7 +1317,6 @@ function startAmbushDuel() {
     if(pDeck.length === 0) pDeck = buildDeck(); 
     for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
     
-    // Custom Goblin Deck Construction (10 Warriors, 8 Archers)
     eDeck = [];
     let gobWarTemplate = cardLibrary.find(c => c.name === "Goblin Warrior");
     let gobArchTemplate = cardLibrary.find(c => c.name === "Goblin Archer");
@@ -1404,7 +1329,6 @@ function startAmbushDuel() {
         eDeck = buildDeck(); 
     }
     
-    // Shuffle the Enemy Deck
     for(let i = eDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [eDeck[i], eDeck[j]] = [eDeck[j], eDeck[i]]; }
     
     document.getElementById('p-deck-count').innerText = pDeck.length;
@@ -1422,26 +1346,22 @@ function startAmbushDuel() {
 }
 
 function triggerNorthsideVictory() {
-    // 1. Hide Battlefield and restore UI safely
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('game-area').style.display = 'none';
     document.getElementById('inventory-btn').style.display = 'block';
     
-    // 2. Max the Quest Progress (Wait for Garrison Board to give rewards)
-    if (quests.northside_investigation) {
+    if (typeof quests !== 'undefined' && quests.northside_investigation) {
         quests.northside_investigation.progress = 1;
+        quests.northside_investigation.isCompleted = false; 
     }
     
-    // 3. Route back to Northside Gate Selection
     const nsScreen = document.getElementById('northside-screen');
     nsScreen.style.display = 'block';
     nsScreen.style.backgroundImage = "url('./assets/Gate.png')";
     
-    // Hide the normal menu temporarily so they have to click the dialog
     const menu = nsScreen.querySelector('.top-left-menu');
     if (menu) menu.style.display = 'none';
 
-    // 4. Inject the one-click Player Realization Dialogue
     let nsDialog = document.getElementById('ns-dialogue-box');
     if (!nsDialog) {
         nsDialog = document.createElement('div');
@@ -1460,7 +1380,6 @@ function triggerNorthsideVictory() {
     document.getElementById('ns-speaker').style.color = "#3498db";
     document.getElementById('ns-text').innerText = "I need to claim my bounty at the Barracks and report to the Captain immediately. This is much larger than a simple raid.";
     
-    // Clicking the box dismisses it and brings the menu back
     nsDialog.onclick = () => {
         if (typeof playClickSound === 'function') playClickSound();
         nsDialog.style.display = 'none';
@@ -1469,25 +1388,19 @@ function triggerNorthsideVictory() {
 
     if (typeof addLog === 'function') addLog("Northside Ambush cleared! Turn in quest at the Garrison Board.", "#2ecc71");
 }
+
 function triggerEncounter() {
-    // --- FIX 1: AGGRESSIVELY KILL THE TIMERS ---
     if (patrolTimer) clearInterval(patrolTimer);
     if (chanceTimer) clearInterval(chanceTimer);
     
-    // Stop the visual marching trail
     document.getElementById('player-patrol-marker').classList.remove('marching');
-    
-    // Show the flashy overlay
     document.getElementById('encounter-overlay').style.display = 'flex';
 }
 
 function escapeEncounter() {
     if (typeof playClickSound === 'function') playClickSound();
     
-    // Hide the overlay
     document.getElementById('encounter-overlay').style.display = 'none';
-    
-    // Restart the visual trail and resume the loops
     document.getElementById('player-patrol-marker').classList.add('marching');
     startPatrolLoops();
 }
@@ -1495,10 +1408,8 @@ function escapeEncounter() {
 function returnToLeonia() {
     if (typeof playClickSound === 'function') playClickSound();
     
-    // --- FIX: STOP THE AMBIENT TEXT ---
     if (typeof stopPatrolAtmosphere === 'function') stopPatrolAtmosphere();
     
-    // Stop any forward marching
     clearInterval(patrolTimer);
     clearInterval(chanceTimer);
     
@@ -1506,12 +1417,10 @@ function returnToLeonia() {
     marker.classList.remove('marching');
     marker.classList.add('retreating');
     
-    // Reverse movement loop (moves back to 0% twice as fast)
     let retreatTimer = setInterval(() => {
         patrolProgress -= 1.0; 
         marker.style.left = Math.max(0, patrolProgress) + '%';
         
-        // Once we hit the start, load the main map
         if (patrolProgress <= 0) {
             clearInterval(retreatTimer);
             marker.classList.remove('retreating');
@@ -1522,65 +1431,44 @@ function returnToLeonia() {
     }, 50);
 }
 
-// Keep this as a placeholder for the next phase
-function startWispDuel() {
-    document.getElementById('encounter-overlay').style.display = 'none';
-    console.log("Setting up Wisp Duel... Need to pull Wisp Deck and transition to game-area.");
-}
-
-// ============================================================================
-// ⚔️ WISP DEFEAT & QUEST PROGRESSION
-// ============================================================================
-
 function processWispDefeat() {
-    let quest = quests.wisp_hunt;
-    
-    // Only increment if the quest is active and not already finished
-    if (quest.isAccepted && !quest.isCompleted && quest.progress < quest.maxProgress) {
-        quest.progress++;
+    if (typeof quests !== 'undefined' && quests.wisp_hunt) {
+        let quest = quests.wisp_hunt;
         
-        if (quest.progress < quest.maxProgress) {
-            if (typeof addLog === 'function') addLog(`Quest Progress: Hunted Wisps ${quest.progress}/3`, "#3498db");
-        } else {
-            if (typeof addLog === 'function') addLog("Wisp Hunt Complete! Return to the Garrison Board.", "#2ecc71");
-            // Optional: Play a victory chime here!
+        if (quest.isAccepted && !quest.isCompleted && quest.progress < quest.maxProgress) {
+            quest.progress++;
+            
+            if (quest.progress < quest.maxProgress) {
+                if (typeof addLog === 'function') addLog(`Quest Progress: Hunted Wisps ${quest.progress}/3`, "#3498db");
+            } else {
+                if (typeof addLog === 'function') addLog("Wisp Hunt Complete! Return to the Garrison Board.", "#2ecc71");
+            }
         }
     }
 }
 
 function endWispDuel() {
-    // 1. Hide the game area
     document.getElementById('game-area').style.display = 'none';
-    
-    // 2. Return to the ACTIVE PATROL SCREEN
     document.getElementById('patrol-screen').style.display = 'block';
     document.getElementById('player-patrol-marker').classList.add('marching');
-    
-    // 3. Restore the inventory button
     document.getElementById('inventory-btn').style.display = 'block';
     
-    // 4. Update the quest math
     processWispDefeat();
     
-    // 5. Give a small immediate reward for the skirmish
     if (typeof playerGold !== 'undefined') {
         playerGold += 50; 
         if (typeof updateGoldUI === 'function') updateGoldUI();
     }
 
-    // 6. Resume the atmosphere AND the walking loops indefinitely!
     if (typeof startPatrolAtmosphere === 'function') startPatrolAtmosphere();
     startPatrolLoops();
 }
-// ============================================================================
-// ⚔️ WISP ENCOUNTER DUEL INITIALIZATION
-// ============================================================================
+
 function startWispDuel() {
     if (typeof playClickSound === 'function') playClickSound();
 
     if (typeof stopPatrolAtmosphere === 'function') stopPatrolAtmosphere();
     
-    // 1. Hide Patrol & Encounter UI, Show Battlefield
     document.getElementById('encounter-overlay').style.display = 'none';
     document.getElementById('patrol-screen').style.display = 'none';
     
@@ -1590,7 +1478,6 @@ function startWispDuel() {
     document.getElementById('game-area').style.display = 'flex';
     document.getElementById('inventory-btn').style.display = 'none';
     
-    // 2. Reset Game States
     isTutorialMode = false; 
     tutorialLock = false;
 
@@ -1599,14 +1486,12 @@ function startWispDuel() {
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; 
     pCoreHP = 2000; 
-    eCoreHP = 1000; // Wisps are weaker, making for a faster skirmish!
+    eCoreHP = 1000; 
     pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0;
     
-    // 3. Clear the board from any previous games
     document.getElementById('hand').innerHTML = ''; 
     document.querySelectorAll('.slot .card').forEach(c => c.remove());
     
-    // 4. Pull the Player's Deck from their Inventory Bag
     pDeck = [];
     if(typeof battleDeckConfig !== 'undefined') {
         Object.values(battleDeckConfig).forEach(tier => {
@@ -1618,15 +1503,11 @@ function startWispDuel() {
             });
         });
     }
-    // Fallback just in case their bag is empty
     if(pDeck.length === 0) pDeck = buildDeck(); 
     for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
     
-    // 5. Build the Wisp Enemy Deck (Exactly 4-6 Wisps total)
     eDeck = [];
     let wispTemplate = cardLibrary.find(c => c.name === "Wisp");
-    
-    // Roll RNG for exactly 4, 5, or 6 Wisps
     let wispPackSize = Math.floor(Math.random() * 3) + 4; 
     
     if (wispTemplate) {
@@ -1635,9 +1516,6 @@ function startWispDuel() {
         }
     }
     
-    // We don't even need to shuffle because they are all the same card!
-    
-    // 6. Update Visuals & Start Match
     document.getElementById('p-deck-count').innerText = pDeck.length;
     document.getElementById('e-deck-count').innerText = eDeck.length;
     document.getElementById('event-log').innerHTML = '';
@@ -1651,10 +1529,6 @@ function startWispDuel() {
     drawBtn.style.display = "block";
     drawBtn.innerText = "DRAW HAND";
 }
-
-// ============================================================================
-// 🚶‍♂️ PATROL ATMOSPHERE LOGIC
-// ============================================================================
 
 let atmosphereTimer = null;
 
@@ -1699,35 +1573,27 @@ function stopPatrolAtmosphere() {
     }
 }
 
-// ============================================================================
-// 🚩 PATROL COMPLETION LOGIC
-// ============================================================================
 let encountersThisPatrol = 0;
-const MAX_PATROL_LENGTH = 3; // The trail ends after 3 battles
+const MAX_PATROL_LENGTH = 3; 
 
 function triggerPatrolComplete() {
-    // 1. Stop the ambient text so the screen is clear
     if (typeof stopPatrolAtmosphere === 'function') stopPatrolAtmosphere();
 
-    // 2. Create the massive "Patrol Completed!" text
     let completeText = document.createElement('div');
     completeText.innerText = "Patrol Completed!";
     completeText.style.cssText = "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #f1c40f; font-size: 3rem; font-weight: bold; text-shadow: 0 0 20px #e67e22, 2px 2px 5px #000; z-index: 9999; opacity: 0; transition: opacity 1s ease-in-out; font-family: monospace; text-align: center;";
     document.body.appendChild(completeText);
 
-    // 3. Fade it in smoothly
     setTimeout(() => { completeText.style.opacity = '1'; }, 100);
 
-    // 4. Leave it on screen for 2.5 seconds, fade it out, and trigger the return sequence
     setTimeout(() => {
         completeText.style.opacity = '0';
         setTimeout(() => {
             completeText.remove();
             
-            // 🚨 IMPORTANT: Change 'return-to-barracks-btn' to whatever the actual ID of your return button is!
-            let returnBtn = document.getElementById('return-to-barracks-btn'); 
+            let returnBtn = document.getElementById('return-to-barracks-btn') || document.getElementById('return-leonia-btn'); 
             if (returnBtn) {
-                returnBtn.click(); // This simulates a physical click so your exact UI animation plays!
+                returnBtn.click(); 
             } else {
                 console.log("Could not find the Return button. Check the ID!");
             }
@@ -1735,87 +1601,23 @@ function triggerPatrolComplete() {
     }, 2500);
 }
 
-function renderNorthsideDialogue() {
-    const line = northsideDialogue[northsideDialogueStep];
-    const speaker = document.getElementById('barracks-speaker');
-    speaker.innerText = line.s;
-    speaker.style.color = line.c;
-    document.getElementById('barracks-text').innerText = line.t;
-}
-
-function advanceNorthsideDialogue() {
-    northsideDialogueStep++;
-    if (northsideDialogueStep < northsideDialogue.length) {
-        renderNorthsideDialogue();
-    } else {
-        hasSeenNorthsideLore = true;
-        document.getElementById('barracks-dialogue-box').style.display = 'none';
-        document.getElementById('barracks-menu').style.display = 'flex';
-        
-        // Restore the original onclick behavior for the barracks box
-        document.getElementById('barracks-dialogue-box').onclick = advanceThorneDialogue;
-        
-        unlockNorthsideQuest();
-    }
-}
-
-function unlockNorthsideQuest() {
-    // 1. Add quest to the database
-    quests.northside_investigation = {
-        id: 'northside_investigation',
-        title: "Northside Whereabouts",
-        objective: "Investigate the missing village at the Northern Watch.",
-        reward: "2,500 Gold & Rare Card", // You can change this reward!
-        description: "An entire village north of the borders has vanished overnight. The scouting party sent to investigate has not returned. Proceed to the Northern Watch, find out what happened, and report back immediately. Do not engage unless absolutely necessary.<br><br><em>- Captain Thorne</em>",
-        isAccepted: false,
-        isCompleted: false,
-        progress: 0,      
-        maxProgress: 1,    
-        cooldownUntil: 0
-    };
-    
-    // 2. Dynamically add the button to the Garrison Board UI
-    const questListDiv = document.querySelector('#garrison-board-ui > div > div:first-child');
-    if(questListDiv && !document.getElementById('btn-quest-northside')) {
-        const newBtn = document.createElement('button');
-        newBtn.id = 'btn-quest-northside';
-        newBtn.className = 'menu-btn unlocked';
-        newBtn.style.width = '100%';
-        newBtn.style.textAlign = 'left';
-        newBtn.style.marginBottom = '10px';
-        newBtn.innerText = "[F-Rank] Northside Whereabouts";
-        newBtn.onclick = () => viewQuest('northside_investigation');
-        questListDiv.appendChild(newBtn);
-    }
-    
-    if (typeof addLog === 'function') addLog("New Quest Available: Northside Whereabouts!", "#f1c40f");
-}
-
-// ============================================================================
-// ⛰️ NORTHSIDE HILLTOP AMBUSH & SCRIPTED DUEL
-// ============================================================================
-
 function enterHilltops() {
     if (typeof playClickSound === 'function') playClickSound();
     
-    // Hide all screens
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     
-    // 1. Show Black Loading Screen
     const loader = document.getElementById('loading-overlay');
     loader.style.display = 'flex';
     
     setTimeout(() => {
         loader.style.display = 'none';
         
-        // 2. Play Video Cutscene
         const vidContainer = document.getElementById('video-container');
         const vid = document.getElementById('cutscene-video');
         vidContainer.style.display = 'block';
         
-        // Dynamically change the video source for this specific event
         vid.innerHTML = '<source src="./assets/Hilltop4.mp4" type="video/mp4">';
-        vid.load(); // Force the browser to load the new video
+        vid.load(); 
         
         let playPromise = vid.play();
         if (playPromise !== undefined) {
@@ -1825,14 +1627,12 @@ function enterHilltops() {
             });
         }
         
-        // On video end, start duel
         vid.onended = () => skipHilltopVideo();
         
-        // Re-wire the existing skip button specifically for this video
         const skipBtn = vidContainer.querySelector('button');
         if (skipBtn) skipBtn.onclick = skipHilltopVideo;
         
-    }, 2500); // 2.5 seconds loading
+    }, 2500); 
 }
 
 function skipHilltopVideo() {
@@ -1841,7 +1641,6 @@ function skipHilltopVideo() {
     vid.pause();
     vidContainer.style.display = 'none';
     
-    // Restore default skip button logic just in case it's used elsewhere
     const skipBtn = vidContainer.querySelector('button');
     if (skipBtn && typeof skipVideo === 'function') skipBtn.onclick = skipVideo; 
     
@@ -1859,13 +1658,12 @@ function startHilltopDuel() {
     
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; 
-    pCoreHP = 2000; eCoreHP = 3000; // Boss Level Core HP
+    pCoreHP = 2000; eCoreHP = 3000; 
     pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0;
     
     document.getElementById('hand').innerHTML = ''; 
     document.querySelectorAll('.slot .card').forEach(c => c.remove());
     
-    // Pull Player Deck
     pDeck = [];
     if(typeof battleDeckConfig !== 'undefined') {
         Object.values(battleDeckConfig).forEach(tier => {
@@ -1880,7 +1678,6 @@ function startHilltopDuel() {
     if(pDeck.length === 0) pDeck = buildDeck(); 
     for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
     
-    // --- BUILD CUSTOM HILLTOP ENEMY DECK ---
     eDeck = [];
     let gobArchTemplate = cardLibrary.find(c => c.name === "Goblin Archer");
     let gobWarDrumTemplate = cardLibrary.find(c => c.name === "Goblin Wardrummer");
@@ -1892,13 +1689,10 @@ function startHilltopDuel() {
         }
     };
 
-    // Note: We subtract the cards that are about to be instantly placed on the board!
-    // Remaining in deck: 16 Archers, 3 Wardrummers, 4 Last Stands
     addCardsToEnemyDeck(gobArchTemplate, 16);
     addCardsToEnemyDeck(gobWarDrumTemplate, 3);
     addCardsToEnemyDeck(lastStandTemplate, 4);
     
-    // Shuffle Enemy Deck
     for(let i = eDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [eDeck[i], eDeck[j]] = [eDeck[j], eDeck[i]]; }
     
     document.getElementById('p-deck-count').innerText = pDeck.length;
@@ -1907,8 +1701,6 @@ function startHilltopDuel() {
     
     addLog("AMBUSH AT THE HILLTOPS! The goblin host has the high ground!", "#e74c3c");
     
-    // --- TURN 1 SCRIPTED AI OVERRIDE ---
-    // This instantly forces the cards onto the board to simulate the AI's first turn.
     const spawnOnBoard = (templateName, slotId) => {
         let template = cardLibrary.find(c => c.name === templateName);
         if(!template) return;
@@ -1916,14 +1708,13 @@ function startHilltopDuel() {
         cardInstances[cardId] = JSON.parse(JSON.stringify(template));
         cardInstances[cardId].id = cardId;
         cardInstances[cardId].side = 'ENEMY';
-        cardInstances[cardId].exhausted = true; // Summoning Sickness active
+        cardInstances[cardId].exhausted = true; 
         cardInstances[cardId].turnPlaced = 1;
         
         let slot = document.getElementById(slotId);
         if(slot) slot.appendChild(createCardDOM(cardId, cardInstances[cardId], false));
     };
 
-    // The AI's flawless Turn 1 formation:
     spawnOnBoard("Goblin Wardrummer", "e-front-center");
     spawnOnBoard("Goblin Archer", "e-front-left");
     spawnOnBoard("Goblin Archer", "e-front-right");
@@ -1941,20 +1732,85 @@ function startHilltopDuel() {
     drawBtn.innerText = "DRAW HAND";
 }
 
-// Routes back to the Gate Options when the core is destroyed
 function triggerHilltopVictory() {
     if (typeof playClickSound === 'function') playClickSound();
     
-    // Hide Battlefield and restore inventory button
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('game-area').style.display = 'none';
     document.getElementById('inventory-btn').style.display = 'block';
     
-    // Route back to Northside Gate
     const nsScreen = document.getElementById('northside-screen');
     nsScreen.style.display = 'block';
-    nsScreen.style.backgroundImage = "url('./assets/Gate.png')"; // Returns to standard gate BG
+    nsScreen.style.backgroundImage = "url('./assets/Gate.png')"; 
     
     if (typeof addLog === 'function') addLog("Hilltop Cleared! The goblin host has been pushed back.", "#2ecc71");
 }
 
+function unlockNorthsideHilltops() {
+    const buttons = document.querySelectorAll('#northside-screen .menu-btn');
+    buttons.forEach(btn => {
+        if (btn.innerText.includes("Northside Hilltop")) {
+            btn.disabled = false;
+            btn.classList.add('unlocked');
+            btn.innerText = "Northside Hilltop";
+            btn.onclick = enterHilltops; 
+        }
+    });
+
+    const floatText = document.createElement('div');
+    floatText.innerText = "Northside Hilltops Unlocked";
+    floatText.style.cssText = "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #f1c40f; font-size: 3rem; font-weight: bold; text-shadow: 0 0 20px #f39c12, 2px 2px 10px #000; z-index: 10000; opacity: 0; transition: opacity 1.5s ease-in-out; font-family: 'Cinzel', serif; text-align: center; pointer-events: none;";
+    document.body.appendChild(floatText);
+
+    setTimeout(() => { floatText.style.opacity = '1'; }, 100);
+
+    setTimeout(() => {
+        floatText.style.opacity = '0';
+        setTimeout(() => { floatText.remove(); }, 1500); 
+    }, 3000); 
+}
+
+// 🌟 IMPORTANT: THIS STARTS THE PATROL SYSTEM
+let patrolProgress = 0;
+let patrolTimer = null;
+let chanceTimer = null;
+
+function startPatrol() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    
+    document.getElementById('patrol-screen').style.display = 'block';
+    document.getElementById('patrol-screen').style.backgroundImage = "url('./assets/Eastern Mountain Pass Watch.png')";
+    
+    patrolProgress = 0;
+    encountersThisPatrol = 0;
+    document.getElementById('player-patrol-marker').style.left = '0%';
+    document.getElementById('player-patrol-marker').classList.add('marching');
+    
+    startPatrolAtmosphere();
+    startPatrolLoops();
+}
+
+function startPatrolLoops() {
+    const marker = document.getElementById('player-patrol-marker');
+    
+    patrolTimer = setInterval(() => {
+        if (patrolProgress >= 100) {
+            clearInterval(patrolTimer);
+            clearInterval(chanceTimer);
+            marker.classList.remove('marching');
+            triggerPatrolComplete();
+        } else {
+            patrolProgress += 0.5; 
+            marker.style.left = patrolProgress + '%';
+        }
+    }, 100);
+
+    chanceTimer = setInterval(() => {
+        if (Math.random() < 0.25) { 
+            encountersThisPatrol++;
+            triggerEncounter();
+        }
+    }, 3000); 
+}
