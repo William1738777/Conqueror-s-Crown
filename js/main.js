@@ -651,8 +651,8 @@ function enterTavern() {
 // 🛡️ BARRACKS NAVIGATION
 // ============================================================================
 
-// 1. Entering the Gate from Leonia Town
-function enterBarracksGate() {
+// 1. Entering the Gate from Leonia Town (Renamed back to enterBarracks to fix HTML link!)
+function enterBarracks() {
     if (typeof playClickSound === 'function') playClickSound();
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     const bgScreen = document.getElementById('barracks-gate-screen');
