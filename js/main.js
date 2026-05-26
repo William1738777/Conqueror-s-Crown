@@ -224,7 +224,7 @@ function inspectBarracksQuest(questName) {
             actionButtons = `
                 <div style="display:flex; gap:10px; margin-top: 15px;">
                     <button class="btn-main" style="flex:1; background:#e74c3c; color:#fff;" onclick="closeBarracksQuests()">DECLINE</button>
-                    <button class="btn-main" style="flex:1; background:#2ecc71; color:#000;" onclick="acceptQuest('Pest Control')">ACCEPT</button>
+                    <button class="btn-main" style="flex:1; background:#2ecc71; color:#000;" onclick="acceptBarracksQuest('Pest Control')">ACCEPT</button>
                 </div>
             `;
         } else if (questPestControlStatus === 'active') {
@@ -278,7 +278,7 @@ function inspectBarracksQuest(questName) {
     }
 }
 
-function acceptQuest(questName) {
+function acceptBarracksQuest(questName) {
     if (typeof playClickSound === 'function') playClickSound();
     
     if (questName === 'Pest Control') {
@@ -557,50 +557,50 @@ function enterTavern() {
 // 1. Entering the Gate from Leonia Town
 function enterBarracksGate() {
     if (typeof playClickSound === 'function') playClickSound();
-    document.getElementById('leonia-screen').style.display = 'none';
-    document.getElementById('barracks-gate-screen').style.display = 'block';
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    const bgScreen = document.getElementById('barracks-gate-screen');
+    bgScreen.style.display = 'block';
+    bgScreen.style.backgroundImage = "var(--bk1-url)";
 }
 
 // 2. Talking to the Guard (Standardized Full Screen)
 function talkToBarracksGuard() {
     if (typeof playClickSound === 'function') playClickSound();
-    
-    // Safely hide screens
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     
     const guardScreen = document.getElementById('barracks-screen');
     guardScreen.style.display = 'block';
-    
-    // Apply the BK2.png background dynamically
     guardScreen.style.backgroundImage = "var(--bk2-url)"; 
 }
 
 // 3. Leaving the Guard Interaction
 function leaveBarracksGuard() {
     if (typeof playClickSound === 'function') playClickSound();
-    
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('barracks-gate-screen').style.display = 'block';
 }
 
-// 4. Going inside the actual Barracks
+// 4. Going inside the actual Barracks (Fixed Background Rendering!)
 function enterBarracksInside() {
     if (typeof playClickSound === 'function') playClickSound();
-    document.getElementById('barracks-gate-screen').style.display = 'none';
-    document.getElementById('barracks-inside-screen').style.display = 'block';
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    
+    const biScreen = document.getElementById('barracks-inside-screen');
+    biScreen.style.display = 'block';
+    // This is the line that was missing in the duplicate!
+    biScreen.style.backgroundImage = "var(--bk3-url, url('./assets/BK3.png'))";
 }
 
 // 5. Returning to Gate from Inside
 function backToBarracksGate() {
     if (typeof playClickSound === 'function') playClickSound();
-    document.getElementById('barracks-inside-screen').style.display = 'none';
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('barracks-gate-screen').style.display = 'block';
 }
 
 // 6. Leaving entirely to go back to Town
 function backToLeonia() {
     if (typeof playClickSound === 'function') playClickSound();
-    // Safely hide ALL active sub-screens and show the Town
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('leonia-screen').style.display = 'block';
 }
