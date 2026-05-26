@@ -770,7 +770,7 @@ const thorneDialogue = [
 let northsidePostDialogueStep = 0;
 let hasSeenNorthsidePostLore = false;
 
-// The New Post-Ambush Lore Sequence
+/// The New Post-Ambush Lore Sequence
 const northsidePostDialogue = [
     { s: "You", c: "#3498db", t: "Captain! Goblins... and a lot of them. I was ambushed by the Old Watchtower. They definitely know what happened to the villagers." },
     { s: "Captain Thorne", c: "#e74c3c", t: "Damn those rats! I knew it wouldn't be a simple disappearance." },
@@ -779,38 +779,35 @@ const northsidePostDialogue = [
     { s: "Captain Thorne", c: "#e74c3c", t: "Follow the trail of the goblin host you encountered. Our scouts note that while other wild factions are executing the raids, they appear to be taking orders from goblin leaders." },
     { s: "Captain Thorne", c: "#e74c3c", t: "Which means it is highly probable the mastermind behind these coordinated attacks is within the Goblin faction." },
     { s: "Captain Thorne", c: "#e74c3c", t: "I'll be assembling Leonia's forces. In the meantime, I need you to push forward into the Hilltops and find out exactly what they're up to!" },
-    { s: "Captain Thorne", c: "#e74c3c", t: "Collect your bounty from the Garrison Board, then move out." }
+    { s: "Captain Thorne", c: "#e74c3c", t: "I've authorized a new deployment order. Check the Garrison Board, accept the task, and move out." }
 ];
 
 function talkToThorne() {
     if (typeof playClickSound === 'function') playClickSound();
 
     if (!hasSeenThorneLore) {
-        // First time ever talking to him
         thorneDialogueStep = 0;
         document.getElementById('barracks-menu').style.display = 'none';
         document.getElementById('barracks-dialogue-box').style.display = 'flex';
         renderThorneDialogue();
         
-    } else if (quests.northside_investigation && quests.northside_investigation.progress === 1 && !hasSeenNorthsidePostLore) {
-        // Post-Northside Lore Trigger
+    } else if (quests.northside_investigation && quests.northside_investigation.isCompleted && !hasSeenNorthsidePostLore) {
+        // Post-Northside Lore Trigger: Only fires AFTER they claim the reward from the board
         northsidePostDialogueStep = 0;
         document.getElementById('barracks-menu').style.display = 'none';
         document.getElementById('barracks-dialogue-box').style.display = 'flex';
         
-        // Swap out the click function to advance the NEW dialogue
         document.getElementById('barracks-dialogue-box').onclick = advanceNorthsidePostDialogue;
         renderNorthsidePostDialogue();
         
     } else {
-        // Repeated generic chatter
         document.getElementById('barracks-menu').style.display = 'none';
         document.getElementById('barracks-dialogue-box').style.display = 'flex';
         document.getElementById('barracks-speaker').innerText = "Captain Thorne";
         document.getElementById('barracks-speaker').style.color = "#e74c3c";
         
         if (hasSeenNorthsidePostLore) {
-            document.getElementById('barracks-text').innerText = "Don't just stand there. Find out what those goblins are doing at the Hilltops!";
+            document.getElementById('barracks-text').innerText = "Don't just stand there. Accept the new orders from the board and get to the Hilltops!";
         } else {
             document.getElementById('barracks-text').innerText = "Check the Garrison Quest Board if you're looking for work. Keep your guard up.";
         }
@@ -822,43 +819,6 @@ function talkToThorne() {
             document.getElementById('barracks-dialogue-box').onclick = advanceThorneDialogue; // Restore safety
         };
     }
-}
-
-// Keep original render/advance functions for Thorne's Intro
-function renderThorneDialogue() {
-    const line = thorneDialogue[thorneDialogueStep];
-    const speaker = document.getElementById('barracks-speaker');
-    speaker.innerText = line.s;
-    speaker.style.color = line.c;
-    document.getElementById('barracks-text').innerText = line.t;
-}
-
-function advanceThorneDialogue() {
-    if (typeof playClickSound === 'function') playClickSound();
-    thorneDialogueStep++;
-    if (thorneDialogueStep < thorneDialogue.length) {
-        renderThorneDialogue();
-    } else {
-        hasSeenThorneLore = true;
-        document.getElementById('barracks-dialogue-box').style.display = 'none';
-        document.getElementById('barracks-menu').style.display = 'flex';
-        
-        const boardBtn = document.getElementById('garrison-board-btn');
-        if (boardBtn) {
-            boardBtn.disabled = false;
-            boardBtn.classList.add('unlocked');
-            boardBtn.innerText = "Garrison Board Quest";
-        }
-    }
-}
-
-// New render/advance functions for the Post-Ambush Lore
-function renderNorthsidePostDialogue() {
-    const line = northsidePostDialogue[northsidePostDialogueStep];
-    const speaker = document.getElementById('barracks-speaker');
-    speaker.innerText = line.s;
-    speaker.style.color = line.c;
-    document.getElementById('barracks-text').innerText = line.t;
 }
 
 function advanceNorthsidePostDialogue() {
@@ -873,42 +833,44 @@ function advanceNorthsidePostDialogue() {
         // Clean up UI
         document.getElementById('barracks-dialogue-box').style.display = 'none';
         document.getElementById('barracks-menu').style.display = 'flex';
-        
-        // Restore default onclick behavior for generic chatter
         document.getElementById('barracks-dialogue-box').onclick = advanceThorneDialogue;
 
-        // 🌟 Trigger the map unlock and floating UI text
-        unlockNorthsideHilltops();
+        // Trigger the new quest creation
+        unlockNorthsidePart2Quest();
     }
 }
 
-// Epic floating text unlock sequence
-function unlockNorthsideHilltops() {
-    // 1. Find the Hilltop button in the Northside menu and unlock it
-    const buttons = document.querySelectorAll('#northside-screen .menu-btn');
-    buttons.forEach(btn => {
-        if (btn.innerText.includes("Northside Hilltop")) {
-            btn.disabled = false;
-            btn.classList.add('unlocked');
-            btn.innerText = "Northside Hilltop";
-            btn.onclick = enterHilltops; // 👈 WE ADDED THE BINDING HERE!
-        }
-    });
-
-    // 2. Create the floating text element
-    const floatText = document.createElement('div');
-    floatText.innerText = "Northside Hilltops Unlocked";
-    floatText.style.cssText = "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #f1c40f; font-size: 3rem; font-weight: bold; text-shadow: 0 0 20px #f39c12, 2px 2px 10px #000; z-index: 10000; opacity: 0; transition: opacity 1.5s ease-in-out; font-family: 'Cinzel', serif; text-align: center; pointer-events: none;";
-    document.body.appendChild(floatText);
-
-    // 3. Fade it in smoothly
-    setTimeout(() => { floatText.style.opacity = '1'; }, 100);
-
-    // 4. Hold it on screen, then fade it out and delete it
-    setTimeout(() => {
-        floatText.style.opacity = '0';
-        setTimeout(() => { floatText.remove(); }, 1500); 
-    }, 3000); 
+function unlockNorthsidePart2Quest() {
+    // 1. Add quest to the database
+    quests.northside_part2 = {
+        id: 'northside_part2',
+        title: "Northside Whereabouts: Part 2",
+        objective: "Push forward and secure the Northside Hilltops.",
+        reward: "3,500 Gold & Epic Core",
+        description: "Scouts have confirmed the goblins are operating from the Hilltops and organizing the regional raids. Your orders are to engage the enemy frontline, break their defensive perimeter, and secure the high ground.<br><br><em>- Captain Thorne</em>",
+        isAccepted: false,
+        isCompleted: false,
+        progress: 0,      
+        maxProgress: 1,    
+        cooldownUntil: 0
+    };
+    
+    // 2. Dynamically add the button to the Garrison Board UI
+    const questListDiv = document.querySelector('#garrison-board-ui > div > div:first-child');
+    if(questListDiv && !document.getElementById('btn-quest-northside-part2')) {
+        const newBtn = document.createElement('button');
+        newBtn.id = 'btn-quest-northside-part2';
+        newBtn.className = 'menu-btn unlocked';
+        newBtn.style.width = '100%';
+        newBtn.style.textAlign = 'left';
+        newBtn.style.marginBottom = '10px';
+        newBtn.style.color = "#f1c40f";
+        newBtn.innerText = "[E-Rank] Northside Whereabouts Pt. 2";
+        newBtn.onclick = () => viewQuest('northside_part2');
+        questListDiv.appendChild(newBtn);
+    }
+    
+    if (typeof addLog === 'function') addLog("New Deployment Order Available: Northside Part 2!", "#f1c40f");
 }
 
 // ==========================================
@@ -1436,7 +1398,7 @@ function triggerNorthsideVictory() {
     nsDialog.style.display = 'flex';
     document.getElementById('ns-speaker').innerText = "You";
     document.getElementById('ns-speaker').style.color = "#3498db";
-    document.getElementById('ns-text').innerText = "I must report back to the Captain immediately. This is much larger than a simple raid.";
+    document.getElementById('ns-text').innerText = "I need to claim my bounty at the Barracks and report to the Captain immediately. This is much larger than a simple raid.";
     
     // Clicking the box dismisses it and brings the menu back
     nsDialog.onclick = () => {
@@ -1445,80 +1407,8 @@ function triggerNorthsideVictory() {
         if (menu) menu.style.display = 'flex';
     };
 
-    if (typeof addLog === 'function') addLog("Northside Ambush cleared! Report back to Captain Thorne.", "#2ecc71");
+    if (typeof addLog === 'function') addLog("Northside Ambush cleared! Turn in quest at the Garrison Board.", "#2ecc71");
 }
-// --- PATROL STATE VARIABLES ---
-let patrolProgress = 0;
-let encounterChance = 5;
-let patrolTimer = null;
-let chanceTimer = null;
-
-function startPatrol() {
-    if (typeof playClickSound === 'function') playClickSound();
-    
-    // Hide all screens and show the new Patrol Screen
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    const patrolScreen = document.getElementById('patrol-screen');
-    patrolScreen.style.display = 'block';
-    
-    patrolScreen.style.backgroundImage = "url('./assets/Eastern Mountain Pass Watch.png')";
-    
-    // Reset state and setup marker
-    patrolProgress = 0;
-    encounterChance = 5;
-    const marker = document.getElementById('player-patrol-marker');
-    marker.style.left = '0%';
-    marker.classList.remove('retreating');
-    marker.classList.add('marching');
-
-    if (typeof startPatrolAtmosphere === 'function') startPatrolAtmosphere();
-
-    // Kick off the movement and RNG loops
-    startPatrolLoops();
-}
-
-function startPatrolLoops() {
-    // --- FIX 1: DESTROY ANY GHOST TIMERS BEFORE STARTING ---
-    if (patrolTimer) clearInterval(patrolTimer);
-    if (chanceTimer) clearInterval(chanceTimer);
-
-    // 1. The Movement Loop (Calculated for exactly 2 minutes)
-    patrolTimer = setInterval(() => {
-        patrolProgress += (100 / 1200); 
-        
-        // --- FIX 2: CLAMP PROGRESS SO IT HITS A BRICK WALL AT 100% ---
-        if (patrolProgress >= 100) {
-            patrolProgress = 100;
-            document.getElementById('player-patrol-marker').style.left = '100%';
-            
-            clearInterval(patrolTimer);
-            clearInterval(chanceTimer);
-            
-            // Trigger the cinematic completion text!
-            if (typeof triggerPatrolComplete === 'function') {
-                triggerPatrolComplete();
-            } else {
-                returnToLeonia();
-            }
-            return; // This 'return' prevents the loop from running another inch!
-        }
-        
-        document.getElementById('player-patrol-marker').style.left = patrolProgress + '%';
-    }, 100);
-
-    // 2. The Encounter RNG Loop (runs every 10 seconds)
-    chanceTimer = setInterval(() => {
-        encounterChance += 5; // Increase chance by 5%
-        
-        let roll = Math.random() * 100;
-        console.log(`Searching for Wisps... Needed: <${encounterChance} | Rolled: ${roll.toFixed(2)}`);
-        
-        if (roll < encounterChance) {
-            triggerEncounter();
-        }
-    }, 10000); 
-}
-
 function triggerEncounter() {
     // --- FIX 1: AGGRESSIVELY KILL THE TIMERS ---
     if (patrolTimer) clearInterval(patrolTimer);
