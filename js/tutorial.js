@@ -891,7 +891,7 @@ function unlockNorthsideHilltops() {
             btn.disabled = false;
             btn.classList.add('unlocked');
             btn.innerText = "Northside Hilltop";
-            // You can bind btn.onclick = enterHilltops here later!
+            btn.onclick = enterHilltops; // 👈 WE ADDED THE BINDING HERE!
         }
     });
 
@@ -907,8 +907,8 @@ function unlockNorthsideHilltops() {
     // 4. Hold it on screen, then fade it out and delete it
     setTimeout(() => {
         floatText.style.opacity = '0';
-        setTimeout(() => { floatText.remove(); }, 1500); // Wait for fade-out to finish before deleting
-    }, 3000); // 3-second display time
+        setTimeout(() => { floatText.remove(); }, 1500); 
+    }, 3000); 
 }
 
 // ==========================================
@@ -1839,5 +1839,172 @@ function unlockNorthsideQuest() {
     }
     
     if (typeof addLog === 'function') addLog("New Quest Available: Northside Whereabouts!", "#f1c40f");
+}
+
+// ============================================================================
+// ⛰️ NORTHSIDE HILLTOP AMBUSH & SCRIPTED DUEL
+// ============================================================================
+
+function enterHilltops() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Hide all screens
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    
+    // 1. Show Black Loading Screen
+    const loader = document.getElementById('loading-overlay');
+    loader.style.display = 'flex';
+    
+    setTimeout(() => {
+        loader.style.display = 'none';
+        
+        // 2. Play Video Cutscene
+        const vidContainer = document.getElementById('video-container');
+        const vid = document.getElementById('cutscene-video');
+        vidContainer.style.display = 'block';
+        
+        // Dynamically change the video source for this specific event
+        vid.innerHTML = '<source src="./assets/Hilltop4.mp4" type="video/mp4">';
+        vid.load(); // Force the browser to load the new video
+        
+        let playPromise = vid.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.warn("Video failed to play, skipping directly to duel.", error);
+                skipHilltopVideo();
+            });
+        }
+        
+        // On video end, start duel
+        vid.onended = () => skipHilltopVideo();
+        
+        // Re-wire the existing skip button specifically for this video
+        const skipBtn = vidContainer.querySelector('button');
+        if (skipBtn) skipBtn.onclick = skipHilltopVideo;
+        
+    }, 2500); // 2.5 seconds loading
+}
+
+function skipHilltopVideo() {
+    const vidContainer = document.getElementById('video-container');
+    const vid = document.getElementById('cutscene-video');
+    vid.pause();
+    vidContainer.style.display = 'none';
+    
+    // Restore default skip button logic just in case it's used elsewhere
+    const skipBtn = vidContainer.querySelector('button');
+    if (skipBtn && typeof skipVideo === 'function') skipBtn.onclick = skipVideo; 
+    
+    startHilltopDuel();
+}
+
+function startHilltopDuel() {
+    document.getElementById('game-area').style.display = 'flex';
+    document.getElementById('inventory-btn').style.display = 'none';
+    
+    isTutorialMode = false;
+    tutorialLock = false;
+
+    if (typeof showInspector === 'function') showInspector('none');
+    
+    turnCount = 1; currentTurn = 'PLAYER';
+    pMana = 8; eMana = 8; 
+    pCoreHP = 2000; eCoreHP = 3000; // Boss Level Core HP
+    pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0;
+    
+    document.getElementById('hand').innerHTML = ''; 
+    document.querySelectorAll('.slot .card').forEach(c => c.remove());
+    
+    // Pull Player Deck
+    pDeck = [];
+    if(typeof battleDeckConfig !== 'undefined') {
+        Object.values(battleDeckConfig).forEach(tier => {
+            tier.cards.forEach(card => {
+                if(card) {
+                   let template = cardLibrary.find(c => c.name === card.name);
+                   if (template) pDeck.push(JSON.parse(JSON.stringify(template)));
+                }
+            });
+        });
+    }
+    if(pDeck.length === 0) pDeck = buildDeck(); 
+    for(let i = pDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pDeck[i], pDeck[j]] = [pDeck[j], pDeck[i]]; }
+    
+    // --- BUILD CUSTOM HILLTOP ENEMY DECK ---
+    eDeck = [];
+    let gobArchTemplate = cardLibrary.find(c => c.name === "Goblin Archer");
+    let gobWarDrumTemplate = cardLibrary.find(c => c.name === "Goblin Wardrummer");
+    let lastStandTemplate = cardLibrary.find(c => c.name === "Last Stand");
+    
+    const addCardsToEnemyDeck = (template, count) => {
+        if (template) {
+            for (let k = 0; k < count; k++) eDeck.push(JSON.parse(JSON.stringify(template)));
+        }
+    };
+
+    // Note: We subtract the cards that are about to be instantly placed on the board!
+    // Remaining in deck: 16 Archers, 3 Wardrummers, 4 Last Stands
+    addCardsToEnemyDeck(gobArchTemplate, 16);
+    addCardsToEnemyDeck(gobWarDrumTemplate, 3);
+    addCardsToEnemyDeck(lastStandTemplate, 4);
+    
+    // Shuffle Enemy Deck
+    for(let i = eDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [eDeck[i], eDeck[j]] = [eDeck[j], eDeck[i]]; }
+    
+    document.getElementById('p-deck-count').innerText = pDeck.length;
+    document.getElementById('e-deck-count').innerText = eDeck.length;
+    document.getElementById('event-log').innerHTML = '';
+    
+    addLog("AMBUSH AT THE HILLTOPS! The goblin host has the high ground!", "#e74c3c");
+    
+    // --- TURN 1 SCRIPTED AI OVERRIDE ---
+    // This instantly forces the cards onto the board to simulate the AI's first turn.
+    const spawnOnBoard = (templateName, slotId) => {
+        let template = cardLibrary.find(c => c.name === templateName);
+        if(!template) return;
+        let cardId = 'e_spawn_' + Math.floor(Math.random() * 1000000);
+        cardInstances[cardId] = JSON.parse(JSON.stringify(template));
+        cardInstances[cardId].id = cardId;
+        cardInstances[cardId].side = 'ENEMY';
+        cardInstances[cardId].exhausted = true; // Summoning Sickness active
+        cardInstances[cardId].turnPlaced = 1;
+        
+        let slot = document.getElementById(slotId);
+        if(slot) slot.appendChild(createCardDOM(cardId, cardInstances[cardId], false));
+    };
+
+    // The AI's flawless Turn 1 formation:
+    spawnOnBoard("Goblin Wardrummer", "e-front-center");
+    spawnOnBoard("Goblin Archer", "e-front-left");
+    spawnOnBoard("Goblin Archer", "e-front-right");
+    spawnOnBoard("Goblin Archer", "e-back-left");
+    spawnOnBoard("Goblin Archer", "e-back-right");
+    spawnOnBoard("Last Stand", "e-ability");
+
+    addLog("The enemy formation is perfectly entrenched!", "#9b59b6");
+    addLog("BATTLE COMMENCED. No combat allowed on Turn 1.", "var(--gold)");
+    
+    updateUI(); 
+    
+    const drawBtn = document.getElementById('draw-cards-btn');
+    drawBtn.style.display = "block";
+    drawBtn.innerText = "DRAW HAND";
+}
+
+// Routes back to the Gate Options when the core is destroyed
+function triggerHilltopVictory() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Hide Battlefield and restore inventory button
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('game-area').style.display = 'none';
+    document.getElementById('inventory-btn').style.display = 'block';
+    
+    // Route back to Northside Gate
+    const nsScreen = document.getElementById('northside-screen');
+    nsScreen.style.display = 'block';
+    nsScreen.style.backgroundImage = "url('./assets/Gate.png')"; // Returns to standard gate BG
+    
+    if (typeof addLog === 'function') addLog("Hilltop Cleared! The goblin host has been pushed back.", "#2ecc71");
 }
 
