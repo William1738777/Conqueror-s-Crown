@@ -887,9 +887,17 @@ function viewQuest(questId) {
     let stars = questId === 'northside_investigation' ? '★★☆☆☆☆☆' : '★☆☆☆☆☆☆';
     let difficultyText = questId === 'northside_investigation' ? 'F-Rank Story Quest' : 'E-Rank Bounty';
 
-    // --- 2. AQW Progress Tracker Sub-Panel ---
+   // --- 2. AQW Progress Tracker Sub-Panel ---
     let progressTracker = '';
-    if (quest.isAccepted && quest.progress < quest.maxProgress) {
+    
+    if (quest.isCompleted) {
+        // 🛠️ FIX: Clean visual state for finished story quests
+        progressTracker = `
+            <div style="background: rgba(0,0,0,0.6); border: 1px solid #27ae60; border-radius: 6px; padding: 12px; text-align: center; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(39, 174, 96, 0.3);">
+                <span style="color:#27ae60; font-weight:bold; letter-spacing: 1px; font-size:0.9rem;">MISSION ACCOMPLISHED</span>
+            </div>
+        `;
+    } else if (quest.isAccepted && quest.progress < quest.maxProgress) {
         progressTracker = `
             <div style="background: rgba(0,0,0,0.6); border: 1px solid #3498db; border-radius: 6px; padding: 12px; text-align: center; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(52,152,219,0.2);">
                 <span style="color:#3498db; font-weight:bold; letter-spacing: 1px; font-size:0.9rem;">GOAL IN PROGRESS</span>
@@ -911,7 +919,11 @@ function viewQuest(questId) {
     let actionType = 'accept';
     let now = Date.now();
 
-    if (quest.cooldownUntil && now < quest.cooldownUntil) {
+    if (quest.isCompleted && questId === 'northside_investigation') {
+        // 🛠️ FIX: Permanently lock the button so it can't be accepted twice
+        actionButtons = `<button class="btn-main" style="width:100%; background:#27ae60; color:#fff; border:1px solid #2ecc71; cursor:not-allowed;" disabled>STORY CLEARED</button>`;
+        actionType = 'completed';
+    } else if (quest.cooldownUntil && now < quest.cooldownUntil) {
         let remainingMins = Math.ceil((quest.cooldownUntil - now) / 60000);
         actionButtons = `<button class="btn-main" id="quest-action-btn" style="width:100%; background:#555; color:#aaa; border:1px solid #444; cursor:not-allowed;" disabled>ON COOLDOWN (${remainingMins}m)</button>`;
         actionType = 'cooldown';
