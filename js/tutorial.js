@@ -503,10 +503,6 @@ function advancePostDuelDialogue() {
         speaker.style.color = "#3498db";
         text.innerText = "Will do, thanks!";
     // ... (Keep previous steps 0 through 7 exactly the same) ...
-    } else if (postDuelStep === 7) {
-        speaker.innerText = "You";
-        speaker.style.color = "#3498db";
-        text.innerText = "Will do, thanks!";
     } else if (postDuelStep === 8) {
         // End of sequence: hide dialog, change to TG9, show menu with ONLY the exit button
         box.style.display = 'none';
@@ -920,7 +916,6 @@ function unlockNorthsidePart2Quest() {
     
     if (typeof addLog === 'function') addLog("New Deployment Order Available: Northside Part 2!", "#f1c40f");
 }
-    
     // 2. Dynamically add the button to the Garrison Board UI
     const questListDiv = document.querySelector('#garrison-board-ui > div > div:first-child');
     if(questListDiv && !document.getElementById('btn-quest-northside-part2')) {
