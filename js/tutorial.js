@@ -712,28 +712,9 @@ function unlockBarracks() {
             btn.disabled = false;
             btn.classList.add('unlocked');
             btn.innerText = "Barracks";
-            btn.onclick = enterBarracks; // Bind navigation
+            btn.onclick = enterBarracksGate;
         }
     });
-}
-
-function enterBarracks() {
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    const bgScreen = document.getElementById('barracks-gate-screen');
-    bgScreen.style.display = 'block';
-    bgScreen.style.backgroundImage = "var(--bk1-url)";
-}
-
-function enterBarracksInside() {
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    const biScreen = document.getElementById('barracks-inside-screen');
-    biScreen.style.display = 'block';
-    biScreen.style.backgroundImage = "var(--bk3-url)";
-}
-
-function backToBarracksGate() {
-    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
-    document.getElementById('barracks-gate-screen').style.display = 'block';
 }
 
 let thorneDialogueStep = 0;
