@@ -832,74 +832,116 @@ function openGarrisonBoard() {
     document.getElementById('garrison-board-ui').style.display = 'block';
 }
 
-function closeGarrisonBoard() {
-    // 1. Hide the board UI
-    document.getElementById('garrison-board-ui').style.display = 'none';
-    
-    // 2. Check if they just finished the Wisp quest and haven't seen Thorne's new dialogue
-    if (wispQuestFirstClear && !hasSeenNorthsideLore) {
-        northsideDialogueStep = 0;
-        const box = document.getElementById('barracks-dialogue-box');
-        box.style.display = 'flex';
-        
-        // Temporarily bind the click event to our new Northside dialogue logic
-        box.onclick = advanceNorthsideDialogue;
-        
-        // Start the dialogue!
-        renderNorthsideDialogue();
-    } else {
-        // Otherwise, just show the normal barracks menu buttons
-        document.getElementById('barracks-menu').style.display = 'flex';
-    }
-}
 function viewQuest(questId) {
     const quest = quests[questId];
     const pane = document.getElementById('quest-details-pane');
     
-    let progressText = quest.isAccepted ? `<p style="color: #2ecc71; font-weight: bold; font-size: 1.2rem; margin-top: 10px;">Progress: ${quest.progress} / ${quest.maxProgress} Wisps Defeated</p>` : '';
-
-    let btnText = 'ACCEPT QUEST';
-    let btnStyle = '';
-    let btnAction = `acceptQuest('${quest.id}')`;
-    let btnDisabled = '';
-
-    let now = Date.now();
-
-    // --- 1. Check if the quest is on Cooldown ---
-    if (quest.cooldownUntil && now < quest.cooldownUntil) {
-        let remainingMins = Math.ceil((quest.cooldownUntil - now) / 60000);
-        btnText = `ON COOLDOWN (${remainingMins}m)`;
-        btnStyle = 'background: #555; color: #aaa; border: 1px solid #444; cursor: not-allowed;';
-        btnDisabled = 'disabled';
-    } 
-    // --- 2. Check if the quest is ready to claim ---
-    else if (quest.progress >= quest.maxProgress && quest.isAccepted) {
-        btnText = 'CLAIM REWARD';
-        btnStyle = 'background: #f1c40f; color: black; border: 1px solid #f39c12; text-shadow: none;';
-        btnAction = `claimQuestReward('${quest.id}')`;
-    } 
-    // --- 3. Check if the quest is currently active ---
-    else if (quest.isAccepted) {
-        btnText = 'QUEST ACCEPTED';
-        btnStyle = 'background: #333; color: #888; border: 1px solid #555;';
-        btnDisabled = 'disabled';
+    // --- 1. Star Rating based on quest ---
+    let stars = questId === 'northside_investigation' ? '★★☆☆☆☆☆' : '★☆☆☆☆☆☆';
+    
+    // --- 2. Progress Tracker Box ---
+    let progressTracker = '';
+    if (quest.isAccepted && quest.progress < quest.maxProgress) {
+        progressTracker = `
+            <div style="background: rgba(0,0,0,0.5); border: 1px solid #3498db; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 15px;">
+                <span style="color:#3498db; font-weight:bold; letter-spacing: 1px;">PROGRESS: ${quest.progress} / ${quest.maxProgress}</span>
+                <div style="font-size:0.8rem; color:#aaa; margin-top:5px;">${quest.objective}</div>
+            </div>
+        `;
+    } else if (quest.isAccepted && quest.progress >= quest.maxProgress) {
+        progressTracker = `
+            <div style="background: rgba(0,0,0,0.5); border: 1px solid #2ecc71; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 15px;">
+                <span style="color:#2ecc71; font-weight:bold; letter-spacing: 1px;">REQUIREMENTS MET</span>
+            </div>
+        `;
     }
 
+    // --- 3. Dynamic Action Buttons & State ---
+    let actionButtons = '';
+    let actionType = 'accept';
+    let now = Date.now();
+
+    if (quest.cooldownUntil && now < quest.cooldownUntil) {
+        let remainingMins = Math.ceil((quest.cooldownUntil - now) / 60000);
+        actionButtons = `<button class="btn-main" id="quest-action-btn" style="width:100%; background:#555; color:#aaa; cursor:not-allowed;" disabled>ON COOLDOWN (${remainingMins}m)</button>`;
+        actionType = 'cooldown';
+    } else if (quest.progress >= quest.maxProgress && quest.isAccepted) {
+        actionButtons = `<button class="btn-main" id="quest-action-btn" style="width:100%; background:#f1c40f; color:#000; box-shadow: 0 0 15px rgba(241, 196, 15, 0.4);">CLAIM REWARDS</button>`;
+        actionType = 'claim';
+    } else if (quest.isAccepted) {
+        actionButtons = `<button class="btn-main" id="quest-action-btn" style="width:100%; background:#888; color:#fff; cursor:not-allowed;" disabled>QUEST IN PROGRESS</button>`;
+        actionType = 'active';
+    } else {
+        // Not accepted yet
+        actionButtons = `
+            <div style="display:flex; gap:10px; margin-top: 15px;">
+                <button class="btn-main" style="flex:1; background:#e74c3c; color:#fff;" onclick="closeGarrisonBoard()">DECLINE</button>
+                <button class="btn-main" id="quest-action-btn" style="flex:1; background:#2ecc71; color:#000;">ACCEPT</button>
+            </div>
+        `;
+    }
+
+    // --- 4. Dynamic Rewards Box ---
+    let rewardLines = '';
+    if (questId === 'wisp_hunt') {
+        rewardLines = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span><span style="color:#f1c40f; font-weight:bold;">G</span> Gold</span>
+                <span style="color:#2ecc71; font-weight:bold;">1,000</span>
+            </div>
+        `;
+    } else if (questId === 'northside_investigation') {
+        rewardLines = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span><span style="color:#f1c40f; font-weight:bold;">G</span> Gold</span>
+                <span style="color:#2ecc71; font-weight:bold;">2,500</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span><span style="color:#9b59b6; font-weight:bold;">★</span> Bonus Item</span>
+                <span style="color:#9b59b6; font-weight:bold;">Rare Card</span>
+            </div>
+        `;
+    }
+
+    // --- 5. Inject the AQW Style HTML ---
+    // Note: We use a small replace() trick below to separate Thorne's signature nicely.
     pane.innerHTML = `
-        <h2 style="color:var(--gold); margin-top:0; font-family:'Cinzel'; font-size: 2rem;">${quest.title}</h2>
-        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 6px; border-left: 3px solid #3498db; margin-bottom: 20px;">
-            <p style="margin: 0 0 10px 0; color: #fff;"><strong>Objective:</strong> <span style="color:#3498db;">${quest.objective}</span></p>
-            <p style="margin: 0; color: #fff;"><strong>Reward:</strong> <span style="color:#f1c40f;">${quest.reward}</span></p>
-            ${progressText}
+        <div style="display:flex; flex-direction:column; height:100%;">
+            
+            <h4 style="color:var(--gold); margin:0 0 5px 0; font-family:'Cinzel'; font-size:1.4rem; text-align:center;">${quest.title}</h4>
+            <div style="color:#f1c40f; font-size:0.8rem; margin-bottom:20px; text-align:center; letter-spacing: 2px;">${stars}</div>
+            
+            <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 15px; box-sizing: border-box; margin-bottom: 15px; font-size: 0.95rem; line-height: 1.5; color: #ddd; font-style: italic;">
+                "${quest.description.replace('<br><br>', '"<br><br>')}"
+            </div>
+            
+            ${progressTracker}
+            
+            <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 6px; padding: 10px 15px; width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+                <div style="font-size:0.8rem; color:#aaa; margin-bottom:10px; text-transform:uppercase; text-align:center; letter-spacing: 1px;">Rewards</div>
+                ${rewardLines}
+            </div>
+            
+            <div style="flex-grow:1;"></div> 
+            
+            ${actionButtons}
         </div>
-        <p style="color:#ddd; font-size: 1.1rem; line-height: 1.6;">${quest.description}</p>
-        
-        <button class="btn-main" id="quest-action-btn" style="margin-top: 30px; width: 100%; padding: 15px; ${btnStyle}" ${btnDisabled} onclick="${btnAction}">
-            ${btnText}
-        </button>
     `;
 
-    // --- 4. Live Countdown UI Effect ---
+    // --- 6. Safely Bind the Master Accept Function ---
+    const actionBtn = document.getElementById('quest-action-btn');
+    if (actionBtn && actionType !== 'cooldown' && actionType !== 'active') {
+        actionBtn.onclick = () => {
+            if (actionType === 'accept') {
+                // Call the global master quest handler we built!
+                window.acceptQuest(quest.id);
+            } else if (actionType === 'claim') {
+                claimQuestReward(quest.id);
+            }
+        };
+    }
+
+    // --- 7. Live Countdown Cooldown Logic ---
     if (quest.cooldownUntil && now < quest.cooldownUntil) {
         let liveTimer = setInterval(() => {
             let currentNow = Date.now();
@@ -913,37 +955,12 @@ function viewQuest(questId) {
                 clearInterval(liveTimer);
                 viewQuest(questId); 
             } else {
-                // Math to show exact Minutes and Seconds
                 let remainingMs = quest.cooldownUntil - currentNow;
                 let m = Math.floor(remainingMs / 60000);
                 let s = Math.floor((remainingMs % 60000) / 1000);
                 btn.innerText = `ON COOLDOWN (${m}m ${s}s)`;
             }
         }, 1000);
-    }
-}
-function claimQuestReward(questId) {
-    if (questId === 'wisp_hunt') {
-        // 1. RESET THE QUEST SO IT CAN BE REPEATED
-        quests.wisp_hunt.isCompleted = false;
-        quests.wisp_hunt.isAccepted = false;
-        quests.wisp_hunt.progress = 0;
-
-        // 2. SET THE 15-MINUTE COOLDOWN (15 mins * 60 secs * 1000 ms)
-        quests.wisp_hunt.cooldownUntil = Date.now() + (15 * 60 * 1000);
-
-        wispQuestFirstClear = true;
-        
-        if (typeof playerGold !== 'undefined') {
-            playerGold += 1000;
-            if (typeof updateGoldUI === 'function') updateGoldUI();
-        }
-        
-        if (typeof playClickSound === 'function') playClickSound();
-        alert("Quest Completed! 1,000 Gold has been added to your purse.");
-        
-        // 3. Refresh the UI to show the Cooldown State
-        viewQuest(questId);
     }
 }
 
