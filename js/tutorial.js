@@ -712,10 +712,34 @@ function unlockBarracks() {
             btn.disabled = false;
             btn.classList.add('unlocked');
             btn.innerText = "Barracks";
-            btn.onclick = enterBarracks; // <-- Changed back to enterBarracks!
+            
+            // 🛡️ BULLETPROOF NAVIGATION FIX 🛡️
+            // Instead of searching for a function in main.js, we do it right here!
+            btn.onclick = () => {
+                if (typeof playClickSound === 'function') playClickSound();
+                document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+                const bgScreen = document.getElementById('barracks-gate-screen');
+                if (bgScreen) {
+                    bgScreen.style.display = 'block';
+                    bgScreen.style.backgroundImage = "var(--bk1-url, url('./assets/BK1.png'))";
+                }
+            };
         }
     });
 }
+
+// 🛡️ GUARANTEE 'ENTER BARRACKS INSIDE' WORKS 🛡️
+// We are putting this here so your index.html can ALWAYS find it.
+window.enterBarracksInside = function() {
+    if (typeof playClickSound === 'function') playClickSound();
+    document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
+    
+    const biScreen = document.getElementById('barracks-inside-screen');
+    if (biScreen) {
+        biScreen.style.display = 'block';
+        biScreen.style.backgroundImage = "var(--bk3-url, url('./assets/BK3.png'))";
+    }
+};
 
 let thorneDialogueStep = 0;
 let hasSeenThorneLore = false;
