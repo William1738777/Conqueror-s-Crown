@@ -712,7 +712,7 @@ function unlockBarracks() {
             btn.disabled = false;
             btn.classList.add('unlocked');
             btn.innerText = "Barracks";
-            btn.onclick = enterBarracksGate;
+            btn.onclick = enterBarracks; // <-- Changed back to enterBarracks!
         }
     });
 }
