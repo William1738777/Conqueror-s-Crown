@@ -767,29 +767,64 @@ const thorneDialogue = [
     { s: "Captain Thorne", c: "#e74c3c", t: "Good. If you don't have any questions, go ahead and check the Quest Board. Let's see what you're made of." }
 ];
 
+let northsidePostDialogueStep = 0;
+let hasSeenNorthsidePostLore = false;
+
+// The New Post-Ambush Lore Sequence
+const northsidePostDialogue = [
+    { s: "You", c: "#3498db", t: "Captain! Goblins... and a lot of them. I was ambushed by the Old Watchtower. They definitely know what happened to the villagers." },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Damn those rats! I knew it wouldn't be a simple disappearance." },
+    { s: "Captain Thorne", c: "#e74c3c", t: "It's not just the goblins. Scouts from across the borders are reporting back. Beastmen, Lizardmen, and other wild factions have been raiding settlements and taking the villagers." },
+    { s: "You", c: "#3498db", t: "Just tell me where you need me. I can help." },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Follow the trail of the goblin host you encountered. Our scouts note that while other wild factions are executing the raids, they appear to be taking orders from goblin leaders." },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Which means it is highly probable the mastermind behind these coordinated attacks is within the Goblin faction." },
+    { s: "Captain Thorne", c: "#e74c3c", t: "I'll be assembling Leonia's forces. In the meantime, I need you to push forward into the Hilltops and find out exactly what they're up to!" },
+    { s: "Captain Thorne", c: "#e74c3c", t: "Collect your bounty from the Garrison Board, then move out." }
+];
+
 function talkToThorne() {
-    if(!hasSeenThorneLore) {
+    if (typeof playClickSound === 'function') playClickSound();
+
+    if (!hasSeenThorneLore) {
+        // First time ever talking to him
         thorneDialogueStep = 0;
         document.getElementById('barracks-menu').style.display = 'none';
         document.getElementById('barracks-dialogue-box').style.display = 'flex';
         renderThorneDialogue();
+        
+    } else if (quests.northside_investigation && quests.northside_investigation.progress === 1 && !hasSeenNorthsidePostLore) {
+        // Post-Northside Lore Trigger
+        northsidePostDialogueStep = 0;
+        document.getElementById('barracks-menu').style.display = 'none';
+        document.getElementById('barracks-dialogue-box').style.display = 'flex';
+        
+        // Swap out the click function to advance the NEW dialogue
+        document.getElementById('barracks-dialogue-box').onclick = advanceNorthsidePostDialogue;
+        renderNorthsidePostDialogue();
+        
     } else {
-        // Repeated chatter if the player talks to him again
+        // Repeated generic chatter
         document.getElementById('barracks-menu').style.display = 'none';
         document.getElementById('barracks-dialogue-box').style.display = 'flex';
         document.getElementById('barracks-speaker').innerText = "Captain Thorne";
         document.getElementById('barracks-speaker').style.color = "#e74c3c";
-        document.getElementById('barracks-text').innerText = "Check the Garrison Quest Board if you're looking for work. Keep your guard up.";
         
-        // Temporarily change the click behavior to just close the box
+        if (hasSeenNorthsidePostLore) {
+            document.getElementById('barracks-text').innerText = "Don't just stand there. Find out what those goblins are doing at the Hilltops!";
+        } else {
+            document.getElementById('barracks-text').innerText = "Check the Garrison Quest Board if you're looking for work. Keep your guard up.";
+        }
+        
         document.getElementById('barracks-dialogue-box').onclick = () => {
+            if (typeof playClickSound === 'function') playClickSound();
             document.getElementById('barracks-dialogue-box').style.display = 'none';
             document.getElementById('barracks-menu').style.display = 'flex';
-            document.getElementById('barracks-dialogue-box').onclick = advanceThorneDialogue; // Restore original
+            document.getElementById('barracks-dialogue-box').onclick = advanceThorneDialogue; // Restore safety
         };
     }
 }
 
+// Keep original render/advance functions for Thorne's Intro
 function renderThorneDialogue() {
     const line = thorneDialogue[thorneDialogueStep];
     const speaker = document.getElementById('barracks-speaker');
@@ -799,6 +834,7 @@ function renderThorneDialogue() {
 }
 
 function advanceThorneDialogue() {
+    if (typeof playClickSound === 'function') playClickSound();
     thorneDialogueStep++;
     if (thorneDialogueStep < thorneDialogue.length) {
         renderThorneDialogue();
@@ -807,14 +843,72 @@ function advanceThorneDialogue() {
         document.getElementById('barracks-dialogue-box').style.display = 'none';
         document.getElementById('barracks-menu').style.display = 'flex';
         
-        // Dialogue is over, unlock the Garrison Board Quest!
         const boardBtn = document.getElementById('garrison-board-btn');
-        if(boardBtn) {
+        if (boardBtn) {
             boardBtn.disabled = false;
             boardBtn.classList.add('unlocked');
             boardBtn.innerText = "Garrison Board Quest";
         }
     }
+}
+
+// New render/advance functions for the Post-Ambush Lore
+function renderNorthsidePostDialogue() {
+    const line = northsidePostDialogue[northsidePostDialogueStep];
+    const speaker = document.getElementById('barracks-speaker');
+    speaker.innerText = line.s;
+    speaker.style.color = line.c;
+    document.getElementById('barracks-text').innerText = line.t;
+}
+
+function advanceNorthsidePostDialogue() {
+    if (typeof playClickSound === 'function') playClickSound();
+    northsidePostDialogueStep++;
+    
+    if (northsidePostDialogueStep < northsidePostDialogue.length) {
+        renderNorthsidePostDialogue();
+    } else {
+        hasSeenNorthsidePostLore = true;
+        
+        // Clean up UI
+        document.getElementById('barracks-dialogue-box').style.display = 'none';
+        document.getElementById('barracks-menu').style.display = 'flex';
+        
+        // Restore default onclick behavior for generic chatter
+        document.getElementById('barracks-dialogue-box').onclick = advanceThorneDialogue;
+
+        // 🌟 Trigger the map unlock and floating UI text
+        unlockNorthsideHilltops();
+    }
+}
+
+// Epic floating text unlock sequence
+function unlockNorthsideHilltops() {
+    // 1. Find the Hilltop button in the Northside menu and unlock it
+    const buttons = document.querySelectorAll('#northside-screen .menu-btn');
+    buttons.forEach(btn => {
+        if (btn.innerText.includes("Northside Hilltop")) {
+            btn.disabled = false;
+            btn.classList.add('unlocked');
+            btn.innerText = "Northside Hilltop";
+            // You can bind btn.onclick = enterHilltops here later!
+        }
+    });
+
+    // 2. Create the floating text element
+    const floatText = document.createElement('div');
+    floatText.innerText = "Northside Hilltops Unlocked";
+    floatText.style.cssText = "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #f1c40f; font-size: 3rem; font-weight: bold; text-shadow: 0 0 20px #f39c12, 2px 2px 10px #000; z-index: 10000; opacity: 0; transition: opacity 1.5s ease-in-out; font-family: 'Cinzel', serif; text-align: center; pointer-events: none;";
+    document.body.appendChild(floatText);
+
+    // 3. Fade it in smoothly
+    setTimeout(() => { floatText.style.opacity = '1'; }, 100);
+
+    // 4. Hold it on screen, then fade it out and delete it
+    setTimeout(() => {
+        floatText.style.opacity = '0';
+        setTimeout(() => { floatText.remove(); }, 1500); // Wait for fade-out to finish before deleting
+    }, 3000); // 3-second display time
 }
 
 // ==========================================
@@ -1311,16 +1405,46 @@ function triggerNorthsideVictory() {
     document.getElementById('game-area').style.display = 'none';
     document.getElementById('inventory-btn').style.display = 'block';
     
-    // 2. Max the Quest Progress (Do NOT mark as completed yet, wait for turn-in)
+    // 2. Max the Quest Progress (Wait for Garrison Board to give rewards)
     if (quests.northside_investigation) {
         quests.northside_investigation.progress = 1;
     }
     
-    // 3. Return to Barracks to report to Thorne
-    const barracksScreen = document.getElementById('barracks-inside-screen');
-    barracksScreen.style.display = 'block';
-    barracksScreen.style.backgroundImage = "var(--bk3-url, url('./assets/BK3.png'))";
+    // 3. Route back to Northside Gate Selection
+    const nsScreen = document.getElementById('northside-screen');
+    nsScreen.style.display = 'block';
+    nsScreen.style.backgroundImage = "url('./assets/Gate.png')";
     
+    // Hide the normal menu temporarily so they have to click the dialog
+    const menu = nsScreen.querySelector('.top-left-menu');
+    if (menu) menu.style.display = 'none';
+
+    // 4. Inject the one-click Player Realization Dialogue
+    let nsDialog = document.getElementById('ns-dialogue-box');
+    if (!nsDialog) {
+        nsDialog = document.createElement('div');
+        nsDialog.id = 'ns-dialogue-box';
+        nsDialog.className = 'dialogue-box-style';
+        nsDialog.innerHTML = `
+            <div id="ns-speaker" style="font-weight: bold; font-family: 'Cinzel'; font-size: 1.2rem; margin-bottom: 10px;"></div>
+            <div id="ns-text" style="font-size: 1.1rem; line-height: 1.5;"></div>
+            <div style="font-size: 0.75rem; color: #aaa; text-align: right; margin-top: 15px; font-style: italic;">(Click to continue)</div>
+        `;
+        nsScreen.appendChild(nsDialog);
+    }
+    
+    nsDialog.style.display = 'flex';
+    document.getElementById('ns-speaker').innerText = "You";
+    document.getElementById('ns-speaker').style.color = "#3498db";
+    document.getElementById('ns-text').innerText = "I must report back to the Captain immediately. This is much larger than a simple raid.";
+    
+    // Clicking the box dismisses it and brings the menu back
+    nsDialog.onclick = () => {
+        if (typeof playClickSound === 'function') playClickSound();
+        nsDialog.style.display = 'none';
+        if (menu) menu.style.display = 'flex';
+    };
+
     if (typeof addLog === 'function') addLog("Northside Ambush cleared! Report back to Captain Thorne.", "#2ecc71");
 }
 // --- PATROL STATE VARIABLES ---
