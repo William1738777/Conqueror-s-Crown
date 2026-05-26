@@ -58,6 +58,8 @@ window.acceptQuest = function(questId) {
     }
 };
 
+
+
 // ============================================================================
 // 🏆 MASTER QUEST REWARD HANDLER
 // ============================================================================
@@ -134,6 +136,30 @@ window.claimQuestReward = function(questId) {
         
         if (typeof addLog === 'function') addLog(`Claimed Northside Rewards: +2,500 Gold & ${rareCardName}!`, "#2ecc71");
         alert(`Rewards Claimed!\n+2,500 Gold\n+ Rare Card: ${rareCardName}`);
+
+        quest.isAccepted = false;
+        quest.isCompleted = true; 
+    }
+    
+    // --- 3. NORTHSIDE PART 2 REWARDS (One-Time Story) ---
+    else if (questId === 'northside_part2') {
+        if (typeof playerGold !== 'undefined') {
+            playerGold += 3500;
+            if (typeof updateGoldUI === 'function') updateGoldUI();
+        }
+        
+        let epicCardName = "Unknown";
+        if (typeof playerCollection !== 'undefined' && typeof cardLibrary !== 'undefined') {
+            let epicCards = cardLibrary.filter(c => c.powerLevel === 6); // Pulls a Level 6 Epic/Legend
+            if (epicCards.length > 0) {
+                let randomEpic = epicCards[Math.floor(Math.random() * epicCards.length)];
+                epicCardName = randomEpic.name;
+                playerCollection.push({...randomEpic, dbId: generateUID()});
+            }
+        }
+        
+        if (typeof addLog === 'function') addLog(`Claimed Hilltop Rewards: +3,500 Gold & ${epicCardName}!`, "#2ecc71");
+        alert(`Rewards Claimed!\n+3,500 Gold\n+ Epic Card: ${epicCardName}`);
 
         quest.isAccepted = false;
         quest.isCompleted = true; 
