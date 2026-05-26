@@ -789,10 +789,9 @@ function talkToThorne() {
         thorneDialogueStep = 0;
         document.getElementById('barracks-menu').style.display = 'none';
         document.getElementById('barracks-dialogue-box').style.display = 'flex';
-        renderThorneDialogue();
+        renderThorneDialogue(); // 🌟 RESTORED! This will now work correctly!
         
-    } else if (quests.northside_investigation && quests.northside_investigation.isCompleted && !hasSeenNorthsidePostLore) {
-        // Post-Northside Lore Trigger: Only fires AFTER they claim the reward from the board
+    } else if (quests.northside_investigation && quests.northside_investigation.progress >= 1 && !hasSeenNorthsidePostLore) {
         northsidePostDialogueStep = 0;
         document.getElementById('barracks-menu').style.display = 'none';
         document.getElementById('barracks-dialogue-box').style.display = 'flex';
@@ -821,6 +820,47 @@ function talkToThorne() {
     }
 }
 
+// ==========================================
+// 🌟 ORIGINAL DIALOGUE FUNCTIONS RESTORED 🌟
+// ==========================================
+function renderThorneDialogue() {
+    const line = thorneDialogue[thorneDialogueStep];
+    const speaker = document.getElementById('barracks-speaker');
+    speaker.innerText = line.s;
+    speaker.style.color = line.c;
+    document.getElementById('barracks-text').innerText = line.t;
+}
+
+function advanceThorneDialogue() {
+    if (typeof playClickSound === 'function') playClickSound();
+    thorneDialogueStep++;
+    if (thorneDialogueStep < thorneDialogue.length) {
+        renderThorneDialogue();
+    } else {
+        hasSeenThorneLore = true;
+        document.getElementById('barracks-dialogue-box').style.display = 'none';
+        document.getElementById('barracks-menu').style.display = 'flex';
+        
+        const boardBtn = document.getElementById('garrison-board-btn');
+        if (boardBtn) {
+            boardBtn.disabled = false;
+            boardBtn.classList.add('unlocked');
+            boardBtn.innerText = "Garrison Board Quest";
+        }
+    }
+}
+
+// ==========================================
+// 🌟 NEW POST-AMBUSH DIALOGUE FUNCTIONS 🌟
+// ==========================================
+function renderNorthsidePostDialogue() {
+    const line = northsidePostDialogue[northsidePostDialogueStep];
+    const speaker = document.getElementById('barracks-speaker');
+    speaker.innerText = line.s;
+    speaker.style.color = line.c;
+    document.getElementById('barracks-text').innerText = line.t;
+}
+
 function advanceNorthsidePostDialogue() {
     if (typeof playClickSound === 'function') playClickSound();
     northsidePostDialogueStep++;
@@ -835,8 +875,16 @@ function advanceNorthsidePostDialogue() {
         document.getElementById('barracks-menu').style.display = 'flex';
         document.getElementById('barracks-dialogue-box').onclick = advanceThorneDialogue;
 
+        // Automatically complete the quest and give rewards right as the dialogue ends!
+        if (typeof claimQuestReward === 'function' && quests.northside_investigation && !quests.northside_investigation.isCompleted) {
+            claimQuestReward('northside_investigation');
+        }
+
         // Trigger the new quest creation
         unlockNorthsidePart2Quest();
+
+        // Trigger the epic map unlock floating text
+        if (typeof unlockNorthsideHilltops === 'function') unlockNorthsideHilltops();
     }
 }
 
@@ -872,7 +920,24 @@ function unlockNorthsidePart2Quest() {
     
     if (typeof addLog === 'function') addLog("New Deployment Order Available: Northside Part 2!", "#f1c40f");
 }
-
+    
+    // 2. Dynamically add the button to the Garrison Board UI
+    const questListDiv = document.querySelector('#garrison-board-ui > div > div:first-child');
+    if(questListDiv && !document.getElementById('btn-quest-northside-part2')) {
+        const newBtn = document.createElement('button');
+        newBtn.id = 'btn-quest-northside-part2';
+        newBtn.className = 'menu-btn unlocked';
+        newBtn.style.width = '100%';
+        newBtn.style.textAlign = 'left';
+        newBtn.style.marginBottom = '10px';
+        newBtn.style.color = "#f1c40f";
+        newBtn.innerText = "[E-Rank] Northside Whereabouts Pt. 2";
+        newBtn.onclick = () => viewQuest('northside_part2');
+        questListDiv.appendChild(newBtn);
+    }
+    
+    if (typeof addLog === 'function') addLog("New Deployment Order Available: Northside Part 2!", "#f1c40f");
+}
 // ==========================================
 // 👇 Northside Whereabouts Quest 👇
 // ==========================================
