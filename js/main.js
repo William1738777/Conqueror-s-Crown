@@ -38,12 +38,20 @@ const log = document.getElementById('event-log');
 // 🛒 BARRACKS SHOP LOGIC
 // ============================================================================
 
+// ============================================================================
+// 🛒 BARRACKS SHOP LOGIC
+// ============================================================================
+
 function openBarracksShop() {
     if (typeof playClickSound === 'function') playClickSound();
     
     // Hide the bag so it doesn't block the UI
     const invBtn = document.getElementById('inventory-btn');
     if (invBtn) invBtn.style.display = 'none';
+
+    // 🛡️ AQW UI FIX: Force close the Quest board if it was left open!
+    document.getElementById('barracks-quest-panel').classList.remove('open');
+    document.getElementById('barracks-quest-inspector').classList.remove('open');
 
     document.getElementById('barracks-shop-panel').classList.add('open');
     // Clear inspector on open
@@ -181,7 +189,7 @@ function buyPraetorianGuard() {
 // 📜 BARRACKS QUEST LOGIC
 // ============================================================================
 
-// Quest State Trackers
+// Quest State Trackers (DO NOT DELETE THESE!)
 let questPestControlStatus = 'unaccepted'; // Can be 'unaccepted', 'active', or 'completed'
 let goblinsSlain = 0;
 
@@ -191,6 +199,10 @@ function openBarracksQuests() {
     // Hide the bag to prevent UI overlap
     const invBtn = document.getElementById('inventory-btn');
     if (invBtn) invBtn.style.display = 'none';
+
+    // 🛡️ AQW UI FIX: Force close the Shop if it was left open!
+    document.getElementById('barracks-shop-panel').classList.remove('open');
+    document.getElementById('barracks-inspector-panel').classList.remove('open');
 
     document.getElementById('barracks-quest-panel').classList.add('open');
     document.getElementById('barracks-quest-content').innerHTML = `<div style="text-align:center; color:#666; margin-top:50%; font-style:italic;">Select a quest.</div>`;
