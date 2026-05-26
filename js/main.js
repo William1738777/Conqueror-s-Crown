@@ -49,6 +49,65 @@ window.acceptQuest = function(questId) {
     }
 };
 
+// ============================================================================
+// 🏆 MASTER QUEST REWARD HANDLER
+// ============================================================================
+window.claimQuestReward = function(questId) {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // Safely find the quest in your tutorial.js data
+    const quest = typeof quests !== 'undefined' ? quests[questId] : null;
+    if (!quest || quest.progress < quest.maxProgress) return;
+
+    // --- 1. WISP HUNT REWARDS (Repeatable) ---
+    if (questId === 'wisp_hunt') {
+        if (typeof playerGold !== 'undefined') {
+            playerGold += 1000;
+            // Update the UI if you have a gold updater function
+            if (typeof updateGoldUI === 'function') updateGoldUI(); 
+        }
+        
+        if (typeof addLog === 'function') addLog("Claimed Wisp Hunt Rewards: +1,000 Gold!", "#2ecc71");
+        alert("Rewards Claimed!\n+1,000 Gold");
+
+        // Reset the quest so they can do it again, but put it on a 5-minute cooldown!
+        quest.isAccepted = false;
+        quest.progress = 0;
+        quest.cooldownUntil = Date.now() + (5 * 60 * 1000); // 5 minutes in milliseconds
+    } 
+    
+    // --- 2. NORTHSIDE WHEREABOUTS REWARDS (One-Time Story) ---
+    else if (questId === 'northside_investigation') {
+        if (typeof playerGold !== 'undefined') {
+            playerGold += 2500;
+            if (typeof updateGoldUI === 'function') updateGoldUI();
+        }
+        
+        // Give them a random Level 5 Rare Card!
+        let rareCardName = "Unknown";
+        if (typeof playerCollection !== 'undefined' && typeof cardLibrary !== 'undefined') {
+            let rareCards = cardLibrary.filter(c => c.powerLevel === 5);
+            if (rareCards.length > 0) {
+                let randomRare = rareCards[Math.floor(Math.random() * rareCards.length)];
+                rareCardName = randomRare.name;
+                playerCollection.push({...randomRare, dbId: generateUID()});
+            }
+        }
+        
+        if (typeof addLog === 'function') addLog(`Claimed Northside Rewards: +2,500 Gold & ${rareCardName}!`, "#2ecc71");
+        alert(`Rewards Claimed!\n+2,500 Gold\n+ Rare Card: ${rareCardName}`);
+
+        // Mark this one as permanently completed
+        quest.isAccepted = false;
+        quest.isCompleted = true; 
+    }
+
+    // Instantly refresh the board UI to show the cooldown timer (or completion state)
+    if (typeof viewQuest === 'function') {
+        viewQuest(questId);
+    }
+};
+
 // --- INVENTORY GLOBALS ---
 // Stores stacking items. I've given you some starting medals to test the shop!
 let playerItems = [
