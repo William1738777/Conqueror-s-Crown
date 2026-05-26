@@ -19,6 +19,36 @@ let isTutorialMode = false;
 let tutorialStep = 0;
 let tutorialLock = false; 
 
+// ============================================================================
+// 📜 MASTER QUEST HANDLER (Place in main.js)
+// ============================================================================
+window.acceptQuest = function(questId) {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    if (questId === 'wisp_hunt') {
+        quests.wisp_hunt.isAccepted = true;
+        if (typeof addLog === 'function') addLog("Accepted Quest: Wisp Hunt!", "#3498db");
+        alert("Quest Accepted: Wisp Hunt!\nThe City Gate is now unlocked.");
+        
+        const gateBtn = document.getElementById('loc-gate-btn');
+        if (gateBtn) {
+            gateBtn.disabled = false;
+            gateBtn.classList.add('unlocked');
+            gateBtn.innerText = "City Gate";
+        }
+        // Refresh the board UI to show "In Progress"
+        if (typeof viewQuest === 'function') viewQuest(questId);
+        
+    } else if (questId === 'northside_investigation') {
+        quests.northside_investigation.isAccepted = true;
+        if (typeof addLog === 'function') addLog("Accepted Quest: Northside Whereabouts!", "#3498db");
+        alert("Quest Accepted: Northside Whereabouts!\nThe Northern Watch is now accessible.");
+        
+        // Refresh the board UI to show "In Progress"
+        if (typeof viewQuest === 'function') viewQuest(questId);
+    }
+};
+
 // --- INVENTORY GLOBALS ---
 // Stores stacking items. I've given you some starting medals to test the shop!
 let playerItems = [
