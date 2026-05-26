@@ -861,6 +861,23 @@ function openGarrisonBoard() {
         pane.innerHTML = `<div style="text-align:center; color:#666; margin-top:50%; font-style:italic; font-size:0.9rem;">Select a quest assignment.</div>`;
     }
 }
+
+function closeGarrisonBoard() {
+    if (typeof playClickSound === 'function') playClickSound();
+    
+    // 1. Hide the Board UI
+    document.getElementById('garrison-board-ui').style.display = 'none';
+    
+    // 2. Bring back Captain Thorne's Menu
+    document.getElementById('barracks-menu').style.display = 'flex';
+    
+    // 3. Reset the Inspector Pane so it's fresh for the next time you open it
+    const pane = document.getElementById('quest-details-pane');
+    if (pane) {
+        pane.innerHTML = `<h3 style="color:#888; text-align:center; margin-top:25%; font-style: italic;">Select a quest from the board to view details.</h3>`;
+    }
+}
+
 function viewQuest(questId) {
     const quest = quests[questId];
     const pane = document.getElementById('quest-details-pane');
