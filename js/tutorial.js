@@ -1499,7 +1499,7 @@ function startWispDuel() {
     pMana = 8; eMana = 8; 
     pCoreHP = 2000; 
     eCoreHP = 1000; 
-    pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0;
+    pQueue = []; eQueue = []; isExecuting = false; globalTargetedThisTurn = []; pArashiSouls = 0; pSquiresFallen = 0; eHandData = [];
     
     document.getElementById('hand').innerHTML = ''; 
     document.querySelectorAll('.slot .card').forEach(c => c.remove());
