@@ -1295,6 +1295,9 @@ function startAmbushDuel() {
 
     if (typeof showInspector === 'function') showInspector('none');
     
+    // 🌟 THE FIX: Wipe the board memory so ghost cards from previous duels don't trigger the wrong victory!
+    cardInstances = {};
+    
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; 
     pCoreHP = 2000; eCoreHP = 2000; 
@@ -1302,6 +1305,8 @@ function startAmbushDuel() {
     
     document.getElementById('hand').innerHTML = ''; 
     document.querySelectorAll('.slot .card').forEach(c => c.remove());
+    
+    // ... (rest of the function remains the same) ...
     
     pDeck = [];
     if(typeof battleDeckConfig !== 'undefined') {
