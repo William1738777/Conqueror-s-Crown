@@ -399,6 +399,8 @@ function startStrangerDuel() {
 
     // Clear the inspector!
     if (typeof showInspector === 'function') showInspector('none');
+
+    cardInstances = {};
     
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; pCoreHP = 2000; eCoreHP = 2000;
@@ -1487,6 +1489,8 @@ function startWispDuel() {
     tutorialLock = false;
 
     if (typeof showInspector === 'function') showInspector('none');
+
+    cardInstances = {};
     
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; 
@@ -1660,6 +1664,8 @@ function startHilltopDuel() {
     tutorialLock = false;
 
     if (typeof showInspector === 'function') showInspector('none');
+
+    cardInstances = {};
     
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; 
