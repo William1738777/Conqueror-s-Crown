@@ -401,6 +401,7 @@ function startStrangerDuel() {
     if (typeof showInspector === 'function') showInspector('none');
 
     cardInstances = {};
+    eHandData = [];
     
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; pCoreHP = 2000; eCoreHP = 2000;
@@ -1299,6 +1300,7 @@ function startAmbushDuel() {
     
     // 🌟 THE FIX: Wipe the board memory so ghost cards from previous duels don't trigger the wrong victory!
     cardInstances = {};
+    eHandData = [];
     
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; 
@@ -1491,6 +1493,7 @@ function startWispDuel() {
     if (typeof showInspector === 'function') showInspector('none');
 
     cardInstances = {};
+    eHandData = [];
     
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; 
@@ -1666,6 +1669,7 @@ function startHilltopDuel() {
     if (typeof showInspector === 'function') showInspector('none');
 
     cardInstances = {};
+    eHandData = [];
     
     turnCount = 1; currentTurn = 'PLAYER';
     pMana = 8; eMana = 8; 
