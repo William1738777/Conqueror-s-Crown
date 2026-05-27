@@ -847,3 +847,22 @@ function backToLeonia() {
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('leonia-screen').style.display = 'block';
 }
+
+// ============================================================================
+// 🌟 UNLOCK NEW MAP AREAS
+// ============================================================================
+window.unlockNorthsideHilltops = function() {
+    const buttons = document.querySelectorAll('#northside-screen .menu-btn');
+    buttons.forEach(btn => {
+        if (btn.innerText.includes("Northside Hilltop")) {
+            btn.disabled = false;
+            btn.classList.add('unlocked');
+            btn.innerText = "Northside Hilltop";
+            
+            // This binds the button directly to your Hilltop Cinematic
+            btn.onclick = enterHilltops; 
+        }
+    });
+    
+    if (typeof addLog === 'function') addLog("New Area Unlocked: Northside Hilltops!", "#f1c40f");
+};
