@@ -1783,10 +1783,13 @@ function triggerHilltopVictory() {
     if (typeof addLog === 'function') addLog("Hilltops Secured! Turn in your quest at the Garrison Board.", "#2ecc71");
 }
 
-// 🌟 IMPORTANT: THIS STARTS THE PATROL SYSTEM
+// ============================================================================
+// 🌟 BULLETPROOF PATROL SYSTEM
+// ============================================================================
 let patrolProgress = 0;
 let patrolTimer = null;
 let chanceTimer = null;
+let isPatrolCompleting = false; // 🌟 FIX: Prevents the "100 clicks" bug
 
 function startPatrol() {
     if (typeof playClickSound === 'function') playClickSound();
@@ -1798,6 +1801,8 @@ function startPatrol() {
     
     patrolProgress = 0;
     encountersThisPatrol = 0;
+    isPatrolCompleting = false; // Reset the safety lock
+    
     document.getElementById('player-patrol-marker').style.left = '0%';
     document.getElementById('player-patrol-marker').classList.add('marching');
     
@@ -1806,12 +1811,18 @@ function startPatrol() {
 }
 
 function startPatrolLoops() {
+    // 🌟 FIX: Aggressively nuke any existing background timers before starting new ones!
+    if (patrolTimer) clearInterval(patrolTimer);
+    if (chanceTimer) clearInterval(chanceTimer);
+    
     const marker = document.getElementById('player-patrol-marker');
     
     patrolTimer = setInterval(() => {
         if (patrolProgress >= 100) {
             clearInterval(patrolTimer);
             clearInterval(chanceTimer);
+            patrolTimer = null;
+            chanceTimer = null;
             marker.classList.remove('marching');
             triggerPatrolComplete();
         } else {
@@ -1826,4 +1837,33 @@ function startPatrolLoops() {
             triggerEncounter();
         }
     }, 3000); 
+}
+
+function triggerPatrolComplete() {
+    // 🌟 FIX: If it's already completing, immediately stop it from running again!
+    if (isPatrolCompleting) return;
+    isPatrolCompleting = true;
+
+    if (typeof stopPatrolAtmosphere === 'function') stopPatrolAtmosphere();
+
+    let completeText = document.createElement('div');
+    completeText.innerText = "Patrol Completed!";
+    completeText.style.cssText = "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #f1c40f; font-size: 3rem; font-weight: bold; text-shadow: 0 0 20px #e67e22, 2px 2px 5px #000; z-index: 9999; opacity: 0; transition: opacity 1s ease-in-out; font-family: monospace; text-align: center;";
+    document.body.appendChild(completeText);
+
+    setTimeout(() => { completeText.style.opacity = '1'; }, 100);
+
+    setTimeout(() => {
+        completeText.style.opacity = '0';
+        setTimeout(() => {
+            completeText.remove();
+            
+            // 🌟 FIX: ONLY route back to town if the player is actually physically on the Patrol screen!
+            let patrolScreen = document.getElementById('patrol-screen');
+            if (patrolScreen && patrolScreen.style.display === 'block') {
+                let returnBtn = document.getElementById('return-leonia-btn'); 
+                if (returnBtn) returnBtn.click(); 
+            }
+        }, 1000);
+    }, 2500);
 }
