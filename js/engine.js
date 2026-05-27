@@ -2091,8 +2091,10 @@ async function processQueue(sideProcessing, queueArr) {
             // 1. Identify the Duel Type
             let isWispDuel = Object.values(cardInstances).some(c => c.side === 'ENEMY' && c.name === "Wisp");
             let isJaxDuel = (typeof triggerJaxPostDuel === 'function' && typeof tgStep !== 'undefined' && tgStep >= 4);
-           // NEW: Detect if we are fighting the Goblin Ambush
-            let isAmbushDuel = Object.values(cardInstances).some(c => c.side === 'ENEMY' && (c.name === "Goblin Warrior" || c.name === "Goblin Archer"));
+            
+            // 🌟 THE FIX: Accurately detect WHICH goblin duel we just won based on the Boss Unit!
+            let isHilltopDuel = Object.values(cardInstances).some(c => c.side === 'ENEMY' && c.name === "Goblin Wardrummer");
+            let isWatchtowerDuel = !isHilltopDuel && Object.values(cardInstances).some(c => c.side === 'ENEMY' && (c.name === "Goblin Warrior" || c.name === "Goblin Archer"));
             
             // 2. Set the appropriate text and next-step function
             let rewardText = "No rewards.";
@@ -2104,21 +2106,21 @@ async function processQueue(sideProcessing, queueArr) {
             } else if (isJaxDuel) {
                 rewardText = "New Cards Available<br><span style='font-size:1rem; color:#aaa;'>Stranger's Respect</span>";
                 callbackFunc = () => { triggerJaxPostDuel(); };
-            } else if (isAmbushDuel) { 
-                // 🌟 FIX: Check if we are doing the first ambush or the Hilltops!
-                if (typeof hasSeenNorthsidePostLore !== 'undefined' && hasSeenNorthsidePostLore) {
-                    rewardText = "Hilltop Secured<br><span style='font-size:1rem; color:#aaa;'>Goblin Host Defeated!</span>";
-                    callbackFunc = () => { triggerHilltopVictory(); };
-                } else {
-                    rewardText = "2,500 Gold & Legend Core<br><span style='font-size:1rem; color:#aaa;'>Ambush Survived!</span>";
-                    callbackFunc = () => { triggerNorthsideVictory(); };
-                }
+            } else if (isHilltopDuel) { 
+                // Routes to Hilltop clear
+                rewardText = "3,500 Gold & Epic Core<br><span style='font-size:1rem; color:#aaa;'>Hilltop Secured!</span>";
+                callbackFunc = () => { if(typeof triggerHilltopVictory === 'function') triggerHilltopVictory(); };
+            } else if (isWatchtowerDuel) {
+                // Routes to Watchtower clear, advancing the quest and triggering dialog!
+                rewardText = "2,500 Gold & Rare Card<br><span style='font-size:1rem; color:#aaa;'>Ambush Survived!</span>";
+                callbackFunc = () => { if(typeof triggerNorthsideVictory === 'function') triggerNorthsideVictory(); };
             }
 
             // 3. Create the Custom Victory Screen
             let vicBox = document.createElement('div');
             vicBox.style.cssText = "position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(15,15,20,0.95); border:2px solid var(--gold); padding:30px 50px; text-align:center; color:white; z-index:9999; border-radius:8px; box-shadow:0 0 30px rgba(212,175,55,0.4); font-family:'Cinzel', serif; min-width:350px;";
-
+            
+            // ... KEEP THE REST OF YOUR VICTORY BOX CODE BELOW THIS ...
             vicBox.innerHTML = `
                 <h1 style="color:var(--gold); text-shadow:2px 2px 4px #000; margin-top:0; font-size:2.5rem;">VICTORY</h1>
                 <p style="color:#aaa; font-size:1.1rem; margin-bottom:10px;">Enemy Core Destroyed</p>
