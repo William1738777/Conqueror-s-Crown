@@ -1735,39 +1735,52 @@ function startHilltopDuel() {
 function triggerHilltopVictory() {
     if (typeof playClickSound === 'function') playClickSound();
     
+    // 1. Hide Battlefield and restore UI safely
     document.querySelectorAll('.rpg-screen').forEach(s => s.style.display = 'none');
     document.getElementById('game-area').style.display = 'none';
     document.getElementById('inventory-btn').style.display = 'block';
     
+    // 2. Mark the Part 2 Quest as Ready to Turn In!
+    if (typeof quests !== 'undefined' && quests.northside_part2) {
+        quests.northside_part2.progress = 1;
+    }
+    
+    // 3. Route back to Northside Selection
     const nsScreen = document.getElementById('northside-screen');
     nsScreen.style.display = 'block';
     nsScreen.style.backgroundImage = "url('./assets/Gate.png')"; 
     
-    if (typeof addLog === 'function') addLog("Hilltop Cleared! The goblin host has been pushed back.", "#2ecc71");
-}
+    // Hide menu temporarily for cinematic dialogue
+    const menu = nsScreen.querySelector('.top-left-menu');
+    if (menu) menu.style.display = 'none';
 
-function unlockNorthsideHilltops() {
-    const buttons = document.querySelectorAll('#northside-screen .menu-btn');
-    buttons.forEach(btn => {
-        if (btn.innerText.includes("Northside Hilltop")) {
-            btn.disabled = false;
-            btn.classList.add('unlocked');
-            btn.innerText = "Northside Hilltop";
-            btn.onclick = enterHilltops; 
-        }
-    });
+    // 4. Inject the one-click Player Victory Dialogue
+    let nsDialog = document.getElementById('ns-dialogue-box');
+    if (!nsDialog) {
+        nsDialog = document.createElement('div');
+        nsDialog.id = 'ns-dialogue-box';
+        nsDialog.className = 'dialogue-box-style';
+        nsDialog.innerHTML = `
+            <div id="ns-speaker" style="font-weight: bold; font-family: 'Cinzel'; font-size: 1.2rem; margin-bottom: 10px;"></div>
+            <div id="ns-text" style="font-size: 1.1rem; line-height: 1.5;"></div>
+            <div style="font-size: 0.75rem; color: #aaa; text-align: right; margin-top: 15px; font-style: italic;">(Click to continue)</div>
+        `;
+        nsScreen.appendChild(nsDialog);
+    }
+    
+    nsDialog.style.display = 'flex';
+    document.getElementById('ns-speaker').innerText = "You";
+    document.getElementById('ns-speaker').style.color = "#3498db";
+    document.getElementById('ns-text').innerText = "The goblin host is broken, and their leaders are defeated. I need to return to the Garrison Board to claim my bounty and report to Captain Thorne.";
+    
+    // Clicking the box dismisses it and brings the menu back
+    nsDialog.onclick = () => {
+        if (typeof playClickSound === 'function') playClickSound();
+        nsDialog.style.display = 'none';
+        if (menu) menu.style.display = 'flex';
+    };
 
-    const floatText = document.createElement('div');
-    floatText.innerText = "Northside Hilltops Unlocked";
-    floatText.style.cssText = "position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #f1c40f; font-size: 3rem; font-weight: bold; text-shadow: 0 0 20px #f39c12, 2px 2px 10px #000; z-index: 10000; opacity: 0; transition: opacity 1.5s ease-in-out; font-family: 'Cinzel', serif; text-align: center; pointer-events: none;";
-    document.body.appendChild(floatText);
-
-    setTimeout(() => { floatText.style.opacity = '1'; }, 100);
-
-    setTimeout(() => {
-        floatText.style.opacity = '0';
-        setTimeout(() => { floatText.remove(); }, 1500); 
-    }, 3000); 
+    if (typeof addLog === 'function') addLog("Hilltops Secured! Turn in your quest at the Garrison Board.", "#2ecc71");
 }
 
 // 🌟 IMPORTANT: THIS STARTS THE PATROL SYSTEM
