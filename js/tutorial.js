@@ -465,6 +465,7 @@ function triggerJaxPostDuel() {
     document.getElementById('tg-menu').style.display = 'none';
 
     postDuelStep = 0;
+    tgStep = 0;
     advancePostDuelDialogue();
 }
 
