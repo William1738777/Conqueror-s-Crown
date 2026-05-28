@@ -1205,6 +1205,7 @@ async function triggerSanChain(actor, defSide) {
     let enemies = activeCardsOnBoard.filter(c => c.side === defSide && c.hp > 0 && !(c.ambushTurns > 0 && c.ambushTurns >= turnCount));
     if (enemies.length === 0) return;
 
+    // 🌟 This restores the giant floating Japanese text
     let sanTxt = document.createElement('div');
     sanTxt.className = 'san-text';
     sanTxt.innerText = "三 San 三";
@@ -1216,6 +1217,7 @@ async function triggerSanChain(actor, defSide) {
     let nDOM = document.getElementById(nextTarget.id);
     let aDOM = document.getElementById(actor.id);
 
+    // 🌟 This restores the primary San activation audio
     if (kinSanAudioUrl) playSound(kinSanAudioUrl);
     const hitDelay = 150;
 
@@ -1228,7 +1230,9 @@ async function triggerSanChain(actor, defSide) {
     if (shurikenImgUrl !== '') {
         for(let i=0; i<3; i++) {
             setTimeout(() => {
-                shootProjectile(aDOM, nDOM, false);
+                // 🌟 FIX: We are now using the dedicated shuriken function
+                shootShuriken(aDOM, nDOM, hitDelay);
+                
                 setTimeout(() => {
                     if (bloodAudioUrl) playSound(bloodAudioUrl);
                     if (nDOM) {
@@ -1988,6 +1992,43 @@ async function processQueue(sideProcessing, queueArr) {
                     await new Promise(r => setTimeout(r, 300));
                 }
                 // -------------------------------------
+
+                function shootShuriken(sourceDOM, targetDOM, hitDelayMs) {
+    if(!sourceDOM || !targetDOM || shurikenImgUrl === '') return;
+    
+    // 🌟 This restores the rapid throwing sound effect!
+    if(typeof kinSfx2Url !== 'undefined' && kinSfx2Url) playSound(kinSfx2Url);
+    
+    const sEl = sourceDOM.parentElement.classList.contains('slot') ? sourceDOM.parentElement : sourceDOM;
+    const tEl = targetDOM.parentElement.classList.contains('slot') ? targetDOM.parentElement : targetDOM;
+    const sRect = sEl.getBoundingClientRect(); 
+    const tRect = tEl.getBoundingClientRect();
+    
+    const s = document.createElement('div'); 
+    s.className = 'shuriken-fx';
+    
+    const startX = sRect.left + sRect.width/2; 
+    const startY = sRect.top + sRect.height/2;
+    const targetX = tRect.left + tRect.width/2; 
+    const targetY = tRect.top + tRect.height/2;
+    const dx = targetX - startX; 
+    const dy = targetY - startY;
+    
+    // Calculate the overshoot so it flies THROUGH the target
+    const endX = startX + dx * 10; 
+    const endY = startY + dy * 10; 
+    
+    s.style.setProperty('--startX', startX + 'px'); 
+    s.style.setProperty('--startY', startY + 'px');
+    s.style.setProperty('--endX', endX + 'px'); 
+    s.style.setProperty('--endY', endY + 'px');
+    
+    const totalAnimTime = hitDelayMs * 10; 
+    s.style.animation = `spinFly ${totalAnimTime}ms linear forwards`;
+    
+    document.body.appendChild(s); 
+    setTimeout(() => s.remove(), totalAnimTime);
+}
 
                 let targetDied = await applyDamage(actor, tId, dmg, action.skillName);
                 
