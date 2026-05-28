@@ -1994,10 +1994,12 @@ async function processQueue(sideProcessing, queueArr) {
                 // -------------------------------------
 
                 function shootShuriken(sourceDOM, targetDOM, hitDelayMs) {
-    if(!sourceDOM || !targetDOM || shurikenImgUrl === '') return;
+    // We removed the shurikenImgUrl check so it never skips!
+    if(!sourceDOM || !targetDOM) return; 
     
-    // 🌟 This restores the rapid throwing sound effect!
-    if(typeof kinSfx2Url !== 'undefined' && kinSfx2Url) playSound(kinSfx2Url);
+    // 🌟 HARD FALLBACK: Ensure the rapid throw sound plays
+    let throwSound = (typeof kinSfx2Url !== 'undefined' && kinSfx2Url) ? kinSfx2Url : './assets/KinSFX2.mp3';
+    playSound(throwSound);
     
     const sEl = sourceDOM.parentElement.classList.contains('slot') ? sourceDOM.parentElement : sourceDOM;
     const tEl = targetDOM.parentElement.classList.contains('slot') ? targetDOM.parentElement : targetDOM;
@@ -2006,6 +2008,9 @@ async function processQueue(sideProcessing, queueArr) {
     
     const s = document.createElement('div'); 
     s.className = 'shuriken-fx';
+    
+    // 🌟 HARD FALLBACK: Forces the image to load even if the CSS variable fails!
+    s.style.backgroundImage = "var(--shuriken-url, url('./assets/ShurikenKin_FX.png'))";
     
     const startX = sRect.left + sRect.width/2; 
     const startY = sRect.top + sRect.height/2;
@@ -2028,6 +2033,72 @@ async function processQueue(sideProcessing, queueArr) {
     
     document.body.appendChild(s); 
     setTimeout(() => s.remove(), totalAnimTime);
+}
+
+async function triggerSanChain(actor, defSide) {
+    let activeCardsOnBoard = Object.values(cardInstances).filter(c => {
+        let el = document.getElementById(c.id);
+        return el && el.parentElement && el.parentElement.classList.contains('slot');
+    });
+    
+    let enemies = activeCardsOnBoard.filter(c => c.side === defSide && c.hp > 0 && !(c.ambushTurns > 0 && c.ambushTurns >= turnCount));
+    if (enemies.length === 0) return;
+
+    // 🌟 Floating Japanese Text
+    let sanTxt = document.createElement('div');
+    sanTxt.className = 'san-text';
+    sanTxt.innerText = "三 San 三";
+    document.body.appendChild(sanTxt);
+    await new Promise(r => setTimeout(r, 1000));
+    sanTxt.remove();
+
+    let nextTarget = enemies[Math.floor(Math.random() * enemies.length)];
+    let nDOM = document.getElementById(nextTarget.id);
+    let aDOM = document.getElementById(actor.id);
+
+    // 🌟 HARD FALLBACK: Ensure the primary San activation audio plays
+    let sanSound = (typeof kinSanAudioUrl !== 'undefined' && kinSanAudioUrl) ? kinSanAudioUrl : './assets/KinSanSound.mp3';
+    playSound(sanSound);
+
+    const hitDelay = 150;
+
+    let dmg1 = Math.floor(Math.random() * 201) + 300;
+    let dmg2 = Math.floor(Math.random() * 201) + 300;
+    let dmg3 = Math.floor(Math.random() * 201) + 300;
+    let sanDmgs = [dmg1, dmg2, dmg3];
+    let totalSanDmg = dmg1 + dmg2 + dmg3;
+
+    // 🌟 The damage and animation loop is now forced to run no matter what!
+    for(let i=0; i<3; i++) {
+        setTimeout(() => {
+            shootShuriken(aDOM, nDOM, hitDelay);
+            
+            setTimeout(() => {
+                // Hard fallback for the blood splatter sound
+                let bloodSfx = (typeof bloodAudioUrl !== 'undefined' && bloodAudioUrl) ? bloodAudioUrl : './assets/BloodSound.mp3';
+                playSound(bloodSfx);
+                
+                if (nDOM) {
+                    nDOM.classList.remove("shake-anim");
+                    void nDOM.offsetWidth;
+                    nDOM.classList.add("shake-anim");
+                    
+                    // The damage numbers will now correctly pop out of the target
+                    if (typeof showFloatingText === 'function') {
+                        showFloatingText(nDOM, `-${sanDmgs[i]}`, "#ff4d4d", "2.5rem");
+                    }
+                }
+            }, hitDelay);
+        }, i * 200);
+    }
+    
+    await new Promise(r => setTimeout(r, 400 + hitDelay));
+
+    let targetDied = await applyDamage(actor, nextTarget.id, totalSanDmg, "SAN");
+    if (targetDied) {
+        if (typeof addLog === 'function') addLog(`<b>System</b> [SAN]: Chain reaction continues!`, "var(--gold)");
+        await triggerSanChain(actor, defSide);
+    }
 }
 
                 let targetDied = await applyDamage(actor, tId, dmg, action.skillName);
