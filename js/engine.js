@@ -1993,13 +1993,27 @@ async function processQueue(sideProcessing, queueArr) {
                 }
                 // -------------------------------------
 
-                function shootShuriken(sourceDOM, targetDOM, hitDelayMs) {
-    // We removed the shurikenImgUrl check so it never skips!
+                // 🌟 DYNAMIC CSS INJECTION: Guarantees animations work regardless of style.css
+(function injectSanCSS() {
+    if (document.getElementById('san-vfx-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'san-vfx-styles';
+    style.innerHTML = `
+        .san-text { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 6rem; color: #e74c3c; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 0 0 20px #000, 0 0 40px #e74c3c; z-index: 10000; pointer-events: none; animation: sanPulse 1s ease-out forwards; }
+        @keyframes sanPulse { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 85% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
+
+        .shuriken-fx { position: fixed; top: 0; left: 0; margin-top: -25px; margin-left: -25px; width: 50px; height: 50px; z-index: 9999; pointer-events: none; background-image: var(--shuriken-url, url('./assets/ShurikenKin_FX.png')); background-size: contain; background-repeat: no-repeat; }
+        @keyframes spinFly { 0% { transform: translate(var(--startX), var(--startY)) rotate(0deg); opacity: 1; } 100% { transform: translate(var(--endX), var(--endY)) rotate(1440deg); opacity: 0; } }
+    `;
+    document.head.appendChild(style);
+})();
+
+function shootShuriken(sourceDOM, targetDOM, hitDelayMs) {
     if(!sourceDOM || !targetDOM) return; 
     
-    // 🌟 HARD FALLBACK: Ensure the rapid throw sound plays
+    // 🌟 Restored VersionFight Audio: KinSFX2 (The Throw)
     let throwSound = (typeof kinSfx2Url !== 'undefined' && kinSfx2Url) ? kinSfx2Url : './assets/KinSFX2.mp3';
-    playSound(throwSound);
+    if (typeof playSound === 'function') playSound(throwSound);
     
     const sEl = sourceDOM.parentElement.classList.contains('slot') ? sourceDOM.parentElement : sourceDOM;
     const tEl = targetDOM.parentElement.classList.contains('slot') ? targetDOM.parentElement : targetDOM;
@@ -2008,9 +2022,6 @@ async function processQueue(sideProcessing, queueArr) {
     
     const s = document.createElement('div'); 
     s.className = 'shuriken-fx';
-    
-    // 🌟 HARD FALLBACK: Forces the image to load even if the CSS variable fails!
-    s.style.backgroundImage = "var(--shuriken-url, url('./assets/ShurikenKin_FX.png'))";
     
     const startX = sRect.left + sRect.width/2; 
     const startY = sRect.top + sRect.height/2;
@@ -2037,67 +2048,58 @@ async function processQueue(sideProcessing, queueArr) {
 
 async function triggerSanChain(actor, defSide) {
     let activeCardsOnBoard = Object.values(cardInstances).filter(c => {
-        let el = document.getElementById(c.id);
+        let el = document.getElementById(c.id); 
         return el && el.parentElement && el.parentElement.classList.contains('slot');
     });
-    
     let enemies = activeCardsOnBoard.filter(c => c.side === defSide && c.hp > 0 && !(c.ambushTurns > 0 && c.ambushTurns >= turnCount));
     if (enemies.length === 0) return;
 
-    // 🌟 Floating Japanese Text
-    let sanTxt = document.createElement('div');
-    sanTxt.className = 'san-text';
+    let sanTxt = document.createElement('div'); 
+    sanTxt.className = 'san-text'; 
     sanTxt.innerText = "三 San 三";
-    document.body.appendChild(sanTxt);
-    await new Promise(r => setTimeout(r, 1000));
+    document.body.appendChild(sanTxt); 
+    await new Promise(r => setTimeout(r, 1000)); 
     sanTxt.remove();
 
     let nextTarget = enemies[Math.floor(Math.random() * enemies.length)];
-    let nDOM = document.getElementById(nextTarget.id);
+    let nDOM = document.getElementById(nextTarget.id); 
     let aDOM = document.getElementById(actor.id);
-
-    // 🌟 HARD FALLBACK: Ensure the primary San activation audio plays
+    
+    // 🌟 Restored VersionFight Audio: KinSanSound
     let sanSound = (typeof kinSanAudioUrl !== 'undefined' && kinSanAudioUrl) ? kinSanAudioUrl : './assets/KinSanSound.mp3';
-    playSound(sanSound);
-
-    const hitDelay = 150;
-
-    let dmg1 = Math.floor(Math.random() * 201) + 300;
-    let dmg2 = Math.floor(Math.random() * 201) + 300;
+    if (typeof playSound === 'function') playSound(sanSound);
+    
+    const hitDelay = 150; 
+    let dmg1 = Math.floor(Math.random() * 201) + 300; 
+    let dmg2 = Math.floor(Math.random() * 201) + 300; 
     let dmg3 = Math.floor(Math.random() * 201) + 300;
     let sanDmgs = [dmg1, dmg2, dmg3];
     let totalSanDmg = dmg1 + dmg2 + dmg3;
 
-    // 🌟 The damage and animation loop is now forced to run no matter what!
-    for(let i=0; i<3; i++) {
+    // 🌟 REMOVED THE IF STATEMENT: This loop is now forced to run no matter what
+    for(let i=0; i<3; i++) { 
         setTimeout(() => {
             shootShuriken(aDOM, nDOM, hitDelay);
-            
-            setTimeout(() => {
-                // Hard fallback for the blood splatter sound
+            setTimeout(() => { 
+                // 🌟 Restored VersionFight Audio: EXACTLY BloodSound.mp3
                 let bloodSfx = (typeof bloodAudioUrl !== 'undefined' && bloodAudioUrl) ? bloodAudioUrl : './assets/BloodSound.mp3';
-                playSound(bloodSfx);
+                if (typeof playSound === 'function') playSound(bloodSfx);
                 
                 if (nDOM) {
-                    nDOM.classList.remove("shake-anim");
+                    nDOM.classList.remove("shake-anim"); 
                     void nDOM.offsetWidth;
-                    nDOM.classList.add("shake-anim");
-                    
-                    // The damage numbers will now correctly pop out of the target
-                    if (typeof showFloatingText === 'function') {
-                        showFloatingText(nDOM, `-${sanDmgs[i]}`, "#ff4d4d", "2.5rem");
-                    }
+                    nDOM.classList.add("shake-anim"); 
+                    if (typeof showFloatingText === 'function') showFloatingText(nDOM, `-${sanDmgs[i]}`, "#ff4d4d", "2.5rem");
                 }
             }, hitDelay);
-        }, i * 200);
+        }, i * 200); 
     }
-    
-    await new Promise(r => setTimeout(r, 400 + hitDelay));
+    await new Promise(r => setTimeout(r, 400 + hitDelay)); 
 
     let targetDied = await applyDamage(actor, nextTarget.id, totalSanDmg, "SAN");
-    if (targetDied) {
-        if (typeof addLog === 'function') addLog(`<b>System</b> [SAN]: Chain reaction continues!`, "var(--gold)");
-        await triggerSanChain(actor, defSide);
+    if (targetDied) { 
+        if (typeof addLog === 'function') addLog(`<b>System</b> [SAN]: Chain reaction continues!`, "var(--gold)"); 
+        await triggerSanChain(actor, defSide); 
     }
 }
 
