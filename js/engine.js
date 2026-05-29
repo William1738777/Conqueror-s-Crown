@@ -1993,7 +1993,11 @@ async function processQueue(sideProcessing, queueArr) {
                 }
                 // -------------------------------------
 
-                // 🌟 DYNAMIC CSS INJECTION: Guarantees animations work regardless of style.css
+                // ============================================================================
+// 🌟 KIN-RYU SAN ULTIMATE LOGIC (SAFE GLOBAL SCOPE)
+// ============================================================================
+
+// 1. Dynamic CSS Injector (Guarantees the animations exist)
 (function injectSanCSS() {
     if (document.getElementById('san-vfx-styles')) return;
     const style = document.createElement('style');
@@ -2001,17 +2005,15 @@ async function processQueue(sideProcessing, queueArr) {
     style.innerHTML = `
         .san-text { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 6rem; color: #e74c3c; font-weight: bold; font-family: 'Cinzel', serif; text-shadow: 0 0 20px #000, 0 0 40px #e74c3c; z-index: 10000; pointer-events: none; animation: sanPulse 1s ease-out forwards; }
         @keyframes sanPulse { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 85% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
-
-        .shuriken-fx { position: fixed; top: 0; left: 0; margin-top: -25px; margin-left: -25px; width: 50px; height: 50px; z-index: 9999; pointer-events: none; background-image: var(--shuriken-url, url('./assets/ShurikenKin_FX.png')); background-size: contain; background-repeat: no-repeat; }
         @keyframes spinFly { 0% { transform: translate(var(--startX), var(--startY)) rotate(0deg); opacity: 1; } 100% { transform: translate(var(--endX), var(--endY)) rotate(1440deg); opacity: 0; } }
     `;
     document.head.appendChild(style);
 })();
 
+// 2. The Missing Shuriken Function
 function shootShuriken(sourceDOM, targetDOM, hitDelayMs) {
     if(!sourceDOM || !targetDOM) return; 
     
-    // 🌟 Restored VersionFight Audio: KinSFX2 (The Throw)
     let throwSound = (typeof kinSfx2Url !== 'undefined' && kinSfx2Url) ? kinSfx2Url : './assets/KinSFX2.mp3';
     if (typeof playSound === 'function') playSound(throwSound);
     
@@ -2023,6 +2025,19 @@ function shootShuriken(sourceDOM, targetDOM, hitDelayMs) {
     const s = document.createElement('div'); 
     s.className = 'shuriken-fx';
     
+    s.style.backgroundImage = "url('./assets/ShurikenKin_FX.png')";
+    s.style.position = 'fixed';
+    s.style.top = '0';
+    s.style.left = '0';
+    s.style.marginTop = '-25px';
+    s.style.marginLeft = '-25px';
+    s.style.width = '50px';
+    s.style.height = '50px';
+    s.style.zIndex = '9999';
+    s.style.pointerEvents = 'none';
+    s.style.backgroundSize = 'contain';
+    s.style.backgroundRepeat = 'no-repeat';
+    
     const startX = sRect.left + sRect.width/2; 
     const startY = sRect.top + sRect.height/2;
     const targetX = tRect.left + tRect.width/2; 
@@ -2030,7 +2045,6 @@ function shootShuriken(sourceDOM, targetDOM, hitDelayMs) {
     const dx = targetX - startX; 
     const dy = targetY - startY;
     
-    // Calculate the overshoot so it flies THROUGH the target
     const endX = startX + dx * 10; 
     const endY = startY + dy * 10; 
     
@@ -2046,6 +2060,7 @@ function shootShuriken(sourceDOM, targetDOM, hitDelayMs) {
     setTimeout(() => s.remove(), totalAnimTime);
 }
 
+// 3. The San Chain Logic
 async function triggerSanChain(actor, defSide) {
     let activeCardsOnBoard = Object.values(cardInstances).filter(c => {
         let el = document.getElementById(c.id); 
@@ -2065,7 +2080,6 @@ async function triggerSanChain(actor, defSide) {
     let nDOM = document.getElementById(nextTarget.id); 
     let aDOM = document.getElementById(actor.id);
     
-    // 🌟 Restored VersionFight Audio: KinSanSound
     let sanSound = (typeof kinSanAudioUrl !== 'undefined' && kinSanAudioUrl) ? kinSanAudioUrl : './assets/KinSanSound.mp3';
     if (typeof playSound === 'function') playSound(sanSound);
     
@@ -2076,12 +2090,10 @@ async function triggerSanChain(actor, defSide) {
     let sanDmgs = [dmg1, dmg2, dmg3];
     let totalSanDmg = dmg1 + dmg2 + dmg3;
 
-    // 🌟 REMOVED THE IF STATEMENT: This loop is now forced to run no matter what
     for(let i=0; i<3; i++) { 
         setTimeout(() => {
             shootShuriken(aDOM, nDOM, hitDelay);
             setTimeout(() => { 
-                // 🌟 Restored VersionFight Audio: EXACTLY BloodSound.mp3
                 let bloodSfx = (typeof bloodAudioUrl !== 'undefined' && bloodAudioUrl) ? bloodAudioUrl : './assets/BloodSound.mp3';
                 if (typeof playSound === 'function') playSound(bloodSfx);
                 
